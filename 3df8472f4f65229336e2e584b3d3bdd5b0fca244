@@ -1,0 +1,8 @@
+Code-Review+1: Piotr Matuszczak <piotr.matuszczak@intel.com>
+Code-Review+2: Adrian Ambrożewicz <adrian.ambrozewicz@linux.intel.com>
+Verified+1: Adrian Ambrożewicz <adrian.ambrozewicz@linux.intel.com>
+Submitted-by: Adrian Ambrożewicz <adrian.ambrozewicz@linux.intel.com>
+Submitted-at: Tue, 28 Jan 2020 12:04:31 +0000
+Reviewed-on: https://gerrit.openbmc-project.xyz/c/openbmc/telemetry/+/28803
+Project: openbmc/telemetry
+Branch: refs/heads/master
