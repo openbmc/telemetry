@@ -1,0 +1,11 @@
+[Unit]
+Description=Monitoring Service
+After=dbus.service
+
+[Service]
+ExecStart=/usr/sbin/monitoring-service
+Restart=always
+Type=simple
+
+[Install]
+WantedBy=multi-user.target
