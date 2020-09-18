@@ -1,0 +1,12 @@
+[Unit]
+Description=Telemetry
+After=dbus.service
+
+[Service]
+ExecStart=/usr/bin/telemetry
+Restart=always
+Type=dbus
+BusName=xyz.openbmc_project.Telemetry
+
+[Install]
+WantedBy=multi-user.target

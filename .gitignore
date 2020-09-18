@@ -1,4 +1,7 @@
-build
+build/
+monitoring-service
+subprojects/boost/
+subprojects/sdbusplus/
 
 # Created by https://www.toptal.com/developers/gitignore/api/visualstudiocode,vim,intellij,cmake
 # Edit at https://www.toptal.com/developers/gitignore?templates=visualstudiocode,vim,intellij,cmake
