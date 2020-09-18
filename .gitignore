@@ -1,4 +1,13 @@
-build
+boost-src/
+build/
+DartConfiguration.tcl
+dependencies/
+external-projects/
+monitoring-service
+sdbusplus-build/
+sdbusplus-project/
+sdbusplus-src/
+tests/monitoring-service-ut
 
 # Created by https://www.toptal.com/developers/gitignore/api/visualstudiocode,vim,intellij,cmake
 # Edit at https://www.toptal.com/developers/gitignore?templates=visualstudiocode,vim,intellij,cmake
