@@ -157,3 +157,11 @@ tags
 .history
 
 # End of https://www.toptal.com/developers/gitignore/api/visualstudiocode,vim,intellij,cmake
+
+boost-src/
+dependencies/
+external-projects/
+monitoring-service
+sdbusplus-build/
+sdbusplus-project/
+sdbusplus-src/
