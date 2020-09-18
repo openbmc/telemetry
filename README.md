@@ -1,9 +1,9 @@
-# MonitoringService #
+# Telemetry #
 This component implements middleware for sensors and metrics aggregation.
 
 
 ## Capabilities ##
-This application is implementation of MonitoringService proposed in design`[1]`.
+This application is implementation of Telemetry proposed in design`[1]`.
 
 It's responsible for:
 - on-demand creation of metric reports,
