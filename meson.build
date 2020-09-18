@@ -1,0 +1,77 @@
+project(
+    'Telemetry',
+    'cpp',
+    meson_version: '>=0.55.0',
+    default_options: [
+        'buildtype=debugoptimized',
+        'cpp_std=c++17',
+        'cpp_rtti=false',
+        'warning_level=3',
+        'werror=true',
+        'b_lto=true',
+    ],
+    license: 'Apache-2.0',
+)
+
+cpp = meson.get_compiler('cpp')
+add_project_arguments(
+    cpp.get_supported_arguments([
+        '-DBOOST_ASIO_DISABLE_THREADS',
+        '-DBOOST_ALL_NO_LIB',
+        '-DBOOST_SYSTEM_NO_DEPRECATED',
+        '-DBOOST_ASIO_NO_DEPRECATED',
+        '-DBOOST_NO_RTTI',
+        '-DBOOST_NO_TYPEID',
+        '-Wno-unused-parameter',
+    ]),
+    language: 'cpp'
+)
+
+boost = dependency('boost', version: '>=1.73.0', required: false)
+if not boost.found()
+    subproject('boost', required: false)
+    boost  = declare_dependency(include_directories: 'subprojects/boost_1_73_0')
+endif
+
+phosphor_logging = dependency('phosphor-logging', required: false)
+if not phosphor_logging.found()
+    subproject('phosphor-logging', required: false)
+    phosphor_logging = declare_dependency(
+        include_directories: 'subprojects/phosphor-logging'
+    )
+endif
+
+sdbusplus = dependency('sdbusplus',required : false)
+if not sdbusplus.found()
+  sdbusplus_proj = subproject('sdbusplus', required: true)
+  sdbusplus = sdbusplus_proj.get_variable('sdbusplus_dep')
+endif
+
+systemd = dependency('systemd')
+
+executable(
+    'telemetry',
+    [
+        'src/main.cpp',
+        'src/report_manager.cpp',
+    ],
+    dependencies: [
+        boost,
+        sdbusplus,
+        phosphor_logging,
+    ],
+    include_directories: 'src',
+    install: true,
+    install_dir: get_option('prefix') / get_option('bindir'),
+    pie: true,
+)
+
+configure_file(
+    input: 'xyz.openbmc_project.Telemetry.service.in',
+    output: 'xyz.openbmc_project.Telemetry.service',
+    configuration: {
+        'bindir': get_option('prefix') / get_option('bindir'),
+    },
+    install: true,
+    install_dir: systemd.get_pkgconfig_variable('systemdsystemunitdir'),
+)

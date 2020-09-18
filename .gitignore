@@ -1,24 +1,9 @@
-build
+build/
+telemetry
+xyz.openbmc_project.Telemetry.service
 
-# Created by https://www.toptal.com/developers/gitignore/api/visualstudiocode,vim,intellij,cmake
-# Edit at https://www.toptal.com/developers/gitignore?templates=visualstudiocode,vim,intellij,cmake
-
-### CMake ###
-CMakeLists.txt.user
-CMakeCache.txt
-CMakeFiles
-CMakeScripts
-Testing
-Makefile
-cmake_install.cmake
-install_manifest.txt
-compile_commands.json
-CTestTestfile.cmake
-_deps
-
-### CMake Patch ###
-# External projects
-*-prefix/
+# Created by https://www.toptal.com/developers/gitignore/api/vim,intellij,meson,visualstudiocode
+# Edit at https://www.toptal.com/developers/gitignore?templates=vim,intellij,meson,visualstudiocode
 
 ### Intellij ###
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio, WebStorm and Rider
@@ -123,6 +108,29 @@ fabric.properties
 # https://plugins.jetbrains.com/plugin/12206-codestream
 .idea/codestream.xml
 
+### Meson ###
+# subproject directories
+/subprojects/*
+!/subprojects/*.wrap
+
+# Meson Directories
+meson-logs
+meson-private
+
+# Meson Files
+meson_benchmark_setup.dat
+meson_test_setup.dat
+sanitycheckcpp.cc     # C++ specific
+sanitycheckcpp.exe    # C++ specific
+
+# Ninja
+build.ninja
+.ninja_deps
+.ninja_logs
+
+# Misc
+compile_commands.json
+
 ### Vim ###
 # Swap
 [._]*.s[a-v][a-z]
@@ -155,5 +163,6 @@ tags
 ### VisualStudioCode Patch ###
 # Ignore all local history of files
 .history
+.ionide
 
-# End of https://www.toptal.com/developers/gitignore/api/visualstudiocode,vim,intellij,cmake
+# End of https://www.toptal.com/developers/gitignore/api/vim,intellij,meson,visualstudiocode
