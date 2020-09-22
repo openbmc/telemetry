@@ -1,0 +1,12 @@
+[Unit]
+Description=Monitoring Service
+After=dbus.service
+
+[Service]
+ExecStart=/usr/bin/monitoring-service
+Restart=always
+Type=dbus
+BusName=xyz.openbmc_project.MonitoringService
+
+[Install]
+WantedBy=multi-user.target
