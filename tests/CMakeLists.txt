@@ -11,6 +11,7 @@ find_package (GMock 1.10 REQUIRED)
 add_executable (monitoring-service-ut
     src/main.cpp
     src/test_persistent_json_storage.cpp
+    src/test_sensor_cache.cpp
     src/mocks/json_storage.cpp
     ../src/persistent_json_storage.cpp
 )
