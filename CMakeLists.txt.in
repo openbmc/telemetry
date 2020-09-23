@@ -1,0 +1,45 @@
+cmake_minimum_required (VERSION 3.5)
+
+project (monitoring-service-dependencies)
+
+include (ExternalProject)
+
+file (MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/dependencies)
+file (MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/dependencies/include)
+
+externalproject_add (
+    Boost
+    URL https://dl.bintray.com/boostorg/release/1.73.0/source/boost_1_73_0.tar.gz
+    URL_MD5 4036cd27ef7548b8d29c30ea10956196
+    SOURCE_DIR "${CMAKE_BINARY_DIR}/boost-src"
+    BINARY_DIR "${CMAKE_BINARY_DIR}/boost-build"
+    CONFIGURE_COMMAND cd ${CMAKE_BINARY_DIR}/boost-src &&
+                      ./bootstrap.sh --with-libraries=coroutine
+                                     --prefix=${CMAKE_BINARY_DIR}/dependencies
+    BUILD_COMMAND cd ${CMAKE_BINARY_DIR}/boost-src &&
+                  ./b2 dll-path=${CMAKE_BINARY_DIR}/dependencies/lib
+    INSTALL_COMMAND cd ${CMAKE_BINARY_DIR}/boost-src && ./b2 -d0 install
+)
+
+# sdbusplus requires meson -> 'python3 -m pip install meson'
+externalproject_add (
+    sdbusplus-project
+    PREFIX "${CMAKE_BINARY_DIR}/sdbusplus-project"
+    GIT_REPOSITORY "https://github.com/openbmc/sdbusplus.git"
+    GIT_TAG d5ce346c434705180d0cbe25686d51630681ba4b
+    SOURCE_DIR "${CMAKE_BINARY_DIR}/sdbusplus-src"
+    BINARY_DIR "${CMAKE_BINARY_DIR}/sdbusplus-build"
+    DEPENDS Boost
+    CONFIGURE_COMMAND PKG_CONFIG_PATH=${CMAKE_BINARY_DIR}/dependencies/lib/pkgconfig
+                      BOOST_INCLUDEDIR=${CMAKE_BINARY_DIR}/dependencies/include
+                      BOOST_LIBRARYDIR=${CMAKE_BINARY_DIR}/dependencies/lib
+                      meson --prefix=${CMAKE_BINARY_DIR}/dependencies
+                            --default-library=static
+                            ${CMAKE_BINARY_DIR}/sdbusplus-build
+                            ${CMAKE_BINARY_DIR}/sdbusplus-src
+    BUILD_COMMAND ninja -C ${CMAKE_BINARY_DIR}/sdbusplus-build libsdbusplus.a
+    INSTALL_COMMAND cp ${CMAKE_BINARY_DIR}/sdbusplus-build/libsdbusplus.a
+                       ${CMAKE_BINARY_DIR}/dependencies/lib/ &&
+                    cp -r ${CMAKE_BINARY_DIR}/sdbusplus-src/include/sdbusplus
+                          ${CMAKE_BINARY_DIR}/dependencies/include/.
+)
