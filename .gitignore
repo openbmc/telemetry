@@ -1,7 +1,10 @@
 build/
 monitoring-service
 subprojects/boost/
+subprojects/googletest/
+subprojects/nlohmann/
 subprojects/sdbusplus/
+xyz.openbmc_project.MonitoringService.service
 
 # Created by https://www.toptal.com/developers/gitignore/api/visualstudiocode,vim,intellij,cmake
 # Edit at https://www.toptal.com/developers/gitignore?templates=visualstudiocode,vim,intellij,cmake
