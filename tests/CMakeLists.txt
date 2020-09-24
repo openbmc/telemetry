@@ -8,7 +8,10 @@ find_package (Threads REQUIRED)
 
 add_executable (monitoring-service-ut
     ../src/persistent_json_storage.cpp
+    ../src/sensor_cache.cpp
     src/test_persistent_json_storage.cpp
+    src/test_sensor_cache.cpp
+    src/utils/generate_unique_mock_id.cpp
 )
 
 include_directories (${CMAKE_CURRENT_SOURCE_DIR}/src)
