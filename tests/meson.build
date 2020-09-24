@@ -25,7 +25,12 @@ test(
         'telemetry-ut',
         [
             '../src/persistent_json_storage.cpp',
+            '../src/report.cpp',
+            '../src/report_manager.cpp',
+            '../src/sensor_cache.cpp',
             'src/test_persistent_json_storage.cpp',
+            'src/test_sensor_cache.cpp',
+            'src/utils/generate_unique_mock_id.cpp',
         ],
         dependencies: [
             boost,
@@ -35,6 +40,6 @@ test(
             phosphor_logging,
             sdbusplus,
         ],
-        include_directories: '../src',
+        include_directories: ['../src', 'src']
     )
 )
