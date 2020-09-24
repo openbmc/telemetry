@@ -1,5 +1,6 @@
 #include "report_manager.hpp"
 
+#include "utils/api_error.hpp"
 #include "utils/log.hpp"
 
 #include <system_error>

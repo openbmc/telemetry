@@ -5,6 +5,7 @@ set (CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules ${CMAKE_MODULE_
 project (monitoring-service CXX)
 
 # General options
+option (MS_ENABLE_UT "Enable unit tests" ON)
 option (MS_ENABLE_LOGS "Enable logging" OFF)
 option (MS_ENABLE_LOGS_TIMESTAMP "Add timestamp to log messages" OFF)
 
@@ -21,6 +22,11 @@ include(cmake/dependencies.cmake)
 
 # Compilation flags
 include(cmake/flags.cmake)
+
+# Build unit tests
+if (${MS_ENABLE_UT})
+  add_subdirectory(tests)
+endif (${MS_ENABLE_UT})
 
 # Include directories
 include_directories (src)
