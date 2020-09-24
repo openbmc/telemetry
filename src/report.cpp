@@ -1,6 +1,7 @@
 #include "report.hpp"
 
 #include "report_manager.hpp"
+#include "utils/api_error.hpp"
 #include "utils/log.hpp"
 
 constexpr const char* reportIfaceName = "xyz.openbmc_project.Telemetry.Report";

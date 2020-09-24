@@ -4,3 +4,4 @@ option('loglevel', type: 'integer', min: 0, max: 5, value: 0,
                     '4 - info, 5 - debug')
 option('logtimestamp', type: 'boolean', value: false,
        description: 'Add timestamp to log entries')
+option('buildtest', type: 'boolean', value: true, description: 'Build tests')
