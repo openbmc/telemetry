@@ -39,10 +39,24 @@ endif
 
 sdbusplus = dependency('sdbusplus', static: true, fallback: ['sdbusplus', 'sdbusplus_dep'])
 
+cpp = meson.get_compiler('cpp')
+if cpp.has_header('nlohmann/json.hpp')
+    nlohmann_json = declare_dependency()
+else
+    subproject('nlohmann', required: false)
+    nlohmann_json = declare_dependency(
+        include_directories: [
+            'subprojects/nlohmann/single_include',
+            'subprojects/nlohmann/single_include/nlohmann',
+        ]
+    )
+endif
+
 src_files = [
     'src/main.cpp',
     'src/report.cpp',
     'src/report_manager.cpp',
+    'src/persistent_json_storage.cpp',
 ]
 
 executable(
@@ -52,6 +66,7 @@ executable(
     dependencies: [
         boost,
         sdbusplus,
+        nlohmann_json,
     ],
     include_directories: 'src',
     install: true,
@@ -71,3 +86,7 @@ configure_file(
     install: true,
     install_dir: systemd.get_pkgconfig_variable('systemdsystemunitdir'),
 )
+
+if get_option('buildtest')
+    subdir('tests')
+endif
