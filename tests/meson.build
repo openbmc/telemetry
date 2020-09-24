@@ -25,7 +25,10 @@ test(
         'monitoring-service-ut',
         [
             '../src/persistent_json_storage.cpp',
+            '../src/sensor_cache.cpp',
             'src/test_persistent_json_storage.cpp',
+            'src/test_sensor_cache.cpp',
+            'src/utils/generate_unique_mock_id.cpp',
         ],
         dependencies: [
             boost,
@@ -34,6 +37,6 @@ test(
             nlohmann_json,
             sdbusplus,
         ],
-        include_directories: '../src',
+        include_directories: ['../src', 'src']
     )
 )
