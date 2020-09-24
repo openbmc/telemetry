@@ -49,15 +49,29 @@ endif
 
 systemd = dependency('systemd')
 
+if cpp.has_header('nlohmann/json.hpp')
+    nlohmann_json = declare_dependency()
+else
+    subproject('nlohmann', required: false)
+    nlohmann_json = declare_dependency(
+        include_directories: [
+            'subprojects/nlohmann/single_include',
+            'subprojects/nlohmann/single_include/nlohmann',
+        ]
+    )
+endif
+
 executable(
     'telemetry',
     [
         'src/main.cpp',
         'src/report.cpp',
         'src/report_manager.cpp',
+        'src/persistent_json_storage.cpp',
     ],
     dependencies: [
         boost,
+        nlohmann_json,
         sdbusplus,
         phosphor_logging,
     ],
@@ -76,3 +90,7 @@ configure_file(
     install: true,
     install_dir: systemd.get_pkgconfig_variable('systemdsystemunitdir'),
 )
+
+if get_option('buildtest')
+    subdir('tests')
+endif
