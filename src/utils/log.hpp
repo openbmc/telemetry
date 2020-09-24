@@ -1,10 +1,13 @@
 #pragma once
 
+#include <sdbusplus/exception.hpp>
+
 #include <ctime>
 #include <filesystem>
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <system_error>
 
 namespace utils
 {
@@ -19,50 +22,52 @@ enum class LogLevel
     Disable,
 };
 
+template <LogLevel level>
 class Logger
 {
   public:
-    Logger(const char* prefix, const std::filesystem::path& filename,
-           const size_t line)
+    Logger(const char* prefix, const char* file, const size_t line)
     {
-        if constexpr (MS_ENABLE_LOGS_TIMESTAMP)
+        if constexpr (getLogLevel() <= level)
         {
-            std::time_t t = std::time(nullptr);
-            stringstream << "("
-                         << std::put_time(std::localtime(&t),
-                                          "%Y-%m-%d %H:%M:%S")
-                         << ") ";
+            if constexpr (MS_ENABLE_LOGS_TIMESTAMP)
+            {
+                std::time_t t = std::time(nullptr);
+                stringstream
+                    << "("
+                    << std::put_time(std::localtime(&t), "%Y-%m-%d %H:%M:%S")
+                    << ") ";
+            }
+            stringstream << "[" << prefix << "] ";
+            stringstream << "{" << std::filesystem::path(file).filename() << ":"
+                         << line << "} ";
         }
-        stringstream << "[" << prefix << "] ";
-        stringstream << "{" << filename << ":" << line << "} ";
     }
 
     ~Logger()
     {
-        stringstream << "\n";
-        std::cerr << stringstream.str();
+        if constexpr (getLogLevel() <= level)
+        {
+            stringstream << "\n";
+            std::cerr << stringstream.str();
+        }
     }
 
     template <typename T>
     Logger& operator<<(T const& value)
     {
-        stringstream << value;
+        if constexpr (getLogLevel() <= level)
+        {
+            stringstream << value;
+        }
         return *this;
     }
 
-    static void setLogLevel(LogLevel level)
+    static constexpr LogLevel getLogLevel()
     {
         if constexpr (MS_ENABLE_LOGS)
         {
-            getLogLevelRef() = level;
-        }
-    }
-
-    static LogLevel getLogLevel()
-    {
-        if constexpr (MS_ENABLE_LOGS)
-        {
-            return getLogLevelRef();
+            return LogLevel::Debug;
         }
         else
         {
@@ -71,20 +76,13 @@ class Logger
     }
 
   private:
-    static LogLevel& getLogLevelRef()
-    {
-        static LogLevel currentLevel = LogLevel::Debug;
-        return currentLevel;
-    }
-
     std::ostringstream stringstream;
 };
+
 } // namespace utils
 
 #define LOG_COMMON(_level_, _level_name_)                                      \
-    if (utils::Logger::getLogLevel() <= _level_)                               \
-    utils::Logger(_level_name_, std::filesystem::path(__FILE__).filename(),    \
-                  __LINE__)
+    utils::Logger<_level_>(_level_name_, __FILE__, __LINE__)
 
 #define LOG_CRITICAL LOG_COMMON(utils::LogLevel::Critical, "CRITICAL")
 #define LOG_ERROR LOG_COMMON(utils::LogLevel::Error, "ERROR")
@@ -97,3 +95,8 @@ class Logger
 #define LOG_WARNING_T(_tag_) LOG_WARNING << "[" << (_tag_) << "] "
 #define LOG_INFO_T(_tag_) LOG_INFO << "[" << (_tag_) << "] "
 #define LOG_DEBUG_T(_tag_) LOG_DEBUG << "[" << (_tag_) << "] "
+
+#define sdBusError(e, msg)                                                     \
+    (LOG_ERROR << "SdBusError with errc: " << std::make_error_code(e) << " - " \
+               << msg,                                                         \
+     sdbusplus::exception::SdBusError(static_cast<int>(e), msg))

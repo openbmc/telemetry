@@ -10,8 +10,6 @@
 
 int main()
 {
-    utils::Logger::setLogLevel(utils::LogLevel::Info);
-
     boost::asio::io_context ioc;
     boost::asio::signal_set signals(ioc, SIGINT, SIGTERM);
 

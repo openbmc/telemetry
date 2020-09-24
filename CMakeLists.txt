@@ -30,6 +30,7 @@ include_directories (src/utils)
 set (
     SRC_FILES
     src/main.cpp
+    src/report.cpp
     src/report_manager.cpp
 )
 
