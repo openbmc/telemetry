@@ -1,5 +1,6 @@
 #pragma once
 
+#include "report_factory.hpp"
 #include "report_manager.hpp"
 
 #include <sdbusplus/asio/connection.hpp>
@@ -12,7 +13,9 @@ class Telemetry
   public:
     Telemetry(std::shared_ptr<sdbusplus::asio::connection> bus) :
         objServer(std::make_shared<sdbusplus::asio::object_server>(bus)),
-        reportManager(bus, objServer)
+        reportManager(
+            std::make_unique<ReportFactory>(bus->get_io_context(), objServer),
+            objServer)
     {}
 
   private:

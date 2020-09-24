@@ -6,8 +6,7 @@ if not gtest_dep.found() or not gmock_dep.found()
         gtest_dep = declare_dependency(
             dependencies: [
                 dependency('threads'),
-                gtest_proj.dependency('gtest'),
-                gtest_proj.dependency('gtest_main'),
+                gtest_proj.dependency('gtest')
             ]
         )
         gmock_dep = gtest_proj.dependency('gmock')
@@ -25,7 +24,21 @@ test(
         'telemetry-ut',
         [
             '../src/persistent_json_storage.cpp',
+            '../src/report.cpp',
+            '../src/report_factory.cpp',
+            '../src/report_manager.cpp',
+            '../src/sensor.cpp',
+            '../src/sensor_cache.cpp',
+            'src/dbus_environment.cpp',
+            'src/main.cpp',
+            'src/stubs/dbus_sensor_object.cpp',
             'src/test_persistent_json_storage.cpp',
+            'src/test_report.cpp',
+            'src/test_report_manager.cpp',
+            'src/test_sensor.cpp',
+            'src/test_sensor_cache.cpp',
+            'src/utils/generate_unique_mock_id.cpp',
+            'src/utils/test_unique_call.cpp',
         ],
         dependencies: [
             boost,
@@ -35,6 +48,6 @@ test(
             phosphor_logging,
             sdbusplus,
         ],
-        include_directories: '../src',
+        include_directories: ['../src', 'src']
     )
 )
