@@ -90,8 +90,3 @@ using Logger = std::conditional_t<LogLevel{TELEMETRY_ENABLE_LOGS} >= level,
 #define LOG_WARNING_T(_tag_) LOG_WARNING << "[" << (_tag_) << "] "
 #define LOG_INFO_T(_tag_) LOG_INFO << "[" << (_tag_) << "] "
 #define LOG_DEBUG_T(_tag_) LOG_DEBUG << "[" << (_tag_) << "] "
-
-#define sdBusError(e, msg)                                                     \
-    (LOG_ERROR << "SdBusError with errc: " << std::make_error_code(e) << " - " \
-               << msg,                                                         \
-     sdbusplus::exception::SdBusError(static_cast<int>(e), msg))
