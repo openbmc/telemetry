@@ -1,5 +1,7 @@
 #pragma once
 
+#include "utils/is_streamable.hpp"
+
 #include <ctime>
 #include <filesystem>
 #include <iostream>
@@ -43,8 +45,9 @@ class EnabledLogger
     }
 
     template <typename T>
-    EnabledLogger& operator<<(T const& value)
+    EnabledLogger& operator<<(const T& value)
     {
+        static_assert(is_streamable_v<T>, "T is not supported by logger");
         stringstream << value;
         return *this;
     }
@@ -60,8 +63,9 @@ class DisabledLogger
     {}
 
     template <typename T>
-    DisabledLogger& operator<<(T const& value)
+    DisabledLogger& operator<<(const T& value)
     {
+        static_assert(is_streamable_v<T>, "T is not supported by logger");
         return *this;
     }
 };
