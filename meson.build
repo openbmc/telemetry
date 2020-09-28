@@ -43,6 +43,7 @@ executable(
     'telemetry',
     [
         'src/main.cpp',
+        'src/report.cpp',
         'src/report_manager.cpp',
     ],
     dependencies: [
