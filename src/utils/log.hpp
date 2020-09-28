@@ -66,6 +66,8 @@ class DisabledLogger
     template <typename T>
     DisabledLogger& operator<<(T const& value)
     {
+        std::ostringstream ss;
+        ss << value;
         return *this;
     }
 };
