@@ -41,6 +41,7 @@ sdbusplus = dependency('sdbusplus', fallback: ['sdbusplus', 'sdbusplus_dep'])
 
 src_files = [
     'src/main.cpp',
+    'src/report.cpp',
     'src/report_manager.cpp',
 ]
 
