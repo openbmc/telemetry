@@ -29,7 +29,12 @@ add_project_arguments(
     language: 'cpp'
 )
 
-boost = dependency('boost', version: '>=1.74.0', required: false)
+boost = dependency(
+  'boost',
+  version: '>=1.74.0',
+  required: false,
+  modules: ['coroutine'])
+
 if not boost.found()
     subproject('boost', required: false)
     boost  = declare_dependency(include_directories: 'subprojects/boost_1_74_0')
@@ -70,6 +75,7 @@ executable(
         'src/report.cpp',
         'src/report_manager.cpp',
         'src/persistent_json_storage.cpp',
+        'src/sensor.cpp',
     ],
     dependencies: [
         boost,
