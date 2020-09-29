@@ -21,6 +21,9 @@ class SensorMock : public interfaces::Sensor
     }
 
     MOCK_CONST_METHOD0(id, Id());
+    MOCK_METHOD0(async_read, void());
+    MOCK_METHOD1(registerForUpdates,
+                 void(const std::weak_ptr<interfaces::SensorListener>&));
 
     const uint64_t mockId = generateUniqueMockId();
 
