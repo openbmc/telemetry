@@ -1,11 +1,15 @@
 #pragma once
 
+#include <chrono>
+#include <memory>
 #include <ostream>
 #include <string>
 #include <string_view>
 
 namespace interfaces
 {
+
+class SensorListener;
 
 class Sensor
 {
@@ -31,6 +35,7 @@ class Sensor
     virtual ~Sensor() = default;
 
     virtual Id id() const = 0;
+    virtual void registerForUpdates(const std::weak_ptr<SensorListener>&) = 0;
 };
 
 } // namespace interfaces
