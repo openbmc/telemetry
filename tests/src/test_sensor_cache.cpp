@@ -1,5 +1,6 @@
 #include "mocks/sensor_mock.hpp"
 #include "sensor_cache.hpp"
+#include "utils/sensor_id_eq.hpp"
 
 #include <initializer_list>
 
@@ -12,13 +13,6 @@ class TestSensorCache : public Test
   public:
     SensorCache sut;
 };
-
-auto sensorIdEq(interfaces::Sensor::Id id)
-{
-    return AllOf(Field(&interfaces::Sensor::Id::type, Eq(id.type)),
-                 Field(&interfaces::Sensor::Id::service, Eq(id.service)),
-                 Field(&interfaces::Sensor::Id::path, Eq(id.path)));
-}
 
 struct IdParam
 {
