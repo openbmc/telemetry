@@ -6,8 +6,7 @@ if not gtest_dep.found() or not gmock_dep.found()
         gtest_dep = declare_dependency(
             dependencies: [
                 dependency('threads'),
-                gtest_proj.dependency('gtest'),
-                gtest_proj.dependency('gtest_main'),
+                gtest_proj.dependency('gtest')
             ]
         )
         gmock_dep = gtest_proj.dependency('gmock')
@@ -24,10 +23,14 @@ test(
     executable(
         'monitoring-service-ut',
         [
+            'src/dbus_environment.cpp',
+            'src/main.cpp',
             '../src/persistent_json_storage.cpp',
             '../src/sensor_cache.cpp',
+            '../src/sensor.cpp',
             'src/test_persistent_json_storage.cpp',
             'src/test_sensor_cache.cpp',
+            'src/test_sensor.cpp',
             'src/utils/generate_unique_mock_id.cpp',
         ],
         cpp_args: cpp_args + boost_args,

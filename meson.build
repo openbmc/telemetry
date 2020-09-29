@@ -54,9 +54,10 @@ endif
 
 src_files = [
     'src/main.cpp',
+    'src/persistent_json_storage.cpp',
     'src/report.cpp',
     'src/report_manager.cpp',
-    'src/persistent_json_storage.cpp',
+    'src/sensor.cpp',
 ]
 
 executable(
