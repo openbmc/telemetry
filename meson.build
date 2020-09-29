@@ -68,6 +68,7 @@ executable(
         'src/report.cpp',
         'src/report_manager.cpp',
         'src/persistent_json_storage.cpp',
+        'src/sensor.cpp',
     ],
     dependencies: [
         boost,
