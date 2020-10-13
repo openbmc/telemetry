@@ -1,4 +1,5 @@
 #include <sdbusplus/asio/object_server.hpp>
+#include <sdbusplus/asio/property.hpp>
 
 #include <future>
 #include <thread>
