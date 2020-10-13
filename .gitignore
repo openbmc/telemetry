@@ -1,5 +1,4 @@
 build/
-telemetry
 xyz.openbmc_project.Telemetry.service
 
 # Created by https://www.toptal.com/developers/gitignore/api/vim,intellij,meson,visualstudiocode

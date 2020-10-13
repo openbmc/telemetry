@@ -1,4 +1,8 @@
+#include "telemetry/names.hpp"
+#include "telemetry/types.hpp"
+
 #include <sdbusplus/asio/object_server.hpp>
+#include <sdbusplus/asio/property.hpp>
 
 #include <future>
 #include <thread>
