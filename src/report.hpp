@@ -1,30 +1,26 @@
 #pragma once
 
+#include "interfaces/report.hpp"
+#include "interfaces/report_manager.hpp"
+#include "telemetry/types.hpp"
+
 #include <boost/asio/io_context.hpp>
 #include <sdbusplus/asio/object_server.hpp>
 
 #include <chrono>
 #include <memory>
 
-using Readings = std::tuple<
-    uint64_t,
-    std::vector<std::tuple<std::string, std::string, double, uint64_t>>>;
-using ReadingParameters =
-    std::vector<std::tuple<std::vector<sdbusplus::message::object_path>,
-                           std::string, std::string, std::string>>;
-
-class ReportManager;
-
-class Report
+class Report : public interfaces::Report
 {
   public:
     Report(boost::asio::io_context& ioc,
            const std::shared_ptr<sdbusplus::asio::object_server>& objServer,
-           const std::string& name, const std::string& reportingType,
+           const std::string& reportName, const std::string& reportingType,
            const bool emitsReadingsSignal,
            const bool logToMetricReportsCollection,
            const std::chrono::milliseconds period,
-           const ReadingParameters& metricParams, ReportManager& reportManager);
+           const ReadingParameters& metricParams,
+           interfaces::ReportManager& reportManager);
     ~Report() = default;
 
     Report(Report&) = delete;
@@ -32,10 +28,19 @@ class Report
     Report& operator=(Report&) = delete;
     Report& operator=(Report&&) = delete;
 
-    const std::string name;
-    const std::string path;
+    std::string getName() const override
+    {
+        return name;
+    }
+
+    std::string getPath() const override
+    {
+        return path;
+    }
 
   private:
+    const std::string name;
+    const std::string path;
     std::chrono::milliseconds interval;
     std::shared_ptr<sdbusplus::asio::object_server> objServer;
     std::unique_ptr<sdbusplus::asio::dbus_interface> reportIface;
