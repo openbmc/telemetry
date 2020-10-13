@@ -2,10 +2,6 @@
 
 #include "report_manager.hpp"
 
-constexpr const char* reportIfaceName = "xyz.openbmc_project.Telemetry.Report";
-constexpr const char* reportPath = "/xyz/openbmc_project/Telemetry/Reports/";
-constexpr const char* deleteIfaceName = "xyz.openbmc_project.Object.Delete";
-
 Report::Report(boost::asio::io_context& io_context,
                const std::shared_ptr<sdbusplus::asio::object_server>& objServer,
                const std::string& reportName, const std::string& reportingType,

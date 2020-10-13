@@ -17,5 +17,7 @@ class Telemetry
 
   private:
     std::shared_ptr<sdbusplus::asio::object_server> objServer;
+
+  protected:
     ReportManager reportManager;
 };
