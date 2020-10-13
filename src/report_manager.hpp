@@ -8,6 +8,11 @@
 #include <memory>
 #include <vector>
 
+constexpr const char* reportManagerIfaceName =
+    "xyz.openbmc_project.Telemetry.ReportManager";
+constexpr const char* reportManagerPath =
+    "/xyz/openbmc_project/Telemetry/Reports";
+
 class ReportManager
 {
   public:
@@ -23,6 +28,11 @@ class ReportManager
 
     static bool verifyScanPeriod(const uint64_t scanPeriod);
     void removeReport(const Report* report);
+
+    size_t getReportsSize()
+    {
+        return reports.size();
+    }
 
   private:
     std::shared_ptr<sdbusplus::asio::object_server> objServer;
