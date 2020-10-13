@@ -1,6 +1,8 @@
 #pragma once
 
-#include "report.hpp"
+#include "interfaces/report.hpp"
+#include "interfaces/report_factory.hpp"
+#include "interfaces/report_manager.hpp"
 
 #include <sdbusplus/asio/object_server.hpp>
 
@@ -8,11 +10,11 @@
 #include <memory>
 #include <vector>
 
-class ReportManager
+class ReportManager : public interfaces::ReportManager
 {
   public:
     ReportManager(
-        const std::shared_ptr<sdbusplus::asio::connection>& bus,
+        std::unique_ptr<interfaces::ReportFactory> reportFactory,
         const std::shared_ptr<sdbusplus::asio::object_server>& objServer);
     ~ReportManager() = default;
 
@@ -21,15 +23,20 @@ class ReportManager
     ReportManager& operator=(ReportManager&) = delete;
     ReportManager& operator=(ReportManager&&) = delete;
 
+    void removeReport(const interfaces::Report* report) override;
     static bool verifyScanPeriod(const uint64_t scanPeriod);
-    void removeReport(const Report* report);
 
   private:
+    std::unique_ptr<interfaces::ReportFactory> reportFactory;
     std::shared_ptr<sdbusplus::asio::object_server> objServer;
     std::unique_ptr<sdbusplus::asio::dbus_interface> reportManagerIface;
-    std::vector<std::unique_ptr<Report>> reports;
+    std::vector<std::unique_ptr<interfaces::Report>> reports;
 
   public:
     static constexpr uint32_t maxReports{20};
     static constexpr std::chrono::milliseconds minInterval{1000};
+    static constexpr const char* reportManagerIfaceName =
+        "xyz.openbmc_project.Telemetry.ReportManager";
+    static constexpr const char* reportManagerPath =
+        "/xyz/openbmc_project/Telemetry/Reports";
 };
