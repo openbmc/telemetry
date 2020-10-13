@@ -4,11 +4,6 @@
 
 #include <system_error>
 
-constexpr const char* reportManagerIfaceName =
-    "xyz.openbmc_project.Telemetry.ReportManager";
-constexpr const char* reportManagerPath =
-    "/xyz/openbmc_project/Telemetry/Reports";
-
 ReportManager::ReportManager(
     const std::shared_ptr<sdbusplus::asio::connection>& bus,
     const std::shared_ptr<sdbusplus::asio::object_server>& objServerIn) :

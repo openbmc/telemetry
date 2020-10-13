@@ -13,6 +13,10 @@ using ReadingParameters =
     std::vector<std::tuple<std::vector<sdbusplus::message::object_path>,
                            std::string, std::string, std::string>>;
 
+constexpr const char* reportIfaceName = "xyz.openbmc_project.Telemetry.Report";
+constexpr const char* reportPath = "/xyz/openbmc_project/Telemetry/Reports/";
+constexpr const char* deleteIfaceName = "xyz.openbmc_project.Object.Delete";
+
 class ReportManager;
 
 class Report
