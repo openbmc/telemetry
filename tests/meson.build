@@ -25,6 +25,7 @@ test(
         [
             '../src/persistent_json_storage.cpp',
             '../src/report.cpp',
+            '../src/report_factory.cpp',
             '../src/report_manager.cpp',
             '../src/sensor.cpp',
             '../src/sensor_cache.cpp',
@@ -33,6 +34,8 @@ test(
             'src/stubs/dbus_sensor_object.cpp',
             'src/test_detached_timer.cpp',
             'src/test_persistent_json_storage.cpp',
+            'src/test_report.cpp',
+            'src/test_report_manager.cpp',
             'src/test_sensor.cpp',
             'src/test_sensor_cache.cpp',
             'src/test_unique_call.cpp',
