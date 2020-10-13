@@ -1,4 +1,8 @@
+#include "telemetry/names.hpp"
+#include "telemetry/types.hpp"
+
 #include <sdbusplus/asio/object_server.hpp>
+#include <sdbusplus/asio/property.hpp>
 
 #include <future>
 #include <thread>
@@ -49,6 +53,72 @@ class DbusEnvironment : public ::testing::Environment
         }
 
         return false;
+    }
+
+    struct AddReportArgs
+    {
+        std::string name;
+        std::string reportingType;
+        bool emitsReadingsSignal;
+        bool logToMetricReportsCollection;
+        uint64_t interval;
+        ReadingParameters readingParams;
+
+        inline std::string getReportPath() const
+        {
+            return reportDir + name;
+        }
+    };
+
+    static std::pair<boost::system::error_code, std::string>
+        addReport(const AddReportArgs& args);
+    static boost::system::error_code deleteReport(const std::string& path);
+
+    template <class T>
+    static T getProperty(const std::string& path, const std::string& iface,
+                         const std::string& property)
+    {
+        std::promise<T> propertyPromise;
+        sdbusplus::asio::getProperty<T>(
+            *getBus(), serviceName(), path, iface, property,
+            [&propertyPromise](boost::system::error_code ec) {
+                EXPECT_THAT(static_cast<bool>(ec), ::testing::Eq(false));
+                propertyPromise.set_value(T{});
+            },
+            [&propertyPromise](T t) { propertyPromise.set_value(t); });
+        return propertyPromise.get_future().get();
+    }
+
+    template <class T>
+    static T getReportManagerProperty(const std::string& property)
+    {
+        return getProperty<T>(reportManagerPath, reportManagerIfaceName,
+                              property);
+    }
+
+    template <class T>
+    static T getReportProperty(const std::string& path,
+                               const std::string& property)
+    {
+        return getProperty<T>(path, reportIfaceName, property);
+    }
+
+    template <class T>
+    static boost::system::error_code
+        setReportProperty(const std::string& path, const std::string& property,
+                          const T& newValue)
+    {
+        std::promise<boost::system::error_code> setPromise;
+        sdbusplus::asio::setProperty(
+            *getBus(), serviceName(), path, reportIfaceName, property,
+            std::move(newValue),
+            [&setPromise](boost::system::error_code ec) {
+                setPromise.set_value(ec);
+            },
+            [&setPromise]() {
+                setPromise.set_value(boost::system::error_code{});
+            });
+        return setPromise.get_future().get();
     }
 
   private:

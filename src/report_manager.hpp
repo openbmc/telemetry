@@ -24,6 +24,11 @@ class ReportManager
     static bool verifyScanPeriod(const uint64_t scanPeriod);
     void removeReport(const Report* report);
 
+    size_t getReportsSize()
+    {
+        return reports.size();
+    }
+
   private:
     std::shared_ptr<sdbusplus::asio::object_server> objServer;
     std::unique_ptr<sdbusplus::asio::dbus_interface> reportManagerIface;

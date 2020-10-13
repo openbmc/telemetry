@@ -1,13 +1,11 @@
 #include "report_manager.hpp"
 
+#include "telemetry/names.hpp"
+#include "telemetry/types.hpp"
+
 #include <sdbusplus/exception.hpp>
 
 #include <system_error>
-
-constexpr const char* reportManagerIfaceName =
-    "xyz.openbmc_project.Telemetry.ReportManager";
-constexpr const char* reportManagerPath =
-    "/xyz/openbmc_project/Telemetry/Reports";
 
 ReportManager::ReportManager(
     const std::shared_ptr<sdbusplus::asio::connection>& bus,
