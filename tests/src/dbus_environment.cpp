@@ -109,6 +109,33 @@ std::future<bool> DbusEnvironment::getFuture(std::string_view name)
     return {};
 }
 
+std::pair<boost::system::error_code, std::string>
+    DbusEnvironment::addReport(const AddReportArgs& args)
+{
+    std::promise<std::pair<boost::system::error_code, std::string>>
+        addReportPromise;
+    getBus()->async_method_call(
+        [&addReportPromise](boost::system::error_code ec,
+                            const std::string& path) {
+            addReportPromise.set_value({ec, path});
+        },
+        serviceName(), reportManagerPath, reportManagerIfaceName, "AddReport",
+        args.name, args.reportingType, args.emitsReadingsSignal,
+        args.logToMetricReportsCollection, args.interval, args.readingParams);
+    return addReportPromise.get_future().get();
+}
+
+boost::system::error_code DbusEnvironment::deleteReport(const std::string& path)
+{
+    std::promise<boost::system::error_code> deleteReportPromise;
+    getBus()->async_method_call(
+        [&deleteReportPromise](boost::system::error_code ec) {
+            deleteReportPromise.set_value(ec);
+        },
+        serviceName(), path, deleteIfaceName, "Delete");
+    return deleteReportPromise.get_future().get();
+}
+
 boost::asio::io_context DbusEnvironment::ioc;
 std::shared_ptr<sdbusplus::asio::connection> DbusEnvironment::bus;
 std::shared_ptr<sdbusplus::asio::object_server> DbusEnvironment::objServer;

@@ -1,10 +1,7 @@
 #include "report.hpp"
 
 #include "report_manager.hpp"
-
-constexpr const char* reportIfaceName = "xyz.openbmc_project.Telemetry.Report";
-constexpr const char* reportPath = "/xyz/openbmc_project/Telemetry/Reports/";
-constexpr const char* deleteIfaceName = "xyz.openbmc_project.Object.Delete";
+#include "telemetry/names.hpp"
 
 Report::Report(boost::asio::io_context& ioc,
                const std::shared_ptr<sdbusplus::asio::object_server>& objServer,
@@ -13,9 +10,9 @@ Report::Report(boost::asio::io_context& ioc,
                const bool logToMetricReportsCollection,
                const std::chrono::milliseconds period,
                const ReadingParameters& metricParams,
-               ReportManager& reportManager) :
+               interfaces::ReportManager& reportManager) :
     name{reportName},
-    path{reportPath + name}, interval{period}, objServer(objServer)
+    path{reportDir + name}, interval{period}, objServer(objServer)
 {
     reportIface = objServer->add_unique_interface(
         path, reportIfaceName,

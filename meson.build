@@ -71,6 +71,7 @@ executable(
     [
         'src/main.cpp',
         'src/report.cpp',
+        'src/report_factory.cpp',
         'src/report_manager.cpp',
         'src/persistent_json_storage.cpp',
         'src/sensor.cpp',
