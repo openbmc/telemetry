@@ -1,0 +1,7 @@
+Code-Review+2: Adrian Ambrożewicz <adrian.ambrozewicz@linux.intel.com>
+Verified+1: Adrian Ambrożewicz <adrian.ambrozewicz@linux.intel.com>
+Submitted-by: Adrian Ambrożewicz <adrian.ambrozewicz@linux.intel.com>
+Submitted-at: Tue, 20 Oct 2020 07:56:50 +0000
+Reviewed-on: https://gerrit.openbmc-project.xyz/c/openbmc/telemetry/+/36854
+Project: openbmc/telemetry
+Branch: refs/heads/master
