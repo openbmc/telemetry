@@ -5,7 +5,9 @@ project(
     default_options: [
         'buildtype=debugoptimized',
         'cpp_std=c++17',
-        'cpp_rtti=false',
+        # TODO: Without RTTI telemetry does not build using Boost 1.74.0
+        # https://github.com/chriskohlhoff/asio/issues/533
+        #'cpp_rtti=false',
         'warning_level=3',
         'werror=true',
         'b_lto=true',
@@ -27,10 +29,10 @@ add_project_arguments(
     language: 'cpp'
 )
 
-boost = dependency('boost', version: '>=1.73.0', required: false)
+boost = dependency('boost', version: '>=1.74.0', required: false)
 if not boost.found()
     subproject('boost', required: false)
-    boost  = declare_dependency(include_directories: 'subprojects/boost_1_73_0')
+    boost  = declare_dependency(include_directories: 'subprojects/boost_1_74_0')
 endif
 
 phosphor_logging = dependency('phosphor-logging', required: false)
