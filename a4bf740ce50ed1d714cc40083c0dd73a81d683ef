@@ -1,0 +1,9 @@
+Code-Review+1: Krzysztof Grobelny <krzysztof.grobelny@intel.com>
+Code-Review+1: Zhikui Ren <zhikui.ren@intel.com>
+Code-Review+2: Adrian Ambrożewicz <adrian.ambrozewicz@linux.intel.com>
+Verified+1: Adrian Ambrożewicz <adrian.ambrozewicz@linux.intel.com>
+Submitted-by: Adrian Ambrożewicz <adrian.ambrozewicz@linux.intel.com>
+Submitted-at: Thu, 22 Oct 2020 09:40:28 +0000
+Reviewed-on: https://gerrit.openbmc-project.xyz/c/openbmc/telemetry/+/37568
+Project: openbmc/telemetry
+Branch: refs/heads/master
