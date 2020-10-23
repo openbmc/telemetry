@@ -15,7 +15,10 @@ std::unique_ptr<interfaces::Report> ReportFactory::make(
     std::chrono::milliseconds period, const ReadingParameters& metricParams,
     interfaces::ReportManager& reportManager) const
 {
+    std::vector<std::shared_ptr<interfaces::Metric>> metrics;
+
     return std::make_unique<Report>(
         ioc, objServer, name, reportingType, emitsReadingsSignal,
-        logToMetricReportsCollection, period, metricParams, reportManager);
+        logToMetricReportsCollection, period, metricParams, reportManager,
+        std::move(metrics));
 }

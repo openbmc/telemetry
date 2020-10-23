@@ -129,6 +129,11 @@ std::future<bool> DbusEnvironment::getFuture(std::string_view name)
     return {};
 }
 
+void DbusEnvironment::sleepFor(std::chrono::milliseconds delay)
+{
+    std::this_thread::sleep_for(delay);
+}
+
 boost::asio::io_context DbusEnvironment::ioc;
 std::shared_ptr<sdbusplus::asio::connection> DbusEnvironment::bus;
 std::shared_ptr<sdbusplus::asio::object_server> DbusEnvironment::objServer;
