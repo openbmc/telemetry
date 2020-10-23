@@ -1,10 +1,12 @@
 #pragma once
 
+#include "interfaces/metric.hpp"
 #include "interfaces/report.hpp"
 #include "interfaces/report_manager.hpp"
 #include "interfaces/types.hpp"
 
 #include <boost/asio/io_context.hpp>
+#include <boost/asio/steady_timer.hpp>
 #include <sdbusplus/asio/object_server.hpp>
 
 #include <chrono>
@@ -20,12 +22,13 @@ class Report : public interfaces::Report
            const bool logToMetricReportsCollection,
            const std::chrono::milliseconds period,
            const ReadingParameters& metricParams,
-           interfaces::ReportManager& reportManager);
+           interfaces::ReportManager& reportManager,
+           std::vector<std::shared_ptr<interfaces::Metric>> metrics);
     ~Report() = default;
 
-    Report(Report&) = delete;
+    Report(const Report&) = delete;
     Report(Report&&) = delete;
-    Report& operator=(Report&) = delete;
+    Report& operator=(const Report&) = delete;
     Report& operator=(Report&&) = delete;
 
     std::string getName() const override
@@ -39,12 +42,20 @@ class Report : public interfaces::Report
     }
 
   private:
+    static void timerProc(boost::system::error_code, Report& self);
+    void scheduleTimer(std::chrono::milliseconds interval);
+    void updateReadings();
+
     const std::string name;
     const std::string path;
     std::chrono::milliseconds interval;
+    Readings readings = {};
+    std::tuple_element_t<1, Readings> readingsCache = {};
     std::shared_ptr<sdbusplus::asio::object_server> objServer;
     std::unique_ptr<sdbusplus::asio::dbus_interface> reportIface;
     std::unique_ptr<sdbusplus::asio::dbus_interface> deleteIface;
+    std::vector<std::shared_ptr<interfaces::Metric>> metrics;
+    boost::asio::steady_timer timer;
 
   public:
     static constexpr const char* reportIfaceName =
