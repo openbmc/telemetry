@@ -4,6 +4,7 @@
 #include "utils/transform.hpp"
 
 #include <phosphor-logging/log.hpp>
+#include <sdbusplus/vtable.hpp>
 
 #include <numeric>
 
@@ -83,9 +84,14 @@ Report::Report(boost::asio::io_context& ioc,
                     return true;
                 },
                 [this](const auto&) { return persistency; });
+
+            auto readingsFlag = sdbusplus::vtable::property_::none;
+            if (emitsReadingsUpdate)
+            {
+                readingsFlag = sdbusplus::vtable::property_::emits_change;
+            }
             dbusIface.register_property_r(
-                "Readings", readings,
-                sdbusplus::vtable::property_::emits_change,
+                "Readings", readings, readingsFlag,
                 [this](const auto&) { return readings; });
             dbusIface.register_property_r(
                 "ReportingType", reportingType,
@@ -158,10 +164,7 @@ void Report::updateReadings()
     std::get<0>(readings) = std::time(0);
     std::get<1>(readings) = std::move(readingsCache);
 
-    if (emitsReadingsUpdate)
-    {
-        reportIface->signal_property("Readings");
-    }
+    reportIface->signal_property("Readings");
 }
 
 bool Report::storeConfiguration() const
