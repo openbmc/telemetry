@@ -4,6 +4,7 @@
 #include "utils/transform.hpp"
 
 #include <phosphor-logging/log.hpp>
+#include <sdbusplus/vtable.hpp>
 
 #include <numeric>
 
@@ -79,9 +80,14 @@ Report::Report(boost::asio::io_context& ioc,
                     actualVal = persistency;
                     return true;
                 });
+
+            auto readingsFlag = sdbusplus::vtable::property_::none;
+            if (emitsReadingsUpdate)
+            {
+                readingsFlag = sdbusplus::vtable::property_::emits_change;
+            }
             dbusIface.register_property_r(
-                "Readings", readings,
-                sdbusplus::vtable::property_::emits_change,
+                "Readings", readings, readingsFlag,
                 [this](const auto&) { return readings; });
             dbusIface.register_property_r(
                 "ReportingType", reportingType,
@@ -91,10 +97,14 @@ Report::Report(boost::asio::io_context& ioc,
                 "ReadingParameters", readingParameters,
                 sdbusplus::vtable::property_::const_,
                 [this](const auto&) { return readingParameters; });
-            dbusIface.register_property("EmitsReadingsUpdate",
-                                        emitsReadingsUpdate);
-            dbusIface.register_property("LogToMetricReportsCollection",
-                                        logToMetricReportsCollection);
+            dbusIface.register_property_r("EmitsReadingsUpdate",
+                                          emitsReadingsUpdate,
+                                          sdbusplus::vtable::property_::const_,
+                                          [](const auto& val) { return val; });
+            dbusIface.register_property_r("LogToMetricReportsCollection",
+                                          logToMetricReportsCollection,
+                                          sdbusplus::vtable::property_::const_,
+                                          [](const auto& val) { return val; });
             dbusIface.register_method("Update", [this] {
                 if (reportingType == "OnRequest")
                 {
