@@ -1,18 +1,21 @@
 #include "dbus_environment.hpp"
+#include "matchers/nth.hpp"
+#include "mocks/metric_mock.hpp"
 #include "mocks/report_manager_mock.hpp"
+#include "params/report_params.hpp"
 #include "report.hpp"
 #include "report_manager.hpp"
+#include "utils/conv_container.hpp"
 
 #include <sdbusplus/exception.hpp>
 
 using namespace testing;
 using namespace std::literals::string_literals;
+using namespace std::chrono_literals;
 
 class TestReport : public Test
 {
   public:
-    std::string defaultReportName = "TestReport";
-    std::string defaultReportType = "Periodic";
     bool defaultEmitReadingSignal = true;
     bool defaultLogToMetricReportCollection = true;
     uint64_t defaultInterval = ReportManager::minInterval.count();
@@ -20,12 +23,28 @@ class TestReport : public Test
 
     std::unique_ptr<ReportManagerMock> reportManagerMock =
         std::make_unique<StrictMock<ReportManagerMock>>();
-    Report sut =
-        Report(DbusEnvironment::getIoc(), DbusEnvironment::getObjServer(),
-               defaultReportName, defaultReportType, defaultEmitReadingSignal,
-               defaultLogToMetricReportCollection,
-               std::chrono::milliseconds{defaultInterval}, defaultReadingParams,
-               *reportManagerMock);
+    std::vector<std::shared_ptr<MetricMock>> metricMocks = {
+        std::make_shared<NiceMock<MetricMock>>(),
+        std::make_shared<NiceMock<MetricMock>>(),
+        std::make_shared<NiceMock<MetricMock>>()};
+    std::unique_ptr<Report> sut;
+
+    void SetUp() override
+    {
+        sut = makeReport(ReportParams());
+    }
+
+    std::unique_ptr<Report> makeReport(const ReportParams& params)
+    {
+        return std::make_unique<Report>(
+            DbusEnvironment::getIoc(), DbusEnvironment::getObjServer(),
+            params.reportName(), params.reportingType(),
+            defaultEmitReadingSignal, defaultLogToMetricReportCollection,
+            std::chrono::milliseconds(defaultInterval), defaultReadingParams,
+            *reportManagerMock,
+            utils::convContainer<std::shared_ptr<interfaces::Metric>>(
+                metricMocks));
+    }
 
     template <class T>
     static T getProperty(const std::string& path, const std::string& property)
@@ -75,42 +94,47 @@ class TestReport : public Test
 
 TEST_F(TestReport, verifyIfPropertiesHaveValidValue)
 {
-    EXPECT_THAT(getProperty<uint64_t>(sut.getPath(), "Interval"),
+    EXPECT_THAT(getProperty<uint64_t>(sut->getPath(), "Interval"),
                 Eq(defaultInterval));
-    EXPECT_THAT(getProperty<bool>(sut.getPath(), "Persistency"), Eq(false));
-    EXPECT_THAT(getProperty<std::string>(sut.getPath(), "ReportingType"),
-                Eq(defaultReportType));
-    EXPECT_THAT(getProperty<bool>(sut.getPath(), "EmitsReadingsUpdate"),
+    EXPECT_THAT(getProperty<bool>(sut->getPath(), "Persistency"), Eq(false));
+    EXPECT_THAT(getProperty<bool>(sut->getPath(), "EmitsReadingsUpdate"),
                 Eq(defaultEmitReadingSignal));
     EXPECT_THAT(
-        getProperty<bool>(sut.getPath(), "LogToMetricReportsCollection"),
+        getProperty<bool>(sut->getPath(), "LogToMetricReportsCollection"),
         Eq(defaultLogToMetricReportCollection));
     EXPECT_THAT(
-        getProperty<ReadingParameters>(sut.getPath(), "ReadingParameters"),
+        getProperty<ReadingParameters>(sut->getPath(), "ReadingParameters"),
         Eq(defaultReadingParams));
+}
+
+TEST_F(TestReport, readingsAreInitialyEmpty)
+{
+    EXPECT_THAT(getProperty<Readings>(sut->getPath(), "Readings"),
+                Eq(Readings{}));
 }
 
 TEST_F(TestReport, setIntervalWithValidValue)
 {
     uint64_t newValue = defaultInterval + 1;
-    EXPECT_THAT(setProperty(sut.getPath(), "Interval", newValue).value(),
+    EXPECT_THAT(setProperty(sut->getPath(), "Interval", newValue).value(),
                 Eq(boost::system::errc::success));
-    EXPECT_THAT(getProperty<uint64_t>(sut.getPath(), "Interval"), Eq(newValue));
+    EXPECT_THAT(getProperty<uint64_t>(sut->getPath(), "Interval"),
+                Eq(newValue));
 }
 
 TEST_F(TestReport, settingIntervalWithInvalidValueDoesNotChangeProperty)
 {
     uint64_t newValue = defaultInterval - 1;
-    EXPECT_THAT(setProperty(sut.getPath(), "Interval", newValue).value(),
+    EXPECT_THAT(setProperty(sut->getPath(), "Interval", newValue).value(),
                 Eq(boost::system::errc::success));
-    EXPECT_THAT(getProperty<uint64_t>(sut.getPath(), "Interval"),
+    EXPECT_THAT(getProperty<uint64_t>(sut->getPath(), "Interval"),
                 Eq(defaultInterval));
 }
 
 TEST_F(TestReport, deleteReport)
 {
-    EXPECT_CALL(*reportManagerMock, removeReport(&sut));
-    auto ec = deleteReport(sut.getPath());
+    EXPECT_CALL(*reportManagerMock, removeReport(sut.get()));
+    auto ec = deleteReport(sut->getPath());
     EXPECT_THAT(ec, Eq(boost::system::errc::success));
 }
 
@@ -120,47 +144,125 @@ TEST_F(TestReport, deletingNonExistingReportReturnInvalidRequestDescriptor)
     EXPECT_THAT(ec.value(), Eq(EBADR));
 }
 
-class TestReportCreation : public Test
+class TestReportValidNames :
+    public TestReport,
+    public WithParamInterface<ReportParams>
 {
   public:
-    std::unique_ptr<ReportManagerMock> reportManagerMock =
-        std::make_unique<StrictMock<ReportManagerMock>>();
-
-    std::unique_ptr<Report> createReportWithName(std::string name)
-    {
-        return std::make_unique<Report>(
-            DbusEnvironment::getIoc(), DbusEnvironment::getObjServer(), name,
-            "", true, true,
-            std::chrono::milliseconds{ReportManager::minInterval.count()},
-            ReadingParameters{}, *reportManagerMock);
-    }
+    void SetUp() override
+    {}
 };
 
-class TestReportValidNames :
-    public TestReportCreation,
-    public WithParamInterface<const char*>
-{};
-
-INSTANTIATE_TEST_SUITE_P(ValidNames, TestReportValidNames,
-                         ValuesIn({"Valid_1", "Valid_1/Valid_2",
-                                   "Valid_1/Valid_2/Valid_3"}));
+INSTANTIATE_TEST_SUITE_P(
+    ValidNames, TestReportValidNames,
+    Values(ReportParams().reportName("Valid_1"),
+           ReportParams().reportName("Valid_1/Valid_2"),
+           ReportParams().reportName("Valid_1/Valid_2/Valid_3")));
 
 TEST_P(TestReportValidNames, reportCtorDoesNotThrowOnValidName)
 {
-    EXPECT_NO_THROW(createReportWithName(GetParam()));
+    EXPECT_NO_THROW(makeReport(GetParam()));
 }
 
 class TestReportInvalidNames :
-    public TestReportCreation,
-    public WithParamInterface<const char*>
-{};
+    public TestReport,
+    public WithParamInterface<ReportParams>
+{
+  public:
+    void SetUp() override
+    {}
+};
 
 INSTANTIATE_TEST_SUITE_P(InvalidNames, TestReportInvalidNames,
-                         ValuesIn({"/", "/Invalid", "Invalid/",
-                                   "Invalid/Invalid/", "Invalid?"}));
+                         Values(ReportParams().reportName("/"),
+                                ReportParams().reportName("/Invalid"),
+                                ReportParams().reportName("Invalid/"),
+                                ReportParams().reportName("Invalid/Invalid/"),
+                                ReportParams().reportName("Invalid?")));
 
 TEST_P(TestReportInvalidNames, reportCtorThrowOnInvalidName)
 {
-    EXPECT_THROW(createReportWithName(GetParam()),
-                 sdbusplus::exception::SdBusError);
+    EXPECT_THROW(makeReport(GetParam()), sdbusplus::exception::SdBusError);
+}
+
+class TestReportAllReportTypes :
+    public TestReport,
+    public WithParamInterface<ReportParams>
+{
+    void SetUp() override
+    {
+        sut = makeReport(GetParam());
+    }
+};
+
+INSTANTIATE_TEST_SUITE_P(_, TestReportAllReportTypes,
+                         Values(ReportParams().reportingType("OnRequest"),
+                                ReportParams().reportingType("OnChange"),
+                                ReportParams().reportingType("Periodic")));
+
+TEST_P(TestReportAllReportTypes, returnPropertValueOfReportType)
+{
+    EXPECT_THAT(getProperty<std::string>(sut->getPath(), "ReportingType"),
+                Eq(GetParam().reportingType()));
+}
+
+class TestReportNonPeriodicReport :
+    public TestReport,
+    public WithParamInterface<ReportParams>
+{
+    void SetUp() override
+    {
+        sut = makeReport(GetParam());
+    }
+};
+
+INSTANTIATE_TEST_SUITE_P(_, TestReportNonPeriodicReport,
+                         Values(ReportParams().reportingType("OnRequest"),
+                                ReportParams().reportingType("OnChange")));
+
+TEST_P(TestReportNonPeriodicReport, readingsAreNotUpdatedAfterIntervalExpires)
+{
+    DbusEnvironment::sleepFor(ReportManager::minInterval + 1ms);
+
+    EXPECT_THAT(getProperty<Readings>(sut->getPath(), "Readings"),
+                Eq(Readings{}));
+}
+
+class TestReportPeriodicReport : public TestReport
+{
+    void SetUp() override
+    {
+        sut = makeReport(ReportParams().reportingType("Periodic"));
+
+        ASSERT_THAT(metricMocks, SizeIs(Ge(2)));
+        ON_CALL(*metricMocks[0], getReadings())
+            .WillByDefault(ReturnRefOfCopy(std::vector<MetricValue>(
+                {MetricValue{"a", "b", 17.1, 114},
+                 MetricValue{"aaa", "bbb", 21.7, 100}})));
+        ON_CALL(*metricMocks[1], getReadings())
+            .WillByDefault(ReturnRefOfCopy(
+                std::vector<MetricValue>({MetricValue{"aa", "bb", 42.0, 74}})));
+    }
+};
+
+TEST_F(TestReportPeriodicReport, readingsAreUpdatedAfterIntervalExpires)
+{
+    const uint64_t expectedTime = std::time(0);
+    DbusEnvironment::sleepFor(ReportManager::minInterval + 1ms);
+
+    const auto readings = getProperty<Readings>(sut->getPath(), "Readings");
+
+    EXPECT_THAT(readings, (Nth<0, Readings>(Ge(expectedTime))));
+}
+
+TEST_F(TestReportPeriodicReport, metricsAreUpdatedAfterIntervalExpires)
+{
+    DbusEnvironment::sleepFor(ReportManager::minInterval + 1ms);
+
+    const auto readings = getProperty<Readings>(sut->getPath(), "Readings");
+
+    EXPECT_THAT(readings, (Nth<1, Readings>(ElementsAre(
+                              std::make_tuple("a"s, "b"s, 17.1, 114u),
+                              std::make_tuple("aaa"s, "bbb"s, 21.7, 100u),
+                              std::make_tuple("aa"s, "bb"s, 42.0, 74u)))));
 }
