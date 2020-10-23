@@ -167,6 +167,27 @@ TEST_F(TestReport, settingIntervalWithInvalidValueDoesNotChangeProperty)
                 Eq(defaultParams.interval().count()));
 }
 
+TEST_F(TestReport, settingEmitsReadingsUpdateHaveNoEffect)
+{
+    EXPECT_THAT(setProperty(sut->getPath(), "EmitsReadingsUpdate",
+                            !defaultParams.emitReadingUpdate())
+                    .value(),
+                Eq(boost::system::errc::read_only_file_system));
+    EXPECT_THAT(getProperty<bool>(sut->getPath(), "EmitsReadingsUpdate"),
+                Eq(defaultParams.emitReadingUpdate()));
+}
+
+TEST_F(TestReport, settingLogToMetricReportCollectionHaveNoEffect)
+{
+    EXPECT_THAT(setProperty(sut->getPath(), "LogToMetricReportsCollection",
+                            !defaultParams.logToMetricReportCollection())
+                    .value(),
+                Eq(boost::system::errc::read_only_file_system));
+    EXPECT_THAT(
+        getProperty<bool>(sut->getPath(), "LogToMetricReportsCollection"),
+        Eq(defaultParams.logToMetricReportCollection()));
+}
+
 TEST_F(TestReport, settingPersistencyToFalseRemovesReportFromStorage)
 {
     EXPECT_CALL(storageMock, remove(to_file_path(sut->getName())));
@@ -311,6 +332,7 @@ class TestReportAllReportTypes :
     public TestReport,
     public WithParamInterface<ReportParams>
 {
+  public:
     void SetUp() override
     {
         sut = makeReport(GetParam());
@@ -387,6 +409,7 @@ class TestReportNonPeriodicReport :
     public TestReport,
     public WithParamInterface<ReportParams>
 {
+  public:
     void SetUp() override
     {
         sut = makeReport(GetParam());
@@ -487,10 +510,31 @@ TEST_F(TestReportInitialization, metricsAreInitializedWhenConstructed)
     sut = makeReport(ReportParams());
 }
 
-TEST_F(TestReportInitialization, readingsPropertiesChangedSingalEmits)
+TEST_F(TestReportInitialization,
+       emitReadingsUpdateIsTrueReadingsPropertiesChangedSingalEmits)
 {
-    sut = makeReport(defaultParams.reportingType("Periodic"));
-    EXPECT_CALL(readingsUpdated, Call());
+    EXPECT_CALL(readingsUpdated, Call())
+        .WillOnce(
+            InvokeWithoutArgs(DbusEnvironment::setPromise("readingsUpdated")));
+
+    const auto elapsed = DbusEnvironment::measureTime([this] {
+        sut = makeReport(
+            defaultParams.reportingType("Periodic").emitReadingUpdate(true));
+        makeMonitor();
+        EXPECT_TRUE(DbusEnvironment::waitForFuture("readingsUpdated"));
+    });
+
+    EXPECT_THAT(elapsed, AllOf(Ge(defaultParams.interval()),
+                               Lt(defaultParams.interval() * 2)));
+}
+
+TEST_F(TestReportInitialization,
+       emitReadingsUpdateIsFalseReadingsPropertiesChangesSigalDoesNotEmits)
+{
+    EXPECT_CALL(readingsUpdated, Call()).Times(0);
+
+    sut = makeReport(
+        defaultParams.reportingType("Periodic").emitReadingUpdate(false));
     makeMonitor();
-    DbusEnvironment::sleepFor(defaultParams.interval() + 1ms);
+    DbusEnvironment::sleepFor(defaultParams.interval() * 2);
 }
