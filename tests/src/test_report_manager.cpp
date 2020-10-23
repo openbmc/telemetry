@@ -50,7 +50,7 @@ class TestReportManager : public Test
             },
             DbusEnvironment::serviceName(), ReportManager::reportManagerPath,
             ReportManager::reportManagerIfaceName, "AddReport", reportName,
-            reportParams.reportingType(), reportParams.emitReadingSignal(),
+            reportParams.reportingType(), reportParams.emitReadingUpdate(),
             reportParams.logToMetricReportCollection(), interval,
             reportParams.readingParameters());
         return DbusEnvironment::waitForFuture(addReportPromise.get_future());
@@ -93,7 +93,7 @@ TEST_F(TestReportManager, addReport)
 
     EXPECT_CALL(reportFactoryMock,
                 make(_, reportParams.reportName(), reportParams.reportingType(),
-                     reportParams.emitReadingSignal(),
+                     reportParams.emitReadingUpdate(),
                      reportParams.logToMetricReportCollection(),
                      std::chrono::milliseconds{reportParams.interval()},
                      reportParams.readingParameters(), Ref(*sut),
@@ -227,7 +227,7 @@ class TestReportManagerStorage : public TestReportManager
         {"Version", Report::reportVersion},
         {"Name", reportParams.reportName()},
         {"ReportingType", reportParams.reportingType()},
-        {"EmitsReadingsUpdate", reportParams.emitReadingSignal()},
+        {"EmitsReadingsUpdate", reportParams.emitReadingUpdate()},
         {"LogToMetricReportsCollection",
          reportParams.logToMetricReportCollection()},
         {"Interval", reportParams.interval()},
@@ -242,7 +242,7 @@ TEST_F(TestReportManagerStorage, reportManagerCtorAddReportFromStorage)
 {
     EXPECT_CALL(reportFactoryMock,
                 make(_, reportParams.reportName(), reportParams.reportingType(),
-                     reportParams.emitReadingSignal(),
+                     reportParams.emitReadingUpdate(),
                      reportParams.logToMetricReportCollection(),
                      std::chrono::milliseconds{reportParams.interval()},
                      reportParams.readingParameters(), _, Ref(storageMock)));

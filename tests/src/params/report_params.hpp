@@ -31,9 +31,15 @@ class ReportParams final
         return reportingTypeProperty;
     }
 
-    bool emitReadingSignal() const
+    ReportParams& emitReadingUpdate(bool val)
     {
-        return emitReadingSignalProperty;
+        emitReadingUpdateProperty = val;
+        return *this;
+    }
+
+    bool emitReadingUpdate() const
+    {
+        return emitReadingUpdateProperty;
     }
 
     bool logToMetricReportCollection() const
@@ -46,6 +52,11 @@ class ReportParams final
         return intervalProperty;
     }
 
+    std::chrono::milliseconds intervalDuration() const
+    {
+        return std::chrono::milliseconds(intervalProperty);
+    }
+
     const ReadingParameters& readingParameters() const
     {
         return readingParametersProperty;
@@ -54,7 +65,7 @@ class ReportParams final
   protected:
     std::string reportNameProperty = "TestReport";
     std::string reportingTypeProperty = "OnRequest";
-    bool emitReadingSignalProperty = true;
+    bool emitReadingUpdateProperty = true;
     bool logToMetricReportCollectionProperty = true;
     uint64_t intervalProperty = ReportManager::minInterval.count();
     ReadingParameters readingParametersProperty = {
