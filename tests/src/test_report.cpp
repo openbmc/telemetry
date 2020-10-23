@@ -49,7 +49,7 @@ class TestReport : public Test
         return std::make_unique<Report>(
             DbusEnvironment::getIoc(), DbusEnvironment::getObjServer(),
             params.reportName(), params.reportingType(),
-            params.emitReadingSignal(), params.logToMetricReportCollection(),
+            params.emitReadingUpdate(), params.logToMetricReportCollection(),
             std::chrono::milliseconds(params.interval()),
             params.readingParameters(), *reportManagerMock, storageMock,
             utils::convContainer<std::shared_ptr<interfaces::Metric>>(
@@ -118,7 +118,7 @@ TEST_F(TestReport, verifyIfPropertiesHaveValidValue)
                 Eq(defaultParams.interval()));
     EXPECT_THAT(getProperty<bool>(sut->getPath(), "Persistency"), Eq(true));
     EXPECT_THAT(getProperty<bool>(sut->getPath(), "EmitsReadingsUpdate"),
-                Eq(defaultParams.emitReadingSignal()));
+                Eq(defaultParams.emitReadingUpdate()));
     EXPECT_THAT(
         getProperty<bool>(sut->getPath(), "LogToMetricReportsCollection"),
         Eq(defaultParams.logToMetricReportCollection()));
@@ -149,6 +149,27 @@ TEST_F(TestReport, settingIntervalWithInvalidValueDoesNotChangeProperty)
                 Eq(boost::system::errc::success));
     EXPECT_THAT(getProperty<uint64_t>(sut->getPath(), "Interval"),
                 Eq(defaultParams.interval()));
+}
+
+TEST_F(TestReport, settingEmitsReadingsUpdateHaveNoEffect)
+{
+    EXPECT_THAT(setProperty(sut->getPath(), "EmitsReadingsUpdate",
+                            !defaultParams.emitReadingUpdate())
+                    .value(),
+                Eq(boost::system::errc::read_only_file_system));
+    EXPECT_THAT(getProperty<bool>(sut->getPath(), "EmitsReadingsUpdate"),
+                Eq(defaultParams.emitReadingUpdate()));
+}
+
+TEST_F(TestReport, settingLogToMetricReportCollectionHaveNoEffect)
+{
+    EXPECT_THAT(setProperty(sut->getPath(), "LogToMetricReportsCollection",
+                            !defaultParams.logToMetricReportCollection())
+                    .value(),
+                Eq(boost::system::errc::read_only_file_system));
+    EXPECT_THAT(
+        getProperty<bool>(sut->getPath(), "LogToMetricReportsCollection"),
+        Eq(defaultParams.logToMetricReportCollection()));
 }
 
 TEST_F(TestReport, settingPersistencyToFalseRemovesReportFromStorage)
@@ -234,6 +255,7 @@ class TestReportAllReportTypes :
     public TestReport,
     public WithParamInterface<ReportParams>
 {
+  public:
     void SetUp() override
     {
         sut = makeReport(GetParam());
@@ -310,6 +332,7 @@ class TestReportNonPeriodicReport :
     public TestReport,
     public WithParamInterface<ReportParams>
 {
+  public:
     void SetUp() override
     {
         sut = makeReport(GetParam());
@@ -358,4 +381,64 @@ TEST_F(TestReportPeriodicReport, readingsAreUpdatedAfterIntervalExpires)
                 ElementsAre(std::make_tuple("a"s, "b"s, 17.1, 114u),
                             std::make_tuple("aaa"s, "bbb"s, 21.7, 100u),
                             std::make_tuple("aa"s, "bb"s, 42.0, 74u)));
+}
+
+class TestReportMonitor : public TestReport
+{
+  public:
+    void SetUp() override
+    {}
+
+    std::unique_ptr<sdbusplus::bus::match::match> monitor;
+    MockFunction<void()> readingsUpdated;
+    void monitorProc(sdbusplus::message::message& msg)
+    {
+        std::string iface;
+        std::vector<std::pair<std::string, std::variant<Readings>>>
+            changed_properties;
+        std::vector<std::string> invalidated_properties;
+
+        msg.read(iface, changed_properties, invalidated_properties);
+
+        if (iface == Report::reportIfaceName)
+        {
+            for (const auto& [name, value] : changed_properties)
+            {
+                if (name == "Readings")
+                {
+                    readingsUpdated.Call();
+                }
+            }
+        }
+    }
+
+    void makeMonitor()
+    {
+        ASSERT_THAT(static_cast<bool>(sut), Eq(true));
+        monitor = std::make_unique<sdbusplus::bus::match::match>(
+            *DbusEnvironment::getBus(),
+            sdbusplus::bus::match::rules::propertiesChanged(
+                sut->getPath(), Report::reportIfaceName),
+            [this](auto& msg) { monitorProc(msg); });
+    }
+};
+
+TEST_F(TestReportMonitor,
+       emitReadingsUpdateIsTrueReadingsPropertiesChangedSingalEmits)
+{
+    sut = makeReport(
+        defaultParams.reportingType("Periodic").emitReadingUpdate(true));
+    EXPECT_CALL(readingsUpdated, Call());
+    makeMonitor();
+    DbusEnvironment::sleepFor(defaultParams.intervalDuration() + 1ms);
+}
+
+TEST_F(TestReportMonitor,
+       emitReadingsUpdateIsFalseReadingsPropertiesChangesSigalDoesNotEmits)
+{
+    sut = makeReport(
+        defaultParams.reportingType("Periodic").emitReadingUpdate(false));
+    EXPECT_CALL(readingsUpdated, Call()).Times(0);
+    makeMonitor();
+    DbusEnvironment::sleepFor(defaultParams.intervalDuration() + 1ms);
 }
