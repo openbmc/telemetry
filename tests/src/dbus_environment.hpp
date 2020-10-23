@@ -25,6 +25,7 @@ class DbusEnvironment : public ::testing::Environment
     static bool waitForFuture(
         std::string_view name,
         std::chrono::milliseconds timeout = std::chrono::seconds(5));
+    static void sleepFor(std::chrono::milliseconds);
 
     template <class Functor>
     static bool synchronizedPost(
