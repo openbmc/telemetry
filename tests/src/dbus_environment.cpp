@@ -62,11 +62,7 @@ const char* DbusEnvironment::serviceName()
 std::function<void()> DbusEnvironment::setPromise(std::string_view name)
 {
     auto promise = std::make_shared<std::promise<bool>>();
-
-    {
-        futures[std::string(name)].emplace_back(promise->get_future());
-    }
-
+    futures[std::string(name)].emplace_back(promise->get_future());
     return [p = std::move(promise)]() { p->set_value(true); };
 }
 
