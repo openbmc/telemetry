@@ -20,8 +20,8 @@ class SensorListenerMock : public interfaces::SensorListener
         }));
     }
 
-    MOCK_METHOD1(sensorUpdated, void(interfaces::Sensor&));
-    MOCK_METHOD2(sensorUpdated, void(interfaces::Sensor&, double));
+    MOCK_METHOD(void, sensorUpdated, (interfaces::Sensor&), (override));
+    MOCK_METHOD(void, sensorUpdated, (interfaces::Sensor&, double), (override));
 
-    MOCK_METHOD0(sensorUpdated, void());
+    MOCK_METHOD(void, sensorUpdated, ());
 };
