@@ -20,9 +20,9 @@ class SensorMock : public interfaces::Sensor
         return Id("SensorMock", service, path);
     }
 
-    MOCK_CONST_METHOD0(id, Id());
-    MOCK_METHOD1(registerForUpdates,
-                 void(const std::weak_ptr<interfaces::SensorListener>&));
+    MOCK_METHOD(Id, id, (), (const, override));
+    MOCK_METHOD(void, registerForUpdates,
+                (const std::weak_ptr<interfaces::SensorListener>&), (override));
 
     const uint64_t mockId = generateUniqueMockId();
 

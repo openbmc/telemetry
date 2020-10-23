@@ -72,6 +72,7 @@ executable(
     'telemetry',
     [
         'src/main.cpp',
+        'src/metric.cpp',
         'src/persistent_json_storage.cpp',
         'src/report.cpp',
         'src/report_factory.cpp',
