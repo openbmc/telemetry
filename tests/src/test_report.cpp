@@ -1,5 +1,6 @@
 #include "dbus_environment.hpp"
 #include "matchers/nth.hpp"
+#include "mocks/json_storage_mock.hpp"
 #include "mocks/metric_mock.hpp"
 #include "mocks/report_manager_mock.hpp"
 #include "params/report_params.hpp"
@@ -27,10 +28,13 @@ class TestReport : public Test
         std::make_shared<NiceMock<MetricMock>>(),
         std::make_shared<NiceMock<MetricMock>>(),
         std::make_shared<NiceMock<MetricMock>>()};
+    std::unique_ptr<StorageMock> reportStorage =
+        std::make_unique<NiceMock<StorageMock>>();
     std::unique_ptr<Report> sut;
 
     void SetUp() override
     {
+        EXPECT_CALL(*reportStorage, store);
         sut = makeReport(ReportParams());
     }
 
@@ -43,7 +47,8 @@ class TestReport : public Test
             std::chrono::milliseconds(defaultInterval), defaultReadingParams,
             *reportManagerMock,
             utils::convContainer<std::shared_ptr<interfaces::Metric>>(
-                metricMocks));
+                metricMocks),
+            *reportStorage);
     }
 
     template <class T>
@@ -96,7 +101,7 @@ TEST_F(TestReport, verifyIfPropertiesHaveValidValue)
 {
     EXPECT_THAT(getProperty<uint64_t>(sut->getPath(), "Interval"),
                 Eq(defaultInterval));
-    EXPECT_THAT(getProperty<bool>(sut->getPath(), "Persistency"), Eq(false));
+    EXPECT_THAT(getProperty<bool>(sut->getPath(), "Persistency"), Eq(true));
     EXPECT_THAT(getProperty<bool>(sut->getPath(), "EmitsReadingsUpdate"),
                 Eq(defaultEmitReadingSignal));
     EXPECT_THAT(
@@ -129,6 +134,17 @@ TEST_F(TestReport, settingIntervalWithInvalidValueDoesNotChangeProperty)
                 Eq(boost::system::errc::success));
     EXPECT_THAT(getProperty<uint64_t>(sut->getPath(), "Interval"),
                 Eq(defaultInterval));
+}
+
+TEST_F(TestReport, settingPersistencyToFalseRemovesReportFromStorage)
+{
+    EXPECT_CALL(*reportStorage, remove);
+
+    bool persistency = false;
+    EXPECT_THAT(setProperty(sut->getPath(), "Persistency", persistency).value(),
+                Eq(boost::system::errc::success));
+    EXPECT_THAT(getProperty<bool>(sut->getPath(), "Persistency"),
+                Eq(persistency));
 }
 
 TEST_F(TestReport, deleteReport)
@@ -170,7 +186,9 @@ class TestReportInvalidNames :
 {
   public:
     void SetUp() override
-    {}
+    {
+        EXPECT_CALL(*reportStorage, store).Times(0);
+    }
 };
 
 INSTANTIATE_TEST_SUITE_P(InvalidNames, TestReportInvalidNames,
