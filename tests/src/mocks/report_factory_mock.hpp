@@ -16,6 +16,7 @@ class ReportFactoryMock : public interfaces::ReportFactory
             .WillByDefault(WithArgs<0>(Invoke([](const std::string& name) {
                 return std::make_unique<NiceMock<ReportMock>>(name);
             })));
+        EXPECT_CALL(*this, loadFromPersistent);
     }
 
     MOCK_METHOD(std::unique_ptr<interfaces::Report>, make,
@@ -24,5 +25,7 @@ class ReportFactoryMock : public interfaces::ReportFactory
                  std::chrono::milliseconds period,
                  const ReadingParameters& metricParams,
                  interfaces::ReportManager& reportManager),
-                (const, override));
+                (override));
+    MOCK_METHOD(void, loadFromPersistent,
+                (interfaces::ReportManager & reportManager), (override));
 };
