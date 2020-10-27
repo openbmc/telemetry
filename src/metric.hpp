@@ -13,7 +13,6 @@ class Metric : public interfaces::Metric, public interfaces::SensorListener
 
     void sensorUpdated(interfaces::Sensor&, uint64_t) override
     {}
-
     void sensorUpdated(interfaces::Sensor&, uint64_t, double value) override
     {}
 

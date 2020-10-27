@@ -2,6 +2,8 @@
 
 #include "metric_value.hpp"
 
+#include <nlohmann/json.hpp>
+
 #include <vector>
 
 namespace interfaces
@@ -13,6 +15,7 @@ class Metric
     virtual ~Metric() = default;
 
     virtual const std::vector<MetricValue>& getReadings() const = 0;
+    virtual nlohmann::json to_json() const = 0;
 };
 
 } // namespace interfaces
