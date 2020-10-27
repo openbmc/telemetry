@@ -23,6 +23,7 @@ class ReportFactoryMock : public interfaces::ReportFactory
                  bool emitsReadingsSignal, bool logToMetricReportsCollection,
                  std::chrono::milliseconds period,
                  const ReadingParameters& metricParams,
-                 interfaces::ReportManager& reportManager),
+                 interfaces::ReportManager& reportManager,
+                 interfaces::JsonStorage& reportStorage),
                 (const, override));
 };

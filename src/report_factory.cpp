@@ -13,12 +13,13 @@ std::unique_ptr<interfaces::Report> ReportFactory::make(
     const std::string& name, const std::string& reportingType,
     bool emitsReadingsSignal, bool logToMetricReportsCollection,
     std::chrono::milliseconds period, const ReadingParameters& metricParams,
-    interfaces::ReportManager& reportManager) const
+    interfaces::ReportManager& reportManager,
+    interfaces::JsonStorage& reportStorage) const
 {
     std::vector<std::shared_ptr<interfaces::Metric>> metrics;
 
     return std::make_unique<Report>(
         ioc, objServer, name, reportingType, emitsReadingsSignal,
         logToMetricReportsCollection, period, metricParams, reportManager,
-        std::move(metrics));
+        reportStorage, std::move(metrics));
 }

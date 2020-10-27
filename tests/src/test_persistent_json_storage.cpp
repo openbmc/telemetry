@@ -47,7 +47,7 @@ TEST_F(TestPersistentJsonStorage, storesJsonData)
 
 TEST_F(TestPersistentJsonStorage, emptyListWhenNoReportsCreated)
 {
-    EXPECT_THAT(sut.list(DirectoryPath("report")), SizeIs(0u));
+    EXPECT_THAT(sut.list(), SizeIs(0u));
 }
 
 TEST_F(TestPersistentJsonStorage, listSavedReports)
@@ -61,10 +61,12 @@ TEST_F(TestPersistentJsonStorage, listSavedReports)
     sut.store(FilePath("report/domain-2/name-1/conf-1.json"),
               nlohmann::json("data-3a"));
 
-    EXPECT_THAT(sut.list(DirectoryPath("report")),
-                UnorderedElementsAre(FilePath("report/domain-1/name-1"),
-                                     FilePath("report/domain-1/name-2"),
-                                     FilePath("report/domain-2/name-1")));
+    EXPECT_THAT(
+        sut.list(),
+        UnorderedElementsAre(FilePath("report/domain-1/name-1/conf-1.json"),
+                             FilePath("report/domain-1/name-2/conf-1.json"),
+                             FilePath("report/domain-1/name-2/conf-2.json"),
+                             FilePath("report/domain-2/name-1/conf-1.json")));
 }
 
 TEST_F(TestPersistentJsonStorage, listSavedReportsWithoutRemovedOnes)
@@ -80,9 +82,10 @@ TEST_F(TestPersistentJsonStorage, listSavedReportsWithoutRemovedOnes)
     sut.remove(FilePath("report/domain-1/name-1/conf-1.json"));
     sut.remove(FilePath("report/domain-1/name-2/conf-2.json"));
 
-    EXPECT_THAT(sut.list(DirectoryPath("report")),
-                UnorderedElementsAre(FilePath("report/domain-1/name-2"),
-                                     FilePath("report/domain-2/name-1")));
+    EXPECT_THAT(
+        sut.list(),
+        UnorderedElementsAre(FilePath("report/domain-1/name-2/conf-1.json"),
+                             FilePath("report/domain-2/name-1/conf-1.json")));
 }
 
 TEST_F(TestPersistentJsonStorage, removesStoredJson)
