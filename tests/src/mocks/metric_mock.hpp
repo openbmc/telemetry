@@ -17,4 +17,5 @@ class MetricMock : public interfaces::Metric
 
     MOCK_METHOD(const std::vector<MetricValue>&, getReadings, (),
                 (const, override));
+    MOCK_METHOD(nlohmann::json, to_json, (), (const, override));
 };

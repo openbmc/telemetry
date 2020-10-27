@@ -1,3 +1,4 @@
+#include "printers.hpp"
 #include "utils/unique_call.hpp"
 
 #include <gmock/gmock.h>

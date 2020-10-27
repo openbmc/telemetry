@@ -1,7 +1,9 @@
 #include "dbus_environment.hpp"
+#include "mocks/json_storage_mock.hpp"
 #include "mocks/metric_mock.hpp"
 #include "mocks/report_manager_mock.hpp"
 #include "params/report_params.hpp"
+#include "printers.hpp"
 #include "report.hpp"
 #include "report_manager.hpp"
 #include "utils/conv_container.hpp"
@@ -15,22 +17,46 @@ using namespace std::chrono_literals;
 class TestReport : public Test
 {
   public:
-    bool defaultEmitReadingSignal = true;
-    bool defaultLogToMetricReportCollection = true;
-    uint64_t defaultInterval = ReportManager::minInterval.count();
-    ReadingParameters defaultReadingParams = {};
+    ReportParams defaultParams;
 
     std::unique_ptr<ReportManagerMock> reportManagerMock =
-        std::make_unique<StrictMock<ReportManagerMock>>();
+        std::make_unique<NiceMock<ReportManagerMock>>();
+    testing::NiceMock<StorageMock> storageMock;
     std::vector<std::shared_ptr<MetricMock>> metricMocks = {
         std::make_shared<NiceMock<MetricMock>>(),
         std::make_shared<NiceMock<MetricMock>>(),
         std::make_shared<NiceMock<MetricMock>>()};
     std::unique_ptr<Report> sut;
 
+    MockFunction<void()> checkPoint;
+
+    TestReport()
+    {
+        ON_CALL(*metricMocks[0], getReadings())
+            .WillByDefault(ReturnRefOfCopy(std::vector<MetricValue>(
+                {MetricValue{"a", "b", 17.1, 114},
+                 MetricValue{"aaa", "bbb", 21.7, 100}})));
+        ON_CALL(*metricMocks[1], getReadings())
+            .WillByDefault(ReturnRefOfCopy(
+                std::vector<MetricValue>({MetricValue{"aa", "bb", 42.0, 74}})));
+
+        for (size_t i = 0; i < metricMocks.size(); ++i)
+        {
+            ON_CALL(*metricMocks[i], to_json())
+                .WillByDefault(
+                    Return(nlohmann::json("metric"s + std::to_string(i))));
+        }
+    }
+
     void SetUp() override
     {
         sut = makeReport(ReportParams());
+    }
+
+    static interfaces::JsonStorage::FilePath to_file_path(std::string name)
+    {
+        return interfaces::JsonStorage::FilePath(
+            std::to_string(std::hash<std::string>{}(name)));
     }
 
     std::unique_ptr<Report> makeReport(const ReportParams& params)
@@ -38,9 +64,9 @@ class TestReport : public Test
         return std::make_unique<Report>(
             DbusEnvironment::getIoc(), DbusEnvironment::getObjServer(),
             params.reportName(), params.reportingType(),
-            defaultEmitReadingSignal, defaultLogToMetricReportCollection,
-            std::chrono::milliseconds(defaultInterval), defaultReadingParams,
-            *reportManagerMock,
+            params.emitReadingUpdate(), params.logToMetricReportCollection(),
+            params.interval(), params.readingParameters(), *reportManagerMock,
+            storageMock,
             utils::convContainer<std::shared_ptr<interfaces::Metric>>(
                 metricMocks));
     }
@@ -97,16 +123,16 @@ class TestReport : public Test
 TEST_F(TestReport, verifyIfPropertiesHaveValidValue)
 {
     EXPECT_THAT(getProperty<uint64_t>(sut->getPath(), "Interval"),
-                Eq(defaultInterval));
-    EXPECT_THAT(getProperty<bool>(sut->getPath(), "Persistency"), Eq(false));
+                Eq(defaultParams.interval().count()));
+    EXPECT_THAT(getProperty<bool>(sut->getPath(), "Persistency"), Eq(true));
     EXPECT_THAT(getProperty<bool>(sut->getPath(), "EmitsReadingsUpdate"),
-                Eq(defaultEmitReadingSignal));
+                Eq(defaultParams.emitReadingUpdate()));
     EXPECT_THAT(
         getProperty<bool>(sut->getPath(), "LogToMetricReportsCollection"),
-        Eq(defaultLogToMetricReportCollection));
+        Eq(defaultParams.logToMetricReportCollection()));
     EXPECT_THAT(
         getProperty<ReadingParameters>(sut->getPath(), "ReadingParameters"),
-        Eq(defaultReadingParams));
+        Eq(defaultParams.readingParameters()));
 }
 
 TEST_F(TestReport, readingsAreInitialyEmpty)
@@ -117,7 +143,7 @@ TEST_F(TestReport, readingsAreInitialyEmpty)
 
 TEST_F(TestReport, setIntervalWithValidValue)
 {
-    uint64_t newValue = defaultInterval + 1;
+    uint64_t newValue = defaultParams.interval().count() + 1;
     EXPECT_THAT(setProperty(sut->getPath(), "Interval", newValue).value(),
                 Eq(boost::system::errc::success));
     EXPECT_THAT(getProperty<uint64_t>(sut->getPath(), "Interval"),
@@ -126,11 +152,22 @@ TEST_F(TestReport, setIntervalWithValidValue)
 
 TEST_F(TestReport, settingIntervalWithInvalidValueDoesNotChangeProperty)
 {
-    uint64_t newValue = defaultInterval - 1;
+    uint64_t newValue = defaultParams.interval().count() - 1;
     EXPECT_THAT(setProperty(sut->getPath(), "Interval", newValue).value(),
                 Eq(boost::system::errc::success));
     EXPECT_THAT(getProperty<uint64_t>(sut->getPath(), "Interval"),
-                Eq(defaultInterval));
+                Eq(defaultParams.interval().count()));
+}
+
+TEST_F(TestReport, settingPersistencyToFalseRemovesReportFromStorage)
+{
+    EXPECT_CALL(storageMock, remove(to_file_path(sut->getName())));
+
+    bool persistency = false;
+    EXPECT_THAT(setProperty(sut->getPath(), "Persistency", persistency).value(),
+                Eq(boost::system::errc::success));
+    EXPECT_THAT(getProperty<bool>(sut->getPath(), "Persistency"),
+                Eq(persistency));
 }
 
 TEST_F(TestReport, deleteReport)
@@ -144,6 +181,74 @@ TEST_F(TestReport, deletingNonExistingReportReturnInvalidRequestDescriptor)
 {
     auto ec = deleteReport(Report::reportDir + "NonExisting"s);
     EXPECT_THAT(ec.value(), Eq(EBADR));
+}
+
+TEST_F(TestReport, deleteReportExpectThatFileIsRemoveFromStorage)
+{
+    EXPECT_CALL(storageMock, remove(to_file_path(sut->getName())));
+    auto ec = deleteReport(sut->getPath());
+    EXPECT_THAT(ec, Eq(boost::system::errc::success));
+}
+
+class TestReportStore :
+    public TestReport,
+    public WithParamInterface<std::pair<std::string, nlohmann::json>>
+{
+  public:
+    void SetUp() override
+    {}
+
+    nlohmann::json storedConfiguration;
+};
+
+INSTANTIATE_TEST_SUITE_P(
+    _, TestReportStore,
+    Values(std::make_pair("Version"s, nlohmann::json(1)),
+           std::make_pair("Name"s, nlohmann::json(ReportParams().reportName())),
+           std::make_pair("ReportingType",
+                          nlohmann::json(ReportParams().reportingType())),
+           std::make_pair("EmitsReadingsUpdate",
+                          nlohmann::json(ReportParams().emitReadingUpdate())),
+           std::make_pair(
+               "LogToMetricReportsCollection",
+               nlohmann::json(ReportParams().logToMetricReportCollection())),
+           std::make_pair("Interval",
+                          nlohmann::json(ReportParams().interval().count())),
+           std::make_pair("ReadingParameters",
+                          nlohmann::json({"metric0", "metric1", "metric2"}))));
+
+TEST_P(TestReportStore, settingPersistencyToTrueStoresReport)
+{
+    sut = makeReport(ReportParams());
+
+    {
+        InSequence seq;
+        EXPECT_CALL(storageMock, remove(to_file_path(sut->getName())));
+        EXPECT_CALL(checkPoint, Call());
+        EXPECT_CALL(storageMock, store(to_file_path(sut->getName()), _))
+            .WillOnce(SaveArg<1>(&storedConfiguration));
+    }
+
+    setProperty(sut->getPath(), "Persistency", false);
+    checkPoint.Call();
+    setProperty(sut->getPath(), "Persistency", true);
+
+    const auto& [key, value] = GetParam();
+
+    ASSERT_THAT(storedConfiguration.at(key), Eq(value));
+}
+
+TEST_P(TestReportStore, reportIsSavedToStorageAfterCreated)
+{
+    EXPECT_CALL(storageMock,
+                store(to_file_path(ReportParams().reportName()), _))
+        .WillOnce(SaveArg<1>(&storedConfiguration));
+
+    sut = makeReport(ReportParams());
+
+    const auto& [key, value] = GetParam();
+
+    ASSERT_THAT(storedConfiguration.at(key), Eq(value));
 }
 
 class TestReportValidNames :
@@ -185,6 +290,13 @@ INSTANTIATE_TEST_SUITE_P(InvalidNames, TestReportInvalidNames,
 TEST_P(TestReportInvalidNames, reportCtorThrowOnInvalidName)
 {
     EXPECT_THROW(makeReport(GetParam()), sdbusplus::exception::SdBusError);
+}
+
+TEST_F(TestReportInvalidNames, reportCtorThrowOnInvalidNameAndNoStoreIsCalled)
+{
+    EXPECT_CALL(storageMock, store).Times(0);
+    EXPECT_THROW(makeReport(ReportParams().reportName("/Invalid")),
+                 sdbusplus::exception::SdBusError);
 }
 
 class TestReportAllReportTypes :
@@ -269,4 +381,64 @@ TEST_F(TestReportPeriodicReport, readingsAreUpdatedAfterIntervalExpires)
                 ElementsAre(std::make_tuple("a"s, "b"s, 17.1, 114u),
                             std::make_tuple("aaa"s, "bbb"s, 21.7, 100u),
                             std::make_tuple("aa"s, "bb"s, 42.0, 74u)));
+}
+
+class TestReportInitialization : public TestReport
+{
+  public:
+    void SetUp() override
+    {}
+
+    void monitorProc(sdbusplus::message::message& msg)
+    {
+        std::string iface;
+        std::vector<std::pair<std::string, std::variant<Readings>>>
+            changed_properties;
+        std::vector<std::string> invalidated_properties;
+
+        msg.read(iface, changed_properties, invalidated_properties);
+
+        if (iface == Report::reportIfaceName)
+        {
+            for (const auto& [name, value] : changed_properties)
+            {
+                if (name == "Readings")
+                {
+                    readingsUpdated.Call();
+                }
+            }
+        }
+    }
+
+    void makeMonitor()
+    {
+        monitor = std::make_unique<sdbusplus::bus::match::match>(
+            *DbusEnvironment::getBus(),
+            sdbusplus::bus::match::rules::propertiesChanged(
+                sut->getPath(), Report::reportIfaceName),
+            [this](auto& msg) { monitorProc(msg); });
+    }
+
+    std::unique_ptr<sdbusplus::bus::match::match> monitor;
+    MockFunction<void()> readingsUpdated;
+};
+
+TEST_F(TestReportInitialization,
+       emitReadingsUpdateIsTrueReadingsPropertiesChangedSingalEmits)
+{
+    sut = makeReport(
+        defaultParams.reportingType("Periodic").emitReadingUpdate(true));
+    EXPECT_CALL(readingsUpdated, Call());
+    makeMonitor();
+    DbusEnvironment::sleepFor(defaultParams.interval() + 1ms);
+}
+
+TEST_F(TestReportInitialization,
+       emitReadingsUpdateIsFalseReadingsPropertiesChangesSigalDoesNotEmits)
+{
+    sut = makeReport(
+        defaultParams.reportingType("Periodic").emitReadingUpdate(false));
+    EXPECT_CALL(readingsUpdated, Call()).Times(0);
+    makeMonitor();
+    DbusEnvironment::sleepFor(defaultParams.interval() + 1ms);
 }
