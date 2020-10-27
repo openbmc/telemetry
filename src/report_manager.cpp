@@ -28,38 +28,15 @@ ReportManager::ReportManager(
                                     const bool logToMetricReportsCollection,
                                     const uint64_t interval,
                                     const ReadingParameters& metricParams) {
-                    if (reports.size() >= maxReports)
-                    {
-                        throw sdbusplus::exception::SdBusError(
-                            static_cast<int>(std::errc::too_many_files_open),
-                            "Reached maximal report count");
-                    }
-
-                    for (const auto& report : reports)
-                    {
-                        if (report->getName() == reportName)
-                        {
-                            throw sdbusplus::exception::SdBusError(
-                                static_cast<int>(std::errc::file_exists),
-                                "Duplicate report");
-                        }
-                    }
-
-                    std::chrono::milliseconds reportInterval{interval};
-                    if (reportInterval < minInterval)
-                    {
-                        throw sdbusplus::exception::SdBusError(
-                            static_cast<int>(std::errc::invalid_argument),
-                            "Invalid interval");
-                    }
-
-                    reports.emplace_back(reportFactory->make(
-                        reportName, reportingType, emitsReadingsUpdate,
-                        logToMetricReportsCollection, std::move(reportInterval),
-                        metricParams, *this));
-                    return reports.back()->getPath();
+                    return addReport(reportName, reportingType,
+                                     emitsReadingsUpdate,
+                                     logToMetricReportsCollection, interval,
+                                     metricParams)
+                        ->getPath();
                 });
         });
+
+    reportFactory->loadFromPersistent(*this);
 }
 
 void ReportManager::removeReport(const interfaces::Report* report)
@@ -68,4 +45,39 @@ void ReportManager::removeReport(const interfaces::Report* report)
         std::remove_if(reports.begin(), reports.end(),
                        [report](const auto& x) { return report == x.get(); }),
         reports.end());
+}
+
+std::unique_ptr<interfaces::Report>& ReportManager::addReport(
+    const std::string& reportName, const std::string& reportingType,
+    const bool emitsReadingsUpdate, const bool logToMetricReportsCollection,
+    const uint64_t interval, const ReadingParameters& metricParams)
+{
+    if (reports.size() >= maxReports)
+    {
+        throw sdbusplus::exception::SdBusError(
+            static_cast<int>(std::errc::too_many_files_open),
+            "Reached maximal report count");
+    }
+
+    for (const auto& report : reports)
+    {
+        if (report->getName() == reportName)
+        {
+            throw sdbusplus::exception::SdBusError(
+                static_cast<int>(std::errc::file_exists), "Duplicate report");
+        }
+    }
+
+    std::chrono::milliseconds reportInterval{interval};
+    if (reportInterval < minInterval)
+    {
+        throw sdbusplus::exception::SdBusError(
+            static_cast<int>(std::errc::invalid_argument), "Invalid interval");
+    }
+
+    reports.emplace_back(
+        reportFactory->make(reportName, reportingType, emitsReadingsUpdate,
+                            logToMetricReportsCollection,
+                            std::move(reportInterval), metricParams, *this));
+    return reports.back();
 }
