@@ -40,6 +40,7 @@ test(
             'src/test_report_manager.cpp',
             'src/test_sensor.cpp',
             'src/test_sensor_cache.cpp',
+            'src/test_transform.cpp',
             'src/test_unique_call.cpp',
             'src/utils/generate_unique_mock_id.cpp',
         ],

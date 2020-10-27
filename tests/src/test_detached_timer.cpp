@@ -1,4 +1,5 @@
 #include "dbus_environment.hpp"
+#include "printers.hpp"
 #include "utils/detached_timer.hpp"
 
 #include <gmock/gmock.h>

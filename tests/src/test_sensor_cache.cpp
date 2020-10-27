@@ -1,4 +1,5 @@
 #include "mocks/sensor_mock.hpp"
+#include "printers.hpp"
 #include "sensor_cache.hpp"
 #include "utils/sensor_id_eq.hpp"
 
