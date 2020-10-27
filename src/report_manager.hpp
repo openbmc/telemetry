@@ -25,6 +25,11 @@ class ReportManager : public interfaces::ReportManager
 
     void removeReport(const interfaces::Report* report) override;
     static bool verifyScanPeriod(const uint64_t scanPeriod);
+    std::unique_ptr<interfaces::Report>& addReport(
+        const std::string& reportName, const std::string& reportingType,
+        const bool emitsReadingsUpdate, const bool logToMetricReportsCollection,
+        const uint64_t interval,
+        const ReadingParameters& metricParams) override;
 
   private:
     std::unique_ptr<interfaces::ReportFactory> reportFactory;
