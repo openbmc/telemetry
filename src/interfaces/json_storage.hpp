@@ -20,10 +20,10 @@ class JsonStorage
 
     virtual void store(const FilePath& subPath, const nlohmann::json& data) = 0;
     virtual bool remove(const FilePath& subPath) = 0;
+    virtual bool isExist(const FilePath& path) const = 0;
     virtual std::optional<nlohmann::json>
         load(const FilePath& subPath) const = 0;
-    virtual std::vector<FilePath>
-        list(const DirectoryPath& subDirectory) const = 0;
+    virtual std::vector<FilePath> list() const = 0;
 };
 
 } // namespace interfaces
