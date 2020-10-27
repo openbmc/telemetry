@@ -22,7 +22,9 @@ class ReportFactory
              bool emitsReadingsSignal, bool logToMetricReportsCollection,
              std::chrono::milliseconds period,
              const ReadingParameters& metricParams,
-             ReportManager& reportManager) const = 0;
+             ReportManager& reportManager) = 0;
+    virtual void
+        loadFromPersistent(interfaces::ReportManager& reportManager) = 0;
 };
 
 } // namespace interfaces
