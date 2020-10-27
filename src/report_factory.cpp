@@ -2,6 +2,10 @@
 
 #include "report.hpp"
 
+#include <phosphor-logging/log.hpp>
+
+#include <stdexcept>
+
 ReportFactory::ReportFactory(
     boost::asio::io_context& ioc,
     const std::shared_ptr<sdbusplus::asio::object_server>& objServer) :

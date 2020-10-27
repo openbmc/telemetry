@@ -2,12 +2,9 @@
 
 #include "interfaces/report.hpp"
 #include "interfaces/report_manager.hpp"
-#include "interfaces/types.hpp"
 
 #include <chrono>
 #include <memory>
-
-class ReportManager;
 
 namespace interfaces
 {

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "interfaces/json_storage.hpp"
 #include "interfaces/report.hpp"
 #include "interfaces/report_factory.hpp"
 #include "interfaces/report_manager.hpp"
@@ -15,6 +16,7 @@ class ReportManager : public interfaces::ReportManager
   public:
     ReportManager(
         std::unique_ptr<interfaces::ReportFactory> reportFactory,
+        std::unique_ptr<interfaces::JsonStorage> reportStorage,
         const std::shared_ptr<sdbusplus::asio::object_server>& objServer);
     ~ReportManager() = default;
 
@@ -25,12 +27,25 @@ class ReportManager : public interfaces::ReportManager
 
     void removeReport(const interfaces::Report* report) override;
     static bool verifyScanPeriod(const uint64_t scanPeriod);
+    std::unique_ptr<interfaces::Report>& addReport(
+        const std::string& reportName, const std::string& reportingType,
+        const bool emitsReadingsUpdate, const bool logToMetricReportsCollection,
+        const uint64_t interval,
+        const ReadingParameters& metricParams) override;
+
+    interfaces::JsonStorage& getReportStorage() override
+    {
+        return *reportStorage;
+    }
 
   private:
     std::unique_ptr<interfaces::ReportFactory> reportFactory;
+    std::unique_ptr<interfaces::JsonStorage> reportStorage;
     std::shared_ptr<sdbusplus::asio::object_server> objServer;
     std::unique_ptr<sdbusplus::asio::dbus_interface> reportManagerIface;
     std::vector<std::unique_ptr<interfaces::Report>> reports;
+
+    void loadFromPersistent();
 
   public:
     static constexpr uint32_t maxReports{20};
