@@ -10,8 +10,8 @@ class StorageMock : public interfaces::JsonStorage
     MOCK_METHOD(void, store, (const FilePath&, const nlohmann::json&),
                 (override));
     MOCK_METHOD(bool, remove, (const FilePath&), (override));
+    MOCK_METHOD(bool, exist, (const FilePath&), (const, override));
     MOCK_METHOD(std::optional<nlohmann::json>, load, (const FilePath&),
                 (const, override));
-    MOCK_METHOD(std::vector<FilePath>, list, (const DirectoryPath&),
-                (const, override));
+    MOCK_METHOD(std::vector<FilePath>, list, (), (const, override));
 };

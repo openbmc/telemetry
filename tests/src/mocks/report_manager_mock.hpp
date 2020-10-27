@@ -7,8 +7,5 @@
 class ReportManagerMock : public interfaces::ReportManager
 {
   public:
-    ReportManagerMock()
-    {}
-
     MOCK_METHOD(void, removeReport, (const interfaces::Report*), (override));
 };

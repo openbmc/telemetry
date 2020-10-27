@@ -1,5 +1,6 @@
 #pragma once
 
+#include "persistent_json_storage.hpp"
 #include "report_factory.hpp"
 #include "report_manager.hpp"
 
@@ -15,6 +16,9 @@ class Telemetry
         objServer(std::make_shared<sdbusplus::asio::object_server>(bus)),
         reportManager(
             std::make_unique<ReportFactory>(bus->get_io_context(), objServer),
+            std::make_unique<PersistentJsonStorage>(
+                interfaces::JsonStorage::DirectoryPath(
+                    "/var/lib/telemetry/Reports")),
             objServer)
     {}
 

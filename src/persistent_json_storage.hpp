@@ -9,9 +9,9 @@ class PersistentJsonStorage : public interfaces::JsonStorage
 
     void store(const FilePath& subPath, const nlohmann::json& data) override;
     bool remove(const FilePath& subPath) override;
+    bool exist(const FilePath& path) const override;
     std::optional<nlohmann::json> load(const FilePath& subPath) const override;
-    std::vector<FilePath>
-        list(const DirectoryPath& subDirectory) const override;
+    std::vector<FilePath> list() const override;
 
   private:
     DirectoryPath directory;
