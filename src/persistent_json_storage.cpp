@@ -92,34 +92,21 @@ std::optional<nlohmann::json>
 }
 
 std::vector<interfaces::JsonStorage::FilePath>
-    PersistentJsonStorage::list(const DirectoryPath& subDirectory) const
+    PersistentJsonStorage::list() const
 {
-    auto result = std::vector<FilePath>();
-    const auto path = join(directory, subDirectory);
-
-    if (!std::filesystem::exists(path))
+    std::vector<interfaces::JsonStorage::FilePath> result;
+    if (!std::filesystem::exists(directory))
     {
         return result;
     }
 
-    for (const auto& p : std::filesystem::directory_iterator(path))
+    for (const auto& p :
+         std::filesystem::recursive_directory_iterator(directory))
     {
-        if (std::filesystem::is_directory(p.path()))
+        if (p.is_regular_file())
         {
-            for (auto& item : list(DirectoryPath(p.path())))
-            {
-                result.emplace_back(std::move(item));
-            }
-        }
-        else
-        {
-            const auto item = std::filesystem::relative(
-                p.path().parent_path(), std::filesystem::path{directory});
-
-            if (std::find(result.begin(), result.end(), item) == result.end())
-            {
-                result.emplace_back(item);
-            }
+            auto item = std::filesystem::relative(p.path(), directory);
+            result.emplace_back(std::move(item));
         }
     }
 
@@ -141,4 +128,9 @@ void PersistentJsonStorage::limitPermissions(const std::filesystem::path& path)
     std::filesystem::permissions(
         path, std::filesystem::is_directory(path) ? dirPerms : filePerms,
         std::filesystem::perm_options::replace);
+}
+
+bool PersistentJsonStorage::exist(const FilePath& subPath) const
+{
+    return std::filesystem::exists(join(directory, subPath));
 }
