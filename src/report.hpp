@@ -1,5 +1,6 @@
 #pragma once
 
+#include "interfaces/json_storage.hpp"
 #include "interfaces/metric.hpp"
 #include "interfaces/report.hpp"
 #include "interfaces/report_manager.hpp"
@@ -41,6 +42,8 @@ class Report : public interfaces::Report
         return path;
     }
 
+    bool storeConfiguration() const;
+
   private:
     static void timerProc(boost::system::error_code, Report& self);
     void scheduleTimer(std::chrono::milliseconds interval);
@@ -48,7 +51,12 @@ class Report : public interfaces::Report
 
     const std::string name;
     const std::string path;
+    std::string reportingType;
     std::chrono::milliseconds interval;
+    bool emitsReadingsUpdate;
+    bool logToMetricReportsCollection;
+    ReadingParameters readingParameters;
+    bool persistency;
     Readings readings = {};
     std::tuple_element_t<1, Readings> readingsCache = {};
     std::shared_ptr<sdbusplus::asio::object_server> objServer;
@@ -57,6 +65,9 @@ class Report : public interfaces::Report
     std::vector<std::shared_ptr<interfaces::Metric>> metrics;
     boost::asio::deadline_timer timer;
 
+    interfaces::JsonStorage::FilePath fileName;
+    interfaces::JsonStorage& reportStorage;
+
   public:
     static constexpr const char* reportIfaceName =
         "xyz.openbmc_project.Telemetry.Report";
@@ -64,4 +75,5 @@ class Report : public interfaces::Report
         "/xyz/openbmc_project/Telemetry/Reports/";
     static constexpr const char* deleteIfaceName =
         "xyz.openbmc_project.Object.Delete";
+    static constexpr size_t reportVersion = 1;
 };

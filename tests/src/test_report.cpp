@@ -1,5 +1,6 @@
 #include "dbus_environment.hpp"
 #include "matchers/nth.hpp"
+#include "mocks/json_storage_mock.hpp"
 #include "mocks/metric_mock.hpp"
 #include "mocks/report_manager_mock.hpp"
 #include "params/report_params.hpp"
@@ -16,13 +17,10 @@ using namespace std::chrono_literals;
 class TestReport : public Test
 {
   public:
-    bool defaultEmitReadingSignal = true;
-    bool defaultLogToMetricReportCollection = true;
-    uint64_t defaultInterval = ReportManager::minInterval.count();
-    ReadingParameters defaultReadingParams = {};
+    ReportParams defaultParams;
 
     std::unique_ptr<ReportManagerMock> reportManagerMock =
-        std::make_unique<StrictMock<ReportManagerMock>>();
+        std::make_unique<NiceMock<ReportManagerMock>>();
     std::vector<std::shared_ptr<MetricMock>> metricMocks = {
         std::make_shared<NiceMock<MetricMock>>(),
         std::make_shared<NiceMock<MetricMock>>(),
@@ -39,9 +37,9 @@ class TestReport : public Test
         return std::make_unique<Report>(
             DbusEnvironment::getIoc(), DbusEnvironment::getObjServer(),
             params.reportName(), params.reportingType(),
-            defaultEmitReadingSignal, defaultLogToMetricReportCollection,
-            std::chrono::milliseconds(defaultInterval), defaultReadingParams,
-            *reportManagerMock,
+            params.emitReadingSignal(), params.logToMetricReportCollection(),
+            std::chrono::milliseconds(params.interval()),
+            params.readingParameters(), *reportManagerMock,
             utils::convContainer<std::shared_ptr<interfaces::Metric>>(
                 metricMocks));
     }
@@ -98,16 +96,16 @@ class TestReport : public Test
 TEST_F(TestReport, verifyIfPropertiesHaveValidValue)
 {
     EXPECT_THAT(getProperty<uint64_t>(sut->getPath(), "Interval"),
-                Eq(defaultInterval));
-    EXPECT_THAT(getProperty<bool>(sut->getPath(), "Persistency"), Eq(false));
+                Eq(defaultParams.interval()));
+    EXPECT_THAT(getProperty<bool>(sut->getPath(), "Persistency"), Eq(true));
     EXPECT_THAT(getProperty<bool>(sut->getPath(), "EmitsReadingsUpdate"),
-                Eq(defaultEmitReadingSignal));
+                Eq(defaultParams.emitReadingSignal()));
     EXPECT_THAT(
         getProperty<bool>(sut->getPath(), "LogToMetricReportsCollection"),
-        Eq(defaultLogToMetricReportCollection));
+        Eq(defaultParams.logToMetricReportCollection()));
     EXPECT_THAT(
         getProperty<ReadingParameters>(sut->getPath(), "ReadingParameters"),
-        Eq(defaultReadingParams));
+        Eq(defaultParams.readingParameters()));
 }
 
 TEST_F(TestReport, readingsAreInitialyEmpty)
@@ -118,7 +116,7 @@ TEST_F(TestReport, readingsAreInitialyEmpty)
 
 TEST_F(TestReport, setIntervalWithValidValue)
 {
-    uint64_t newValue = defaultInterval + 1;
+    uint64_t newValue = defaultParams.interval() + 1;
     EXPECT_THAT(setProperty(sut->getPath(), "Interval", newValue).value(),
                 Eq(boost::system::errc::success));
     EXPECT_THAT(getProperty<uint64_t>(sut->getPath(), "Interval"),
@@ -127,11 +125,22 @@ TEST_F(TestReport, setIntervalWithValidValue)
 
 TEST_F(TestReport, settingIntervalWithInvalidValueDoesNotChangeProperty)
 {
-    uint64_t newValue = defaultInterval - 1;
+    uint64_t newValue = defaultParams.interval() - 1;
     EXPECT_THAT(setProperty(sut->getPath(), "Interval", newValue).value(),
                 Eq(boost::system::errc::success));
     EXPECT_THAT(getProperty<uint64_t>(sut->getPath(), "Interval"),
-                Eq(defaultInterval));
+                Eq(defaultParams.interval()));
+}
+
+TEST_F(TestReport, settingPersistencyToFalseRemovesReportFromStorage)
+{
+    EXPECT_CALL(reportManagerMock->storageMock, remove);
+
+    bool persistency = false;
+    EXPECT_THAT(setProperty(sut->getPath(), "Persistency", persistency).value(),
+                Eq(boost::system::errc::success));
+    EXPECT_THAT(getProperty<bool>(sut->getPath(), "Persistency"),
+                Eq(persistency));
 }
 
 TEST_F(TestReport, deleteReport)
@@ -145,6 +154,13 @@ TEST_F(TestReport, deletingNonExistingReportReturnInvalidRequestDescriptor)
 {
     auto ec = deleteReport(Report::reportDir + "NonExisting"s);
     EXPECT_THAT(ec.value(), Eq(EBADR));
+}
+
+TEST_F(TestReport, deleteReportExpectThatFileIsRemoveFromStorage)
+{
+    EXPECT_CALL(reportManagerMock->storageMock, remove);
+    auto ec = deleteReport(sut->getPath());
+    EXPECT_THAT(ec, Eq(boost::system::errc::success));
 }
 
 class TestReportValidNames :
@@ -186,6 +202,13 @@ INSTANTIATE_TEST_SUITE_P(InvalidNames, TestReportInvalidNames,
 TEST_P(TestReportInvalidNames, reportCtorThrowOnInvalidName)
 {
     EXPECT_THROW(makeReport(GetParam()), sdbusplus::exception::SdBusError);
+}
+
+TEST_F(TestReportInvalidNames, reportCtorThrowOnInvalidNameAndNoStoreIsCalled)
+{
+    EXPECT_CALL(reportManagerMock->storageMock, store).Times(0);
+    EXPECT_THROW(makeReport(ReportParams().reportName("/Invalid")),
+                 sdbusplus::exception::SdBusError);
 }
 
 class TestReportAllReportTypes :
