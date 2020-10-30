@@ -78,12 +78,16 @@ Report::Report(boost::asio::io_context& ioc,
                 "Readings", readings,
                 sdbusplus::vtable::property_::emits_change,
                 [this](const auto&) { return readings; });
-            dbusIface.register_property("ReportingType", reportingType);
+            dbusIface.register_property_r(
+                "ReportingType", reportingType,
+                sdbusplus::vtable::property_::const_,
+                [this](const auto&) { return reportingType; });
             dbusIface.register_property("ReadingParameters", readingParameters);
             dbusIface.register_property("EmitsReadingsUpdate",
                                         emitsReadingsUpdate);
             dbusIface.register_property("LogToMetricReportsCollection",
                                         logToMetricReportsCollection);
+            dbusIface.register_method("Update", [this] { updateReadings(); });
         });
 
     if (reportingType == "Periodic")
