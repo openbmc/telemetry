@@ -90,6 +90,12 @@ Report::Report(boost::asio::io_context& ioc,
                                         emitsReadingsUpdate);
             dbusIface.register_property("LogToMetricReportsCollection",
                                         logToMetricReportsCollection);
+            dbusIface.register_method("Update", [this] {
+                if (reportingType == "OnRequest")
+                {
+                    updateReadings();
+                }
+            });
         });
 
     if (reportingType == "Periodic")
