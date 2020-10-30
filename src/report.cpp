@@ -98,6 +98,12 @@ Report::Report(boost::asio::io_context& ioc,
                 "LogToMetricReportsCollection", logToMetricReportsCollection,
                 sdbusplus::vtable::property_::const_,
                 [this](const auto&) { return logToMetricReportsCollection; });
+            dbusIface.register_method("Update", [this] {
+                if (reportingType == "OnRequest")
+                {
+                    updateReadings();
+                }
+            });
         });
 
     if (reportingType == "Periodic")
