@@ -6,6 +6,7 @@
 #include "report.hpp"
 #include "report_manager.hpp"
 #include "utils/conv_container.hpp"
+#include "utils/set_exception.hpp"
 
 #include <sdbusplus/exception.hpp>
 
@@ -26,6 +27,17 @@ class TestReport : public Test
         std::make_shared<NiceMock<MetricMock>>(),
         std::make_shared<NiceMock<MetricMock>>()};
     std::unique_ptr<Report> sut;
+
+    TestReport()
+    {
+        ON_CALL(*metricMocks[0], getReadings())
+            .WillByDefault(ReturnRefOfCopy(std::vector<MetricValue>(
+                {MetricValue{"a", "b", 17.1, 114},
+                 MetricValue{"aaa", "bbb", 21.7, 100}})));
+        ON_CALL(*metricMocks[1], getReadings())
+            .WillByDefault(ReturnRefOfCopy(
+                std::vector<MetricValue>({MetricValue{"aa", "bb", 42.0, 74}})));
+    }
 
     void SetUp() override
     {
@@ -51,13 +63,29 @@ class TestReport : public Test
         sdbusplus::asio::getProperty<T>(
             *DbusEnvironment::getBus(), DbusEnvironment::serviceName(), path,
             Report::reportIfaceName, property,
-            [&propertyPromise](boost::system::error_code ec) {
-                EXPECT_THAT(static_cast<bool>(ec), ::testing::Eq(false));
-                propertyPromise.set_value(T{});
+            [&propertyPromise](boost::system::error_code) {
+                utils::setException(propertyPromise, "GetProperty failed");
             },
             [&propertyPromise](T t) { propertyPromise.set_value(t); });
-        return DbusEnvironment::waitForFuture(propertyPromise.get_future())
-            .value_or(T{});
+        return DbusEnvironment::waitForFuture(propertyPromise.get_future());
+    }
+
+    boost::system::error_code call(const std::string& path,
+                                   const std::string& interface,
+                                   const std::string& method)
+    {
+        std::promise<boost::system::error_code> methodPromise;
+        DbusEnvironment::getBus()->async_method_call(
+            [&methodPromise](boost::system::error_code ec) {
+                methodPromise.set_value(ec);
+            },
+            DbusEnvironment::serviceName(), path, interface, method);
+        return DbusEnvironment::waitForFuture(methodPromise.get_future());
+    }
+
+    boost::system::error_code update(const std::string& path)
+    {
+        return call(path, Report::reportIfaceName, "Update");
     }
 
     template <class T>
@@ -75,21 +103,12 @@ class TestReport : public Test
             [&setPromise]() {
                 setPromise.set_value(boost::system::error_code{});
             });
-        return DbusEnvironment::waitForFuture(setPromise.get_future())
-            .value_or(boost::system::error_code{});
+        return DbusEnvironment::waitForFuture(setPromise.get_future());
     }
 
     boost::system::error_code deleteReport(const std::string& path)
     {
-        std::promise<boost::system::error_code> deleteReportPromise;
-        DbusEnvironment::getBus()->async_method_call(
-            [&deleteReportPromise](boost::system::error_code ec) {
-                deleteReportPromise.set_value(ec);
-            },
-            DbusEnvironment::serviceName(), path, Report::deleteIfaceName,
-            "Delete");
-        return DbusEnvironment::waitForFuture(deleteReportPromise.get_future())
-            .value_or(boost::system::error_code{});
+        return call(path, Report::deleteIfaceName, "Delete");
     }
 };
 
@@ -232,6 +251,61 @@ TEST_P(TestReportAllReportTypes, returnPropertValueOfReportType)
                 Eq(GetParam().reportingType()));
 }
 
+class TestReportOnRequestType : public TestReport
+{
+    void SetUp() override
+    {
+        sut = makeReport(ReportParams().reportingType("OnRequest"));
+    }
+};
+
+TEST_F(TestReportOnRequestType, updatesReadingTimestamp)
+{
+    const uint64_t expectedTime = std::time(0);
+
+    ASSERT_THAT(update(sut->getPath()), Eq(boost::system::errc::success));
+
+    const auto [timestamp, readings] =
+        getProperty<Readings>(sut->getPath(), "Readings");
+
+    EXPECT_THAT(timestamp, Ge(expectedTime));
+}
+
+TEST_F(TestReportOnRequestType, updatesReadingWhenUpdateIsCalled)
+{
+    ASSERT_THAT(update(sut->getPath()), Eq(boost::system::errc::success));
+
+    const auto [timestamp, readings] =
+        getProperty<Readings>(sut->getPath(), "Readings");
+
+    EXPECT_THAT(readings,
+                ElementsAre(std::make_tuple("a"s, "b"s, 17.1, 114u),
+                            std::make_tuple("aaa"s, "bbb"s, 21.7, 100u),
+                            std::make_tuple("aa"s, "bb"s, 42.0, 74u)));
+}
+
+class TestReportNonOnRequestType :
+    public TestReport,
+    public WithParamInterface<ReportParams>
+{
+    void SetUp() override
+    {
+        sut = makeReport(GetParam());
+    }
+};
+
+INSTANTIATE_TEST_SUITE_P(_, TestReportNonOnRequestType,
+                         Values(ReportParams().reportingType("Periodic"),
+                                ReportParams().reportingType("OnChange")));
+
+TEST_P(TestReportNonOnRequestType, readingsAreNotUpdateOnUpdateCall)
+{
+    ASSERT_THAT(update(sut->getPath()), Eq(boost::system::errc::success));
+
+    EXPECT_THAT(getProperty<Readings>(sut->getPath(), "Readings"),
+                Eq(Readings{}));
+}
+
 class TestReportNonPeriodicReport :
     public TestReport,
     public WithParamInterface<ReportParams>
@@ -259,15 +333,6 @@ class TestReportPeriodicReport : public TestReport
     void SetUp() override
     {
         sut = makeReport(ReportParams().reportingType("Periodic"));
-
-        ASSERT_THAT(metricMocks, SizeIs(Ge(2)));
-        ON_CALL(*metricMocks[0], getReadings())
-            .WillByDefault(ReturnRefOfCopy(std::vector<MetricValue>(
-                {MetricValue{"a", "b", 17.1, 114},
-                 MetricValue{"aaa", "bbb", 21.7, 100}})));
-        ON_CALL(*metricMocks[1], getReadings())
-            .WillByDefault(ReturnRefOfCopy(
-                std::vector<MetricValue>({MetricValue{"aa", "bb", 42.0, 74}})));
     }
 };
 
