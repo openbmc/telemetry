@@ -42,8 +42,7 @@ class TestReportManager : public Test
             ReportManager::reportManagerIfaceName, "AddReport", reportName,
             defaultReportType, defaultEmitReadingSignal,
             defaultLogToMetricReportCollection, interval, defaultReadingParams);
-        return DbusEnvironment::waitForFuture(addReportPromise.get_future())
-            .value_or(std::pair<boost::system::error_code, std::string>{});
+        return DbusEnvironment::waitForFuture(addReportPromise.get_future());
     }
 
     template <class T>
@@ -59,8 +58,7 @@ class TestReportManager : public Test
                 propertyPromise.set_value(T{});
             },
             [&propertyPromise](T t) { propertyPromise.set_value(t); });
-        return DbusEnvironment::waitForFuture(propertyPromise.get_future())
-            .value_or(T{});
+        return DbusEnvironment::waitForFuture(propertyPromise.get_future());
     }
 };
 
