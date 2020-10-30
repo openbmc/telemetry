@@ -73,7 +73,7 @@ std::function<void()> DbusEnvironment::setPromise(std::string_view name)
 bool DbusEnvironment::waitForFuture(std::string_view name,
                                     std::chrono::milliseconds timeout)
 {
-    return waitForFuture(getFuture(name), timeout).value_or(false);
+    return waitForFuture(getFuture(name), timeout);
 }
 
 std::future<bool> DbusEnvironment::getFuture(std::string_view name)
