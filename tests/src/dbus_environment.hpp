@@ -37,7 +37,7 @@ class DbusEnvironment : public ::testing::Environment
     }
 
     template <class T>
-    static std::optional<T> waitForFuture(
+    static T waitForFuture(
         std::future<T> future,
         std::chrono::milliseconds timeout = std::chrono::seconds(10))
     {
@@ -48,25 +48,17 @@ class DbusEnvironment : public ::testing::Environment
         {
             synchronizeIoc();
 
-            try
+            if (future.wait_for(precission) == std::future_status::ready)
             {
-                if (future.wait_for(precission) == std::future_status::ready)
-                {
-                    return future.get();
-                }
-                else
-                {
-                    elapsed += precission;
-                }
+                return future.get();
             }
-            catch (const std::future_error& e)
+            else
             {
-                std::cerr << e.what() << "\n";
-                return {};
+                elapsed += precission;
             }
         }
 
-        return {};
+        throw std::runtime_error("Timed out while waiting for future");
     }
 
     static bool waitForFuture(
