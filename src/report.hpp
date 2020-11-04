@@ -58,7 +58,6 @@ class Report : public interfaces::Report
     ReadingParameters readingParameters;
     bool persistency;
     Readings readings = {};
-    std::tuple_element_t<1, Readings> readingsCache = {};
     std::shared_ptr<sdbusplus::asio::object_server> objServer;
     std::unique_ptr<sdbusplus::asio::dbus_interface> reportIface;
     std::unique_ptr<sdbusplus::asio::dbus_interface> deleteIface;
