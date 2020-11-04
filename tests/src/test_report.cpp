@@ -256,21 +256,23 @@ TEST_P(TestReportAllReportTypes, updatesReadingTimestamp)
 
     ASSERT_THAT(update(sut->getPath()), Eq(boost::system::errc::success));
 
-    const auto readings = getProperty<Readings>(sut->getPath(), "Readings");
+    const auto [timestamp, readings] =
+        getProperty<Readings>(sut->getPath(), "Readings");
 
-    EXPECT_THAT(readings, (Nth<0, Readings>(Ge(expectedTime))));
+    EXPECT_THAT(timestamp, Ge(expectedTime));
 }
 
 TEST_P(TestReportAllReportTypes, updatesReadingWhenUpdateIsCalled)
 {
     ASSERT_THAT(update(sut->getPath()), Eq(boost::system::errc::success));
 
-    const auto readings = getProperty<Readings>(sut->getPath(), "Readings");
+    const auto [timestamp, readings] =
+        getProperty<Readings>(sut->getPath(), "Readings");
 
-    EXPECT_THAT(readings, (Nth<1, Readings>(ElementsAre(
-                              std::make_tuple("a"s, "b"s, 17.1, 114u),
-                              std::make_tuple("aaa"s, "bbb"s, 21.7, 100u),
-                              std::make_tuple("aa"s, "bb"s, 42.0, 74u)))));
+    EXPECT_THAT(readings,
+                ElementsAre(std::make_tuple("a"s, "b"s, 17.1, 114u),
+                            std::make_tuple("aaa"s, "bbb"s, 21.7, 100u),
+                            std::make_tuple("aa"s, "bb"s, 42.0, 74u)));
 }
 
 class TestReportNonPeriodicReport :
