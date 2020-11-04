@@ -13,14 +13,15 @@ class ReportFactoryMock : public interfaces::ReportFactory
         using namespace testing;
 
         ON_CALL(*this, make)
-            .WillByDefault(WithArgs<0>(Invoke([](const std::string& name) {
+            .WillByDefault(WithArgs<1>(Invoke([](const std::string& name) {
                 return std::make_unique<NiceMock<ReportMock>>(name);
             })));
     }
 
     MOCK_METHOD(std::unique_ptr<interfaces::Report>, make,
-                (const std::string& name, const std::string& reportingType,
-                 bool emitsReadingsSignal, bool logToMetricReportsCollection,
+                (boost::asio::yield_context&, const std::string& name,
+                 const std::string& reportingType, bool emitsReadingsSignal,
+                 bool logToMetricReportsCollection,
                  std::chrono::milliseconds period,
                  const ReadingParameters& metricParams,
                  interfaces::ReportManager& reportManager,
