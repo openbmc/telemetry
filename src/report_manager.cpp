@@ -9,6 +9,7 @@
 #include <system_error>
 
 ReportManager::ReportManager(
+    boost::asio::io_context& iocIn,
     std::unique_ptr<interfaces::ReportFactory> reportFactoryIn,
     std::unique_ptr<interfaces::JsonStorage> reportStorageIn,
     const std::shared_ptr<sdbusplus::asio::object_server>& objServerIn) :
@@ -16,7 +17,10 @@ ReportManager::ReportManager(
     reportStorage(std::move(reportStorageIn)), objServer(objServerIn)
 {
     reports.reserve(maxReports);
-    loadFromPersistent();
+
+    boost::asio::spawn(iocIn, [this](boost::asio::yield_context yield) {
+        loadFromPersistent(yield);
+    });
 
     reportManagerIface = objServer->add_unique_interface(
         reportManagerPath, reportManagerIfaceName, [this](auto& dbusIface) {
@@ -28,13 +32,14 @@ ReportManager::ReportManager(
                 [](const auto&) -> uint64_t { return minInterval.count(); });
 
             dbusIface.register_method(
-                "AddReport", [this](const std::string& reportName,
+                "AddReport", [this](boost::asio::yield_context& yield,
+                                    const std::string& reportName,
                                     const std::string& reportingType,
                                     const bool emitsReadingsUpdate,
                                     const bool logToMetricReportsCollection,
                                     const uint64_t interval,
                                     const ReadingParameters& metricParams) {
-                    return addReport(reportName, reportingType,
+                    return addReport(yield, reportName, reportingType,
                                      emitsReadingsUpdate,
                                      logToMetricReportsCollection, interval,
                                      metricParams)
@@ -52,9 +57,10 @@ void ReportManager::removeReport(const interfaces::Report* report)
 }
 
 std::unique_ptr<interfaces::Report>& ReportManager::addReport(
-    const std::string& reportName, const std::string& reportingType,
-    const bool emitsReadingsUpdate, const bool logToMetricReportsCollection,
-    const uint64_t interval, const ReadingParameters& metricParams)
+    boost::asio::yield_context& yield, const std::string& reportName,
+    const std::string& reportingType, const bool emitsReadingsUpdate,
+    const bool logToMetricReportsCollection, const uint64_t interval,
+    const ReadingParameters& metricParams)
 {
     if (reports.size() >= maxReports)
     {
@@ -80,13 +86,13 @@ std::unique_ptr<interfaces::Report>& ReportManager::addReport(
     }
 
     reports.emplace_back(reportFactory->make(
-        reportName, reportingType, emitsReadingsUpdate,
+        yield, reportName, reportingType, emitsReadingsUpdate,
         logToMetricReportsCollection, std::move(reportInterval), metricParams,
         *this, *reportStorage));
     return reports.back();
 }
 
-void ReportManager::loadFromPersistent()
+void ReportManager::loadFromPersistent(boost::asio::yield_context& yield)
 {
     std::vector<interfaces::JsonStorage::FilePath> paths =
         reportStorage->list();
@@ -116,7 +122,7 @@ void ReportManager::loadFromPersistent()
                     ReadingParameterJson::from_json(item));
             }
 
-            addReport(name, reportingType, emitsReadingsSignal,
+            addReport(yield, name, reportingType, emitsReadingsSignal,
                       logToMetricReportsCollection, interval,
                       readingParameters);
         }

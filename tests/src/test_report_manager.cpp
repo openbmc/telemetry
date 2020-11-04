@@ -27,9 +27,9 @@ class TestReportManager : public Test
 
     void SetUp() override
     {
-        sut = std::make_unique<ReportManager>(std::move(reportFactoryMockPtr),
-                                              std::move(storageMockPtr),
-                                              DbusEnvironment::getObjServer());
+        sut = std::make_unique<ReportManager>(
+            DbusEnvironment::getIoc(), std::move(reportFactoryMockPtr),
+            std::move(storageMockPtr), DbusEnvironment::getObjServer());
     }
 
     void TearDown() override
@@ -92,7 +92,7 @@ TEST_F(TestReportManager, addReport)
     auto& reportMock = *reportMockPtr;
 
     EXPECT_CALL(reportFactoryMock,
-                make(reportParams.reportName(), reportParams.reportingType(),
+                make(_, reportParams.reportName(), reportParams.reportingType(),
                      reportParams.emitReadingSignal(),
                      reportParams.logToMetricReportCollection(),
                      std::chrono::milliseconds{reportParams.interval()},
@@ -107,7 +107,7 @@ TEST_F(TestReportManager, addReport)
 
 TEST_F(TestReportManager, failToAddReportTwice)
 {
-    EXPECT_CALL(reportFactoryMock, make(_, _, _, _, _, _, _, _));
+    EXPECT_CALL(reportFactoryMock, make);
 
     addReport(reportParams.reportName());
 
@@ -118,7 +118,7 @@ TEST_F(TestReportManager, failToAddReportTwice)
 
 TEST_F(TestReportManager, failToAddReportWithInvalidInterval)
 {
-    EXPECT_CALL(reportFactoryMock, make(_, _, _, _, _, _, _, _)).Times(0);
+    EXPECT_CALL(reportFactoryMock, make).Times(0);
 
     uint64_t interval = reportParams.interval() - 1;
 
@@ -129,8 +129,7 @@ TEST_F(TestReportManager, failToAddReportWithInvalidInterval)
 
 TEST_F(TestReportManager, failToAddReportWhenMaxReportIsReached)
 {
-    EXPECT_CALL(reportFactoryMock, make(_, _, _, _, _, _, _, _))
-        .Times(ReportManager::maxReports);
+    EXPECT_CALL(reportFactoryMock, make).Times(ReportManager::maxReports);
 
     for (size_t i = 0; i < ReportManager::maxReports; i++)
     {
@@ -155,7 +154,7 @@ TEST_F(TestReportManager, removeReport)
 
     {
         InSequence seq;
-        EXPECT_CALL(reportFactoryMock, make(_, _, _, _, _, _, _, _))
+        EXPECT_CALL(reportFactoryMock, make)
             .WillOnce(Return(ByMove(std::move(reportMockPtr))));
         EXPECT_CALL(reportMock, Die());
         EXPECT_CALL(checkPoint, Call("end"));
@@ -191,7 +190,7 @@ TEST_F(TestReportManager, removingSameReportTwiceHasNoSideEffect)
     {
         InSequence seq;
         EXPECT_CALL(reportFactoryMock,
-                    make(reportParams.reportName(), _, _, _, _, _, _, _))
+                    make(_, reportParams.reportName(), _, _, _, _, _, _, _))
             .WillOnce(Return(ByMove(std::move(reportMockPtr))));
         EXPECT_CALL(reportMock, Die());
         EXPECT_CALL(checkPoint, Call("end"));
@@ -214,14 +213,14 @@ class TestReportManagerStorage : public TestReportManager
         ON_CALL(storageMock, list())
             .WillByDefault(Return(std::vector<FilePath>{FilePath("report1")}));
         ON_CALL(storageMock, load(FilePath("report1")))
-            .WillByDefault(Return(data));
+            .WillByDefault(InvokeWithoutArgs([this] { return data; }));
     }
 
     void makeReportManager()
     {
-        sut = std::make_unique<ReportManager>(std::move(reportFactoryMockPtr),
-                                              std::move(storageMockPtr),
-                                              DbusEnvironment::getObjServer());
+        sut = std::make_unique<ReportManager>(
+            DbusEnvironment::getIoc(), std::move(reportFactoryMockPtr),
+            std::move(storageMockPtr), DbusEnvironment::getObjServer());
     }
 
     nlohmann::json data = nlohmann::json{
@@ -242,7 +241,7 @@ class TestReportManagerStorage : public TestReportManager
 TEST_F(TestReportManagerStorage, reportManagerCtorAddReportFromStorage)
 {
     EXPECT_CALL(reportFactoryMock,
-                make(reportParams.reportName(), reportParams.reportingType(),
+                make(_, reportParams.reportName(), reportParams.reportingType(),
                      reportParams.emitReadingSignal(),
                      reportParams.logToMetricReportCollection(),
                      std::chrono::milliseconds{reportParams.interval()},
@@ -256,7 +255,6 @@ TEST_F(TestReportManagerStorage,
 {
     data["Version"] = Report::reportVersion - 1;
 
-    ON_CALL(storageMock, load(FilePath("report1"))).WillByDefault(Return(data));
     EXPECT_CALL(storageMock, remove(FilePath("report1")));
 
     makeReportManager();
@@ -267,7 +265,6 @@ TEST_F(TestReportManagerStorage,
 {
     data["Interval"] = "1000";
 
-    ON_CALL(storageMock, load(FilePath("report1"))).WillByDefault(Return(data));
     EXPECT_CALL(storageMock, remove(FilePath("report1")));
 
     makeReportManager();
