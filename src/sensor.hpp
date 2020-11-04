@@ -36,7 +36,6 @@ class Sensor final :
     void async_read();
     void async_read(std::shared_ptr<utils::UniqueCall::Lock>);
     void makeSignalMonitor();
-    void updateValue();
     void updateValue(double);
 
     interfaces::Sensor::Id sensorId;
@@ -47,6 +46,7 @@ class Sensor final :
 
     utils::UniqueCall uniqueCall;
     std::vector<std::weak_ptr<interfaces::SensorListener>> listeners;
+    uint64_t timestamp = 0;
     std::optional<double> value;
     std::unique_ptr<sdbusplus::bus::match::match> signalMonitor;
 };
