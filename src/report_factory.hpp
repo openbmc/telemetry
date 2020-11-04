@@ -1,6 +1,7 @@
 #pragma once
 
 #include "interfaces/report_factory.hpp"
+#include "sensor_cache.hpp"
 
 #include <boost/asio/io_context.hpp>
 #include <sdbusplus/asio/object_server.hpp>
@@ -9,18 +10,33 @@ class ReportFactory : public interfaces::ReportFactory
 {
   public:
     ReportFactory(
-        boost::asio::io_context& ioc,
-        const std::shared_ptr<sdbusplus::asio::object_server>& objServer);
+        const std::shared_ptr<sdbusplus::asio::connection>& bus,
+        const std::shared_ptr<sdbusplus::asio::object_server>& objServer,
+        std::unique_ptr<SensorCache> sensorCache);
 
     std::unique_ptr<interfaces::Report>
-        make(const std::string& name, const std::string& reportingType,
-             bool emitsReadingsSignal, bool logToMetricReportsCollection,
+        make(boost::asio::yield_context& yield, const std::string& name,
+             const std::string& reportingType, bool emitsReadingsSignal,
+             bool logToMetricReportsCollection,
              std::chrono::milliseconds period,
              const ReadingParameters& metricParams,
              interfaces::ReportManager& reportManager,
              interfaces::JsonStorage& reportStorage) const override;
 
   private:
-    boost::asio::io_context& ioc;
+    using SensorPath = std::string;
+    using ServiceName = std::string;
+    using Ifaces = std::vector<std::string>;
+    using SensorIfaces = std::vector<std::pair<ServiceName, Ifaces>>;
+    using SensorTree = std::pair<SensorPath, SensorIfaces>;
+
+    std::vector<std::shared_ptr<interfaces::Sensor>> getSensors(
+        const std::vector<SensorTree>& tree,
+        const std::vector<sdbusplus::message::object_path>& sensorPaths) const;
+    std::vector<SensorTree>
+        getSensorTree(boost::asio::yield_context& yield) const;
+
+    std::shared_ptr<sdbusplus::asio::connection> bus;
     std::shared_ptr<sdbusplus::asio::object_server> objServer;
+    std::unique_ptr<SensorCache> sensorCache;
 };

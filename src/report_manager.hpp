@@ -15,6 +15,7 @@ class ReportManager : public interfaces::ReportManager
 {
   public:
     ReportManager(
+        boost::asio::io_context&,
         std::unique_ptr<interfaces::ReportFactory> reportFactory,
         std::unique_ptr<interfaces::JsonStorage> reportStorage,
         const std::shared_ptr<sdbusplus::asio::object_server>& objServer);
@@ -36,10 +37,11 @@ class ReportManager : public interfaces::ReportManager
     std::vector<std::unique_ptr<interfaces::Report>> reports;
 
     std::unique_ptr<interfaces::Report>& addReport(
-        const std::string& reportName, const std::string& reportingType,
-        const bool emitsReadingsUpdate, const bool logToMetricReportsCollection,
-        const uint64_t interval, const ReadingParameters& metricParams);
-    void loadFromPersistent();
+        boost::asio::yield_context& yield, const std::string& reportName,
+        const std::string& reportingType, const bool emitsReadingsUpdate,
+        const bool logToMetricReportsCollection, const uint64_t interval,
+        const ReadingParameters& metricParams);
+    void loadFromPersistent(boost::asio::yield_context& yield);
 
   public:
     static constexpr uint32_t maxReports{20};
