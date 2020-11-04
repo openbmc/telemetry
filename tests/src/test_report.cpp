@@ -477,6 +477,16 @@ class TestReportInitialization : public TestReport
     MockFunction<void()> readingsUpdated;
 };
 
+TEST_F(TestReportInitialization, metricsAreInitializedWhenConstructed)
+{
+    for (auto& metric : metricMocks)
+    {
+        EXPECT_CALL(*metric, initialize());
+    }
+
+    sut = makeReport(ReportParams());
+}
+
 TEST_F(TestReportInitialization, readingsPropertiesChangedSingalEmits)
 {
     sut = makeReport(defaultParams.reportingType("Periodic"));
