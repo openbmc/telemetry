@@ -8,11 +8,14 @@
 class SensorMock : public interfaces::Sensor
 {
   public:
+    explicit SensorMock()
+    {
+        initialize();
+    }
+
     explicit SensorMock(Id sensorId) : mockSensorId(sensorId)
     {
-        ON_CALL(*this, id()).WillByDefault(testing::Invoke([this] {
-            return this->mockSensorId;
-        }));
+        initialize();
     }
 
     static Id makeId(std::string_view service, std::string_view path)
@@ -27,4 +30,12 @@ class SensorMock : public interfaces::Sensor
     const uint64_t mockId = generateUniqueMockId();
 
     Id mockSensorId = Id("SensorMock", "", "");
+
+  private:
+    void initialize()
+    {
+        ON_CALL(*this, id()).WillByDefault(testing::Invoke([this] {
+            return this->mockSensorId;
+        }));
+    }
 };

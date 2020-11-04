@@ -11,6 +11,7 @@ class Metric
   public:
     virtual ~Metric() = default;
 
+    virtual void initialize() = 0;
     virtual const std::vector<MetricValue>& getReadings() const = 0;
 };
 

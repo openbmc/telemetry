@@ -76,7 +76,7 @@ void Sensor::registerForUpdates(
     {
         if (value)
         {
-            listener->sensorUpdated(*this, *value);
+            listener->sensorUpdated(*this, timestamp, *value);
         }
         else
         {
@@ -85,22 +85,19 @@ void Sensor::registerForUpdates(
     }
 }
 
-void Sensor::updateValue()
-{
-    for (const auto& weakListener : listeners)
-    {
-        if (auto listener = weakListener.lock())
-        {
-            listener->sensorUpdated(*this);
-        }
-    }
-}
-
 void Sensor::updateValue(double newValue)
 {
+    timestamp = std::time(0);
+
     if (value == newValue)
     {
-        updateValue();
+        for (const auto& weakListener : listeners)
+        {
+            if (auto listener = weakListener.lock())
+            {
+                listener->sensorUpdated(*this, timestamp);
+            }
+        }
     }
     else
     {
@@ -110,7 +107,7 @@ void Sensor::updateValue(double newValue)
         {
             if (auto listener = weakListener.lock())
             {
-                listener->sensorUpdated(*this, *value);
+                listener->sensorUpdated(*this, timestamp, *value);
             }
         }
     }

@@ -5,8 +5,8 @@
 
 struct MetricValue
 {
-    std::string a;
-    std::string b;
+    std::string id;
+    std::string metadata;
     double value;
     uint64_t timestamp;
 };
