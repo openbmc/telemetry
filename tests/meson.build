@@ -53,5 +53,6 @@ test(
             sdbusplus,
         ],
         include_directories: ['../src', 'src']
-    )
+    ),
+    timeout: 120,
 )

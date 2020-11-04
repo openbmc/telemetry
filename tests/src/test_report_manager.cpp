@@ -2,6 +2,7 @@
 #include "mocks/json_storage_mock.hpp"
 #include "mocks/report_factory_mock.hpp"
 #include "params/report_params.hpp"
+#include "printers.hpp"
 #include "report.hpp"
 #include "report_manager.hpp"
 #include "utils/transform.hpp"
@@ -214,7 +215,7 @@ class TestReportManagerStorage : public TestReportManager
         ON_CALL(storageMock, list())
             .WillByDefault(Return(std::vector<FilePath>{FilePath("report1")}));
         ON_CALL(storageMock, load(FilePath("report1")))
-            .WillByDefault(Return(data));
+            .WillByDefault(InvokeWithoutArgs([this] { return data; }));
     }
 
     void makeReportManager()
@@ -256,7 +257,6 @@ TEST_F(TestReportManagerStorage,
 {
     data["Version"] = Report::reportVersion - 1;
 
-    ON_CALL(storageMock, load(FilePath("report1"))).WillByDefault(Return(data));
     EXPECT_CALL(storageMock, remove(FilePath("report1")));
 
     makeReportManager();
@@ -267,7 +267,6 @@ TEST_F(TestReportManagerStorage,
 {
     data["Interval"] = "1000";
 
-    ON_CALL(storageMock, load(FilePath("report1"))).WillByDefault(Return(data));
     EXPECT_CALL(storageMock, remove(FilePath("report1")));
 
     makeReportManager();
