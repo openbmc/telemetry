@@ -16,6 +16,7 @@ ReportManager::ReportManager(
     reportStorage(std::move(reportStorageIn)), objServer(objServerIn)
 {
     reports.reserve(maxReports);
+
     loadFromPersistent();
 
     reportManagerIface = objServer->add_unique_interface(
