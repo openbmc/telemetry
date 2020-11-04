@@ -1,7 +1,7 @@
+#include "helpers/sensor_id_helpers.hpp"
 #include "mocks/sensor_mock.hpp"
 #include "printers.hpp"
 #include "sensor_cache.hpp"
-#include "utils/sensor_id_eq.hpp"
 
 #include <initializer_list>
 
@@ -100,5 +100,5 @@ TEST_F(TestSensorCache, shouldCreateSensorWithCorrespondingId)
 
     auto expected = SensorMock::makeId("sensor-service", "sensor-path");
 
-    ASSERT_THAT(id, sensorIdEq(expected));
+    ASSERT_THAT(id, Eq(expected));
 }
