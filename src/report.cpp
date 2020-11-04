@@ -123,7 +123,7 @@ void Report::updateReadings()
             return sum + metric->getReadings().size();
         });
 
-    readingsCache.resize(numElements);
+    std::tuple_element_t<1, Readings> readingsCache(numElements);
 
     auto it = readingsCache.begin();
 
@@ -137,7 +137,7 @@ void Report::updateReadings()
     }
 
     std::get<0>(readings) = std::time(0);
-    std::get<1>(readings) = readingsCache;
+    std::get<1>(readings) = std::move(readingsCache);
     reportIface->signal_property("Readings");
 }
 
