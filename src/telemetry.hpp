@@ -3,6 +3,7 @@
 #include "persistent_json_storage.hpp"
 #include "report_factory.hpp"
 #include "report_manager.hpp"
+#include "sensor_cache.hpp"
 
 #include <sdbusplus/asio/connection.hpp>
 #include <sdbusplus/asio/object_server.hpp>

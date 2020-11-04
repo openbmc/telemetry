@@ -27,6 +27,11 @@ Report::Report(boost::asio::io_context& ioc,
     fileName(std::to_string(std::hash<std::string>{}(name))),
     reportStorage(reportStorageIn)
 {
+    for (auto& metric : this->metrics)
+    {
+        metric->initialize();
+    }
+
     deleteIface = objServer->add_unique_interface(
         path, deleteIfaceName, [this, &ioc, &reportManager](auto& dbusIface) {
             dbusIface.register_method("Delete", [this, &ioc, &reportManager] {
@@ -137,7 +142,7 @@ void Report::updateReadings()
             return sum + metric->getReadings().size();
         });
 
-    readingsCache.resize(numElements);
+    std::tuple_element_t<1, Readings> readingsCache(numElements);
 
     auto it = readingsCache.begin();
 
@@ -151,7 +156,7 @@ void Report::updateReadings()
     }
 
     std::get<0>(readings) = std::time(0);
-    std::get<1>(readings) = readingsCache;
+    std::get<1>(readings) = std::move(readingsCache);
 
     reportIface->signal_property("Readings");
 }
