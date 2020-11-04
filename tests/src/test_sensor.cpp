@@ -1,9 +1,9 @@
 #include "dbus_environment.hpp"
+#include "helpers/sensor_id_helpers.hpp"
 #include "mocks/sensor_listener_mock.hpp"
 #include "sensor.hpp"
 #include "sensor_cache.hpp"
 #include "stubs/dbus_sensor_object.hpp"
-#include "utils/sensor_id_eq.hpp"
 
 #include <sdbusplus/asio/property.hpp>
 
@@ -55,8 +55,8 @@ class TestSensor : public Test
 TEST_F(TestSensor, createsCorretlyViaSensorCache)
 {
     ASSERT_THAT(sut->id(),
-                sensorIdEq(Sensor::Id("Sensor", DbusEnvironment::serviceName(),
-                                      sensorObject.path())));
+                Eq(Sensor::Id("Sensor", DbusEnvironment::serviceName(),
+                              sensorObject.path())));
 }
 
 TEST_F(TestSensor, notifiesWithValueAfterRegister)

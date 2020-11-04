@@ -5,6 +5,8 @@
 #include "interfaces/report_manager.hpp"
 #include "interfaces/types.hpp"
 
+#include <boost/asio/spawn.hpp>
+
 #include <chrono>
 #include <memory>
 
@@ -17,10 +19,11 @@ class ReportFactory
     virtual ~ReportFactory() = default;
 
     virtual std::unique_ptr<interfaces::Report> make(
-        const std::string& name, const std::string& reportingType,
-        bool emitsReadingsSignal, bool logToMetricReportsCollection,
-        std::chrono::milliseconds period, const ReadingParameters& metricParams,
-        ReportManager& reportManager, JsonStorage& reportStorage) const = 0;
+        boost::asio::yield_context& yield, const std::string& name,
+        const std::string& reportingType, bool emitsReadingsSignal,
+        bool logToMetricReportsCollection, std::chrono::milliseconds period,
+        const ReadingParameters& metricParams, ReportManager& reportManager,
+        JsonStorage& reportStorage) const = 0;
 };
 
 } // namespace interfaces
