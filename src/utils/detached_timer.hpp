@@ -1,7 +1,6 @@
 #pragma once
 
 #include <boost/asio/io_context.hpp>
-#include <boost/asio/spawn.hpp>
 #include <boost/asio/steady_timer.hpp>
 
 #include <chrono>
