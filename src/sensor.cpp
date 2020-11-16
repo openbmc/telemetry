@@ -1,14 +1,11 @@
 #include "sensor.hpp"
 
-#include "utils/detached_timer.hpp"
-
 #include <boost/container/flat_map.hpp>
 #include <phosphor-logging/log.hpp>
 #include <sdbusplus/asio/property.hpp>
 #include <sdbusplus/bus/match.hpp>
 
 #include <functional>
-#include <iostream>
 
 Sensor::Sensor(interfaces::Sensor::Id sensorId, boost::asio::io_context& ioc,
                const std::shared_ptr<sdbusplus::asio::connection>& bus) :
@@ -40,24 +37,10 @@ void Sensor::async_read(std::shared_ptr<utils::UniqueCall::Lock> lock)
         "xyz.openbmc_project.Sensor.Value", "Value",
         [lock, id = sensorId,
          weakSelf = weak_from_this()](boost::system::error_code ec) {
-            phosphor::logging::log<phosphor::logging::level::ERR>(
+            phosphor::logging::log<phosphor::logging::level::WARNING>(
                 "DBus 'GetProperty' call failed on Sensor Value",
                 phosphor::logging::entry("sensor=%s, ec=%lu", id.str().c_str(),
                                          ec.value()));
-
-            if (auto self = weakSelf.lock())
-            {
-
-                constexpr auto retryIntervalAfterFailedRead =
-                    std::chrono::seconds(30);
-                utils::makeDetachedTimer(
-                    self->ioc, retryIntervalAfterFailedRead, [weakSelf] {
-                        if (auto self = weakSelf.lock())
-                        {
-                            self->async_read();
-                        }
-                    });
-            }
         },
         [lock, weakSelf = weak_from_this()](double newValue) {
             if (auto self = weakSelf.lock())
