@@ -15,18 +15,13 @@ DbusSensorObject::DbusSensorObject(
     ioc(ioc),
     bus(bus), objServer(objServer)
 {
-    sensorIface = objServer->add_interface(path(), interface());
-
-    sensorIface->register_property_r(property.value(), double{},
-                                     sdbusplus::vtable::property_::emits_change,
-                                     [this](const auto&) { return value; });
-
-    sensorIface->initialize();
-}
-
-DbusSensorObject::~DbusSensorObject()
-{
-    objServer->remove_interface(sensorIface);
+    sensorIface = objServer->add_unique_interface(
+        path(), interface(), [this](auto& iface) {
+            iface.register_property_r(
+                property.value(), value,
+                sdbusplus::vtable::property_::emits_change,
+                [this](const auto&) { return value; });
+        });
 }
 
 void DbusSensorObject::setValue(double v)
