@@ -154,3 +154,38 @@ TEST_F(TestSensorNotification, notifiesWithValueDuringRegister)
 
     registerForUpdates(listenerMock2);
 }
+
+class TestSensorMonitor : public Test
+{
+  public:
+    void SetUp() override
+    {}
+
+    std::unique_ptr<stubs::DbusSensorObject> sensorObjectPtr;
+
+    void makeSensorObject()
+    {
+        sensorObjectPtr = std::make_unique<stubs::DbusSensorObject>(
+            DbusEnvironment::getIoc(), DbusEnvironment::getBus(),
+            DbusEnvironment::getObjServer());
+    }
+
+    SensorCache sensorCache;
+    uint64_t timestamp = std::time(0);
+    std::shared_ptr<Sensor> sut = sensorCache.makeSensor<Sensor>(
+        DbusEnvironment::serviceName(), stubs::DbusSensorObject::path(),
+        DbusEnvironment::getIoc(), DbusEnvironment::getBus());
+    std::shared_ptr<SensorListenerMock> listenerMock =
+        std::make_shared<StrictMock<SensorListenerMock>>();
+};
+
+TEST_F(TestSensorMonitor,
+       dbusSensorIsAddedToSystemAfterSensorIsCreatedThenValueIsUpdated)
+{
+    EXPECT_CALL(*listenerMock, sensorUpdated(Ref(*sut), Ge(timestamp), 0.))
+        .WillOnce(InvokeWithoutArgs(DbusEnvironment::setPromise("notify")));
+    sut->registerForUpdates(listenerMock);
+    DbusEnvironment::sleepFor(std::chrono::seconds(1));
+    makeSensorObject();
+    DbusEnvironment::waitForFuture("notify");
+}
