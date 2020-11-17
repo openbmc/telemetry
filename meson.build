@@ -1,7 +1,7 @@
 project(
     'Telemetry',
     'cpp',
-    meson_version: '>=0.55.0',
+    meson_version: '>=0.54.3',
     default_options: [
         'buildtype=debugoptimized',
         'cpp_std=c++17',

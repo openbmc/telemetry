@@ -11,13 +11,11 @@ class SensorListenerMock : public interfaces::SensorListener
     {
         using namespace testing;
 
-        ON_CALL(*this, sensorUpdated(_, _)).WillByDefault(Invoke([this] {
-            sensorUpdated();
-        }));
+        ON_CALL(*this, sensorUpdated(_, _))
+            .WillByDefault(InvokeWithoutArgs([this] { sensorUpdated(); }));
 
-        ON_CALL(*this, sensorUpdated(_, _, _)).WillByDefault(Invoke([this] {
-            sensorUpdated();
-        }));
+        ON_CALL(*this, sensorUpdated(_, _, _))
+            .WillByDefault(InvokeWithoutArgs([this] { sensorUpdated(); }));
     }
 
     MOCK_METHOD(void, sensorUpdated, (interfaces::Sensor&, uint64_t),
