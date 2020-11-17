@@ -62,7 +62,7 @@ TEST_F(TestSensor, createsCorretlyViaSensorCache)
 TEST_F(TestSensor, notifiesWithValueAfterRegister)
 {
     EXPECT_CALL(*listenerMock, sensorUpdated(Ref(*sut), Ge(timestamp), 42.7))
-        .WillOnce(Invoke(DbusEnvironment::setPromise("async_read")));
+        .WillOnce(Invoke([] { DbusEnvironment::setPromise("async_read"); }));
 
     registerForUpdates(listenerMock);
 
@@ -72,9 +72,9 @@ TEST_F(TestSensor, notifiesWithValueAfterRegister)
 TEST_F(TestSensor, notifiesOnceWithValueAfterRegister)
 {
     EXPECT_CALL(*listenerMock, sensorUpdated(Ref(*sut), Ge(timestamp), 42.7))
-        .WillOnce(Invoke(DbusEnvironment::setPromise("async_read")));
+        .WillOnce(Invoke([] { DbusEnvironment::setPromise("async_read"); }));
     EXPECT_CALL(*listenerMock2, sensorUpdated(Ref(*sut), Ge(timestamp), 42.7))
-        .WillOnce(Invoke(DbusEnvironment::setPromise("async_read2")));
+        .WillOnce(Invoke([] { DbusEnvironment::setPromise("async_read2"); }));
 
     DbusEnvironment::synchronizedPost([this] {
         sut->registerForUpdates(listenerMock);
@@ -91,7 +91,8 @@ class TestSensorNotification : public TestSensor
     void SetUp() override
     {
         EXPECT_CALL(*listenerMock, sensorUpdated(Ref(*sut), Ge(timestamp), 0.))
-            .WillOnce(Invoke(DbusEnvironment::setPromise("async_read")));
+            .WillOnce(
+                Invoke([] { DbusEnvironment::setPromise("async_read"); }));
 
         registerForUpdates(listenerMock);
 
@@ -105,7 +106,7 @@ class TestSensorNotification : public TestSensor
 TEST_F(TestSensorNotification, notifiesListenerWithValueWhenChangeOccurs)
 {
     EXPECT_CALL(*listenerMock, sensorUpdated(Ref(*sut), Ge(timestamp), 42.7))
-        .WillOnce(Invoke(DbusEnvironment::setPromise("notify")));
+        .WillOnce(Invoke([] { DbusEnvironment::setPromise("notify"); }));
 
     sensorObject.setValue(42.7);
 
@@ -120,7 +121,7 @@ TEST_F(TestSensorNotification, notifiesListenerWithValueWhenNoChangeOccurs)
         .InSequence(seq);
     EXPECT_CALL(*listenerMock, sensorUpdated(Ref(*sut), Ge(timestamp)))
         .InSequence(seq)
-        .WillOnce(Invoke(DbusEnvironment::setPromise("notify")));
+        .WillOnce(Invoke([] { DbusEnvironment::setPromise("notify"); }));
 
     sensorObject.setValue(42.7);
     sensorObject.setValue(42.7);
@@ -135,7 +136,7 @@ TEST_F(TestSensorNotification, doesntNotifyExpiredListener)
         .InSequence(seq);
     EXPECT_CALL(*listenerMock2, sensorUpdated(Ref(*sut), Ge(timestamp), 42.7))
         .InSequence(seq)
-        .WillOnce(Invoke(DbusEnvironment::setPromise("notify")));
+        .WillOnce(Invoke([] { DbusEnvironment::setPromise("notify"); }));
 
     registerForUpdates(listenerMock2);
     listenerMock = nullptr;
