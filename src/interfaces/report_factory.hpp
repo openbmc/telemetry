@@ -20,11 +20,17 @@ class ReportFactory
     virtual ~ReportFactory() = default;
 
     virtual std::unique_ptr<interfaces::Report> make(
-        std::optional<std::reference_wrapper<boost::asio::yield_context>> yield,
+        boost::asio::yield_context& yield, const std::string& name,
+        const std::string& reportingType, bool emitsReadingsSignal,
+        bool logToMetricReportsCollection, std::chrono::milliseconds period,
+        const ReadingParameters& metricParams, ReportManager& reportManager,
+        JsonStorage& reportStorage) const = 0;
+    virtual std::unique_ptr<interfaces::Report> make(
         const std::string& name, const std::string& reportingType,
         bool emitsReadingsSignal, bool logToMetricReportsCollection,
         std::chrono::milliseconds period, const ReadingParameters& metricParams,
-        ReportManager& reportManager, JsonStorage& reportStorage) const = 0;
+        ReportManager& reportManager, JsonStorage& reportStorage,
+        std::vector<LabeledMetricParameters> labeledMetricParams) const = 0;
 };
 
 } // namespace interfaces

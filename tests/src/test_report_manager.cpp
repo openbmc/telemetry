@@ -1,8 +1,8 @@
 #include "dbus_environment.hpp"
+#include "helpers.hpp"
 #include "mocks/json_storage_mock.hpp"
 #include "mocks/report_factory_mock.hpp"
 #include "params/report_params.hpp"
-#include "printers.hpp"
 #include "report.hpp"
 #include "report_manager.hpp"
 #include "utils/transform.hpp"
@@ -22,6 +22,10 @@ class TestReportManager : public Test
     std::unique_ptr<StorageMock> storageMockPtr =
         std::make_unique<NiceMock<StorageMock>>();
     StorageMock& storageMock = *storageMockPtr;
+
+    std::unique_ptr<ReportMock> reportMockPtr =
+        std::make_unique<NiceMock<ReportMock>>(reportParams.reportName());
+    ReportMock& reportMock = *reportMockPtr;
 
     std::unique_ptr<ReportManager> sut;
 
@@ -89,16 +93,7 @@ TEST_F(TestReportManager, maxReports)
 
 TEST_F(TestReportManager, addReport)
 {
-    auto reportMockPtr =
-        std::make_unique<NiceMock<ReportMock>>(reportParams.reportName());
-    auto& reportMock = *reportMockPtr;
-
-    EXPECT_CALL(reportFactoryMock,
-                make(_, reportParams.reportName(), reportParams.reportingType(),
-                     reportParams.emitReadingUpdate(),
-                     reportParams.logToMetricReportCollection(),
-                     reportParams.interval(), reportParams.readingParameters(),
-                     Ref(*sut), Ref(storageMock)))
+    reportFactoryMock.expectMake(_, reportParams, Ref(*sut), Ref(storageMock))
         .WillOnce(Return(ByMove(std::move(reportMockPtr))));
 
     auto [ec, path] = addReport(reportParams);
@@ -108,7 +103,8 @@ TEST_F(TestReportManager, addReport)
 
 TEST_F(TestReportManager, DISABLED_failToAddReportTwice)
 {
-    EXPECT_CALL(reportFactoryMock, make(_, _, _, _, _, _, _, _, _));
+    reportFactoryMock.expectMake(_, reportParams, Ref(*sut), Ref(storageMock))
+        .WillOnce(Return(ByMove(std::move(reportMockPtr))));
 
     addReport(reportParams);
 
@@ -119,7 +115,10 @@ TEST_F(TestReportManager, DISABLED_failToAddReportTwice)
 
 TEST_F(TestReportManager, DISABLED_failToAddReportWithInvalidInterval)
 {
-    EXPECT_CALL(reportFactoryMock, make).Times(0);
+    reportFactoryMock.expectMake(_, std::nullopt, Ref(*sut), Ref(storageMock))
+        .Times(0);
+    reportFactoryMock.expectMake(std::nullopt, Ref(*sut), Ref(storageMock), _)
+        .Times(0);
 
     reportParams.interval(reportParams.interval() - 1ms);
 
@@ -130,7 +129,7 @@ TEST_F(TestReportManager, DISABLED_failToAddReportWithInvalidInterval)
 
 TEST_F(TestReportManager, DISABLED_failToAddReportWhenMaxReportIsReached)
 {
-    EXPECT_CALL(reportFactoryMock, make(_, _, _, _, _, _, _, _, _))
+    reportFactoryMock.expectMake(_, std::nullopt, Ref(*sut), Ref(storageMock))
         .Times(ReportManager::maxReports);
 
     for (size_t i = 0; i < ReportManager::maxReports; i++)
@@ -150,13 +149,10 @@ TEST_F(TestReportManager, DISABLED_failToAddReportWhenMaxReportIsReached)
 
 TEST_F(TestReportManager, removeReport)
 {
-    auto reportMockPtr =
-        std::make_unique<NiceMock<ReportMock>>(reportParams.reportName());
-    auto& reportMock = *reportMockPtr;
-
     {
         InSequence seq;
-        EXPECT_CALL(reportFactoryMock, make(_, _, _, _, _, _, _, _, _))
+        reportFactoryMock
+            .expectMake(_, reportParams, Ref(*sut), Ref(storageMock))
             .WillOnce(Return(ByMove(std::move(reportMockPtr))));
         EXPECT_CALL(reportMock, Die());
         EXPECT_CALL(checkPoint, Call("end"));
@@ -169,10 +165,6 @@ TEST_F(TestReportManager, removeReport)
 
 TEST_F(TestReportManager, removingReportThatIsNotInContainerHasNoEffect)
 {
-    auto reportMockPtr =
-        std::make_unique<NiceMock<ReportMock>>(reportParams.reportName());
-    auto& reportMock = *reportMockPtr;
-
     {
         InSequence seq;
         EXPECT_CALL(checkPoint, Call("end"));
@@ -185,14 +177,10 @@ TEST_F(TestReportManager, removingReportThatIsNotInContainerHasNoEffect)
 
 TEST_F(TestReportManager, removingSameReportTwiceHasNoSideEffect)
 {
-    auto reportMockPtr =
-        std::make_unique<NiceMock<ReportMock>>(reportParams.reportName());
-    auto& reportMock = *reportMockPtr;
-
     {
         InSequence seq;
-        EXPECT_CALL(reportFactoryMock,
-                    make(_, reportParams.reportName(), _, _, _, _, _, _, _))
+        reportFactoryMock
+            .expectMake(_, reportParams, Ref(*sut), Ref(storageMock))
             .WillOnce(Return(ByMove(std::move(reportMockPtr))));
         EXPECT_CALL(reportMock, Die());
         EXPECT_CALL(checkPoint, Call("end"));
@@ -225,6 +213,20 @@ class TestReportManagerStorage : public TestReportManager
                                               DbusEnvironment::getObjServer());
     }
 
+    static std::vector<LabeledMetricParameters>
+        convertToLabeled(const ReadingParameters& params)
+    {
+        return utils::transform(params, [](const auto& item) {
+            return LabeledMetricParameters(
+                utils::transform(std::get<0>(item),
+                                 [](const auto& elem) {
+                                     return LabeledSensorParameters("service",
+                                                                    elem);
+                                 }),
+                std::get<1>(item), std::get<2>(item), std::get<3>(item));
+        });
+    }
+
     nlohmann::json data = nlohmann::json{
         {"Version", Report::reportVersion},
         {"Name", reportParams.reportName()},
@@ -234,20 +236,14 @@ class TestReportManagerStorage : public TestReportManager
          reportParams.logToMetricReportCollection()},
         {"Interval", reportParams.interval().count()},
         {"ReadingParameters",
-         utils::transform(reportParams.readingParameters(),
-                          [](const auto& item) {
-                              return LabeledReadingParameter::to_json(item);
-                          })}};
+         convertToLabeled(reportParams.readingParameters())}};
 };
 
 TEST_F(TestReportManagerStorage, reportManagerCtorAddReportFromStorage)
 {
-    EXPECT_CALL(reportFactoryMock,
-                make(_, reportParams.reportName(), reportParams.reportingType(),
-                     reportParams.emitReadingUpdate(),
-                     reportParams.logToMetricReportCollection(),
-                     reportParams.interval(), reportParams.readingParameters(),
-                     _, Ref(storageMock)));
+    reportFactoryMock.expectMake(
+        reportParams, _, Ref(storageMock),
+        ElementsAreArray(convertToLabeled(reportParams.readingParameters())));
 
     makeReportManager();
 }
