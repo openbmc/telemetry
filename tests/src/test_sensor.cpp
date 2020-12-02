@@ -1,7 +1,6 @@
 #include "dbus_environment.hpp"
-#include "helpers/sensor_id_helpers.hpp"
+#include "helpers.hpp"
 #include "mocks/sensor_listener_mock.hpp"
-#include "printers.hpp"
 #include "sensor.hpp"
 #include "sensor_cache.hpp"
 #include "stubs/dbus_sensor_object.hpp"

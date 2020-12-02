@@ -1,6 +1,8 @@
 #include "report_manager.hpp"
 
+#include "interfaces/types.hpp"
 #include "report.hpp"
+#include "utils/transform.hpp"
 
 #include <phosphor-logging/log.hpp>
 #include <sdbusplus/exception.hpp>
@@ -35,13 +37,13 @@ ReportManager::ReportManager(
                                     const bool emitsReadingsUpdate,
                                     const bool logToMetricReportsCollection,
                                     const uint64_t interval,
-                                    const ReadingParameters& metricParams) {
+                                    ReadingParameters metricParams) {
                     return addReport(yield, reportName, reportingType,
                                      emitsReadingsUpdate,
                                      logToMetricReportsCollection,
                                      std::chrono::milliseconds(interval),
-                                     metricParams)
-                        ->getPath();
+                                     std::move(metricParams))
+                        .getPath();
                 });
         });
 }
@@ -54,11 +56,8 @@ void ReportManager::removeReport(const interfaces::Report* report)
         reports.end());
 }
 
-std::unique_ptr<interfaces::Report>& ReportManager::addReport(
-    std::optional<std::reference_wrapper<boost::asio::yield_context>> yield,
-    const std::string& reportName, const std::string& reportingType,
-    const bool emitsReadingsUpdate, const bool logToMetricReportsCollection,
-    std::chrono::milliseconds interval, const ReadingParameters& metricParams)
+void ReportManager::verifyAddReport(const std::string& reportName,
+                                    std::chrono::milliseconds interval)
 {
     if (reports.size() >= maxReports)
     {
@@ -81,12 +80,49 @@ std::unique_ptr<interfaces::Report>& ReportManager::addReport(
         throw sdbusplus::exception::SdBusError(
             static_cast<int>(std::errc::invalid_argument), "Invalid interval");
     }
+}
 
-    reports.emplace_back(
-        reportFactory->make(yield, reportName, reportingType,
-                            emitsReadingsUpdate, logToMetricReportsCollection,
-                            interval, metricParams, *this, *reportStorage));
-    return reports.back();
+interfaces::Report& ReportManager::addReport(
+    boost::asio::yield_context& yield, const std::string& reportName,
+    const std::string& reportingType, const bool emitsReadingsUpdate,
+    const bool logToMetricReportsCollection, std::chrono::milliseconds interval,
+    ReadingParameters metricParams)
+{
+    verifyAddReport(reportName, interval);
+
+    reports.emplace_back(reportFactory->make(
+        yield, reportName, reportingType, emitsReadingsUpdate,
+        logToMetricReportsCollection, interval, std::move(metricParams), *this,
+        *reportStorage));
+    return *reports.back();
+}
+
+interfaces::Report& ReportManager::addReport(
+    const std::string& reportName, const std::string& reportingType,
+    const bool emitsReadingsUpdate, const bool logToMetricReportsCollection,
+    std::chrono::milliseconds interval,
+    std::vector<LabeledMetricParameters> labeledMetricParams)
+{
+    verifyAddReport(reportName, interval);
+
+    auto metricParams = utils::transform(
+        labeledMetricParams, [](const LabeledMetricParameters& param) {
+            using namespace utils::tstring;
+
+            return ReadingParameters::value_type(
+                utils::transform(param.at_index<0>(),
+                                 [](const LabeledSensorParameters& p) {
+                                     return sdbusplus::message::object_path(
+                                         p.at_label<Path>());
+                                 }),
+                param.at_index<1>(), param.at_index<2>(), param.at_index<3>());
+        });
+
+    reports.emplace_back(reportFactory->make(
+        reportName, reportingType, emitsReadingsUpdate,
+        logToMetricReportsCollection, interval, std::move(metricParams), *this,
+        *reportStorage, labeledMetricParams));
+    return *reports.back();
 }
 
 void ReportManager::loadFromPersistent()
@@ -112,16 +148,14 @@ void ReportManager::loadFromPersistent()
             bool logToMetricReportsCollection =
                 data->at("LogToMetricReportsCollection").get<bool>();
             uint64_t interval = data->at("Interval").get<uint64_t>();
-            ReadingParameters readingParameters;
-            for (auto& item : data->at("ReadingParameters"))
-            {
-                readingParameters.emplace_back(
-                    LabeledReadingParameter::from_json(item));
-            }
+            auto readingParameters =
+                data->at("ReadingParameters")
+                    .get<std::vector<LabeledMetricParameters>>();
 
-            addReport(std::nullopt, name, reportingType, emitsReadingsSignal,
+            addReport(name, reportingType, emitsReadingsSignal,
                       logToMetricReportsCollection,
-                      std::chrono::milliseconds(interval), readingParameters);
+                      std::chrono::milliseconds(interval),
+                      std::move(readingParameters));
         }
         catch (const std::exception& e)
         {
