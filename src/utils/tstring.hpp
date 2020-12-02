@@ -5,32 +5,56 @@
 
 namespace utils
 {
-namespace literals
-{
-
-constexpr char id[] = "id";
-constexpr char sensorPaths[] = "sensorPaths";
-constexpr char operationType[] = "operationType";
-constexpr char metricMetadata[] = "metricMetadata";
-
-} // namespace literals
-
-template <const char* const V>
-struct Label
-{
-    static std::string str()
-    {
-        return V;
-    }
-};
-
 namespace tstring
 {
 
-using Id = utils::Label<utils::literals::id>;
-using SensorPaths = utils::Label<utils::literals::sensorPaths>;
-using OperationType = utils::Label<utils::literals::operationType>;
-using MetricMetadata = utils::Label<utils::literals::metricMetadata>;
+struct Id
+{
+    static std::string str()
+    {
+        return "id";
+    }
+};
+
+struct SensorPaths
+{
+    static std::string str()
+    {
+        return "sensorPaths";
+    }
+};
+
+struct OperationType
+{
+    static std::string str()
+    {
+        return "operationType";
+    }
+};
+
+struct MetricMetadata
+{
+    static std::string str()
+    {
+        return "metricMetadata";
+    }
+};
+
+struct Service
+{
+    static std::string str()
+    {
+        return "service";
+    }
+};
+
+struct Path
+{
+    static std::string str()
+    {
+        return "path";
+    }
+};
 
 } // namespace tstring
 } // namespace utils

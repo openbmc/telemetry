@@ -18,8 +18,6 @@ class ReportMock : public interfaces::Report
             return "/" + reportName;
         });
 
-        EXPECT_CALL(*this, getPath).Times(AnyNumber());
-        EXPECT_CALL(*this, getName).Times(AnyNumber());
         EXPECT_CALL(*this, Die).Times(AnyNumber());
     }
 
