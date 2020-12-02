@@ -53,6 +53,11 @@ void Sensor::async_read(std::shared_ptr<utils::UniqueCall::Lock> lock)
 void Sensor::registerForUpdates(
     const std::weak_ptr<interfaces::SensorListener>& weakListener)
 {
+    listeners.erase(
+        std::remove_if(listeners.begin(), listeners.end(),
+                       [](const auto& listener) { return listener.expired(); }),
+        listeners.end());
+
     if (auto listener = weakListener.lock())
     {
         listeners.emplace_back(weakListener);

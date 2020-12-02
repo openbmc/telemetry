@@ -75,5 +75,5 @@ class Report : public interfaces::Report
         "/xyz/openbmc_project/Telemetry/Reports/";
     static constexpr const char* deleteIfaceName =
         "xyz.openbmc_project.Object.Delete";
-    static constexpr size_t reportVersion = 1;
+    static constexpr size_t reportVersion = 2;
 };

@@ -52,13 +52,11 @@ MetricValue& Metric::findMetric(interfaces::Sensor& sensor)
     return readings.at(index);
 }
 
-nlohmann::json Metric::to_json() const
+LabeledMetricParameters Metric::dumpConfiguration() const
 {
-    auto sensorPaths = utils::transform(
-        sensors, [](const auto& sensor) -> sdbusplus::message::object_path {
-            return sdbusplus::message::object_path(sensor->id().service + ":" +
-                                                   sensor->id().path);
-        });
-    return LabeledReadingParameter::to_json(ReadingParameters::value_type(
-        std::move(sensorPaths), operationType, id, metadata));
+    auto sensorPaths = utils::transform(sensors, [](const auto& sensor) {
+        return LabeledSensorParameters(sensor->id().service, sensor->id().path);
+    });
+    return LabeledMetricParameters(std::move(sensorPaths), operationType, id,
+                                   metadata);
 }

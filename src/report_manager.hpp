@@ -35,12 +35,20 @@ class ReportManager : public interfaces::ReportManager
     std::unique_ptr<sdbusplus::asio::dbus_interface> reportManagerIface;
     std::vector<std::unique_ptr<interfaces::Report>> reports;
 
-    std::unique_ptr<interfaces::Report>& addReport(
-        std::optional<std::reference_wrapper<boost::asio::yield_context>> yield,
+    void verifyAddReport(const std::string& reportName,
+                         std::chrono::milliseconds interval);
+    interfaces::Report& addReport(boost::asio::yield_context& yield,
+                                  const std::string& reportName,
+                                  const std::string& reportingType,
+                                  const bool emitsReadingsUpdate,
+                                  const bool logToMetricReportsCollection,
+                                  std::chrono::milliseconds interval,
+                                  ReadingParameters metricParams);
+    interfaces::Report& addReport(
         const std::string& reportName, const std::string& reportingType,
         const bool emitsReadingsUpdate, const bool logToMetricReportsCollection,
         std::chrono::milliseconds interval,
-        const ReadingParameters& metricParams);
+        std::vector<LabeledMetricParameters> metricParams);
     void loadFromPersistent();
 
   public:
