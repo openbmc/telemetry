@@ -28,11 +28,6 @@ Report::Report(boost::asio::io_context& ioc,
     fileName(std::to_string(std::hash<std::string>{}(name))),
     reportStorage(reportStorageIn)
 {
-    for (auto& metric : this->metrics)
-    {
-        metric->initialize();
-    }
-
     deleteIface = objServer->add_unique_interface(
         path, deleteIfaceName, [this, &ioc, &reportManager](auto& dbusIface) {
             dbusIface.register_method("Delete", [this, &ioc, &reportManager] {
@@ -121,6 +116,11 @@ Report::Report(boost::asio::io_context& ioc,
     {
         scheduleTimer(interval);
     }
+
+    for (auto& metric : this->metrics)
+    {
+        metric->initialize();
+    }
 }
 
 void Report::timerProc(boost::system::error_code ec, Report& self)
@@ -179,8 +179,10 @@ bool Report::storeConfiguration() const
         data["EmitsReadingsUpdate"] = emitsReadingsUpdate;
         data["LogToMetricReportsCollection"] = logToMetricReportsCollection;
         data["Interval"] = interval.count();
-        data["ReadingParameters"] = utils::transform(
-            metrics, [](const auto& metric) { return metric->to_json(); });
+        data["ReadingParameters"] =
+            utils::transform(metrics, [](const auto& metric) {
+                return metric->dumpConfiguration();
+            });
 
         reportStorage.store(fileName, data);
     }

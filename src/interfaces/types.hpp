@@ -13,8 +13,13 @@ using ReadingParameters =
     std::vector<std::tuple<std::vector<sdbusplus::message::object_path>,
                            std::string, std::string, std::string>>;
 
-using LabeledReadingParameter =
-    utils::LabeledTuple<ReadingParameters::value_type,
+using LabeledSensorParameters =
+    utils::LabeledTuple<std::tuple<std::string, std::string>,
+                        utils::tstring::Service, utils::tstring::Path>;
+
+using LabeledMetricParameters =
+    utils::LabeledTuple<std::tuple<std::vector<LabeledSensorParameters>,
+                                   std::string, std::string, std::string>,
                         utils::tstring::SensorPaths,
                         utils::tstring::OperationType, utils::tstring::Id,
                         utils::tstring::MetricMetadata>;

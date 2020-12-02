@@ -53,54 +53,93 @@ struct LabeledTuple;
 template <class... Args, class... Labels>
 struct LabeledTuple<std::tuple<Args...>, Labels...>
 {
-    LabeledTuple() = delete;
-
     static_assert(sizeof...(Args) == sizeof...(Labels));
 
-    static nlohmann::json to_json(const std::tuple<Args...>& tuple)
+    using tuple_type = std::tuple<Args...>;
+
+    LabeledTuple() = default;
+    LabeledTuple(const LabeledTuple&) = default;
+    LabeledTuple(LabeledTuple&&) = default;
+
+    LabeledTuple(tuple_type v) : value(std::move(v))
+    {}
+    LabeledTuple(Args... args) : value(std::move(args)...)
+    {}
+
+    LabeledTuple& operator=(const LabeledTuple&) = default;
+    LabeledTuple& operator=(LabeledTuple&&) = default;
+
+    nlohmann::json to_json() const
     {
         nlohmann::json j;
-        to_json_all(j, tuple, std::make_index_sequence<sizeof...(Args)>());
+        to_json_all(j, std::make_index_sequence<sizeof...(Args)>());
         return j;
     }
 
-    static std::tuple<Args...> from_json(const nlohmann::json& j)
+    void from_json(const nlohmann::json& j)
     {
-        std::tuple<Args...> value;
-        from_json_all(j, value, std::make_index_sequence<sizeof...(Args)>());
-        return value;
+        from_json_all(j, std::make_index_sequence<sizeof...(Args)>());
+    }
+
+    template <size_t Idx>
+    const auto& at_index() const
+    {
+        return std::get<Idx>(value);
+    }
+
+    template <size_t Idx>
+    auto& at_index()
+    {
+        return std::get<Idx>(value);
+    }
+
+    template <class Label>
+    const auto& at_label() const
+    {
+        return find_item<0, Label>(*this);
+    }
+
+    template <class Label>
+    auto& at_label()
+    {
+        return find_item<0, Label>(*this);
+    }
+
+    bool operator==(const LabeledTuple& other) const
+    {
+        return value == other.value;
+    }
+
+    bool operator<(const LabeledTuple& other) const
+    {
+        return value < other.value;
     }
 
   private:
     template <size_t... Idx>
-    static void to_json_all(nlohmann::json& j, const std::tuple<Args...>& tuple,
-                            std::index_sequence<Idx...>)
+    void to_json_all(nlohmann::json& j, std::index_sequence<Idx...>) const
     {
-        (to_json_item<Idx>(j, tuple), ...);
+        (to_json_item<Idx>(j), ...);
     }
 
     template <size_t Idx>
-    static void to_json_item(nlohmann::json& j,
-                             const std::tuple<Args...>& tuple)
+    void to_json_item(nlohmann::json& j) const
     {
         using Label = std::tuple_element_t<Idx, std::tuple<Labels...>>;
-        j[Label::str()] = std::get<Idx>(tuple);
+        j[Label::str()] = std::get<Idx>(value);
     }
 
     template <size_t... Idx>
-    static void from_json_all(const nlohmann::json& j,
-                              std::tuple<Args...>& value,
-                              std::index_sequence<Idx...>)
+    void from_json_all(const nlohmann::json& j, std::index_sequence<Idx...>)
     {
-        (from_json_item<Idx>(j, value), ...);
+        (from_json_item<Idx>(j), ...);
     }
 
     template <size_t Idx>
-    static void from_json_item(const nlohmann::json& j,
-                               std::tuple<Args...>& value)
+    void from_json_item(const nlohmann::json& j)
     {
         using Label = std::tuple_element_t<Idx, std::tuple<Labels...>>;
-        using T = std::tuple_element_t<Idx, std::tuple<Args...>>;
+        using T = std::tuple_element_t<Idx, tuple_type>;
         const nlohmann::json& item = j.at(Label::str());
         if constexpr (detail::has_utils_from_json_v<T>)
         {
@@ -112,6 +151,36 @@ struct LabeledTuple<std::tuple<Args...>, Labels...>
             std::get<Idx>(value) = item.get<T>();
         }
     }
+
+    template <size_t Idx, class Label, class Self>
+    static auto& find_item(Self& self)
+    {
+        if constexpr (std::is_same_v<Label, std::tuple_element_t<
+                                                Idx, std::tuple<Labels...>>>)
+        {
+            return std::get<Idx>(self.value);
+        }
+        else
+        {
+            return find_item<Idx + 1, Label>(self);
+        }
+    }
+
+    tuple_type value;
 };
+
+template <class... Args, class... Labels>
+void to_json(nlohmann::json& json,
+             const LabeledTuple<std::tuple<Args...>, Labels...>& tuple)
+{
+    json = tuple.to_json();
+}
+
+template <class... Args, class... Labels>
+void from_json(const nlohmann::json& json,
+               LabeledTuple<std::tuple<Args...>, Labels...>& tuple)
+{
+    tuple.from_json(json);
+}
 
 } // namespace utils
