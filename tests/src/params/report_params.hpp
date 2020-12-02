@@ -2,6 +2,7 @@
 
 #include "interfaces/types.hpp"
 #include "report_manager.hpp"
+#include "reporting_type.hpp"
 
 #include <chrono>
 #include <string>
@@ -77,7 +78,7 @@ class ReportParams final
 
   private:
     std::string reportNameProperty = "TestReport";
-    std::string reportingTypeProperty = "OnRequest";
+    std::string reportingTypeProperty = ReportingType::OnRequest;
     bool emitReadingUpdateProperty = true;
     bool logToMetricReportCollectionProperty = true;
     std::chrono::milliseconds intervalProperty = ReportManager::minInterval;
