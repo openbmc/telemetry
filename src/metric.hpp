@@ -17,7 +17,7 @@ class Metric :
     const std::vector<MetricValue>& getReadings() const override;
     void sensorUpdated(interfaces::Sensor&, uint64_t) override;
     void sensorUpdated(interfaces::Sensor&, uint64_t, double value) override;
-    nlohmann::json to_json() const override;
+    LabeledMetricParameters dumpConfiguration() const override;
 
   private:
     MetricValue& findMetric(interfaces::Sensor&);

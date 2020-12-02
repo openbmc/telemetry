@@ -14,13 +14,23 @@ class ReportFactory : public interfaces::ReportFactory
         std::shared_ptr<sdbusplus::asio::connection> bus,
         const std::shared_ptr<sdbusplus::asio::object_server>& objServer);
 
-    std::unique_ptr<interfaces::Report> make(
-        std::optional<std::reference_wrapper<boost::asio::yield_context>> yield,
-        const std::string& name, const std::string& reportingType,
-        bool emitsReadingsSignal, bool logToMetricReportsCollection,
-        std::chrono::milliseconds period, const ReadingParameters& metricParams,
-        interfaces::ReportManager& reportManager,
-        interfaces::JsonStorage& reportStorage) const override;
+    std::unique_ptr<interfaces::Report>
+        make(boost::asio::yield_context& yield, const std::string& name,
+             const std::string& reportingType, bool emitsReadingsSignal,
+             bool logToMetricReportsCollection,
+             std::chrono::milliseconds period,
+             const ReadingParameters& metricParams,
+             interfaces::ReportManager& reportManager,
+             interfaces::JsonStorage& reportStorage) const override;
+    std::unique_ptr<interfaces::Report>
+        make(const std::string& name, const std::string& reportingType,
+             bool emitsReadingsSignal, bool logToMetricReportsCollection,
+             std::chrono::milliseconds period,
+             const ReadingParameters& metricParams,
+             interfaces::ReportManager& reportManager,
+             interfaces::JsonStorage& reportStorage,
+             std::vector<LabeledMetricParameters> labeledMetricParams)
+            const override;
 
   private:
     using SensorPath = std::string;
@@ -30,12 +40,12 @@ class ReportFactory : public interfaces::ReportFactory
     using SensorTree = std::pair<SensorPath, SensorIfaces>;
 
     std::vector<std::shared_ptr<interfaces::Sensor>> getSensors(
-        const std::optional<std::vector<SensorTree>>& tree,
-        const std::vector<sdbusplus::message::object_path>& sensorPaths) const;
-    std::vector<SensorTree>
-        getSensorTree(boost::asio::yield_context& yield) const;
+        const std::vector<LabeledSensorParameters>& sensorPaths) const;
+    std::vector<LabeledMetricParameters>
+        convertMetricParams(boost::asio::yield_context& yield,
+                            const ReadingParameters& metricParams) const;
 
     std::shared_ptr<sdbusplus::asio::connection> bus;
     std::shared_ptr<sdbusplus::asio::object_server> objServer;
-    std::unique_ptr<SensorCache> sensorCache;
+    mutable SensorCache sensorCache;
 };

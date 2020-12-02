@@ -1,9 +1,9 @@
 #include "dbus_environment.hpp"
+#include "helpers.hpp"
 #include "mocks/json_storage_mock.hpp"
 #include "mocks/metric_mock.hpp"
 #include "mocks/report_manager_mock.hpp"
 #include "params/report_params.hpp"
-#include "printers.hpp"
 #include "report.hpp"
 #include "report_manager.hpp"
 #include "utils/conv_container.hpp"
@@ -43,9 +43,18 @@ class TestReport : public Test
 
         for (size_t i = 0; i < metricMocks.size(); ++i)
         {
-            ON_CALL(*metricMocks[i], to_json())
-                .WillByDefault(
-                    Return(nlohmann::json("metric"s + std::to_string(i))));
+            using namespace std::string_literals;
+
+            auto id = std::to_string(i);
+
+            auto sensorParameters = std::vector<LabeledSensorParameters>(
+                {LabeledSensorParameters("service"s + id, "path"s + id)});
+            auto metricParameters =
+                LabeledMetricParameters(std::move(sensorParameters), "op"s + id,
+                                        "id"s + id, "metadata"s + id);
+
+            ON_CALL(*metricMocks[i], dumpConfiguration())
+                .WillByDefault(Return(std::move(metricParameters)));
         }
     }
 
@@ -232,19 +241,35 @@ class TestReportStore :
 
 INSTANTIATE_TEST_SUITE_P(
     _, TestReportStore,
-    Values(std::make_pair("Version"s, nlohmann::json(1)),
-           std::make_pair("Name"s, nlohmann::json(ReportParams().reportName())),
-           std::make_pair("ReportingType",
-                          nlohmann::json(ReportParams().reportingType())),
-           std::make_pair("EmitsReadingsUpdate",
-                          nlohmann::json(ReportParams().emitReadingUpdate())),
-           std::make_pair(
-               "LogToMetricReportsCollection",
-               nlohmann::json(ReportParams().logToMetricReportCollection())),
-           std::make_pair("Interval",
-                          nlohmann::json(ReportParams().interval().count())),
-           std::make_pair("ReadingParameters",
-                          nlohmann::json({"metric0", "metric1", "metric2"}))));
+    Values(
+        std::make_pair("Version"s, nlohmann::json(1)),
+        std::make_pair("Name"s, nlohmann::json(ReportParams().reportName())),
+        std::make_pair("ReportingType",
+                       nlohmann::json(ReportParams().reportingType())),
+        std::make_pair("EmitsReadingsUpdate",
+                       nlohmann::json(ReportParams().emitReadingUpdate())),
+        std::make_pair(
+            "LogToMetricReportsCollection",
+            nlohmann::json(ReportParams().logToMetricReportCollection())),
+        std::make_pair("Interval",
+                       nlohmann::json(ReportParams().interval().count())),
+        std::make_pair(
+            "ReadingParameters",
+            nlohmann::json({{{"sensorPaths",
+                              {{{"service", "service0"}, {"path", "path0"}}}},
+                             {"operationType", "op0"},
+                             {"id", "id0"},
+                             {"metricMetadata", "metadata0"}},
+                            {{"sensorPaths",
+                              {{{"service", "service1"}, {"path", "path1"}}}},
+                             {"operationType", "op1"},
+                             {"id", "id1"},
+                             {"metricMetadata", "metadata1"}},
+                            {{"sensorPaths",
+                              {{{"service", "service2"}, {"path", "path2"}}}},
+                             {"operationType", "op2"},
+                             {"id", "id2"},
+                             {"metricMetadata", "metadata2"}}}))));
 
 TEST_P(TestReportStore, settingPersistencyToTrueStoresReport)
 {
