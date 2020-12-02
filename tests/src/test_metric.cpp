@@ -1,8 +1,7 @@
-#include "helpers/metric_value_helpers.hpp"
+#include "helpers.hpp"
 #include "interfaces/sensor.hpp"
 #include "metric.hpp"
 #include "mocks/sensor_mock.hpp"
-#include "printers.hpp"
 #include "utils/conv_container.hpp"
 
 #include <gmock/gmock.h>
@@ -83,19 +82,29 @@ TEST_F(TestMetric, throwsWhenUpdateIsPerformedOnUnknownSensor)
                  std::out_of_range);
 }
 
-TEST_F(TestMetric, containsIdInJsonDump)
+TEST_F(TestMetric, containsIdInConfigurationDump)
 {
-    ASSERT_THAT(sut->to_json().at("id"), Eq(nlohmann::json("id")));
+    const auto conf = sut->dumpConfiguration();
+
+    EXPECT_THAT(conf.at_label<utils::tstring::Id>(), Eq("id"));
+    EXPECT_THAT(conf.to_json().at("id"), Eq(nlohmann::json("id")));
 }
 
 TEST_F(TestMetric, containsOpInJsonDump)
 {
-    ASSERT_THAT(sut->to_json().at("operationType"), Eq(nlohmann::json("op")));
+    const auto conf = sut->dumpConfiguration();
+
+    EXPECT_THAT(conf.at_label<utils::tstring::OperationType>(), Eq("op"));
+    EXPECT_THAT(conf.to_json().at("operationType"), Eq(nlohmann::json("op")));
 }
 
 TEST_F(TestMetric, containsMetadataInJsonDump)
 {
-    ASSERT_THAT(sut->to_json().at("metricMetadata"),
+    const auto conf = sut->dumpConfiguration();
+
+    EXPECT_THAT(conf.at_label<utils::tstring::MetricMetadata>(),
+                Eq("metadata"));
+    EXPECT_THAT(conf.to_json().at("metricMetadata"),
                 Eq(nlohmann::json("metadata")));
 }
 
@@ -109,7 +118,15 @@ TEST_F(TestMetric, containsSensorPathsInJsonDump)
                 Return(SensorMock::makeId("service" + no, "path" + no)));
     }
 
-    ASSERT_THAT(sut->to_json().at("sensorPaths"),
-                Eq(nlohmann::json(
-                    {"service0:path0", "service1:path1", "service2:path2"})));
+    const auto conf = sut->dumpConfiguration();
+
+    EXPECT_THAT(conf.at_label<utils::tstring::SensorPaths>(),
+                ElementsAre(LabeledSensorParameters("service0", "path0"),
+                            LabeledSensorParameters("service1", "path1"),
+                            LabeledSensorParameters("service2", "path2")));
+    EXPECT_THAT(
+        conf.to_json().at("sensorPaths"),
+        Eq(nlohmann::json({{{"service", "service0"}, {"path", "path0"}},
+                           {{"service", "service1"}, {"path", "path1"}},
+                           {{"service", "service2"}, {"path", "path2"}}})));
 }
