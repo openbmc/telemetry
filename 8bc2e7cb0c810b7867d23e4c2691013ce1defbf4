@@ -1,0 +1,10 @@
+Ok-To-Test+1: OpenBMC CI <openbmcbump-ci@yahoo.com>
+Code-Review+1: Jozef Wludzik <jozef.wludzik@intel.com>
+Code-Review+1: Krzysztof Grobelny <krzysztof.grobelny@intel.com>
+Code-Review+2: Adrian Ambrożewicz <adrian.ambrozewicz@linux.intel.com>
+Verified+1: OpenBMC CI <openbmcbump-ci@yahoo.com>
+Submitted-by: Jozef Wludzik <jozef.wludzik@intel.com>
+Submitted-at: Mon, 07 Dec 2020 11:52:08 +0000
+Reviewed-on: https://gerrit.openbmc-project.xyz/c/openbmc/telemetry/+/38791
+Project: openbmc/telemetry
+Branch: refs/heads/master
