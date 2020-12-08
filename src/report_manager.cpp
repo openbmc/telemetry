@@ -57,7 +57,9 @@ void ReportManager::removeReport(const interfaces::Report* report)
 }
 
 void ReportManager::verifyAddReport(const std::string& reportName,
-                                    std::chrono::milliseconds interval)
+                                    const std::string& reportingType,
+                                    std::chrono::milliseconds interval,
+                                    const ReadingParameters& readingParams)
 {
     if (reports.size() >= maxReports)
     {
@@ -75,10 +77,36 @@ void ReportManager::verifyAddReport(const std::string& reportName,
         }
     }
 
-    if (interval < minInterval)
+    auto found = std::find(supportedReportingType.begin(),
+                           supportedReportingType.end(), reportingType);
+    if (found == supportedReportingType.end())
+    {
+        throw sdbusplus::exception::SdBusError(
+            static_cast<int>(std::errc::invalid_argument),
+            "Invalid reportingType");
+    }
+
+    if (reportingType == "Periodic" && interval < minInterval)
     {
         throw sdbusplus::exception::SdBusError(
             static_cast<int>(std::errc::invalid_argument), "Invalid interval");
+    }
+
+    for (const auto& param : readingParams)
+    {
+        const auto& sensors = std::get<0>(param);
+        if (sensors.size() != 1)
+        {
+            throw sdbusplus::exception::SdBusError(
+                static_cast<int>(std::errc::not_supported),
+                "Only single sensor per metric is allowed");
+        }
+    }
+    if (readingParams.size() >= maxReadingParams)
+    {
+        throw sdbusplus::exception::SdBusError(
+            static_cast<int>(std::errc::argument_list_too_long),
+            "Too many reading parameters");
     }
 }
 
@@ -88,7 +116,7 @@ interfaces::Report& ReportManager::addReport(
     const bool logToMetricReportsCollection, std::chrono::milliseconds interval,
     ReadingParameters metricParams)
 {
-    verifyAddReport(reportName, interval);
+    verifyAddReport(reportName, reportingType, interval, metricParams);
 
     reports.emplace_back(reportFactory->make(
         yield, reportName, reportingType, emitsReadingsUpdate,
@@ -103,8 +131,6 @@ interfaces::Report& ReportManager::addReport(
     std::chrono::milliseconds interval,
     std::vector<LabeledMetricParameters> labeledMetricParams)
 {
-    verifyAddReport(reportName, interval);
-
     auto metricParams = utils::transform(
         labeledMetricParams, [](const LabeledMetricParameters& param) {
             using namespace utils::tstring;
@@ -117,6 +143,8 @@ interfaces::Report& ReportManager::addReport(
                                  }),
                 param.at_index<1>(), param.at_index<2>(), param.at_index<3>());
         });
+
+    verifyAddReport(reportName, reportingType, interval, metricParams);
 
     reports.emplace_back(reportFactory->make(
         reportName, reportingType, emitsReadingsUpdate,
