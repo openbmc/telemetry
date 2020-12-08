@@ -120,10 +120,44 @@ TEST_F(TestReportManager, DISABLED_failToAddReportWithInvalidInterval)
     reportFactoryMock.expectMake(std::nullopt, Ref(*sut), Ref(storageMock), _)
         .Times(0);
 
+    reportParams.reportingType("Periodic");
     reportParams.interval(reportParams.interval() - 1ms);
 
     auto [ec, path] = addReport(reportParams);
     EXPECT_THAT(ec.value(), Eq(boost::system::errc::invalid_argument));
+    EXPECT_THAT(path, Eq(std::string()));
+}
+
+TEST_F(TestReportManager, DISABLED_failToAddReportWithInvalidReportingType)
+{
+    reportFactoryMock.expectMake(_, std::nullopt, Ref(*sut), Ref(storageMock))
+        .Times(0);
+    reportFactoryMock.expectMake(std::nullopt, Ref(*sut), Ref(storageMock), _)
+        .Times(0);
+
+    reportParams.reportingType("Invalid");
+
+    auto [ec, path] = addReport(reportParams);
+    EXPECT_THAT(ec.value(), Eq(boost::system::errc::invalid_argument));
+    EXPECT_THAT(path, Eq(std::string()));
+}
+
+TEST_F(TestReportManager, DISABLED_failToAddReportWithMoreSensorsThanExpected)
+{
+    reportFactoryMock.expectMake(_, std::nullopt, Ref(*sut), Ref(storageMock))
+        .Times(0);
+    reportFactoryMock.expectMake(std::nullopt, Ref(*sut), Ref(storageMock), _)
+        .Times(0);
+
+    auto readingParams = reportParams.readingParameters();
+    for (size_t i = 0; i < ReportManager::maxReadingParams + 1; i++)
+    {
+        readingParams.push_back(readingParams.front());
+    }
+    reportParams.readingParameters(std::move(readingParams));
+
+    auto [ec, path] = addReport(reportParams);
+    EXPECT_THAT(ec.value(), Eq(boost::system::errc::argument_list_too_long));
     EXPECT_THAT(path, Eq(std::string()));
 }
 

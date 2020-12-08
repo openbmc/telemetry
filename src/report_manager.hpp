@@ -9,6 +9,7 @@
 
 #include <chrono>
 #include <memory>
+#include <string>
 #include <vector>
 
 class ReportManager : public interfaces::ReportManager
@@ -36,7 +37,9 @@ class ReportManager : public interfaces::ReportManager
     std::vector<std::unique_ptr<interfaces::Report>> reports;
 
     void verifyAddReport(const std::string& reportName,
-                         std::chrono::milliseconds interval);
+                         const std::string& reportingType,
+                         std::chrono::milliseconds interval,
+                         const ReadingParameters& readingParams);
     interfaces::Report& addReport(boost::asio::yield_context& yield,
                                   const std::string& reportName,
                                   const std::string& reportingType,
@@ -53,9 +56,12 @@ class ReportManager : public interfaces::ReportManager
 
   public:
     static constexpr uint32_t maxReports{20};
+    static constexpr uint32_t maxReadingParams{200};
     static constexpr std::chrono::milliseconds minInterval{1000};
     static constexpr const char* reportManagerIfaceName =
         "xyz.openbmc_project.Telemetry.ReportManager";
     static constexpr const char* reportManagerPath =
         "/xyz/openbmc_project/Telemetry/Reports";
+    static constexpr std::array<std::string_view, 2> supportedReportingType = {
+        "Periodic", "OnRequest"};
 };
