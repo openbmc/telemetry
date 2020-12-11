@@ -24,7 +24,7 @@ ReportManager::ReportManager(
     reportManagerIface = objServer->add_unique_interface(
         reportManagerPath, reportManagerIfaceName, [this](auto& dbusIface) {
             dbusIface.register_property_r(
-                "MaxReports", uint32_t{}, sdbusplus::vtable::property_::const_,
+                "MaxReports", size_t{}, sdbusplus::vtable::property_::const_,
                 [](const auto&) { return maxReports; });
             dbusIface.register_property_r(
                 "MinInterval", uint64_t{}, sdbusplus::vtable::property_::const_,
@@ -102,7 +102,7 @@ void ReportManager::verifyAddReport(const std::string& reportName,
                 "Only single sensor per metric is allowed");
         }
     }
-    if (readingParams.size() >= maxReadingParams)
+    if (readingParams.size() > maxReadingParams)
     {
         throw sdbusplus::exception::SdBusError(
             static_cast<int>(std::errc::argument_list_too_long),

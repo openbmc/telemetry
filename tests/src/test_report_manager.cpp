@@ -87,7 +87,7 @@ TEST_F(TestReportManager, minInterval)
 
 TEST_F(TestReportManager, maxReports)
 {
-    EXPECT_THAT(getProperty<uint32_t>("MaxReports"),
+    EXPECT_THAT(getProperty<size_t>("MaxReports"),
                 Eq(ReportManager::maxReports));
 }
 

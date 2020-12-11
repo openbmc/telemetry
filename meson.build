@@ -68,6 +68,13 @@ else
     )
 endif
 
+add_project_arguments(
+    '-DTELEMETRY_MAX_REPORTS=' + get_option('max-reports').to_string(),
+    '-DTELEMETRY_MAX_READING_PARAMS=' + get_option('max-reading-parameters').to_string(),
+    '-DTELEMETRY_MIN_INTERVAL=' + get_option('min-interval').to_string(),
+    language: 'cpp'
+)
+
 executable(
     'telemetry',
     [
