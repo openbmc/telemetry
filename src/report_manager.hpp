@@ -55,9 +55,9 @@ class ReportManager : public interfaces::ReportManager
     void loadFromPersistent();
 
   public:
-    static constexpr uint32_t maxReports{20};
-    static constexpr uint32_t maxReadingParams{200};
-    static constexpr std::chrono::milliseconds minInterval{1000};
+    static constexpr size_t maxReports{TELEMETRY_MAX_REPORTS};
+    static constexpr size_t maxReadingParams{TELEMETRY_MAX_READING_PARAMS};
+    static constexpr std::chrono::milliseconds minInterval{TELEMETRY_MIN_INTERVAL};
     static constexpr const char* reportManagerIfaceName =
         "xyz.openbmc_project.Telemetry.ReportManager";
     static constexpr const char* reportManagerPath =
