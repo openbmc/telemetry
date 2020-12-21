@@ -4,6 +4,8 @@
 #include "report_factory.hpp"
 #include "report_manager.hpp"
 #include "sensor_cache.hpp"
+#include "trigger_factory.hpp"
+#include "trigger_manager.hpp"
 
 #include <sdbusplus/asio/connection.hpp>
 #include <sdbusplus/asio/object_server.hpp>
@@ -19,10 +21,13 @@ class Telemetry
                       std::make_unique<PersistentJsonStorage>(
                           interfaces::JsonStorage::DirectoryPath(
                               "/var/lib/telemetry/Reports")),
-                      objServer)
+                      objServer),
+        triggerManager(std::make_unique<TriggerFactory>(bus, objServer),
+                       objServer)
     {}
 
   private:
     std::shared_ptr<sdbusplus::asio::object_server> objServer;
     ReportManager reportManager;
+    TriggerManager triggerManager;
 };
