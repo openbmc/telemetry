@@ -27,7 +27,6 @@ class ReportManager : public interfaces::ReportManager
     ReportManager& operator=(ReportManager&&) = delete;
 
     void removeReport(const interfaces::Report* report) override;
-    static bool verifyScanPeriod(const uint64_t scanPeriod);
 
   private:
     std::unique_ptr<interfaces::ReportFactory> reportFactory;
