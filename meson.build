@@ -72,6 +72,7 @@ add_project_arguments(
     '-DTELEMETRY_MAX_REPORTS=' + get_option('max-reports').to_string(),
     '-DTELEMETRY_MAX_READING_PARAMS=' + get_option('max-reading-parameters').to_string(),
     '-DTELEMETRY_MIN_INTERVAL=' + get_option('min-interval').to_string(),
+    '-DTELEMETRY_MAX_TRIGGERS=' + get_option('max-triggers').to_string(),
     language: 'cpp'
 )
 
@@ -86,6 +87,9 @@ executable(
         'src/report_manager.cpp',
         'src/sensor.cpp',
         'src/sensor_cache.cpp',
+        'src/trigger.cpp',
+        'src/trigger_factory.cpp',
+        'src/trigger_manager.cpp',
     ],
     dependencies: [
         boost,
