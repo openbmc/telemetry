@@ -1,13 +1,13 @@
 #pragma once
 
-#include "interfaces/report.hpp"
+#include "interfaces/trigger.hpp"
 
 #include <gmock/gmock.h>
 
-class ReportMock : public interfaces::Report
+class TriggerMock : public interfaces::Trigger
 {
   public:
-    ReportMock(std::string name)
+    TriggerMock(std::string name)
     {
         using namespace testing;
 
@@ -16,12 +16,12 @@ class ReportMock : public interfaces::Report
         EXPECT_CALL(*this, Die).Times(AnyNumber());
     }
 
-    virtual ~ReportMock()
+    virtual ~TriggerMock()
     {
         Die();
     }
 
-    MOCK_METHOD(std::string, getName, (), (override, const));
-    MOCK_METHOD(std::string, getPath, (), (override, const));
+    MOCK_METHOD(std::string, getName, (), (const, override));
+    MOCK_METHOD(std::string, getPath, (), (const, override));
     MOCK_METHOD(void, Die, ());
 };
