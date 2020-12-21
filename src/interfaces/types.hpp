@@ -27,3 +27,12 @@ using LabeledMetricParameters =
 using Readings = std::tuple<
     uint64_t,
     std::vector<std::tuple<std::string, std::string, double, uint64_t>>>;
+
+using DiscreteThreshold =
+    std::tuple<std::string, std::string, std::variant<double>, uint64_t>;
+using DiscreteThresholds =
+    std::tuple<std::string, std::vector<DiscreteThreshold>>;
+
+using NumericThreshold = std::tuple<std::string, uint64_t, std::string, double>;
+using TriggerThresholds =
+    std::variant<DiscreteThresholds, std::vector<NumericThreshold>>;
