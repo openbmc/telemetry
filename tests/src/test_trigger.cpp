@@ -24,7 +24,8 @@ class TestTrigger : public Test
             triggerParams.name(), triggerParams.isDiscrete(),
             triggerParams.logToJournal(), triggerParams.logToRedfish(),
             triggerParams.updateReport(), triggerParams.sensors(),
-            triggerParams.reportNames(), triggerParams.thresholds(),
+            triggerParams.reportNames(), triggerParams.thresholdParams(),
+            std::vector<std::shared_ptr<interfaces::Threshold>>{},
             *triggerManagerMockPtr);
     }
 
@@ -74,7 +75,7 @@ TEST_F(TestTrigger, checkIfPropertiesAreSet)
         Eq(triggerParams.reportNames()));
     EXPECT_THAT(
         getProperty<TriggerThresholdParams>(sut->getPath(), "Thresholds"),
-        Eq(triggerParams.thresholds()));
+        Eq(triggerParams.thresholdParams()));
 }
 
 TEST_F(TestTrigger, deleteTrigger)
