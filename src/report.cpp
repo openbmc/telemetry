@@ -190,7 +190,7 @@ bool Report::storeConfiguration() const
     {
         phosphor::logging::log<phosphor::logging::level::ERR>(
             "Failed to store a report in storage",
-            phosphor::logging::entry("msg=", e.what()));
+            phosphor::logging::entry("EXCEPTION_MSG=", e.what()));
         return false;
     }
 
