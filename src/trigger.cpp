@@ -10,10 +10,12 @@ Trigger::Trigger(
     const std::vector<sdbusplus::message::object_path>& sensorsIn,
     const std::vector<std::string>& reportNamesIn,
     const TriggerThresholdParams& thresholdParamsIn,
+    std::vector<std::shared_ptr<interfaces::Threshold>>&& thresholdsIn,
     interfaces::TriggerManager& triggerManager) :
     name(nameIn),
     path(triggerDir + name), persistent(false), sensors(sensorsIn),
-    reportNames(reportNamesIn), thresholdParams(thresholdParamsIn)
+    reportNames(reportNamesIn), thresholdParams(thresholdParamsIn),
+    thresholds(std::move(thresholdsIn))
 {
     deleteIface = objServer->add_unique_interface(
         path, deleteIfaceName, [this, &ioc, &triggerManager](auto& dbusIface) {
@@ -56,4 +58,9 @@ Trigger::Trigger(
                                           sdbusplus::vtable::property_::const_,
                                           [](const auto& x) { return x; });
         });
+
+    for (const auto& threshold : thresholds)
+    {
+        threshold->initialize();
+    }
 }

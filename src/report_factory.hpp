@@ -12,7 +12,8 @@ class ReportFactory : public interfaces::ReportFactory
   public:
     ReportFactory(
         std::shared_ptr<sdbusplus::asio::connection> bus,
-        const std::shared_ptr<sdbusplus::asio::object_server>& objServer);
+        const std::shared_ptr<sdbusplus::asio::object_server>& objServer,
+        SensorCache& sensorCache);
 
     std::unique_ptr<interfaces::Report>
         make(boost::asio::yield_context& yield, const std::string& name,
@@ -33,12 +34,6 @@ class ReportFactory : public interfaces::ReportFactory
             const override;
 
   private:
-    using SensorPath = std::string;
-    using ServiceName = std::string;
-    using Ifaces = std::vector<std::string>;
-    using SensorIfaces = std::vector<std::pair<ServiceName, Ifaces>>;
-    using SensorTree = std::pair<SensorPath, SensorIfaces>;
-
     std::vector<std::shared_ptr<interfaces::Sensor>> getSensors(
         const std::vector<LabeledSensorParameters>& sensorPaths) const;
     std::vector<LabeledMetricParameters>
@@ -47,5 +42,5 @@ class ReportFactory : public interfaces::ReportFactory
 
     std::shared_ptr<sdbusplus::asio::connection> bus;
     std::shared_ptr<sdbusplus::asio::object_server> objServer;
-    mutable SensorCache sensorCache;
+    SensorCache& sensorCache;
 };
