@@ -1,5 +1,6 @@
 #pragma once
 
+#include "interfaces/threshold.hpp"
 #include "interfaces/trigger.hpp"
 #include "interfaces/trigger_manager.hpp"
 #include "interfaces/trigger_types.hpp"
@@ -20,7 +21,8 @@ class Trigger : public interfaces::Trigger
         const std::vector<
             std::pair<sdbusplus::message::object_path, std::string>>& sensorsIn,
         const std::vector<std::string>& reportNames,
-        const TriggerThresholdParams& thresholds,
+        const TriggerThresholdParams& thresholdParams,
+        std::vector<std::shared_ptr<interfaces::Threshold>>&& thresholds,
         interfaces::TriggerManager& triggerManager);
 
     Trigger(const Trigger&) = delete;
@@ -46,9 +48,9 @@ class Trigger : public interfaces::Trigger
         sensors;
     std::vector<std::string> reportNames;
     TriggerThresholdParams thresholdParams;
-
     std::unique_ptr<sdbusplus::asio::dbus_interface> deleteIface;
     std::unique_ptr<sdbusplus::asio::dbus_interface> triggerIface;
+    std::vector<std::shared_ptr<interfaces::Threshold>> thresholds;
 
   public:
     static constexpr const char* triggerIfaceName =

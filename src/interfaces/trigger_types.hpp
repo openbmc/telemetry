@@ -4,8 +4,8 @@
 
 #include <string>
 #include <tuple>
-#include <vector>
 #include <utility>
+#include <vector>
 
 namespace discrete
 {
