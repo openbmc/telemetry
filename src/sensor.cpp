@@ -39,8 +39,8 @@ void Sensor::async_read(std::shared_ptr<utils::UniqueCall::Lock> lock)
          weakSelf = weak_from_this()](boost::system::error_code ec) {
             phosphor::logging::log<phosphor::logging::level::WARNING>(
                 "DBus 'GetProperty' call failed on Sensor Value",
-                phosphor::logging::entry("sensor=%s, ec=%lu", id.str().c_str(),
-                                         ec.value()));
+                phosphor::logging::entry("SENSOR=%s", id.str().c_str()),
+                phosphor::logging::entry("ERROR_CODE=%d", ec.value()));
         },
         [lock, weakSelf = weak_from_this()](double newValue) {
             if (auto self = weakSelf.lock())
@@ -147,7 +147,7 @@ void Sensor::signalProc(const std::weak_ptr<Sensor>& weakSelf,
                     phosphor::logging::log<phosphor::logging::level::ERR>(
                         "Failed to receive Value from Sensor "
                         "PropertiesChanged signal",
-                        phosphor::logging::entry("sensor=%s",
+                        phosphor::logging::entry("SENSOR=%s",
                                                  self->sensorId.path.c_str()));
                 }
             }

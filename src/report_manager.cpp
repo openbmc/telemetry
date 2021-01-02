@@ -190,9 +190,9 @@ void ReportManager::loadFromPersistent()
             phosphor::logging::log<phosphor::logging::level::ERR>(
                 "Failed to load report from storage",
                 phosphor::logging::entry(
-                    "filename=",
+                    "FILENAME=%s",
                     static_cast<std::filesystem::path>(path).c_str()),
-                phosphor::logging::entry("msg=", e.what()));
+                phosphor::logging::entry("EXCEPTION_MSG=%s", e.what()));
             reportStorage->remove(path);
         }
     }
