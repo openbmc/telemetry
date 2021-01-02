@@ -18,7 +18,7 @@ void PersistentJsonStorage::store(const FilePath& filePath,
         std::error_code ec;
 
         phosphor::logging::log<phosphor::logging::level::DEBUG>(
-            "Store to file", phosphor::logging::entry("path=%s", path.c_str()));
+            "Store to file", phosphor::logging::entry("PATH=%s", path.c_str()));
 
         std::filesystem::create_directories(path.parent_path(), ec);
         if (ec)
@@ -55,8 +55,8 @@ bool PersistentJsonStorage::remove(const FilePath& filePath)
     {
         phosphor::logging::log<phosphor::logging::level::ERR>(
             "Unable to remove file",
-            phosphor::logging::entry("path=%s, ec= %lu: %s", path.c_str(),
-                                     ec.value(), ec.message().c_str()));
+            phosphor::logging::entry("PATH=%s", path.c_str()),
+            phosphor::logging::entry("ERROR_CODE=%d", ec.value());
         return false;
     }
 
