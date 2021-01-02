@@ -18,7 +18,7 @@ class TriggerFactory : public interfaces::TriggerFactory
              const bool updateReport,
              const std::vector<sdbusplus::message::object_path>& sensors,
              const std::vector<std::string>& reportNames,
-             const TriggerThresholds& thresholds,
+             const TriggerThresholdParams& thresholds,
              interfaces::TriggerManager& triggerManager) const override;
 
   private:

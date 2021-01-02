@@ -7,6 +7,7 @@
 
 #include <string>
 #include <tuple>
+#include <type_traits>
 #include <vector>
 
 using ReadingParameters =
@@ -28,11 +29,43 @@ using Readings = std::tuple<
     uint64_t,
     std::vector<std::tuple<std::string, std::string, double, uint64_t>>>;
 
-using DiscreteThreshold =
-    std::tuple<std::string, std::string, std::variant<double>, uint64_t>;
-using DiscreteThresholds =
-    std::tuple<std::string, std::vector<DiscreteThreshold>>;
+enum DiscreteConditionType : int
+{
+    changed = 0,
+    specified
+};
 
-using NumericThreshold = std::tuple<std::string, uint64_t, std::string, double>;
-using TriggerThresholds =
-    std::variant<DiscreteThresholds, std::vector<NumericThreshold>>;
+enum DiscreteSeverityType : int
+{
+    ok = 0,
+    warning,
+    critical
+};
+
+using DiscreteThresholdParam =
+    std::tuple<std::string, std::underlying_type_t<DiscreteSeverityType>,
+               std::variant<double>, uint64_t>;
+using DiscreteThresholdParams =
+    std::tuple<std::underlying_type_t<DiscreteConditionType>,
+               std::vector<DiscreteThresholdParam>>;
+
+enum NumericThresholdType : int
+{
+    lowerCritical = 0,
+    lowerWarning,
+    upperWarning,
+    upperCritical
+};
+
+enum NumericActivationType : int
+{
+    either = 0,
+    decreasing,
+    increasing
+};
+
+using NumericThresholdParam =
+    std::tuple<std::underlying_type_t<NumericThresholdType>, uint64_t,
+               std::underlying_type_t<NumericActivationType>, double>;
+using TriggerThresholdParams =
+    std::variant<DiscreteThresholdParams, std::vector<NumericThresholdParam>>;

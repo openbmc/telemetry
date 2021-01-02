@@ -71,8 +71,9 @@ TEST_F(TestTrigger, checkIfPropertiesAreSet)
     EXPECT_THAT(
         getProperty<std::vector<std::string>>(sut->getPath(), "ReportNames"),
         Eq(triggerParams.reportNames()));
-    EXPECT_THAT(getProperty<TriggerThresholds>(sut->getPath(), "Thresholds"),
-                Eq(triggerParams.thresholds()));
+    EXPECT_THAT(
+        getProperty<TriggerThresholdParams>(sut->getPath(), "Thresholds"),
+        Eq(triggerParams.thresholds()));
 }
 
 TEST_F(TestTrigger, deleteTrigger)

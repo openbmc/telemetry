@@ -24,6 +24,7 @@ test(
         'telemetry-ut',
         [
             '../src/metric.cpp',
+            '../src/numeric_threshold.cpp',
             '../src/persistent_json_storage.cpp',
             '../src/report.cpp',
             '../src/report_factory.cpp',
@@ -37,6 +38,7 @@ test(
             'src/stubs/dbus_sensor_object.cpp',
             'src/test_detached_timer.cpp',
             'src/test_metric.cpp',
+            'src/test_numeric_threshold.cpp',
             'src/test_persistent_json_storage.cpp',
             'src/test_report.cpp',
             'src/test_report_manager.cpp',

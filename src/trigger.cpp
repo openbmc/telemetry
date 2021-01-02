@@ -9,10 +9,11 @@ Trigger::Trigger(
     const bool logToRedfish, const bool updateReport,
     const std::vector<sdbusplus::message::object_path>& sensors,
     const std::vector<std::string>& reportNames,
-    const TriggerThresholds& thresholds,
+    const TriggerThresholdParams& thresholdParams,
     interfaces::TriggerManager& triggerManager) :
     name(nameIn),
     path(triggerDir + name), persistent(false)
+
 {
     deleteIface = objServer->add_unique_interface(
         path, deleteIfaceName, [this, &ioc, &triggerManager](auto& dbusIface) {
@@ -30,7 +31,7 @@ Trigger::Trigger(
                 sdbusplus::vtable::property_::emits_change,
                 [this](const auto& x) { return x; });
             dbusIface.register_property_r(
-                "Thresholds", thresholds,
+                "Thresholds", thresholdParams,
                 sdbusplus::vtable::property_::emits_change,
                 [](const auto& x) { return x; });
             dbusIface.register_property_r(

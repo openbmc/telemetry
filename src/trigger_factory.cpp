@@ -14,7 +14,7 @@ std::unique_ptr<interfaces::Trigger> TriggerFactory::make(
     const bool logToRedfish, const bool updateReport,
     const std::vector<sdbusplus::message::object_path>& sensors,
     const std::vector<std::string>& reportNames,
-    const TriggerThresholds& thresholds,
+    const TriggerThresholdParams& thresholds,
     interfaces::TriggerManager& reportManager) const
 {
     return std::make_unique<Trigger>(bus->get_io_context(), objServer, name,
