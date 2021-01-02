@@ -2,6 +2,8 @@
 
 #include "interfaces/types.hpp"
 
+#include <chrono>
+
 class TriggerParams
 {
   public:
@@ -57,7 +59,16 @@ class TriggerParams
     bool logToJournalProperty = false;
     bool logToRedfishProperty = false;
     bool updateReportProperty = false;
-    std::vector<sdbusplus::message::object_path> sensorsProperty = {};
-    std::vector<std::string> reportNamesProperty = {};
-    TriggerThresholdParams thresholdsProperty = {};
+    std::vector<sdbusplus::message::object_path> sensorsProperty = {
+        sdbusplus::message::object_path(
+            "/xyz/openbmc_project/sensors/temperature/BMC_Temp")};
+    std::vector<std::string> reportNamesProperty = {"Report1"};
+    TriggerThresholdParams thresholdsProperty =
+        std::vector<NumericThresholdParam>{
+            {NumericThresholdType::lowerCritical,
+             std::chrono::milliseconds(10).count(),
+             NumericActivationType::decreasing, 0.0},
+            {NumericThresholdType::upperCritical,
+             std::chrono::milliseconds(10).count(),
+             NumericActivationType::increasing, 90.0}};
 };
