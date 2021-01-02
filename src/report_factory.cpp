@@ -3,6 +3,7 @@
 #include "metric.hpp"
 #include "report.hpp"
 #include "sensor.hpp"
+#include "utils/dbus_mapper.hpp"
 #include "utils/transform.hpp"
 
 ReportFactory::ReportFactory(
@@ -68,19 +69,7 @@ std::vector<LabeledMetricParameters> ReportFactory::convertMetricParams(
     boost::asio::yield_context& yield,
     const ReadingParameters& metricParams) const
 {
-    std::array<const char*, 1> interfaces = {
-        "xyz.openbmc_project.Sensor.Value"};
-    boost::system::error_code ec;
-
-    auto tree = bus->yield_method_call<std::vector<SensorTree>>(
-        yield, ec, "xyz.openbmc_project.ObjectMapper",
-        "/xyz/openbmc_project/object_mapper",
-        "xyz.openbmc_project.ObjectMapper", "GetSubTree",
-        "/xyz/openbmc_project/sensors", 2, interfaces);
-    if (ec)
-    {
-        throw std::runtime_error("Failed to query ObjectMapper!");
-    }
+    auto tree = utils::getSubTreeSensors(yield, bus);
 
     return utils::transform(metricParams, [&tree](const auto& item) {
         std::vector<LabeledSensorParameters> sensors;

@@ -24,7 +24,7 @@ class TestTriggerManager : public Test
             TriggerManager::triggerManagerIfaceName, "AddTrigger",
             params.name(), params.isDiscrete(), params.logToJournal(),
             params.logToRedfish(), params.updateReport(), params.sensors(),
-            params.reportNames(), params.thresholds());
+            params.reportNames(), params.thresholdParams());
         return DbusEnvironment::waitForFuture(addTriggerPromise.get_future());
     }
 

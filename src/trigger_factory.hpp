@@ -1,6 +1,8 @@
 #pragma once
 
+#include "interfaces/sensor.hpp"
 #include "interfaces/trigger_factory.hpp"
+#include "sensor_cache.hpp"
 
 #include <sdbusplus/asio/object_server.hpp>
 
@@ -13,10 +15,10 @@ class TriggerFactory : public interfaces::TriggerFactory
                    std::shared_ptr<sdbusplus::asio::object_server> objServer);
 
     std::unique_ptr<interfaces::Trigger>
-        make(const std::string& name, const bool isDiscrete,
-             const bool logToJournal, const bool logToRedfish,
-             const bool updateReport,
-             const std::vector<sdbusplus::message::object_path>& sensors,
+        make(boost::asio::yield_context& yield, const std::string& name,
+             const bool isDiscrete, const bool logToJournal,
+             const bool logToRedfish, const bool updateReport,
+             const std::vector<sdbusplus::message::object_path>& sensorPaths,
              const std::vector<std::string>& reportNames,
              const TriggerThresholdParams& thresholdParams,
              interfaces::TriggerManager& triggerManager) const override;
@@ -24,4 +26,9 @@ class TriggerFactory : public interfaces::TriggerFactory
   private:
     std::shared_ptr<sdbusplus::asio::connection> bus;
     std::shared_ptr<sdbusplus::asio::object_server> objServer;
+    mutable SensorCache sensorCache;
+
+    std::vector<std::shared_ptr<interfaces::Sensor>> getSensors(
+        boost::asio::yield_context& yield,
+        const std::vector<sdbusplus::message::object_path>& sensorPaths) const;
 };
