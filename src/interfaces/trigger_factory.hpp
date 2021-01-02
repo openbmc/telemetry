@@ -20,7 +20,7 @@ class TriggerFactory
              const bool updateReport,
              const std::vector<sdbusplus::message::object_path>& sensors,
              const std::vector<std::string>& reportNames,
-             const TriggerThresholdParams& thresholdParams,
+             const TriggerThresholdParams& thresholds,
              TriggerManager& triggerManager) const = 0;
 };
 
