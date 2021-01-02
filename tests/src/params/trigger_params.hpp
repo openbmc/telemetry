@@ -2,6 +2,7 @@
 
 #include "interfaces/trigger_types.hpp"
 
+#include <chrono>
 #include <utility>
 
 class TriggerParams
@@ -49,7 +50,7 @@ class TriggerParams
         return reportNamesProperty;
     }
 
-    const TriggerThresholdParams& thresholds() const
+    const TriggerThresholdParams& thresholdParams() const
     {
         return thresholdsProperty;
     }
@@ -61,7 +62,17 @@ class TriggerParams
     bool logToRedfishProperty = false;
     bool updateReportProperty = false;
     std::vector<std::pair<sdbusplus::message::object_path, std::string>>
-        sensorsProperty = {};
-    std::vector<std::string> reportNamesProperty = {};
-    TriggerThresholdParams thresholdsProperty = {};
+        sensorsProperty = {
+            {sdbusplus::message::object_path(
+                 "/xyz/openbmc_project/sensors/temperature/BMC_Temp"),
+             ""}};
+    std::vector<std::string> reportNamesProperty = {"Report1"};
+    TriggerThresholdParams thresholdsProperty =
+        std::vector<numeric::ThresholdParam>{
+            {static_cast<int>(numeric::Type::lowerCritical),
+             std::chrono::milliseconds(10).count(),
+             static_cast<int>(numeric::Direction::decreasing), 0.0},
+            {static_cast<int>(numeric::Type::upperCritical),
+             std::chrono::milliseconds(10).count(),
+             static_cast<int>(numeric::Direction::increasing), 90.0}};
 };
