@@ -1,5 +1,4 @@
 #include "helpers.hpp"
-#include "interfaces/sensor.hpp"
 #include "metric.hpp"
 #include "mocks/sensor_mock.hpp"
 #include "utils/conv_container.hpp"

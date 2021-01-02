@@ -13,19 +13,19 @@ class TriggerFactoryMock : public interfaces::TriggerFactory
     {
         using namespace testing;
 
-        ON_CALL(*this, make(_, _, _, _, _, _, _, _, _))
-            .WillByDefault(WithArgs<0>(Invoke([](const std::string& name) {
+        ON_CALL(*this, make(_, _, _, _, _, _, _, _, _, _))
+            .WillByDefault(WithArgs<1>(Invoke([](const std::string& name) {
                 return std::make_unique<NiceMock<TriggerMock>>(name);
             })));
     }
 
     MOCK_METHOD(std::unique_ptr<interfaces::Trigger>, make,
-                (const std::string& name, const bool isDiscrete,
-                 const bool logToJournal, const bool logToRedfish,
-                 const bool updateReport,
+                (boost::asio::yield_context&, const std::string& name,
+                 const bool isDiscrete, const bool logToJournal,
+                 const bool logToRedfish, const bool updateReport,
                  const std::vector<sdbusplus::message::object_path>& sensors,
                  const std::vector<std::string>& reportNames,
-                 const TriggerThresholdParams& thresholds,
+                 const TriggerThresholdParams& thresholdParams,
                  interfaces::TriggerManager& triggerManager),
                 (const, override));
 
@@ -33,19 +33,21 @@ class TriggerFactoryMock : public interfaces::TriggerFactory
         std::optional<std::reference_wrapper<const TriggerParams>> paramsOpt,
         const testing::Matcher<interfaces::TriggerManager&>& tm)
     {
+        using namespace testing;
+
         if (paramsOpt)
         {
             const TriggerParams& params = *paramsOpt;
             return EXPECT_CALL(
-                *this, make(params.name(), params.isDiscrete(),
-                            params.logToJournal(), params.logToRedfish(),
-                            params.updateReport(), params.sensors(),
-                            params.reportNames(), params.thresholds(), tm));
+                *this,
+                make(_, params.name(), params.isDiscrete(),
+                     params.logToJournal(), params.logToRedfish(),
+                     params.updateReport(), params.sensors(),
+                     params.reportNames(), params.thresholdParams(), tm));
         }
         else
         {
-            using testing::_;
-            return EXPECT_CALL(*this, make(_, _, _, _, _, _, _, _, tm));
+            return EXPECT_CALL(*this, make(_, _, _, _, _, _, _, _, _, tm));
         }
     }
 };

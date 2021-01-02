@@ -10,12 +10,19 @@ TriggerManager::TriggerManager(
             iface.register_method(
                 "AddTrigger",
                 [this](
-                    const std::string& name, const bool isDiscrete,
-                    const bool logToJournal, const bool logToRedfish,
-                    const bool updateReport,
+                    boost::asio::yield_context& yield, const std::string& name,
+                    const bool isDiscrete, const bool logToJournal,
+                    const bool logToRedfish, const bool updateReport,
                     const std::vector<sdbusplus::message::object_path>& sensors,
                     const std::vector<std::string>& reportNames,
                     const TriggerThresholdParams& thresholds) {
+                    if (isDiscrete)
+                    {
+                        throw sdbusplus::exception::SdBusError(
+                            static_cast<int>(std::errc::not_supported),
+                            "Only numeric threshold is supported");
+                    }
+
                     if (triggers.size() >= maxTriggers)
                     {
                         throw sdbusplus::exception::SdBusError(
@@ -34,7 +41,7 @@ TriggerManager::TriggerManager(
                     }
 
                     triggers.emplace_back(triggerFactory->make(
-                        name, isDiscrete, logToJournal, logToRedfish,
+                        yield, name, isDiscrete, logToJournal, logToRedfish,
                         updateReport, sensors, reportNames, thresholds, *this));
                     return triggers.back()->getPath();
                 });

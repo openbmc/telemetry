@@ -17,17 +17,20 @@ class Telemetry
   public:
     Telemetry(std::shared_ptr<sdbusplus::asio::connection> bus) :
         objServer(std::make_shared<sdbusplus::asio::object_server>(bus)),
-        reportManager(std::make_unique<ReportFactory>(bus, objServer),
-                      std::make_unique<PersistentJsonStorage>(
-                          interfaces::JsonStorage::DirectoryPath(
-                              "/var/lib/telemetry/Reports")),
-                      objServer),
-        triggerManager(std::make_unique<TriggerFactory>(bus, objServer),
-                       objServer)
+        reportManager(
+            std::make_unique<ReportFactory>(bus, objServer, sensorCache),
+            std::make_unique<PersistentJsonStorage>(
+                interfaces::JsonStorage::DirectoryPath(
+                    "/var/lib/telemetry/Reports")),
+            objServer),
+        triggerManager(
+            std::make_unique<TriggerFactory>(bus, objServer, sensorCache),
+            objServer)
     {}
 
   private:
     std::shared_ptr<sdbusplus::asio::object_server> objServer;
+    mutable SensorCache sensorCache;
     ReportManager reportManager;
     TriggerManager triggerManager;
 };
