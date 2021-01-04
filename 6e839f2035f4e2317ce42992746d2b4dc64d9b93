@@ -46,6 +46,30 @@
       "revId": "6e839f2035f4e2317ce42992746d2b4dc64d9b93",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5b134247_22316a4b",
+        "filename": "src/sensor.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 150,
+      "author": {
+        "id": 1000677
+      },
+      "writtenOn": "2021-01-04T15:54:34Z",
+      "side": 1,
+      "message": "Done, now it is consistent",
+      "parentUuid": "0ff617c2_1fd28cc2",
+      "range": {
+        "startLine": 150,
+        "startChar": 50,
+        "endLine": 150,
+        "endChar": 59
+      },
+      "revId": "6e839f2035f4e2317ce42992746d2b4dc64d9b93",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }
