@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5d41b115_8cb3acd8",
+        "filename": "src/sensor.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 150,
+      "author": {
+        "id": 1000534
+      },
+      "writtenOn": "2021-01-04T13:05:32Z",
+      "side": 1,
+      "message": "There are two occurrences of SENSOR journal parameter, in both cases it seems like different string is provided. Maybe it should be unified for clarity?",
+      "range": {
+        "startLine": 150,
+        "startChar": 50,
+        "endLine": 150,
+        "endChar": 59
+      },
+      "revId": "6e839f2035f4e2317ce42992746d2b4dc64d9b93",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
