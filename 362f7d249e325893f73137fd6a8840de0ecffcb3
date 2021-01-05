@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7597ffe6_62aebab5",
+        "filename": "src/numeric_threshold.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-01-05T09:49:02Z",
+      "side": 1,
+      "message": "Looks the same as if below, maybe:\n\nconst bool someNiceVariableName \u003d\n(thresholdValue \u003e prevValue \u0026\u0026 thresholdValue \u003c value) ||\n(thresholdValue \u003c prevValue \u0026\u0026 thresholdValue \u003e value);\n\n\nalso one question can we reuse previous cases? for example:\n\nif (activationType \u003d\u003d NumericActivationType::decreasing || activationType \u003d\u003d NumericActivationType::either) { /* ... */ }\n\nif (activationType \u003d\u003d NumericActivationType::increasing || activationType \u003d\u003d NumericActivationType::either) { /* ... */ }",
+      "range": {
+        "startLine": 87,
+        "startChar": 16,
+        "endLine": 88,
+        "endChar": 70
+      },
+      "revId": "362f7d249e325893f73137fd6a8840de0ecffcb3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
