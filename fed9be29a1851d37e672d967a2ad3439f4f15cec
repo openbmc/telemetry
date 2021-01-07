@@ -22,6 +22,30 @@
       "revId": "fed9be29a1851d37e672d967a2ad3439f4f15cec",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "73a07db3_f3ee598b",
+        "filename": "src/interfaces/types.hpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1000677
+      },
+      "writtenOn": "2021-01-07T11:54:10Z",
+      "side": 1,
+      "message": "1) Not all of them require \u0027Type\u0027 postfix, it is true. To avoid name conflict in next patch I added those postfixes. e.g. next patch introduces class NumericThreshold\n2) Yes, you are right. I can close those types in namespace and remove some common prefixes, it would make more sense here",
+      "parentUuid": "9974f3b9_a1da2210",
+      "range": {
+        "startLine": 31,
+        "startChar": 0,
+        "endLine": 70,
+        "endChar": 78
+      },
+      "revId": "fed9be29a1851d37e672d967a2ad3439f4f15cec",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }
