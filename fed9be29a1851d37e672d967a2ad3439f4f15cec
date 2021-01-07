@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9974f3b9_a1da2210",
+        "filename": "src/interfaces/types.hpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1000534
+      },
+      "writtenOn": "2021-01-07T11:02:05Z",
+      "side": 1,
+      "message": "Questions:\n\n1) Is adding \u0027Type\u0027 to all of the enums is not somewhat redundant?\n2) You have the common prefixes (\u0027Discrete...\u0027, \u0027Numeric...\u0027), isn\u0027t that one of the reasons that named scopes (eg. namespaces) exist?\n\nJust asking",
+      "range": {
+        "startLine": 31,
+        "startChar": 0,
+        "endLine": 70,
+        "endChar": 78
+      },
+      "revId": "fed9be29a1851d37e672d967a2ad3439f4f15cec",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
