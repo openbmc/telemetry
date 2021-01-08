@@ -27,6 +27,7 @@ class ReportManager : public interfaces::ReportManager
     ReportManager& operator=(ReportManager&&) = delete;
 
     void removeReport(const interfaces::Report* report) override;
+    void updateReport(const std::string& name) override;
 
   private:
     std::unique_ptr<interfaces::ReportFactory> reportFactory;
