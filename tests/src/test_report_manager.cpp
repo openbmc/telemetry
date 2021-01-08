@@ -226,6 +226,26 @@ TEST_F(TestReportManager, removingSameReportTwiceHasNoSideEffect)
     checkPoint.Call("end");
 }
 
+TEST_F(TestReportManager, updateReportCallsUpdateReadingsForExistReport)
+{
+    reportFactoryMock.expectMake(_, reportParams, Ref(*sut), Ref(storageMock))
+        .WillOnce(Return(ByMove(std::move(reportMockPtr))));
+    EXPECT_CALL(reportMock, updateReadings());
+
+    addReport(reportParams);
+    sut->updateReport(reportParams.reportName());
+}
+
+TEST_F(TestReportManager, updateReportDoNothingIfReportDoesNotExist)
+{
+    reportFactoryMock.expectMake(_, reportParams, Ref(*sut), Ref(storageMock))
+        .WillOnce(Return(ByMove(std::move(reportMockPtr))));
+    EXPECT_CALL(reportMock, updateReadings()).Times(0);
+
+    addReport(reportParams);
+    sut->updateReport("NotAReport");
+}
+
 class TestReportManagerStorage : public TestReportManager
 {
   public:

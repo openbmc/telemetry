@@ -23,5 +23,6 @@ class ReportMock : public interfaces::Report
 
     MOCK_METHOD(std::string, getName, (), (override, const));
     MOCK_METHOD(std::string, getPath, (), (override, const));
+    MOCK_METHOD(void, updateReadings, (), (override));
     MOCK_METHOD(void, Die, ());
 };

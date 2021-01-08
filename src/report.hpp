@@ -43,12 +43,12 @@ class Report : public interfaces::Report
         return path;
     }
 
+    void updateReadings() override;
     bool storeConfiguration() const;
 
   private:
     static void timerProc(boost::system::error_code, Report& self);
     void scheduleTimer(std::chrono::milliseconds interval);
-    void updateReadings();
 
     const std::string name;
     const std::string path;
