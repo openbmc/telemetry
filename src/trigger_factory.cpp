@@ -3,14 +3,16 @@
 #include "numeric_threshold.hpp"
 #include "sensor.hpp"
 #include "trigger.hpp"
+#include "trigger_actions.hpp"
 #include "utils/dbus_mapper.hpp"
 
 TriggerFactory::TriggerFactory(
     std::shared_ptr<sdbusplus::asio::connection> bus,
     std::shared_ptr<sdbusplus::asio::object_server> objServer,
-    SensorCache& sensorCache) :
+    SensorCache& sensorCache, interfaces::ReportManager& reportManager) :
     bus(std::move(bus)),
-    objServer(std::move(objServer)), sensorCache(sensorCache)
+    objServer(std::move(objServer)), sensorCache(sensorCache),
+    reportManager(reportManager)
 {}
 
 std::unique_ptr<interfaces::Trigger> TriggerFactory::make(
@@ -35,6 +37,22 @@ std::unique_ptr<interfaces::Trigger> TriggerFactory::make(
     for (const auto& [level, dwellTime, direction, value] : params)
     {
         std::vector<std::unique_ptr<interfaces::TriggerAction>> actions;
+        if (logToJournal)
+        {
+            actions.emplace_back(std::make_unique<LogToJournalAction>(
+                static_cast<numeric::Level>(level),
+                static_cast<numeric::Direction>(direction), value));
+        }
+        if (logToRedfish)
+        {
+            actions.emplace_back(std::make_unique<LogToRedfishAction>(
+                static_cast<numeric::Level>(level), value));
+        }
+        if (updateReport)
+        {
+            actions.emplace_back(std::make_unique<UpdateReportAction>(
+                reportManager, reportNames));
+        }
 
         thresholds.emplace_back(std::make_shared<NumericThreshold>(
             bus->get_io_context(), sensors, std::move(actions),
