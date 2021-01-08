@@ -197,3 +197,15 @@ void ReportManager::loadFromPersistent()
         }
     }
 }
+
+void ReportManager::updateReport(const std::string& name)
+{
+    for (auto& report : reports)
+    {
+        if (report->getName() == name)
+        {
+            report->updateReadings();
+            return;
+        }
+    }
+}

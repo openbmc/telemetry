@@ -1,5 +1,6 @@
 #pragma once
 
+#include "interfaces/report_manager.hpp"
 #include "interfaces/sensor.hpp"
 #include "interfaces/trigger_factory.hpp"
 #include "sensor_cache.hpp"
@@ -11,7 +12,8 @@ class TriggerFactory : public interfaces::TriggerFactory
   public:
     TriggerFactory(std::shared_ptr<sdbusplus::asio::connection> bus,
                    std::shared_ptr<sdbusplus::asio::object_server> objServer,
-                   SensorCache& sensorCache);
+                   SensorCache& sensorCache,
+                   interfaces::ReportManager& reportManager);
 
     std::unique_ptr<interfaces::Trigger> make(
         boost::asio::yield_context& yield, const std::string& name,
@@ -27,6 +29,7 @@ class TriggerFactory : public interfaces::TriggerFactory
     std::shared_ptr<sdbusplus::asio::connection> bus;
     std::shared_ptr<sdbusplus::asio::object_server> objServer;
     SensorCache& sensorCache;
+    interfaces::ReportManager& reportManager;
 
     std::pair<std::vector<std::shared_ptr<interfaces::Sensor>>,
               std::vector<std::string>>

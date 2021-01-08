@@ -1,5 +1,6 @@
 #pragma once
 
+#include "interfaces/report_manager.hpp"
 #include "interfaces/trigger_factory.hpp"
 #include "interfaces/trigger_manager.hpp"
 
