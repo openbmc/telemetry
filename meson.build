@@ -89,6 +89,7 @@ executable(
         'src/sensor.cpp',
         'src/sensor_cache.cpp',
         'src/trigger.cpp',
+        'src/trigger_actions.cpp',
         'src/trigger_factory.cpp',
         'src/trigger_manager.cpp',
     ],

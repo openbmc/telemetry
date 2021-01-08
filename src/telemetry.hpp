@@ -23,9 +23,9 @@ class Telemetry
                 interfaces::JsonStorage::DirectoryPath(
                     "/var/lib/telemetry/Reports")),
             objServer),
-        triggerManager(
-            std::make_unique<TriggerFactory>(bus, objServer, sensorCache),
-            objServer)
+        triggerManager(std::make_unique<TriggerFactory>(
+                           bus, objServer, sensorCache, reportManager),
+                       objServer)
     {}
 
   private:

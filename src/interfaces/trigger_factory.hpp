@@ -5,6 +5,7 @@
 #include "interfaces/trigger_types.hpp"
 
 #include <boost/asio/spawn.hpp>
+#include <sdbusplus/message/types.hpp>
 
 #include <memory>
 #include <utility>

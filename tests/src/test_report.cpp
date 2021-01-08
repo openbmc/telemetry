@@ -375,6 +375,18 @@ TEST_P(TestReportAllReportTypes, returnPropertValueOfReportType)
                 Eq(GetParam().reportingType()));
 }
 
+TEST_P(TestReportAllReportTypes, updateReadingsCallUpdateReadingsProperty)
+{
+    const uint64_t expectedTime = std::time(0);
+
+    sut->updateReadings();
+
+    const auto [timestamp, readings] =
+        getProperty<Readings>(sut->getPath(), "Readings");
+
+    EXPECT_THAT(timestamp, Ge(expectedTime));
+}
+
 class TestReportOnRequestType : public TestReport
 {
     void SetUp() override
