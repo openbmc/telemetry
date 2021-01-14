@@ -16,6 +16,24 @@
       "revId": "982c5b5b1ebe368329f6a1a95a8893b03953cb9b",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5d8a87f5_d8b438be",
+        "filename": "src/persistent_json_storage.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1000677
+      },
+      "writtenOn": "2021-01-14T10:22:50Z",
+      "side": 1,
+      "message": "Thanks for note. I ignored it to reduce size of message. std::error_code offers a message that is taken from error category. Those messages maps to errno messages so it is easy to find it",
+      "parentUuid": "2401456f_12b016c4",
+      "revId": "982c5b5b1ebe368329f6a1a95a8893b03953cb9b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }
