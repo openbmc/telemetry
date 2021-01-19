@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bcc43d9e_25778f5e",
+        "filename": "src/trigger_manager.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-01-19T07:38:42Z",
+      "side": 1,
+      "message": "Quoted from:\n\nhttps://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines\n\nException Function arguments are rarely mutated, but also rarely declared const. To avoid confusion and lots of false positives, don’t enforce this rule for function arguments.",
+      "range": {
+        "startLine": 13,
+        "startChar": 20,
+        "endLine": 18,
+        "endChar": 62
+      },
+      "revId": "c4c21bcb34ac8ed33f32ad40d35308e41c957bb0",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
