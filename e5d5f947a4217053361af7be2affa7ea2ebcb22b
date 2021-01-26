@@ -84,6 +84,30 @@
     },
     {
       "key": {
+        "uuid": "740b6cb6_42ed53ef",
+        "filename": "src/trigger_actions.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-01-26T12:04:10Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "3be4b1ec_a8af8994",
+      "range": {
+        "startLine": 7,
+        "startChar": 0,
+        "endLine": 25,
+        "endChar": 3
+      },
+      "revId": "e5d5f947a4217053361af7be2affa7ea2ebcb22b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d95525c5_8ac355e8",
         "filename": "src/trigger_factory.cpp",
         "patchSetId": 4
