@@ -33,7 +33,8 @@ class TestPersistentJsonStorage : public Test
 
 const interfaces::JsonStorage::DirectoryPath
     TestPersistentJsonStorage::directory =
-        interfaces::JsonStorage::DirectoryPath(std::tmpnam(nullptr));
+        interfaces::JsonStorage::DirectoryPath(
+            std::filesystem::temp_directory_path() / "telemetry-tests");
 
 TEST_F(TestPersistentJsonStorage, storesJsonData)
 {
