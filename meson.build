@@ -24,21 +24,21 @@ add_project_arguments(
         '-DBOOST_ASIO_NO_DEPRECATED',
         '-DBOOST_NO_RTTI',
         '-DBOOST_NO_TYPEID',
+        # TODO: Removed below arg after upgrade to Boost 1.75
+        '-DBOOST_ALLOW_DEPRECATED_HEADERS',
         '-Wno-unused-parameter',
     ]),
     language: 'cpp'
 )
 
 boost = dependency(
-  'boost',
-  version: '>=1.74.0',
-  required: false,
-  modules: ['coroutine'])
-
-if not boost.found()
-    subproject('boost', required: false)
-    boost  = declare_dependency(include_directories: 'subprojects/boost_1_74_0')
-endif
+    'boost',
+    version: '>=1.74.0',
+    required: false,
+    modules: ['coroutine'])
+assert(boost.found(), 'Missing Boost 1.74.0 or higher, as WA you can set BOOST_ROOT ' +
+                      'environemt to point at boost build. To build a boost you can ' +
+                      'use script ./scripts/boost_build_1.74.0.sh')
 
 phosphor_logging = dependency('phosphor-logging', required: false)
 if not phosphor_logging.found()
@@ -48,24 +48,13 @@ if not phosphor_logging.found()
     )
 endif
 
-sdbusplus = dependency('sdbusplus',required : false)
-if not sdbusplus.found()
-  sdbusplus_proj = subproject('sdbusplus', required: true)
-  sdbusplus = sdbusplus_proj.get_variable('sdbusplus_dep')
-endif
-
+sdbusplus = dependency('sdbusplus', required: true, fallback: ['sdbusplus', 'sdbusplus_dep'])
 systemd = dependency('systemd')
 
 if cpp.has_header('nlohmann/json.hpp')
     nlohmann_json = declare_dependency()
 else
-    subproject('nlohmann', required: false)
-    nlohmann_json = declare_dependency(
-        include_directories: [
-            'subprojects/nlohmann/single_include',
-            'subprojects/nlohmann/single_include/nlohmann',
-        ]
-    )
+    nlohmann_json = dependency('nlohmann_json', fallback: ['nlohmann', 'nlohmann_json_dep'])
 endif
 
 add_project_arguments(
