@@ -10,11 +10,11 @@ class Metric :
     public std::enable_shared_from_this<Metric>
 {
   public:
-    Metric(std::vector<std::shared_ptr<interfaces::Sensor>> sensors,
-           std::string operationType, std::string id, std::string metadata);
+    Metric(std::shared_ptr<interfaces::Sensor> sensor,
+           OperationType operationType, std::string id, std::string metadata);
 
     void initialize() override;
-    const std::vector<MetricValue>& getReadings() const override;
+    const MetricValue& getReading() const override;
     void sensorUpdated(interfaces::Sensor&, uint64_t) override;
     void sensorUpdated(interfaces::Sensor&, uint64_t, double value) override;
     LabeledMetricParameters dumpConfiguration() const override;
@@ -22,9 +22,7 @@ class Metric :
   private:
     MetricValue& findMetric(interfaces::Sensor&);
 
-    std::vector<std::shared_ptr<interfaces::Sensor>> sensors;
-    std::string operationType;
-    std::string id;
-    std::string metadata;
-    std::vector<MetricValue> readings;
+    std::shared_ptr<interfaces::Sensor> sensor;
+    OperationType operationType;
+    MetricValue reading;
 };

@@ -4,7 +4,7 @@
 
 using namespace testing;
 
-class TestEnum : public Test
+class TestConversion : public Test
 {
   public:
     enum class Enum
@@ -18,16 +18,62 @@ class TestEnum : public Test
     {
         return utils::toEnum<Enum, Enum::zero, Enum::two>(x);
     }
+
+    Enum stringToEnum(const std::string& value)
+    {
+        return utils::stringToEnum(convDataEnum, value);
+    }
+
+    std::string enumToString(Enum value)
+    {
+        return utils::enumToString(convDataEnum, value);
+    }
+
+    const std::vector<std::pair<std::string, Enum>> convDataEnum = {
+        {std::make_pair<std::string, Enum>("zero", Enum::zero),
+         std::make_pair<std::string, Enum>("one", Enum::one),
+         std::make_pair<std::string, Enum>("two", Enum::two)}};
 };
 
-TEST_F(TestEnum, passValueInRangeExpectToGetValidOutput)
+TEST_F(TestConversion, passValueInRangeExpectToGetValidOutput)
 {
     EXPECT_EQ(toEnum(0), Enum::zero);
     EXPECT_EQ(toEnum(2), Enum::two);
 }
 
-TEST_F(TestEnum, passInvalidValueExpectToThrowOutOfRangeException)
+TEST_F(TestConversion, passInvalidValueExpectToThrowOutOfRangeException)
 {
     EXPECT_THROW(toEnum(-1), std::out_of_range);
     EXPECT_THROW(toEnum(3), std::out_of_range);
+}
+
+TEST_F(TestConversion, convertsToUnderlyingType)
+{
+    EXPECT_THAT(utils::toUnderlying(Enum::one), Eq(1));
+    EXPECT_THAT(utils::toUnderlying(Enum::two), Eq(2));
+    EXPECT_THAT(utils::toUnderlying(Enum::zero), Eq(0));
+}
+
+TEST_F(TestConversion, convertsEnumToString)
+{
+    EXPECT_THAT(enumToString(Enum::one), Eq("one"));
+    EXPECT_THAT(enumToString(Enum::two), Eq("two"));
+    EXPECT_THAT(enumToString(Enum::zero), Eq("zero"));
+}
+
+TEST_F(TestConversion, convertsStringToEnum)
+{
+    EXPECT_THAT(stringToEnum("one"), Eq(Enum::one));
+    EXPECT_THAT(stringToEnum("two"), Eq(Enum::two));
+    EXPECT_THAT(stringToEnum("zero"), Eq(Enum::zero));
+}
+
+TEST_F(TestConversion, enumToStringThrowsWhenUknownEnumPassed)
+{
+    EXPECT_THROW(enumToString(static_cast<Enum>(77)), std::out_of_range);
+}
+
+TEST_F(TestConversion, stringToEnumThrowsWhenUknownStringPassed)
+{
+    EXPECT_THROW(stringToEnum("four"), std::out_of_range);
 }

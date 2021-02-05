@@ -2,6 +2,7 @@
 
 #include "interfaces/types.hpp"
 #include "report.hpp"
+#include "utils/conversion.hpp"
 #include "utils/transform.hpp"
 
 #include <phosphor-logging/log.hpp>
@@ -92,21 +93,25 @@ void ReportManager::verifyAddReport(const std::string& reportName,
             static_cast<int>(std::errc::invalid_argument), "Invalid interval");
     }
 
-    for (const auto& param : readingParams)
-    {
-        const auto& sensors = std::get<0>(param);
-        if (sensors.size() != 1)
-        {
-            throw sdbusplus::exception::SdBusError(
-                static_cast<int>(std::errc::not_supported),
-                "Only single sensor per metric is allowed");
-        }
-    }
     if (readingParams.size() > maxReadingParams)
+
     {
         throw sdbusplus::exception::SdBusError(
             static_cast<int>(std::errc::argument_list_too_long),
             "Too many reading parameters");
+    }
+
+    try
+    {
+        for (const auto& item : readingParams)
+        {
+            utils::stringToOperationType(std::get<1>(item));
+        }
+    }
+    catch (const std::exception& e)
+    {
+        throw sdbusplus::exception::SdBusError(
+            static_cast<int>(std::errc::invalid_argument), e.what());
     }
 }
 
@@ -136,12 +141,10 @@ interfaces::Report& ReportManager::addReport(
             using namespace utils::tstring;
 
             return ReadingParameters::value_type(
-                utils::transform(param.at_index<0>(),
-                                 [](const LabeledSensorParameters& p) {
-                                     return sdbusplus::message::object_path(
-                                         p.at_label<Path>());
-                                 }),
-                param.at_index<1>(), param.at_index<2>(), param.at_index<3>());
+                sdbusplus::message::object_path(
+                    param.at_index<0>().at_label<Path>()),
+                utils::enumToString(param.at_index<1>()), param.at_index<2>(),
+                param.at_index<3>());
         });
 
     verifyAddReport(reportName, reportingType, interval, metricParams);
