@@ -5,58 +5,52 @@
 
 #include <algorithm>
 
-Metric::Metric(std::vector<std::shared_ptr<interfaces::Sensor>> sensors,
-               std::string operationType, std::string id,
+Metric::Metric(std::shared_ptr<interfaces::Sensor> sensor,
+               OperationType operationType, std::string id,
                std::string metadata) :
-    sensors(std::move(sensors)),
-    operationType(std::move(operationType)), id(std::move(id)),
-    metadata(std::move(metadata))
+    sensor(std::move(sensor)),
+    operationType(std::move(operationType)), reading{std::move(id),
+                                                     std::move(metadata), 0.,
+                                                     0u}
 {}
 
 void Metric::initialize()
 {
-    readings = std::vector<MetricValue>(sensors.size(),
-                                        MetricValue{id, metadata, 0., 0u});
-
-    for (auto& sensor : sensors)
-    {
-        sensor->registerForUpdates(weak_from_this());
-    }
+    sensor->registerForUpdates(weak_from_this());
 }
 
-const std::vector<MetricValue>& Metric::getReadings() const
+const MetricValue& Metric::getReading() const
 {
-    return readings;
+    return reading;
 }
 
-void Metric::sensorUpdated(interfaces::Sensor& sensor, uint64_t timestamp)
+void Metric::sensorUpdated(interfaces::Sensor& notifier, uint64_t timestamp)
 {
-    MetricValue& mv = findMetric(sensor);
+    MetricValue& mv = findMetric(notifier);
     mv.timestamp = timestamp;
 }
 
-void Metric::sensorUpdated(interfaces::Sensor& sensor, uint64_t timestamp,
+void Metric::sensorUpdated(interfaces::Sensor& notifier, uint64_t timestamp,
                            double value)
 {
-    MetricValue& mv = findMetric(sensor);
+    MetricValue& mv = findMetric(notifier);
     mv.timestamp = timestamp;
     mv.value = value;
 }
 
-MetricValue& Metric::findMetric(interfaces::Sensor& sensor)
+MetricValue& Metric::findMetric(interfaces::Sensor& notifier)
 {
-    auto it =
-        std::find_if(sensors.begin(), sensors.end(),
-                     [&sensor](const auto& s) { return s.get() == &sensor; });
-    auto index = std::distance(sensors.begin(), it);
-    return readings.at(index);
+    if (sensor.get() != &notifier)
+    {
+        throw std::out_of_range("unknown sensor");
+    }
+    return reading;
 }
 
 LabeledMetricParameters Metric::dumpConfiguration() const
 {
-    auto sensorPaths = utils::transform(sensors, [](const auto& sensor) {
-        return LabeledSensorParameters(sensor->id().service, sensor->id().path);
-    });
-    return LabeledMetricParameters(std::move(sensorPaths), operationType, id,
-                                   metadata);
+    auto sensorPath =
+        LabeledSensorParameters(sensor->id().service, sensor->id().path);
+    return LabeledMetricParameters(std::move(sensorPath), operationType,
+                                   reading.id, reading.metadata);
 }
