@@ -16,11 +16,11 @@ struct Id
     }
 };
 
-struct SensorPaths
+struct SensorPath
 {
     static std::string str()
     {
-        return "sensorPaths";
+        return "sensorPath";
     }
 };
 

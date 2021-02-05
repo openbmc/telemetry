@@ -5,9 +5,11 @@
 #include "params/report_params.hpp"
 #include "report.hpp"
 #include "report_manager.hpp"
+#include "utils/conversion.hpp"
 #include "utils/transform.hpp"
 
 using namespace testing;
+using namespace std::string_literals;
 using namespace std::chrono_literals;
 
 class TestReportManager : public Test
@@ -246,6 +248,37 @@ TEST_F(TestReportManager, updateReportDoNothingIfReportDoesNotExist)
     sut->updateReport("NotAReport");
 }
 
+class TestReportManagerWithAggregationOperationType :
+    public TestReportManager,
+    public WithParamInterface<OperationType>
+{
+  public:
+    OperationType operationType = GetParam();
+};
+
+INSTANTIATE_TEST_SUITE_P(_, TestReportManagerWithAggregationOperationType,
+                         Values(OperationType::single, OperationType::max,
+                                OperationType::min, OperationType::avg,
+                                OperationType::sum));
+
+TEST_P(TestReportManagerWithAggregationOperationType,
+       addReportWithDifferentOperationTypes)
+{
+    reportParams.readingParameters(
+        {{{sdbusplus::message::object_path(
+              "/xyz/openbmc_project/sensors/power/p1")},
+          utils::enumToString(operationType),
+          "MetricId1",
+          "Metadata1"}});
+
+    reportFactoryMock.expectMake(_, reportParams, Ref(*sut), Ref(storageMock))
+        .WillOnce(Return(ByMove(std::move(reportMockPtr))));
+
+    auto [ec, path] = addReport(reportParams);
+    EXPECT_THAT(ec.value(), Eq(boost::system::errc::success));
+    EXPECT_THAT(path, Eq("/"s + reportParams.reportName()));
+}
+
 class TestReportManagerStorage : public TestReportManager
 {
   public:
@@ -272,12 +305,9 @@ class TestReportManagerStorage : public TestReportManager
     {
         return utils::transform(params, [](const auto& item) {
             return LabeledMetricParameters(
-                utils::transform(std::get<0>(item),
-                                 [](const auto& elem) {
-                                     return LabeledSensorParameters("service",
-                                                                    elem);
-                                 }),
-                std::get<1>(item), std::get<2>(item), std::get<3>(item));
+                LabeledSensorParameters("service", std::get<0>(item)),
+                utils::stringToOperationType(std::get<1>(item)),
+                std::get<2>(item), std::get<3>(item));
         });
     }
 

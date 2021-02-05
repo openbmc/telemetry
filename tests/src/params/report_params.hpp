@@ -84,12 +84,12 @@ class ReportParams final
     ReadingParameters readingParametersProperty = {
         {{sdbusplus::message::object_path(
              "/xyz/openbmc_project/sensors/power/p1")},
-         "SINGLE",
+         utils::enumToString(OperationType::single),
          "MetricId1",
          "Metadata1"},
         {{sdbusplus::message::object_path(
              "/xyz/openbmc_project/sensors/power/p2")},
-         "SINGLE",
+         utils::enumToString(OperationType::single),
          "MetricId2",
          "Metadata2"}};
 };
