@@ -3,6 +3,7 @@
 #include "metric.hpp"
 #include "report.hpp"
 #include "sensor.hpp"
+#include "utils/conversion.hpp"
 #include "utils/dbus_mapper.hpp"
 #include "utils/transform.hpp"
 
@@ -41,7 +42,7 @@ std::unique_ptr<interfaces::Report> ReportFactory::make(
         [this](const LabeledMetricParameters& param)
             -> std::shared_ptr<interfaces::Metric> {
             return std::make_shared<Metric>(
-                getSensors(param.at_index<0>()), param.at_index<1>(),
+                getSensor(param.at_index<0>()), param.at_index<1>(),
                 param.at_index<2>(), param.at_index<3>());
         });
 
@@ -51,19 +52,14 @@ std::unique_ptr<interfaces::Report> ReportFactory::make(
         reportManager, reportStorage, std::move(metrics));
 }
 
-std::vector<std::shared_ptr<interfaces::Sensor>> ReportFactory::getSensors(
-    const std::vector<LabeledSensorParameters>& sensorPaths) const
+std::shared_ptr<interfaces::Sensor>
+    ReportFactory::getSensor(const LabeledSensorParameters& sensorPath) const
 {
-    return utils::transform(sensorPaths,
-                            [this](const LabeledSensorParameters& param)
-                                -> std::shared_ptr<interfaces::Sensor> {
-                                using namespace utils::tstring;
+    using namespace utils::tstring;
 
-                                return sensorCache.makeSensor<Sensor>(
-                                    param.at_label<Service>(),
-                                    param.at_label<Path>(),
-                                    bus->get_io_context(), bus);
-                            });
+    return sensorCache.makeSensor<Sensor>(sensorPath.at_label<Service>(),
+                                          sensorPath.at_label<Path>(),
+                                          bus->get_io_context(), bus);
 }
 
 std::vector<LabeledMetricParameters> ReportFactory::convertMetricParams(
@@ -75,22 +71,22 @@ std::vector<LabeledMetricParameters> ReportFactory::convertMetricParams(
     return utils::transform(metricParams, [&tree](const auto& item) {
         std::vector<LabeledSensorParameters> sensors;
 
-        for (const auto& sensorPath : std::get<0>(item))
-        {
-            auto it = std::find_if(
-                tree.begin(), tree.end(),
-                [&sensorPath](const auto& v) { return v.first == sensorPath; });
+        const auto& [sensorPath, operationType, id, metadata] = item;
 
-            if (it != tree.end())
-            {
-                for (const auto& [service, ifaces] : it->second)
-                {
-                    sensors.emplace_back(service, sensorPath);
-                }
-            }
+        auto it = std::find_if(
+            tree.begin(), tree.end(),
+            [&sensorPath](const auto& v) { return v.first == sensorPath; });
+
+        if (it != tree.end() && it->second.size() == 1)
+        {
+            const auto& [service, ifaces] = it->second.front();
+            return LabeledMetricParameters(
+                LabeledSensorParameters(service, sensorPath),
+                utils::stringToOperationType(operationType), id, metadata);
         }
 
-        return LabeledMetricParameters(std::move(sensors), std::get<1>(item),
-                                       std::get<2>(item), std::get<3>(item));
+        throw sdbusplus::exception::SdBusError(
+            static_cast<int>(std::errc::invalid_argument),
+            "Invalid number of sensors found");
     });
 }

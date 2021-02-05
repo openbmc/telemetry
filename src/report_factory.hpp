@@ -34,8 +34,8 @@ class ReportFactory : public interfaces::ReportFactory
             const override;
 
   private:
-    std::vector<std::shared_ptr<interfaces::Sensor>> getSensors(
-        const std::vector<LabeledSensorParameters>& sensorPaths) const;
+    std::shared_ptr<interfaces::Sensor>
+        getSensor(const LabeledSensorParameters& sensorPath) const;
     std::vector<LabeledMetricParameters>
         convertMetricParams(boost::asio::yield_context& yield,
                             const ReadingParameters& metricParams) const;

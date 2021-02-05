@@ -15,8 +15,8 @@ inline void PrintTo(const LabeledMetricParameters& o, std::ostream* os)
     using testing::PrintToString;
 
     (*os) << "{ ";
-    (*os) << utils::tstring::SensorPaths::str() << ": "
-          << PrintToString(o.at_label<utils::tstring::SensorPaths>()) << ", ";
+    (*os) << utils::tstring::SensorPath::str() << ": "
+          << PrintToString(o.at_label<utils::tstring::SensorPath>()) << ", ";
     (*os) << utils::tstring::OperationType::str() << ": "
           << PrintToString(o.at_label<utils::tstring::OperationType>()) << ", ";
     (*os) << utils::tstring::Id::str() << ": "

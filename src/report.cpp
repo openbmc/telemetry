@@ -143,23 +143,14 @@ void Report::scheduleTimer(std::chrono::milliseconds timerInterval)
 
 void Report::updateReadings()
 {
-    auto numElements = std::accumulate(
-        metrics.begin(), metrics.end(), 0u, [](auto sum, const auto& metric) {
-            return sum + metric->getReadings().size();
-        });
+    std::tuple_element_t<1, Readings> readingsCache(metrics.size());
 
-    std::tuple_element_t<1, Readings> readingsCache(numElements);
-
-    auto it = readingsCache.begin();
-
-    for (const auto& metric : metrics)
-    {
-        for (const auto& reading : metric->getReadings())
-        {
-            *(it++) = std::make_tuple(reading.id, reading.metadata,
-                                      reading.value, reading.timestamp);
-        }
-    }
+    std::transform(std::begin(metrics), std::end(metrics),
+                   std::begin(readingsCache), [](const auto& metric) {
+                       const auto& reading = metric->getReading();
+                       return std::make_tuple(reading.id, reading.metadata,
+                                              reading.value, reading.timestamp);
+                   });
 
     std::get<0>(readings) = std::time(0);
     std::get<1>(readings) = std::move(readingsCache);

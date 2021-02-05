@@ -2,6 +2,8 @@
 
 #include "interfaces/trigger_types.hpp"
 
+#include <sdbusplus/message.hpp>
+
 #include <chrono>
 #include <utility>
 

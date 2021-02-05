@@ -8,12 +8,14 @@
 #include "report_manager.hpp"
 #include "utils/conv_container.hpp"
 #include "utils/set_exception.hpp"
+#include "utils/tstring.hpp"
 
 #include <sdbusplus/exception.hpp>
 
 using namespace testing;
 using namespace std::literals::string_literals;
 using namespace std::chrono_literals;
+namespace tstring = utils::tstring;
 
 class TestReport : public Test
 {
@@ -33,13 +35,13 @@ class TestReport : public Test
 
     TestReport()
     {
-        ON_CALL(*metricMocks[0], getReadings())
-            .WillByDefault(ReturnRefOfCopy(std::vector<MetricValue>(
-                {MetricValue{"a", "b", 17.1, 114},
-                 MetricValue{"aaa", "bbb", 21.7, 100}})));
-        ON_CALL(*metricMocks[1], getReadings())
-            .WillByDefault(ReturnRefOfCopy(
-                std::vector<MetricValue>({MetricValue{"aa", "bb", 42.0, 74}})));
+        ON_CALL(*metricMocks[0], getReading())
+            .WillByDefault(ReturnRefOfCopy(MetricValue{"a", "b", 17.1, 114}));
+        ON_CALL(*metricMocks[1], getReading())
+            .WillByDefault(ReturnRefOfCopy(MetricValue{"aa", "bb", 42.0, 74}));
+        ON_CALL(*metricMocks[2], getReading())
+            .WillByDefault(
+                ReturnRefOfCopy(MetricValue{"aaa", "bbb", 100.7, 21}));
 
         for (size_t i = 0; i < metricMocks.size(); ++i)
         {
@@ -47,11 +49,11 @@ class TestReport : public Test
 
             auto id = std::to_string(i);
 
-            auto sensorParameters = std::vector<LabeledSensorParameters>(
-                {LabeledSensorParameters("service"s + id, "path"s + id)});
-            auto metricParameters =
-                LabeledMetricParameters(std::move(sensorParameters), "op"s + id,
-                                        "id"s + id, "metadata"s + id);
+            auto sensorParameters =
+                LabeledSensorParameters("service"s + id, "path"s + id);
+            auto metricParameters = LabeledMetricParameters(
+                std::move(sensorParameters), utils::toOperationType(i),
+                "id"s + id, "metadata"s + id);
 
             ON_CALL(*metricMocks[i], dumpConfiguration())
                 .WillByDefault(Return(std::move(metricParameters)));
@@ -241,35 +243,35 @@ class TestReportStore :
 
 INSTANTIATE_TEST_SUITE_P(
     _, TestReportStore,
-    Values(
-        std::make_pair("Version"s, nlohmann::json(2)),
-        std::make_pair("Name"s, nlohmann::json(ReportParams().reportName())),
-        std::make_pair("ReportingType",
-                       nlohmann::json(ReportParams().reportingType())),
-        std::make_pair("EmitsReadingsUpdate",
-                       nlohmann::json(ReportParams().emitReadingUpdate())),
-        std::make_pair(
-            "LogToMetricReportsCollection",
-            nlohmann::json(ReportParams().logToMetricReportCollection())),
-        std::make_pair("Interval",
-                       nlohmann::json(ReportParams().interval().count())),
-        std::make_pair(
-            "ReadingParameters",
-            nlohmann::json({{{"sensorPaths",
-                              {{{"service", "service0"}, {"path", "path0"}}}},
-                             {"operationType", "op0"},
-                             {"id", "id0"},
-                             {"metricMetadata", "metadata0"}},
-                            {{"sensorPaths",
-                              {{{"service", "service1"}, {"path", "path1"}}}},
-                             {"operationType", "op1"},
-                             {"id", "id1"},
-                             {"metricMetadata", "metadata1"}},
-                            {{"sensorPaths",
-                              {{{"service", "service2"}, {"path", "path2"}}}},
-                             {"operationType", "op2"},
-                             {"id", "id2"},
-                             {"metricMetadata", "metadata2"}}}))));
+    Values(std::make_pair("Version"s, nlohmann::json(3)),
+           std::make_pair("Name"s, nlohmann::json(ReportParams().reportName())),
+           std::make_pair("ReportingType",
+                          nlohmann::json(ReportParams().reportingType())),
+           std::make_pair("EmitsReadingsUpdate",
+                          nlohmann::json(ReportParams().emitReadingUpdate())),
+           std::make_pair(
+               "LogToMetricReportsCollection",
+               nlohmann::json(ReportParams().logToMetricReportCollection())),
+           std::make_pair("Interval",
+                          nlohmann::json(ReportParams().interval().count())),
+           std::make_pair(
+               "ReadingParameters",
+               nlohmann::json(
+                   {{{tstring::SensorPath::str(),
+                      {{"service", "service0"}, {"path", "path0"}}},
+                     {tstring::OperationType::str(), OperationType::single},
+                     {tstring::Id::str(), "id0"},
+                     {tstring::MetricMetadata::str(), "metadata0"}},
+                    {{tstring::SensorPath::str(),
+                      {{"service", "service1"}, {"path", "path1"}}},
+                     {tstring::OperationType::str(), OperationType::max},
+                     {tstring::Id::str(), "id1"},
+                     {tstring::MetricMetadata::str(), "metadata1"}},
+                    {{tstring::SensorPath::str(),
+                      {{"service", "service2"}, {"path", "path2"}}},
+                     {tstring::OperationType::str(), OperationType::min},
+                     {tstring::Id::str(), "id2"},
+                     {tstring::MetricMetadata::str(), "metadata2"}}}))));
 
 TEST_P(TestReportStore, settingPersistencyToTrueStoresReport)
 {
@@ -416,8 +418,8 @@ TEST_F(TestReportOnRequestType, updatesReadingWhenUpdateIsCalled)
 
     EXPECT_THAT(readings,
                 ElementsAre(std::make_tuple("a"s, "b"s, 17.1, 114u),
-                            std::make_tuple("aaa"s, "bbb"s, 21.7, 100u),
-                            std::make_tuple("aa"s, "bb"s, 42.0, 74u)));
+                            std::make_tuple("aa"s, "bb"s, 42.0, 74u),
+                            std::make_tuple("aaa"s, "bbb"s, 100.7, 21u)));
 }
 
 class TestReportNonOnRequestType :
@@ -493,8 +495,8 @@ TEST_F(TestReportPeriodicReport, readingsAreUpdatedAfterIntervalExpires)
 
     EXPECT_THAT(readings,
                 ElementsAre(std::make_tuple("a"s, "b"s, 17.1, 114u),
-                            std::make_tuple("aaa"s, "bbb"s, 21.7, 100u),
-                            std::make_tuple("aa"s, "bb"s, 42.0, 74u)));
+                            std::make_tuple("aa"s, "bb"s, 42.0, 74u),
+                            std::make_tuple("aaa"s, "bbb"s, 100.7, 21u)));
 }
 
 class TestReportInitialization : public TestReport
