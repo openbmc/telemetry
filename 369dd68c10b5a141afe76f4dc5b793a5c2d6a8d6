@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "79fd30c2_3c8b5536",
+        "filename": "src/operation_type.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1000677
+      },
+      "writtenOn": "2021-02-05T16:53:39Z",
+      "side": 1,
+      "message": "consider to change vector to array and string to string_view",
+      "range": {
+        "startLine": 21,
+        "startChar": 11,
+        "endLine": 21,
+        "endChar": 17
+      },
+      "revId": "369dd68c10b5a141afe76f4dc5b793a5c2d6a8d6",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
