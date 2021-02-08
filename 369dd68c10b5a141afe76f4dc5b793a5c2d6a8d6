@@ -22,6 +22,75 @@
       "revId": "369dd68c10b5a141afe76f4dc5b793a5c2d6a8d6",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e1a4d333_38395949",
+        "filename": "src/report_factory.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1000677
+      },
+      "writtenOn": "2021-02-08T08:31:42Z",
+      "side": 1,
+      "message": "I guess we don\u0027t need a vector any more",
+      "range": {
+        "startLine": 72,
+        "startChar": 8,
+        "endLine": 72,
+        "endChar": 19
+      },
+      "revId": "369dd68c10b5a141afe76f4dc5b793a5c2d6a8d6",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "598c28c5_96d2d4f2",
+        "filename": "src/report_factory.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1000677
+      },
+      "writtenOn": "2021-02-08T08:31:42Z",
+      "side": 1,
+      "message": "item could be divided to separate variable to better reflect their names. It could be done in single line thanks to structure binding\nconst auto\u0026 [sensorPath, operationType, id, metadata] \u003d item;",
+      "range": {
+        "startLine": 74,
+        "startChar": 45,
+        "endLine": 74,
+        "endChar": 49
+      },
+      "revId": "369dd68c10b5a141afe76f4dc5b793a5c2d6a8d6",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0c6b4e7b_0be75458",
+        "filename": "src/report_factory.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1000677
+      },
+      "writtenOn": "2021-02-08T08:31:42Z",
+      "side": 1,
+      "message": "You can check here if there are more services that holds same sensor",
+      "range": {
+        "startLine": 88,
+        "startChar": 12,
+        "endLine": 88,
+        "endChar": 32
+      },
+      "revId": "369dd68c10b5a141afe76f4dc5b793a5c2d6a8d6",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }
