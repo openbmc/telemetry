@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8ce2b559_44d024b8",
+        "filename": "src/report_factory.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1000677
+      },
+      "writtenOn": "2021-02-08T13:17:20Z",
+      "side": 1,
+      "message": "nit leftover?",
+      "range": {
+        "startLine": 72,
+        "startChar": 8,
+        "endLine": 72,
+        "endChar": 53
+      },
+      "revId": "755986a35940f84897a71a59c791980ebd359c55",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "dffaac09_14e803c5",
+        "filename": "src/report_factory.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1000677
+      },
+      "writtenOn": "2021-02-08T13:17:20Z",
+      "side": 1,
+      "message": "maybe change it to: \"Could not find service for provided sensors\"",
+      "range": {
+        "startLine": 90,
+        "startChar": 13,
+        "endLine": 90,
+        "endChar": 44
+      },
+      "revId": "755986a35940f84897a71a59c791980ebd359c55",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
