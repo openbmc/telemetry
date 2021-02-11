@@ -13,5 +13,5 @@ if [[ ! -d build ]]; then
     ./b2 install --prefix=build
 fi
 
-echo -e "Please, set BOOST_ROOT to `pwd`/build, e.g.:\n" \
-        "export BOOST_ROOT=`pwd`/build"
+echo -e "Please, set BOOST_ROOT to $(pwd)/build, e.g.:\n" \
+        "export BOOST_ROOT=$(pwd)/build"
