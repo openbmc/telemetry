@@ -71,10 +71,10 @@ class TriggerParams
     std::vector<std::string> reportNamesProperty = {"Report1"};
     TriggerThresholdParams thresholdsProperty =
         std::vector<numeric::ThresholdParam>{
-            {static_cast<int>(numeric::Type::lowerCritical),
+            {numeric::typeToString(numeric::Type::lowerCritical),
              std::chrono::milliseconds(10).count(),
-             static_cast<int>(numeric::Direction::decreasing), 0.0},
-            {static_cast<int>(numeric::Type::upperCritical),
+             numeric::directionToString(numeric::Direction::decreasing), 0.0},
+            {numeric::typeToString(numeric::Type::upperCritical),
              std::chrono::milliseconds(10).count(),
-             static_cast<int>(numeric::Direction::increasing), 90.0}};
+             numeric::directionToString(numeric::Direction::increasing), 90.0}};
 };
