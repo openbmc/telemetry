@@ -3,7 +3,7 @@
 #include "interfaces/json_storage.hpp"
 #include "interfaces/report.hpp"
 #include "interfaces/report_manager.hpp"
-#include "interfaces/types.hpp"
+#include "types/types.hpp"
 
 #include <boost/asio/spawn.hpp>
 
