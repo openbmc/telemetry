@@ -1,6 +1,6 @@
 #pragma once
 
-#include "interfaces/types.hpp"
+#include "types/types.hpp"
 #include "metric_value.hpp"
 
 #include <nlohmann/json.hpp>

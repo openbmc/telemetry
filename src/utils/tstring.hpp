@@ -56,5 +56,21 @@ struct Path
     }
 };
 
+struct CollectionTimeScope
+{
+    static std::string str()
+    {
+        return "collectionTimeScope";
+    }
+};
+
+struct CollectionDuration
+{
+    static std::string str()
+    {
+        return "collectionDuration";
+    }
+};
+
 } // namespace tstring
 } // namespace utils
