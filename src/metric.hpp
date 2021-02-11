@@ -11,7 +11,8 @@ class Metric :
 {
   public:
     Metric(std::shared_ptr<interfaces::Sensor> sensor,
-           OperationType operationType, std::string id, std::string metadata);
+           OperationType operationType, std::string id, std::string metadata,
+           CollectionTimeScope, CollectionDuration);
 
     void initialize() override;
     const MetricValue& getReading() const override;
@@ -25,4 +26,6 @@ class Metric :
     std::shared_ptr<interfaces::Sensor> sensor;
     OperationType operationType;
     MetricValue reading;
+    CollectionTimeScope timeScope;
+    CollectionDuration collectionDuration;
 };

@@ -56,7 +56,7 @@ class TestReportManager : public Test
                 addReportPromise.set_value({ec, path});
             },
             DbusEnvironment::serviceName(), ReportManager::reportManagerPath,
-            ReportManager::reportManagerIfaceName, "AddReport",
+            ReportManager::reportManagerIfaceName, "AddReportFutureVersion",
             params.reportName(), params.reportingType(),
             params.emitReadingUpdate(), params.logToMetricReportCollection(),
             static_cast<uint64_t>(params.interval().count()),
@@ -269,7 +269,9 @@ TEST_P(TestReportManagerWithAggregationOperationType,
               "/xyz/openbmc_project/sensors/power/p1")},
           utils::enumToString(operationType),
           "MetricId1",
-          "Metadata1"}});
+          "Metadata1",
+          utils::enumToString(CollectionTimeScope::point),
+          0u}});
 
     reportFactoryMock.expectMake(_, reportParams, Ref(*sut), Ref(storageMock))
         .WillOnce(Return(ByMove(std::move(reportMockPtr))));
@@ -307,7 +309,10 @@ class TestReportManagerStorage : public TestReportManager
             return LabeledMetricParameters(
                 LabeledSensorParameters("service", std::get<0>(item)),
                 utils::stringToOperationType(std::get<1>(item)),
-                std::get<2>(item), std::get<3>(item));
+                std::get<2>(item), std::get<3>(item),
+                utils::stringToCollectionTimeScope(std::get<4>(item)),
+                CollectionDuration(
+                    std::chrono::milliseconds(std::get<5>(item))));
         });
     }
 

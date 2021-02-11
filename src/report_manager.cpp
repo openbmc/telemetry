@@ -1,7 +1,7 @@
 #include "report_manager.hpp"
 
-#include "interfaces/types.hpp"
 #include "report.hpp"
+#include "types/types.hpp"
 #include "utils/conversion.hpp"
 #include "utils/transform.hpp"
 
@@ -10,6 +10,19 @@
 
 #include <stdexcept>
 #include <system_error>
+
+ReadingParameters
+    convertToReadingParameters(ReadingParametersPastVersion params)
+{
+    return utils::transform(params, [](const auto& param) {
+        using namespace std::chrono_literals;
+
+        return ReadingParameters::value_type(
+            std::get<0>(param), std::get<1>(param), std::get<2>(param),
+            std::get<3>(param), utils::enumToString(CollectionTimeScope::point),
+            0u);
+    });
+}
 
 ReportManager::ReportManager(
     std::unique_ptr<interfaces::ReportFactory> reportFactoryIn,
@@ -38,7 +51,25 @@ ReportManager::ReportManager(
                                     const bool emitsReadingsUpdate,
                                     const bool logToMetricReportsCollection,
                                     const uint64_t interval,
-                                    ReadingParameters metricParams) {
+                                    ReadingParametersPastVersion metricParams) {
+                    return addReport(yield, reportName, reportingType,
+                                     emitsReadingsUpdate,
+                                     logToMetricReportsCollection,
+                                     std::chrono::milliseconds(interval),
+                                     convertToReadingParameters(
+                                         std::move(metricParams)))
+                        .getPath();
+                });
+
+            dbusIface.register_method(
+                "AddReportFutureVersion",
+                [this](boost::asio::yield_context& yield,
+                       const std::string& reportName,
+                       const std::string& reportingType,
+                       const bool emitsReadingsUpdate,
+                       const bool logToMetricReportsCollection,
+                       const uint64_t interval,
+                       ReadingParameters metricParams) {
                     return addReport(yield, reportName, reportingType,
                                      emitsReadingsUpdate,
                                      logToMetricReportsCollection,
@@ -144,7 +175,8 @@ interfaces::Report& ReportManager::addReport(
                 sdbusplus::message::object_path(
                     param.at_index<0>().at_label<Path>()),
                 utils::enumToString(param.at_index<1>()), param.at_index<2>(),
-                param.at_index<3>());
+                param.at_index<3>(), utils::enumToString(param.at_index<4>()),
+                param.at_index<5>().t.count());
         });
 
     verifyAddReport(reportName, reportingType, interval, metricParams);
