@@ -34,18 +34,19 @@ std::unique_ptr<interfaces::Trigger> TriggerFactory::make(
 
     const auto& params =
         std::get<std::vector<numeric::ThresholdParam>>(thresholdParams);
-    for (const auto& [type, dwellTime, direction, value] : params)
+    for (const auto& [typeStr, dwellTime, directionStr, value] : params)
     {
+        numeric::Type type = numeric::stringToType(typeStr);
         std::vector<std::unique_ptr<interfaces::TriggerAction>> actions;
         if (logToJournal)
         {
-            actions.emplace_back(std::make_unique<action::LogToJournal>(
-                numeric::toType(type), value));
+            actions.emplace_back(
+                std::make_unique<action::LogToJournal>(type, value));
         }
         if (logToRedfish)
         {
-            actions.emplace_back(std::make_unique<action::LogToRedfish>(
-                numeric::toType(type), value));
+            actions.emplace_back(
+                std::make_unique<action::LogToRedfish>(type, value));
         }
         if (updateReport)
         {
@@ -56,7 +57,7 @@ std::unique_ptr<interfaces::Trigger> TriggerFactory::make(
         thresholds.emplace_back(std::make_shared<NumericThreshold>(
             bus->get_io_context(), sensors, sensorNames, std::move(actions),
             std::chrono::milliseconds(dwellTime),
-            numeric::toDirection(direction), value));
+            numeric::stringToDirection(directionStr), value));
     }
 
     return std::make_unique<Trigger>(

@@ -18,13 +18,27 @@ enum class Severity
     critical
 };
 
-inline Severity toSeverity(int x)
+namespace details
 {
-    return utils::toEnum<Severity, Severity::ok, Severity::critical>(x);
+constexpr std::array<std::pair<std::string_view, Severity>, 3>
+    convDataSeverity = {std::make_pair("Ok", Severity::ok),
+                        std::make_pair("Warning", Severity::warning),
+                        std::make_pair("Critical", Severity::critical)};
+
+} // namespace details
+
+inline Severity stringToSeverity(const std::string& str)
+{
+    return utils::stringToEnum(details::convDataSeverity, str);
 }
 
-using ThresholdParam = std::tuple<std::string, std::underlying_type_t<Severity>,
-                                  std::variant<double>, uint64_t>;
+inline std::string severityToString(Severity v)
+{
+    return std::string(utils::enumToString(details::convDataSeverity, v));
+}
+
+using ThresholdParam =
+    std::tuple<std::string, std::string, std::variant<double>, uint64_t>;
 } // namespace discrete
 
 namespace numeric
@@ -45,19 +59,43 @@ enum class Direction
     increasing
 };
 
-inline Type toType(int x)
+namespace details
 {
-    return utils::toEnum<Type, Type::lowerCritical, Type::upperCritical>(x);
+
+constexpr std::array<std::pair<std::string_view, Type>, 4> convDataType = {
+    std::make_pair("LowerCritical", Type::lowerCritical),
+    std::make_pair("LowerWarning", Type::lowerWarning),
+    std::make_pair("UpperWarning", Type::upperWarning),
+    std::make_pair("UpperCritical", Type::upperCritical)};
+
+constexpr std::array<std::pair<std::string_view, Direction>, 3>
+    convDataDirection = {std::make_pair("Either", Direction::either),
+                         std::make_pair("Decreasing", Direction::decreasing),
+                         std::make_pair("Increasing", Direction::increasing)};
+
+} // namespace details
+
+inline Type stringToType(const std::string& str)
+{
+    return utils::stringToEnum(details::convDataType, str);
 }
 
-inline Direction toDirection(int x)
+inline std::string typeToString(Type v)
 {
-    return utils::toEnum<Direction, Direction::either, Direction::increasing>(
-        x);
+    return std::string(utils::enumToString(details::convDataType, v));
 }
 
-using ThresholdParam = std::tuple<std::underlying_type_t<Type>, uint64_t,
-                                  std::underlying_type_t<Direction>, double>;
+inline Direction stringToDirection(const std::string& str)
+{
+    return utils::stringToEnum(details::convDataDirection, str);
+}
+
+inline std::string directionToString(Direction v)
+{
+    return std::string(utils::enumToString(details::convDataDirection, v));
+}
+
+using ThresholdParam = std::tuple<std::string, uint64_t, std::string, double>;
 } // namespace numeric
 
 using TriggerThresholdParams =
