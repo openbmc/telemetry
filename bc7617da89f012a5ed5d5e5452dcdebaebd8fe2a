@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5ae09c6f_ebf15a91",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1000677
+      },
+      "writtenOn": "2021-02-11T13:06:15Z",
+      "side": 1,
+      "message": "fix commit msg, title should be limited to 50 and the msg to 72 as far as I remember",
+      "range": {
+        "startLine": 7,
+        "startChar": 0,
+        "endLine": 7,
+        "endChar": 78
+      },
+      "revId": "bc7617da89f012a5ed5d5e5452dcdebaebd8fe2a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
