@@ -53,7 +53,8 @@ class TestReport : public Test
                 LabeledSensorParameters("service"s + id, "path"s + id);
             auto metricParameters = LabeledMetricParameters(
                 std::move(sensorParameters), utils::toOperationType(i),
-                "id"s + id, "metadata"s + id);
+                "id"s + id, "metadata"s + id, CollectionTimeScope::point,
+                CollectionDuration(0ms));
 
             ON_CALL(*metricMocks[i], dumpConfiguration())
                 .WillByDefault(Return(std::move(metricParameters)));
@@ -258,20 +259,32 @@ INSTANTIATE_TEST_SUITE_P(
                "ReadingParameters",
                nlohmann::json(
                    {{{tstring::SensorPath::str(),
-                      {{"service", "service0"}, {"path", "path0"}}},
+                      {{tstring::Service::str(), "service0"},
+                       {tstring::Path::str(), "path0"}}},
                      {tstring::OperationType::str(), OperationType::single},
                      {tstring::Id::str(), "id0"},
-                     {tstring::MetricMetadata::str(), "metadata0"}},
+                     {tstring::MetricMetadata::str(), "metadata0"},
+                     {tstring::CollectionTimeScope::str(),
+                      CollectionTimeScope::point},
+                     {tstring::CollectionDuration::str(), 0}},
                     {{tstring::SensorPath::str(),
-                      {{"service", "service1"}, {"path", "path1"}}},
+                      {{tstring::Service::str(), "service1"},
+                       {tstring::Path::str(), "path1"}}},
                      {tstring::OperationType::str(), OperationType::max},
                      {tstring::Id::str(), "id1"},
-                     {tstring::MetricMetadata::str(), "metadata1"}},
+                     {tstring::MetricMetadata::str(), "metadata1"},
+                     {tstring::CollectionTimeScope::str(),
+                      CollectionTimeScope::point},
+                     {tstring::CollectionDuration::str(), 0}},
                     {{tstring::SensorPath::str(),
-                      {{"service", "service2"}, {"path", "path2"}}},
+                      {{tstring::Service::str(), "service2"},
+                       {tstring::Path::str(), "path2"}}},
                      {tstring::OperationType::str(), OperationType::min},
                      {tstring::Id::str(), "id2"},
-                     {tstring::MetricMetadata::str(), "metadata2"}}}))));
+                     {tstring::MetricMetadata::str(), "metadata2"},
+                     {tstring::CollectionTimeScope::str(),
+                      CollectionTimeScope::point},
+                     {tstring::CollectionDuration::str(), 0}}}))));
 
 TEST_P(TestReportStore, settingPersistencyToTrueStoresReport)
 {
