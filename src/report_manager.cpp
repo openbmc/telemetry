@@ -1,6 +1,6 @@
 #include "report_manager.hpp"
 
-#include "interfaces/types.hpp"
+#include "types/types.hpp"
 #include "report.hpp"
 #include "utils/conversion.hpp"
 #include "utils/transform.hpp"
@@ -144,7 +144,8 @@ interfaces::Report& ReportManager::addReport(
                 sdbusplus::message::object_path(
                     param.at_index<0>().at_label<Path>()),
                 utils::enumToString(param.at_index<1>()), param.at_index<2>(),
-                param.at_index<3>());
+                param.at_index<3>(), utils::enumToString(param.at_index<4>()),
+                param.at_index<5>().t.count());
         });
 
     verifyAddReport(reportName, reportingType, interval, metricParams);
