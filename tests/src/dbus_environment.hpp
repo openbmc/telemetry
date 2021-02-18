@@ -26,7 +26,8 @@ class DbusEnvironment : public ::testing::Environment
     static void synchronizeIoc()
     {
         while (ioc.poll() > 0)
-        {}
+        {
+        }
     }
 
     template <class Functor>
