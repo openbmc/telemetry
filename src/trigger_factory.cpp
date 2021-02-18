@@ -15,14 +15,15 @@ TriggerFactory::TriggerFactory(
     reportManager(reportManager)
 {}
 
-std::unique_ptr<interfaces::Trigger> TriggerFactory::make(
-    boost::asio::yield_context& yield, const std::string& name, bool isDiscrete,
-    bool logToJournal, bool logToRedfish, bool updateReport,
-    const std::vector<std::pair<sdbusplus::message::object_path, std::string>>&
-        sensorPaths,
-    const std::vector<std::string>& reportNames,
-    const TriggerThresholdParams& thresholdParams,
-    interfaces::TriggerManager& triggerManager) const
+std::unique_ptr<interfaces::Trigger>
+    TriggerFactory::make(boost::asio::yield_context& yield,
+                         const std::string& name, bool isDiscrete,
+                         bool logToJournal, bool logToRedfish,
+                         bool updateReport, const TriggerSensors& sensorPaths,
+                         const std::vector<std::string>& reportNames,
+                         const TriggerThresholdParams& thresholdParams,
+                         interfaces::TriggerManager& triggerManager,
+                         interfaces::JsonStorage& triggerStorage) const
 {
     if (isDiscrete)
     {
@@ -63,7 +64,7 @@ std::unique_ptr<interfaces::Trigger> TriggerFactory::make(
     return std::make_unique<Trigger>(
         bus->get_io_context(), objServer, name, isDiscrete, logToJournal,
         logToRedfish, updateReport, sensorPaths, reportNames, thresholdParams,
-        std::move(thresholds), triggerManager);
+        std::move(thresholds), triggerManager, triggerStorage);
 }
 
 std::pair<std::vector<std::shared_ptr<interfaces::Sensor>>,
