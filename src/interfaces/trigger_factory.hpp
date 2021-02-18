@@ -1,5 +1,6 @@
 #pragma once
 
+#include "interfaces/json_storage.hpp"
 #include "interfaces/trigger.hpp"
 #include "interfaces/trigger_manager.hpp"
 #include "interfaces/trigger_types.hpp"
@@ -26,7 +27,8 @@ class TriggerFactory
             std::pair<sdbusplus::message::object_path, std::string>>& sensors,
         const std::vector<std::string>& reportNames,
         const TriggerThresholdParams& thresholdParams,
-        interfaces::TriggerManager& triggerManager) const = 0;
+        interfaces::TriggerManager& triggerManager,
+        interfaces::JsonStorage& triggerStorage) const = 0;
 };
 
 } // namespace interfaces

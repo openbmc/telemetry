@@ -1,5 +1,6 @@
 #pragma once
 
+#include "interfaces/json_storage.hpp"
 #include "interfaces/threshold.hpp"
 #include "interfaces/trigger.hpp"
 #include "interfaces/trigger_manager.hpp"
@@ -23,7 +24,8 @@ class Trigger : public interfaces::Trigger
         const std::vector<std::string>& reportNames,
         const TriggerThresholdParams& thresholdParams,
         std::vector<std::shared_ptr<interfaces::Threshold>>&& thresholds,
-        interfaces::TriggerManager& triggerManager);
+        interfaces::TriggerManager& triggerManager,
+        interfaces::JsonStorage& triggerStorage);
 
     Trigger(const Trigger&) = delete;
     Trigger(Trigger&&) = delete;
@@ -40,17 +42,25 @@ class Trigger : public interfaces::Trigger
         return path;
     }
 
+    bool storeConfiguration() const;
+
   private:
     const std::string name;
+    bool isDiscrete;
+    bool logToJournal;
+    bool logToRedfish;
+    bool updateReport;
     const std::string path;
-    bool persistent;
-    std::vector<std::pair<sdbusplus::message::object_path, std::string>>
-        sensors;
+    bool persistent = false;
+    TriggerSensors sensors;
     std::vector<std::string> reportNames;
     TriggerThresholdParams thresholdParams;
     std::unique_ptr<sdbusplus::asio::dbus_interface> deleteIface;
     std::unique_ptr<sdbusplus::asio::dbus_interface> triggerIface;
     std::vector<std::shared_ptr<interfaces::Threshold>> thresholds;
+
+    interfaces::JsonStorage::FilePath fileName;
+    interfaces::JsonStorage& triggerStorage;
 
   public:
     static constexpr const char* triggerIfaceName =
@@ -59,4 +69,5 @@ class Trigger : public interfaces::Trigger
         "/xyz/openbmc_project/Telemetry/Triggers/";
     static constexpr const char* deleteIfaceName =
         "xyz.openbmc_project.Object.Delete";
+    static constexpr size_t triggerVersion = 0;
 };
