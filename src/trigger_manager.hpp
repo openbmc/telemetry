@@ -14,6 +14,7 @@ class TriggerManager : public interfaces::TriggerManager
   public:
     TriggerManager(
         std::unique_ptr<interfaces::TriggerFactory> triggerFactory,
+        std::unique_ptr<interfaces::JsonStorage> triggerStorage,
         const std::shared_ptr<sdbusplus::asio::object_server>& objServer);
 
     TriggerManager(TriggerManager&) = delete;
@@ -25,6 +26,7 @@ class TriggerManager : public interfaces::TriggerManager
 
   private:
     std::unique_ptr<interfaces::TriggerFactory> triggerFactory;
+    std::unique_ptr<interfaces::JsonStorage> triggerStorage;
     std::unique_ptr<sdbusplus::asio::dbus_interface> managerIface;
     std::vector<std::unique_ptr<interfaces::Trigger>> triggers;
 

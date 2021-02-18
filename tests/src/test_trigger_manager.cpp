@@ -1,5 +1,6 @@
 #include "dbus_environment.hpp"
 #include "helpers.hpp"
+#include "mocks/json_storage_mock.hpp"
 #include "mocks/trigger_factory_mock.hpp"
 #include "mocks/trigger_mock.hpp"
 #include "params/trigger_params.hpp"
@@ -29,6 +30,9 @@ class TestTriggerManager : public Test
     }
 
     TriggerParams triggerParams;
+    std::unique_ptr<StorageMock> storageMockPtr =
+        std::make_unique<NiceMock<StorageMock>>();
+    StorageMock& storageMock = *storageMockPtr;
     std::unique_ptr<TriggerFactoryMock> triggerFactoryMockPtr =
         std::make_unique<NiceMock<TriggerFactoryMock>>();
     TriggerFactoryMock& triggerFactoryMock = *triggerFactoryMockPtr;
@@ -36,14 +40,14 @@ class TestTriggerManager : public Test
         std::make_unique<NiceMock<TriggerMock>>(triggerParams.name());
     TriggerMock& triggerMock = *triggerMockPtr;
     std::unique_ptr<TriggerManager> sut = std::make_unique<TriggerManager>(
-        std::move(triggerFactoryMockPtr),
+        std::move(triggerFactoryMockPtr), std::move(storageMockPtr),
         std::move(DbusEnvironment::getObjServer()));
     MockFunction<void(std::string)> checkPoint;
 };
 
 TEST_F(TestTriggerManager, addTrigger)
 {
-    triggerFactoryMock.expectMake(triggerParams, Ref(*sut))
+    triggerFactoryMock.expectMake(triggerParams, Ref(*sut), Ref(storageMock))
         .WillOnce(Return(ByMove(std::move(triggerMockPtr))));
 
     auto [ec, path] = addTrigger(triggerParams);
@@ -83,7 +87,7 @@ TEST_F(TestTriggerManager, addDiscreteTriggerWithoutThresholds)
 
 TEST_F(TestTriggerManager, DISABLED_failToAddTriggerTwice)
 {
-    triggerFactoryMock.expectMake(triggerParams, Ref(*sut))
+    triggerFactoryMock.expectMake(triggerParams, Ref(*sut), Ref(storageMock))
         .WillOnce(Return(ByMove(std::move(triggerMockPtr))));
 
     addTrigger(triggerParams);
@@ -95,7 +99,7 @@ TEST_F(TestTriggerManager, DISABLED_failToAddTriggerTwice)
 
 TEST_F(TestTriggerManager, DISABLED_failToAddTriggerWhenMaxTriggerIsReached)
 {
-    triggerFactoryMock.expectMake(std::nullopt, Ref(*sut))
+    triggerFactoryMock.expectMake(std::nullopt, Ref(*sut), Ref(storageMock))
         .Times(TriggerManager::maxTriggers);
 
     for (size_t i = 0; i < TriggerManager::maxTriggers; i++)
@@ -117,7 +121,8 @@ TEST_F(TestTriggerManager, removeTrigger)
 {
     {
         InSequence seq;
-        triggerFactoryMock.expectMake(triggerParams, Ref(*sut))
+        triggerFactoryMock
+            .expectMake(triggerParams, Ref(*sut), Ref(storageMock))
             .WillOnce(Return(ByMove(std::move(triggerMockPtr))));
         EXPECT_CALL(triggerMock, Die());
         EXPECT_CALL(checkPoint, Call("end"));
@@ -144,7 +149,8 @@ TEST_F(TestTriggerManager, removingSameTriggerTwiceHasNoSideEffect)
 {
     {
         InSequence seq;
-        triggerFactoryMock.expectMake(triggerParams, Ref(*sut))
+        triggerFactoryMock
+            .expectMake(triggerParams, Ref(*sut), Ref(storageMock))
             .WillOnce(Return(ByMove(std::move(triggerMockPtr))));
         EXPECT_CALL(triggerMock, Die());
         EXPECT_CALL(checkPoint, Call("end"));

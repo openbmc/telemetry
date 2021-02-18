@@ -1,6 +1,8 @@
 #pragma once
 
 #include "utils/conversion.hpp"
+#include "utils/labeled_tuple.hpp"
+#include "utils/tstring.hpp"
 
 #include <string>
 #include <tuple>
@@ -38,6 +40,12 @@ inline std::string severityToString(Severity v)
 }
 
 using ThresholdParam = std::tuple<std::string, std::string, uint64_t, double>;
+
+using LabeledThresholdParam =
+    utils::LabeledTuple<std::tuple<std::string, Severity, uint64_t, double>,
+                        utils::tstring::UserId, utils::tstring::Severity,
+                        utils::tstring::DwellTime,
+                        utils::tstring::ThresholdValue>;
 } // namespace discrete
 
 namespace numeric
@@ -95,7 +103,21 @@ inline std::string directionToString(Direction v)
 }
 
 using ThresholdParam = std::tuple<std::string, uint64_t, std::string, double>;
+
+using LabeledThresholdParam =
+    utils::LabeledTuple<std::tuple<Type, uint64_t, Direction, double>,
+                        utils::tstring::Type, utils::tstring::DwellTime,
+                        utils::tstring::Direction,
+                        utils::tstring::ThresholdValue>;
 } // namespace numeric
+
+using TriggerSensors =
+    std::vector<std::pair<sdbusplus::message::object_path, std::string>>;
+
+using LabeledTriggerSensor =
+    utils::LabeledTuple<std::tuple<std::string, std::string>,
+                        utils::tstring::SensorPath,
+                        utils::tstring::SensorMetadata>;
 
 using TriggerThresholdParams =
     std::variant<std::vector<numeric::ThresholdParam>,
