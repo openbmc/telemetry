@@ -1,3 +1,4 @@
+.vscode
 build/
 xyz.openbmc_project.Telemetry.service
 telemetry
