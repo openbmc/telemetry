@@ -26,6 +26,12 @@ class TriggerParams
         return discreteProperty;
     }
 
+    TriggerParams& isDiscrete(bool isDiscrete)
+    {
+        discreteProperty = isDiscrete;
+        return *this;
+    }
+
     bool logToJournal() const
     {
         return logToJournalProperty;
@@ -36,13 +42,18 @@ class TriggerParams
         return logToRedfishProperty;
     }
 
+    TriggerParams& updateReport(bool updateReport)
+    {
+        updateReportProperty = updateReport;
+        return *this;
+    }
+
     bool updateReport() const
     {
         return updateReportProperty;
     }
 
-    const std::vector<std::pair<sdbusplus::message::object_path, std::string>>&
-        sensors() const
+    const TriggerSensors& sensors() const
     {
         return sensorsProperty;
     }
@@ -57,17 +68,22 @@ class TriggerParams
         return thresholdsProperty;
     }
 
+    TriggerParams& thresholdParams(TriggerThresholdParams thresholdParams)
+    {
+        thresholdsProperty = thresholdParams;
+        return *this;
+    }
+
   private:
     std::string nameProperty = "Trigger1";
     bool discreteProperty = false;
     bool logToJournalProperty = false;
     bool logToRedfishProperty = false;
-    bool updateReportProperty = false;
-    std::vector<std::pair<sdbusplus::message::object_path, std::string>>
-        sensorsProperty = {
-            {sdbusplus::message::object_path(
-                 "/xyz/openbmc_project/sensors/temperature/BMC_Temp"),
-             ""}};
+    bool updateReportProperty = true;
+    TriggerSensors sensorsProperty = {
+        {sdbusplus::message::object_path(
+             "/xyz/openbmc_project/sensors/temperature/BMC_Temp"),
+         ""}};
     std::vector<std::string> reportNamesProperty = {"Report1"};
     TriggerThresholdParams thresholdsProperty =
         std::vector<numeric::ThresholdParam>{

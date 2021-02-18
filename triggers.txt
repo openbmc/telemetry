@@ -1,0 +1,587 @@
+commit 096f84538deec04021657fe3152f9d21717da0be
+Author: Cezary Zwolak <cezary.zwolak@intel.com>
+Date:   Wed Feb 17 01:48:58 2021 +0100
+
+    V1
+    
+    Change-Id: Ia90d2332fa490d8fbfaecd3875b2362078bf0306
+
+diff --git a/src/interfaces/trigger_factory.hpp b/src/interfaces/trigger_factory.hpp
+index 7d448d0..800720f 100644
+--- a/src/interfaces/trigger_factory.hpp
++++ b/src/interfaces/trigger_factory.hpp
+@@ -19,14 +19,30 @@ class TriggerFactory
+     virtual ~TriggerFactory() = default;
+ 
+     virtual std::unique_ptr<interfaces::Trigger> make(
+-        boost::asio::yield_context& yield, const std::string& name,
+-        bool isDiscrete, bool logToJournal, bool logToRedfish,
++        boost::asio::yield_context& yield,
++        const std::string& name,
++        bool isDiscrete,
++        bool logToJournal,
++        bool logToRedfish,
+         bool updateReport,
+         const std::vector<
+             std::pair<sdbusplus::message::object_path, std::string>>& sensors,
+         const std::vector<std::string>& reportNames,
+         const TriggerThresholdParams& thresholdParams,
+-        interfaces::TriggerManager& triggerManager) const = 0;
++        interfaces::TriggerManager& triggerManager,
++        interfaces::JsonStorage& triggerStorage) const = 0;
++    virtual std::unique_ptr<interfaces::Trigger> make(
++        const std::string& name,
++        bool isDiscrete,
++        bool logToJournal,
++        bool logToRedfish,
++        bool updateReport,
++        const std::vector<
++            std::pair<sdbusplus::message::object_path, std::string>>& sensors,
++        const std::vector<std::string>& reportNames,
++        const TriggerThresholdParams& thresholdParams,
++        interfaces::TriggerManager& triggerManager,
++        interfaces::JsonStorage& triggerStorage) const = 0;
+ };
+ 
+ } // namespace interfaces
+diff --git a/src/telemetry.hpp b/src/telemetry.hpp
+index fb7f2a3..4dc3bc8 100644
+--- a/src/telemetry.hpp
++++ b/src/telemetry.hpp
+@@ -23,9 +23,12 @@ class Telemetry
+                 interfaces::JsonStorage::DirectoryPath(
+                     "/var/lib/telemetry/Reports")),
+             objServer),
+-        triggerManager(std::make_unique<TriggerFactory>(
+-                           bus, objServer, sensorCache, reportManager),
+-                       objServer)
++        triggerManager(
++            std::make_unique<TriggerFactory>(bus, objServer, sensorCache, reportManager),
++            std::make_unique<PersistentJsonStorage>(
++                interfaces::JsonStorage::DirectoryPath(
++                    "/var/lib/telemetry/Triggers")),
++            objServer)
+     {}
+ 
+   private:
+diff --git a/src/trigger.cpp b/src/trigger.cpp
+index 471ad10..a920a07 100644
+--- a/src/trigger.cpp
++++ b/src/trigger.cpp
+@@ -1,26 +1,42 @@
+ #include "trigger.hpp"
+ 
+-#include "interfaces/types.hpp"
++#include <phosphor-logging/log.hpp>
+ 
+ Trigger::Trigger(
+     boost::asio::io_context& ioc,
+     const std::shared_ptr<sdbusplus::asio::object_server>& objServer,
+-    const std::string& nameIn, const bool isDiscrete, const bool logToJournal,
+-    const bool logToRedfish, const bool updateReport,
++    const std::string& nameIn,
++    const bool isDiscreteIn,
++    const bool logToJournalIn,
++    const bool logToRedfishIn,
++    const bool updateReportIn,
+     const std::vector<std::pair<sdbusplus::message::object_path, std::string>>&
+         sensorsIn,
+     const std::vector<std::string>& reportNamesIn,
+     const TriggerThresholdParams& thresholdParamsIn,
+     std::vector<std::shared_ptr<interfaces::Threshold>>&& thresholdsIn,
+-    interfaces::TriggerManager& triggerManager) :
++    interfaces::TriggerManager& triggerManager,
++    interfaces::JsonStorage& triggerStorageIn) :
+     name(nameIn),
+-    path(triggerDir + name), persistent(false), sensors(sensorsIn),
+-    reportNames(reportNamesIn), thresholdParams(thresholdParamsIn),
+-    thresholds(std::move(thresholdsIn))
++    path(triggerDir + name), 
++    isDiscrete(isDiscreteIn),
++    logToJournal(logToJournalIn),
++    logToRedfish(logToRedfishIn),
++    updateReport(updateReportIn),
++    sensors(sensorsIn),
++    reportNames(reportNamesIn),
++    thresholdParams(thresholdParamsIn),
++    thresholds(std::move(thresholdsIn)),
++    fileName(std::to_string(std::hash<std::string>{}(name))),
++    triggerStorage(triggerStorageIn)
+ {
+     deleteIface = objServer->add_unique_interface(
+         path, deleteIfaceName, [this, &ioc, &triggerManager](auto& dbusIface) {
+             dbusIface.register_method("Delete", [this, &ioc, &triggerManager] {
++                if (persistent)
++                {
++                    triggerStorage.remove(fileName);
++                }
+                 boost::asio::post(ioc, [this, &triggerManager] {
+                     triggerManager.removeTrigger(this);
+                 });
+@@ -31,10 +47,28 @@ Trigger::Trigger(
+         path, triggerIfaceName,
+         [this, isDiscrete, logToJournal, logToRedfish,
+          updateReport](auto& dbusIface) {
+-            dbusIface.register_property_r(
++            persistent = storeConfiguration();
++            dbusIface.register_property_rw(
+                 "Persistent", persistent,
+                 sdbusplus::vtable::property_::emits_change,
+-                [](const auto& x) { return x; });
++                [this](bool newVal, const auto&) {
++                    if (newVal == persistent)
++                    {
++                        return true;
++                    }
++                    if (newVal)
++                    {
++                        persistent = storeConfiguration();
++                    }
++                    else
++                    {
++                        triggerStorage.remove(fileName);
++                        persistent = false;
++                    }
++                    return true;
++                },
++                [this](const auto&) { return persistent; });
++
+             dbusIface.register_property_r(
+                 "Thresholds", thresholdParams,
+                 sdbusplus::vtable::property_::emits_change,
+@@ -65,3 +99,31 @@ Trigger::Trigger(
+         threshold->initialize();
+     }
+ }
++
++bool Trigger::storeConfiguration() const
++{
++    try
++    {
++        nlohmann::json data;
++
++        data["Name"] = name;
++        data["IsDiscrete"] = isDiscrete;
++        data["LogToJournal"] = logToJournal;
++        data["LogToRedfish"] = logToRedfish;
++        data["UpdateReport"] = updateReport;
++        data["Sensors"] = sensors;                     // TODO: how to
++        data["ReportNames"] = reportNames;             // TODO: how to
++        data["ThresholdParameters"] = thresholdParams; // TODO: how to
++
++        triggerStorage.store(fileName, data);
++    }
++    catch (const std::exception& e)
++    {
++        phosphor::logging::log<phosphor::logging::level::ERR>(
++            "Failed to store a trigger in storage",
++            phosphor::logging::entry("EXCEPTION_MSG=%s", e.what()));
++        return false;
++    }
++
++    return true;
++}
+diff --git a/src/trigger.hpp b/src/trigger.hpp
+index 3405c5b..70ffe83 100644
+--- a/src/trigger.hpp
++++ b/src/trigger.hpp
+@@ -1,5 +1,6 @@
+ #pragma once
+ 
++#include "interfaces/json_storage.hpp"
+ #include "interfaces/threshold.hpp"
+ #include "interfaces/trigger.hpp"
+ #include "interfaces/trigger_manager.hpp"
+@@ -16,14 +17,18 @@ class Trigger : public interfaces::Trigger
+     Trigger(
+         boost::asio::io_context& ioc,
+         const std::shared_ptr<sdbusplus::asio::object_server>& objServer,
+-        const std::string& name, const bool isDiscrete, const bool logToJournal,
+-        const bool logToRedfish, const bool updateReport,
++        const std::string& nameIn,
++        const bool isDiscreteIn,
++        const bool logToJournalIn,
++        const bool logToRedfishIn,
++        const bool updateReportIn,
+         const std::vector<
+             std::pair<sdbusplus::message::object_path, std::string>>& sensorsIn,
+-        const std::vector<std::string>& reportNames,
+-        const TriggerThresholdParams& thresholdParams,
+-        std::vector<std::shared_ptr<interfaces::Threshold>>&& thresholds,
+-        interfaces::TriggerManager& triggerManager);
++        const std::vector<std::string>& reportNamesIn,
++        const TriggerThresholdParams& thresholdParamsIn,
++        std::vector<std::shared_ptr<interfaces::Threshold>>&& thresholdsIn,
++        interfaces::TriggerManager& triggerManager,
++        interfaces::JsonStorage& triggerStorageIn);
+ 
+     Trigger(const Trigger&) = delete;
+     Trigger(Trigger&&) = delete;
+@@ -40,10 +45,16 @@ class Trigger : public interfaces::Trigger
+         return path;
+     }
+ 
++    bool storeConfiguration() const;
++
+   private:
+     const std::string name;
+     const std::string path;
+     bool persistent;
++    bool isDiscrete;
++    bool logToJournal;
++    bool logToRedfish;
++    bool updateReport;
+     std::vector<std::pair<sdbusplus::message::object_path, std::string>>
+         sensors;
+     std::vector<std::string> reportNames;
+@@ -52,6 +63,9 @@ class Trigger : public interfaces::Trigger
+     std::unique_ptr<sdbusplus::asio::dbus_interface> triggerIface;
+     std::vector<std::shared_ptr<interfaces::Threshold>> thresholds;
+ 
++    interfaces::JsonStorage::FilePath fileName;
++    interfaces::JsonStorage& triggerStorage;
++
+   public:
+     static constexpr const char* triggerIfaceName =
+         "xyz.openbmc_project.Telemetry.Trigger";
+diff --git a/src/trigger_factory.cpp b/src/trigger_factory.cpp
+index 7953cd9..f4030be 100644
+--- a/src/trigger_factory.cpp
++++ b/src/trigger_factory.cpp
+@@ -22,7 +22,8 @@ std::unique_ptr<interfaces::Trigger> TriggerFactory::make(
+         sensorPaths,
+     const std::vector<std::string>& reportNames,
+     const TriggerThresholdParams& thresholdParams,
+-    interfaces::TriggerManager& triggerManager) const
++    interfaces::TriggerManager& triggerManager,
++    interfaces::JsonStorage& triggerStorage) const
+ {
+     if (isDiscrete)
+     {
+@@ -63,7 +64,7 @@ std::unique_ptr<interfaces::Trigger> TriggerFactory::make(
+     return std::make_unique<Trigger>(
+         bus->get_io_context(), objServer, name, isDiscrete, logToJournal,
+         logToRedfish, updateReport, sensorPaths, reportNames, thresholdParams,
+-        std::move(thresholds), triggerManager);
++        std::move(thresholds), triggerManager, triggerStorage);
+ }
+ 
+ std::pair<std::vector<std::shared_ptr<interfaces::Sensor>>,
+diff --git a/src/trigger_factory.hpp b/src/trigger_factory.hpp
+index c1f2473..667d18a 100644
+--- a/src/trigger_factory.hpp
++++ b/src/trigger_factory.hpp
+@@ -1,5 +1,6 @@
+ #pragma once
+ 
++#include "interfaces/json_storage.hpp"
+ #include "interfaces/report_manager.hpp"
+ #include "interfaces/sensor.hpp"
+ #include "interfaces/trigger_factory.hpp"
+@@ -16,14 +17,30 @@ class TriggerFactory : public interfaces::TriggerFactory
+                    interfaces::ReportManager& reportManager);
+ 
+     std::unique_ptr<interfaces::Trigger> make(
+-        boost::asio::yield_context& yield, const std::string& name,
+-        bool isDiscrete, bool logToJournal, bool logToRedfish,
++        boost::asio::yield_context& yield,
++        const std::string& name,
++        bool isDiscrete,
++        bool logToJournal,
++        bool logToRedfish,
+         bool updateReport,
+         const std::vector<
+             std::pair<sdbusplus::message::object_path, std::string>>& sensors,
+         const std::vector<std::string>& reportNames,
+         const TriggerThresholdParams& thresholdParams,
+-        interfaces::TriggerManager& triggerManager) const override;
++        interfaces::TriggerManager& triggerManager,
++        interfaces::JsonStorage& triggerStorage) const override;
++    std::unique_ptr<interfaces::Trigger> make(
++        const std::string& name,
++        bool isDiscrete,
++        bool logToJournal,
++        bool logToRedfish,
++        bool updateReport,
++        const std::vector<
++            std::pair<sdbusplus::message::object_path, std::string>>& sensors,
++        const std::vector<std::string>& reportNames,
++        const TriggerThresholdParams& thresholdParams,
++        interfaces::TriggerManager& triggerManager,
++        interfaces::JsonStorage& triggerStorage) const override;
+ 
+   private:
+     std::shared_ptr<sdbusplus::asio::connection> bus;
+diff --git a/src/trigger_manager.cpp b/src/trigger_manager.cpp
+index 4191738..42f6d01 100644
+--- a/src/trigger_manager.cpp
++++ b/src/trigger_manager.cpp
+@@ -1,9 +1,15 @@
+ #include "trigger_manager.hpp"
++#include "interfaces/trigger_types.hpp"
++
++#include <phosphor-logging/log.hpp>
+ 
+ TriggerManager::TriggerManager(
+     std::unique_ptr<interfaces::TriggerFactory> triggerFactoryIn,
+-    const std::shared_ptr<sdbusplus::asio::object_server>& objServer) :
+-    triggerFactory(std::move(triggerFactoryIn))
++    std::unique_ptr<interfaces::JsonStorage> triggerStorageIn,
++    const std::shared_ptr<sdbusplus::asio::object_server>& objServerIn) :
++    triggerFactory(std::move(triggerFactoryIn)),
++    triggerStorage(std::move(triggerStorageIn)),
++    objServer(objServerIn)
+ {
+     managerIface = objServer->add_unique_interface(
+         triggerManagerPath, triggerManagerIfaceName, [this](auto& iface) {
+@@ -17,34 +23,10 @@ TriggerManager::TriggerManager(
+                                                 std::string>>& sensors,
+                     const std::vector<std::string>& reportNames,
+                     const TriggerThresholdParams& thresholds) {
+-                    if (isDiscrete)
+-                    {
+-                        throw sdbusplus::exception::SdBusError(
+-                            static_cast<int>(std::errc::not_supported),
+-                            "Only numeric threshold is supported");
+-                    }
+-
+-                    if (triggers.size() >= maxTriggers)
+-                    {
+-                        throw sdbusplus::exception::SdBusError(
+-                            static_cast<int>(std::errc::too_many_files_open),
+-                            "Reached maximal trigger count");
+-                    }
+-
+-                    for (const auto& trigger : triggers)
+-                    {
+-                        if (trigger->getName() == name)
+-                        {
+-                            throw sdbusplus::exception::SdBusError(
+-                                static_cast<int>(std::errc::file_exists),
+-                                "Duplicate trigger");
+-                        }
+-                    }
+-
+-                    triggers.emplace_back(triggerFactory->make(
+-                        yield, name, isDiscrete, logToJournal, logToRedfish,
+-                        updateReport, sensors, reportNames, thresholds, *this));
+-                    return triggers.back()->getPath();
++                        return addTrigger(
++                            yield, name, isDiscrete, logToJournal, logToRedfish, 
++                            updateReport, sensors, reportNames, thresholds)
++                        .getPath();
+                 });
+         });
+ }
+@@ -56,3 +38,116 @@ void TriggerManager::removeTrigger(const interfaces::Trigger* trigger)
+                        [trigger](const auto& x) { return trigger == x.get(); }),
+         triggers.end());
+ }
++
++void TriggerManager::verifyAddTrigger(const std::string& triggerName,
++                                      bool isDiscrete)
++{
++    if (isDiscrete)
++    {
++        throw sdbusplus::exception::SdBusError(
++            static_cast<int>(std::errc::not_supported),
++            "Only numeric threshold is supported");
++    }
++
++    if (triggers.size() >= maxTriggers)
++    {
++        throw sdbusplus::exception::SdBusError(
++            static_cast<int>(std::errc::too_many_files_open),
++            "Reached maximal trigger count");
++    }
++
++    for (const auto& trigger : triggers)
++    {
++        if (trigger->getName() == triggerName)
++        {
++            throw sdbusplus::exception::SdBusError(
++                static_cast<int>(std::errc::file_exists),
++                "Duplicate trigger");
++        }
++    }
++}
++
++interfaces::Trigger& TriggerManager::addTrigger(
++    boost::asio::yield_context& yield,
++    const std::string& triggerName,
++    bool isDiscrete,
++    bool logToJournal,
++    bool logToRedfish,
++    bool updateReport,
++    const std::vector<std::pair<sdbusplus::message::object_path,
++                                std::string>>& sensors,
++    const std::vector<std::string>& reportNames,
++    const TriggerThresholdParams& thresholds)
++{
++    verifyAddTrigger(triggerName, isDiscrete);
++
++    triggers.emplace_back(triggerFactory->make(
++        yield, triggerName, isDiscrete, logToJournal, logToRedfish,
++        updateReport, sensors, reportNames, thresholds, *this, *triggerStorage));
++
++    return *triggers.back();
++}
++
++interfaces::Trigger& TriggerManager::addTrigger(
++    const std::string& triggerName,
++    bool isDiscrete,
++    bool logToJournal,
++    bool logToRedfish,
++    bool updateReport,
++    const std::vector<std::pair<sdbusplus::message::object_path,
++                                std::string>>& sensors,
++    const std::vector<std::string>& reportNames,
++    const TriggerThresholdParams& thresholds)
++{
++    verifyAddTrigger(triggerName, isDiscrete);
++
++    triggers.emplace_back(triggerFactory->make(
++        triggerName, isDiscrete, logToJournal, logToRedfish,
++        updateReport, sensors, reportNames, thresholds, *this, *triggerStorage));
++
++    return *triggers.back();
++}
++
++void TriggerManager::loadFromPersistent()
++{
++    std::vector<interfaces::JsonStorage::FilePath> paths =
++        triggerStorage->list();
++
++    for (const auto& path : paths)
++    {
++        std::optional<nlohmann::json> data = triggerStorage->load(path);
++        try
++        {
++            std::string& name = data->at("Name").get_ref<std::string&>();
++            bool isDiscrete = data->at("IsDiscrete").get<bool>();
++            bool logToJournal = data->at("LogToJournal").get<bool>();
++            bool logToRedfish = data->at("LogToRedfish").get<bool>();
++            bool updateReport = data->at("UpdateReport").get<bool>();
++
++            auto sensors =
++                data->at("Sensors")
++                    .get<std::vector<std::pair<sdbusplus::message::object_path, std::string>>>(); // TODO: how to
++
++            auto reportNames =
++                data->at("ReportNames")
++                    .get<std::vector<std::string>>(); // TODO: how t
++
++            auto thresholdParams =
++                data->at("ThresholdParams")
++                    .get<std::variant<TriggerThresholdParams>>(); // TODO: how t
++
++            addTrigger(name, isDiscrete, logToJournal, logToRedfish, 
++                       updateReport, sensors, reportNames, thresholdParams);
++        }
++        catch (const std::exception& e)
++        {
++            phosphor::logging::log<phosphor::logging::level::ERR>(
++                "Failed to load report from storage",
++                phosphor::logging::entry(
++                    "FILENAME=%s",
++                    static_cast<std::filesystem::path>(path).c_str()),
++                phosphor::logging::entry("EXCEPTION_MSG=%s", e.what()));
++            triggerStorage->remove(path);
++        }
++    }
++}
+diff --git a/src/trigger_manager.hpp b/src/trigger_manager.hpp
+index 41257eb..56acb72 100644
+--- a/src/trigger_manager.hpp
++++ b/src/trigger_manager.hpp
+@@ -1,5 +1,6 @@
+ #pragma once
+ 
++#include "interfaces/json_storage.hpp"
+ #include "interfaces/report_manager.hpp"
+ #include "interfaces/trigger_factory.hpp"
+ #include "interfaces/trigger_manager.hpp"
+@@ -14,6 +15,7 @@ class TriggerManager : public interfaces::TriggerManager
+   public:
+     TriggerManager(
+         std::unique_ptr<interfaces::TriggerFactory> triggerFactory,
++        std::unique_ptr<interfaces::JsonStorage> triggerStorage,
+         const std::shared_ptr<sdbusplus::asio::object_server>& objServer);
+ 
+     TriggerManager(TriggerManager&) = delete;
+@@ -25,9 +27,36 @@ class TriggerManager : public interfaces::TriggerManager
+ 
+   private:
+     std::unique_ptr<interfaces::TriggerFactory> triggerFactory;
++    std::unique_ptr<interfaces::JsonStorage> triggerStorage;
++    std::shared_ptr<sdbusplus::asio::object_server> objServer;
+     std::unique_ptr<sdbusplus::asio::dbus_interface> managerIface;
+     std::vector<std::unique_ptr<interfaces::Trigger>> triggers;
+ 
++    void verifyAddTrigger(const std::string& triggerName,
++                          bool isDiscrete);
++    interfaces::Trigger& addTrigger(
++        boost::asio::yield_context& yield,
++        const std::string& triggerName,
++        bool isDiscrete,
++        bool logToJournal,
++        bool logToRedfish,
++        bool updateReport,
++        const std::vector<std::pair<sdbusplus::message::object_path,
++                                    std::string>>& sensors,
++        const std::vector<std::string>& reportNames,
++        const TriggerThresholdParams& thresholds);
++    interfaces::Trigger& addTrigger(
++        const std::string& triggerName,
++        bool isDiscrete,
++        bool logToJournal,
++        bool logToRedfish,
++        bool updateReport,
++        const std::vector<std::pair<sdbusplus::message::object_path,
++                                    std::string>>& sensors,
++        const std::vector<std::string>& reportNames,
++        const TriggerThresholdParams& thresholds);
++    void loadFromPersistent();
++
+   public:
+     static constexpr size_t maxTriggers{TELEMETRY_MAX_TRIGGERS};
+     static constexpr const char* triggerManagerIfaceName =
+diff --git a/src/utils/dbus_mapper.hpp b/src/utils/dbus_mapper.hpp
+index 78cf7b2..4e3e8a1 100644
+--- a/src/utils/dbus_mapper.hpp
++++ b/src/utils/dbus_mapper.hpp
+@@ -21,6 +21,7 @@ inline std::vector<SensorTree>
+     getSubTreeSensors(boost::asio::yield_context& yield,
+                       const std::shared_ptr<sdbusplus::asio::connection>& bus)
+ {
++    /*
+     std::array<const char*, 1> interfaces = {
+         "xyz.openbmc_project.Sensor.Value"};
+     boost::system::error_code ec;
+@@ -35,6 +36,13 @@ inline std::vector<SensorTree>
+         throw std::runtime_error("Failed to query ObjectMapper!");
+     }
+     return tree;
++*/
++
++    //////
++    std::vector<SensorTree> out;
++    SensorIfaces sensorIfaces = {{"xyz.openbmc_project.Temperature",{"xyz.openbmc_project.Sensor.Value"}}};
++    out.emplace_back("/xyz/openbmc_project/sensors/temperature/BMC_Temp",sensorIfaces);
++    return out;
+ }
+ 
+ } // namespace utils
+diff --git a/tests/src/mocks/trigger_factory_mock.hpp b/tests/src/mocks/trigger_factory_mock.hpp
+index cf1be55..6986a7b 100644
+--- a/tests/src/mocks/trigger_factory_mock.hpp
++++ b/tests/src/mocks/trigger_factory_mock.hpp
+@@ -27,7 +27,7 @@ class TriggerFactoryMock : public interfaces::TriggerFactory
+              std::pair<sdbusplus::message::object_path, std::string>>& sensors),
+          const std::vector<std::string>& reportNames,
+          const TriggerThresholdParams& thresholdParams,
+-         interfaces::TriggerManager& triggerManager),
++         interfaces::TriggerManager& triggerManager,
+         (const, override));
+ 
+     auto& expectMake(
