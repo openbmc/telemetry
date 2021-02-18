@@ -2,8 +2,10 @@
 
 TriggerManager::TriggerManager(
     std::unique_ptr<interfaces::TriggerFactory> triggerFactoryIn,
+    std::unique_ptr<interfaces::JsonStorage> triggerStorageIn,
     const std::shared_ptr<sdbusplus::asio::object_server>& objServer) :
-    triggerFactory(std::move(triggerFactoryIn))
+    triggerFactory(std::move(triggerFactoryIn)),
+    triggerStorage(std::move(triggerStorageIn))
 {
     managerIface = objServer->add_unique_interface(
         triggerManagerPath, triggerManagerIfaceName, [this](auto& iface) {
@@ -43,7 +45,8 @@ TriggerManager::TriggerManager(
 
                     triggers.emplace_back(triggerFactory->make(
                         yield, name, isDiscrete, logToJournal, logToRedfish,
-                        updateReport, sensors, reportNames, thresholds, *this));
+                        updateReport, sensors, reportNames, thresholds, *this,
+                        *triggerStorage));
                     return triggers.back()->getPath();
                 });
         });

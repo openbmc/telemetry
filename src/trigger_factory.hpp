@@ -23,7 +23,8 @@ class TriggerFactory : public interfaces::TriggerFactory
             std::pair<sdbusplus::message::object_path, std::string>>& sensors,
         const std::vector<std::string>& reportNames,
         const TriggerThresholdParams& thresholdParams,
-        interfaces::TriggerManager& triggerManager) const override;
+        interfaces::TriggerManager& triggerManager,
+        interfaces::JsonStorage& triggerStorage) const override;
 
   private:
     std::shared_ptr<sdbusplus::asio::connection> bus;
