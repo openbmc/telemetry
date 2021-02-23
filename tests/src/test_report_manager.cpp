@@ -6,6 +6,7 @@
 #include "report.hpp"
 #include "report_manager.hpp"
 #include "utils/conversion.hpp"
+#include "utils/set_exception.hpp"
 #include "utils/transform.hpp"
 
 using namespace testing;
@@ -67,17 +68,21 @@ class TestReportManager : public Test
     template <class T>
     static T getProperty(std::string property)
     {
-        std::promise<T> propertyPromise;
+        auto propertyPromise = std::promise<T>();
+        auto propertyFuture = propertyPromise.get_future();
         sdbusplus::asio::getProperty<T>(
             *DbusEnvironment::getBus(), DbusEnvironment::serviceName(),
             ReportManager::reportManagerPath,
             ReportManager::reportManagerIfaceName, property,
-            [&propertyPromise](boost::system::error_code ec) {
-                EXPECT_THAT(static_cast<bool>(ec), ::testing::Eq(false));
-                propertyPromise.set_value(T{});
-            },
-            [&propertyPromise](T t) { propertyPromise.set_value(t); });
-        return DbusEnvironment::waitForFuture(propertyPromise.get_future());
+            [&propertyPromise](const boost::system::error_code& ec, T t) {
+                if (ec)
+                {
+                    utils::setException(propertyPromise, "Get property failed");
+                    return;
+                }
+                propertyPromise.set_value(t);
+            });
+        return DbusEnvironment::waitForFuture(std::move(propertyFuture));
     }
 };
 

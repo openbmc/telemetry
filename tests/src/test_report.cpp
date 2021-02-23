@@ -87,15 +87,20 @@ class TestReport : public Test
     template <class T>
     static T getProperty(const std::string& path, const std::string& property)
     {
-        std::promise<T> propertyPromise;
+        auto propertyPromise = std::promise<T>();
+        auto propertyFuture = propertyPromise.get_future();
         sdbusplus::asio::getProperty<T>(
             *DbusEnvironment::getBus(), DbusEnvironment::serviceName(), path,
             Report::reportIfaceName, property,
-            [&propertyPromise](boost::system::error_code) {
-                utils::setException(propertyPromise, "GetProperty failed");
-            },
-            [&propertyPromise](T t) { propertyPromise.set_value(t); });
-        return DbusEnvironment::waitForFuture(propertyPromise.get_future());
+            [&propertyPromise](const boost::system::error_code& ec, T t) {
+                if (ec)
+                {
+                    utils::setException(propertyPromise, "GetProperty failed");
+                    return;
+                }
+                propertyPromise.set_value(t);
+            });
+        return DbusEnvironment::waitForFuture(std::move(propertyFuture));
     }
 
     boost::system::error_code call(const std::string& path,
@@ -122,16 +127,15 @@ class TestReport : public Test
                                                  const T& newValue)
     {
         std::promise<boost::system::error_code> setPromise;
+        auto future = setPromise.get_future();
         sdbusplus::asio::setProperty(
             *DbusEnvironment::getBus(), DbusEnvironment::serviceName(), path,
             Report::reportIfaceName, property, std::move(newValue),
-            [&setPromise](boost::system::error_code ec) {
+            [setPromise =
+                 std::move(setPromise)](boost::system::error_code ec) mutable {
                 setPromise.set_value(ec);
-            },
-            [&setPromise]() {
-                setPromise.set_value(boost::system::error_code{});
             });
-        return DbusEnvironment::waitForFuture(setPromise.get_future());
+        return DbusEnvironment::waitForFuture(std::move(future));
     }
 
     boost::system::error_code deleteReport(const std::string& path)
