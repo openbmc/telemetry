@@ -35,14 +35,16 @@ void Sensor::async_read(std::shared_ptr<utils::UniqueCall::Lock> lock)
     sdbusplus::asio::getProperty<double>(
         *bus, sensorId.service, sensorId.path,
         "xyz.openbmc_project.Sensor.Value", "Value",
-        [lock, id = sensorId,
-         weakSelf = weak_from_this()](boost::system::error_code ec) {
-            phosphor::logging::log<phosphor::logging::level::WARNING>(
-                "DBus 'GetProperty' call failed on Sensor Value",
-                phosphor::logging::entry("SENSOR_PATH=%s", id.path.c_str()),
-                phosphor::logging::entry("ERROR_CODE=%d", ec.value()));
-        },
-        [lock, weakSelf = weak_from_this()](double newValue) {
+        [lock, id = sensorId, weakSelf = weak_from_this()](
+            boost::system::error_code ec, double newValue) {
+            if (ec)
+            {
+                phosphor::logging::log<phosphor::logging::level::WARNING>(
+                    "DBus 'GetProperty' call failed on Sensor Value",
+                    phosphor::logging::entry("SENSOR_PATH=%s", id.path.c_str()),
+                    phosphor::logging::entry("ERROR_CODE=%d", ec.value()));
+                return;
+            }
             if (auto self = weakSelf.lock())
             {
                 self->updateValue(newValue);
