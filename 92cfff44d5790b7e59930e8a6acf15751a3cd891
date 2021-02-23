@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "499cece0_ddbc2dc7",
+        "filename": ".clang-format",
+        "patchSetId": 2
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2021-02-23T13:11:48Z",
+      "side": 1,
+      "message": "Copied the latest .clang-format from the docs repository to ensure consistency.  Looks like there was a minor whitespace issue.",
+      "revId": "92cfff44d5790b7e59930e8a6acf15751a3cd891",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
