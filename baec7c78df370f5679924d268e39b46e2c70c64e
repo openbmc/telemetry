@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da9408aa_fec8cea8",
+        "filename": "src/sensor.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-02-24T09:54:27Z",
+      "side": 1,
+      "message": "What are the benefits of it? You are just moving code from library to user code. You will have to add this if condition in every future usage of getProperty",
+      "range": {
+        "startLine": 40,
+        "startChar": 12,
+        "endLine": 40,
+        "endChar": 19
+      },
+      "revId": "baec7c78df370f5679924d268e39b46e2c70c64e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
