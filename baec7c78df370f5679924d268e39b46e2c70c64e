@@ -22,6 +22,30 @@
       "revId": "baec7c78df370f5679924d268e39b46e2c70c64e",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "82cef8c5_5e80c49c",
+        "filename": "src/sensor.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1000153
+      },
+      "writtenOn": "2021-02-24T16:41:54Z",
+      "side": 1,
+      "message": "\u003e What are the benefits of it? \n\nI\u0027ve outlined the benefits in the crosslinked patch in the commit message.  This handles more cases, and is in line with std::networking.\n\n\u003e You are just moving code from library to user code. You will have to add this if condition in every future usage of getProperty\n\nI\u0027m not following what you mean about moving to user code.  This whole file is user code unless I\u0027m mistaken, and I\u0027ve simply modified how error conditions are registered.\n\nThe difference between having to add a conditional versus having to construct a whole new lambda is negligible, and as you can see from this patch, seems to lead to less code, as the lambda captures aren\u0027t duplicated  between the two handlers.  This means that the complex objects aren\u0027t constructed twice, which should be good overall.  These benefits are called out in the commit message in sdbusplus.",
+      "parentUuid": "da9408aa_fec8cea8",
+      "range": {
+        "startLine": 40,
+        "startChar": 12,
+        "endLine": 40,
+        "endChar": 19
+      },
+      "revId": "baec7c78df370f5679924d268e39b46e2c70c64e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }
