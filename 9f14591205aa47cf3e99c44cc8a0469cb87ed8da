@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a54f50c4_9e1b54a6",
+        "filename": "src/sensor.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1000153
+      },
+      "writtenOn": "2021-02-25T15:38:28Z",
+      "side": 0,
+      "message": "This portion of the capture is duplicated between the error case and the \"good\" case.",
+      "range": {
+        "startLine": 45,
+        "startChar": 8,
+        "endLine": 45,
+        "endChar": 43
+      },
+      "revId": "9f14591205aa47cf3e99c44cc8a0469cb87ed8da",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}

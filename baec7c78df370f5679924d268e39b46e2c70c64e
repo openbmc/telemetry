@@ -70,6 +70,30 @@
       "revId": "baec7c78df370f5679924d268e39b46e2c70c64e",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "eeee985e_4ebe04dc",
+        "filename": "src/sensor.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1000153
+      },
+      "writtenOn": "2021-02-25T15:38:28Z",
+      "side": 1,
+      "message": "\u003e I agree that it prevents something moveable only to be passed to both handlers, that is valid point and this proposition seems like good approach to address it. Thanks for explanation.\n\u003e \n\u003e There is one part that I disagree, current version (with separate callbacks) doesn\u0027t duplicate logic.\n\nFair point, I should\u0027ve said that it duplicates the captures, which isn\u0027t strictly \"logic\" so, you\u0027re right here.\n\n\u003e For some cases like this one, it is not important which error code was it, so once errorHandler is called no additional check is needed (I saw many cases like this in bmcweb).\n\nIt should be noted, this is an antipattern in bmcweb now.  As a general rule, there is info in the error message that generally results in status code changes to the response.  We\u0027re slowly going through and fixing them.\n\n\u003e Version with one callback will have to rapeat if (ec) in every invocation even for something trivial like this. I am not sure what you meant by less code (lines? characters? binary size?)\n\nAt least for the sdbusplus examples, the binary size is identical, because the optimizer seems to optimize the exact same.  In this case, I mean less characters;  If you look at the old code, there\u0027s repeated lambda captures.  That\u0027s the code that\u0027s \"duplicate\"\n\n\u003e but for sure in version with two callback common logic was already in getProperty and didn\u0027t have to be repeated in every invocation of getProperty. Duplicating capture list is inconvenient and inefficient, but duplicating logic means adding more complexity to your code.\n\u003e \n\u003e Anyway it has to wait for sdbusplus patch to be merged. I raised my concerns there, once change in sdbusplus is accepted this one will get +2.\n\n\nCool.  Thanks for your review.",
+      "parentUuid": "39caa1a7_b70b9fc5",
+      "range": {
+        "startLine": 40,
+        "startChar": 12,
+        "endLine": 40,
+        "endChar": 19
+      },
+      "revId": "baec7c78df370f5679924d268e39b46e2c70c64e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }
