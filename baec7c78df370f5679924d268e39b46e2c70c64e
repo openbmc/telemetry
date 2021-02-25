@@ -46,6 +46,30 @@
       "revId": "baec7c78df370f5679924d268e39b46e2c70c64e",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "39caa1a7_b70b9fc5",
+        "filename": "src/sensor.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-02-25T15:22:03Z",
+      "side": 1,
+      "message": "I agree that it prevents something moveable only to be passed to both handlers, that is valid point and this proposition seems like good approach to address it. Thanks for explanation.\n\nThere is one part that I disagree, current version (with separate callbacks) doesn\u0027t duplicate logic. For some cases like this one, it is not important which error code was it, so once errorHandler is called no additional check is needed (I saw many cases like this in bmcweb). Version with one callback will have to rapeat if (ec) in every invocation even for something trivial like this. I am not sure what you meant by less code (lines? characters? binary size?) but for sure in version with two callback common logic was already in getProperty and didn\u0027t have to be repeated in every invocation of getProperty. Duplicating capture list is inconvenient and inefficient, but duplicating logic means adding more complexity to your code.\n\nAnyway it has to wait for sdbusplus patch to be merged. I raised my concerns there, once change in sdbusplus is accepted this one will get +2.",
+      "parentUuid": "82cef8c5_5e80c49c",
+      "range": {
+        "startLine": 40,
+        "startChar": 12,
+        "endLine": 40,
+        "endChar": 19
+      },
+      "revId": "baec7c78df370f5679924d268e39b46e2c70c64e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }
