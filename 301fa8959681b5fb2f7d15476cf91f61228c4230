@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a7b7eec_fc06c82b",
+        "filename": "tests/src/test_trigger.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 1000677
+      },
+      "writtenOn": "2021-03-02T09:20:53Z",
+      "side": 1,
+      "message": "Consider to moving it to function. Try to avoid `sut \u003d nullptr`. Best would be to move tests to new class and inherit TestTrigger that overrides SetUp() so you do not have to set sut to nullptr.\nSimilar pattern is applied to TestReport and TestReportStore\nhttps://github.com/openbmc/telemetry/blob/master/tests/src/test_report.cpp#L233",
+      "range": {
+        "startLine": 127,
+        "startChar": 0,
+        "endLine": 136,
+        "endChar": 45
+      },
+      "revId": "301fa8959681b5fb2f7d15476cf91f61228c4230",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
