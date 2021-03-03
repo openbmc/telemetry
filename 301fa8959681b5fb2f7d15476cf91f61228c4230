@@ -2,6 +2,155 @@
   "comments": [
     {
       "key": {
+        "uuid": "a9bc1754_adbfa33d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1000534
+      },
+      "writtenOn": "2021-03-03T12:00:58Z",
+      "side": 1,
+      "message": "I would expect such changes to also be tested on real system in following scenarios:\n- starting app without configuration\n- restart app with configuration stored - it\u0027s restored properly\n- restart app with configuration in incorrect version \n- restart app with configuration malformed",
+      "range": {
+        "startLine": 15,
+        "startChar": 3,
+        "endLine": 15,
+        "endChar": 22
+      },
+      "revId": "301fa8959681b5fb2f7d15476cf91f61228c4230",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1ec28443_d667ca2a",
+        "filename": "src/trigger.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1000534
+      },
+      "writtenOn": "2021-03-03T12:00:58Z",
+      "side": 1,
+      "message": "You sure we should initialize it with \u0027true\u0027? Report doesn\u0027t initialize it\u0027s counterpart variable (persistency). It\u0027s set afterwards as a result of \u0027storeConfiguration()\u0027 outcome.",
+      "range": {
+        "startLine": 22,
+        "startChar": 29,
+        "endLine": 22,
+        "endChar": 45
+      },
+      "revId": "301fa8959681b5fb2f7d15476cf91f61228c4230",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f6a199f0_7718239a",
+        "filename": "src/trigger.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1000534
+      },
+      "writtenOn": "2021-03-03T12:00:58Z",
+      "side": 1,
+      "message": "If name is unique (and verified before by TriggerManager) why using std::hash here? Hashes have (little, but not exploitable) risk of collision",
+      "range": {
+        "startLine": 25,
+        "startChar": 28,
+        "endLine": 25,
+        "endChar": 58
+      },
+      "revId": "301fa8959681b5fb2f7d15476cf91f61228c4230",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f975940c_a4181d73",
+        "filename": "src/trigger.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1000534
+      },
+      "writtenOn": "2021-03-03T12:00:58Z",
+      "side": 1,
+      "message": "No \u0027ReportVersion\u0027 field indicating compatibility of file with application (update/downgrade scenarios). See Report::storeConfiguration()",
+      "revId": "301fa8959681b5fb2f7d15476cf91f61228c4230",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "56427c77_e026c727",
+        "filename": "src/trigger.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 1000534
+      },
+      "writtenOn": "2021-03-03T12:00:58Z",
+      "side": 1,
+      "message": "could be replaced with \u0027auto\u0027 - type is clearly deductible from get_if\u003c\u003e paremeter",
+      "range": {
+        "startLine": 111,
+        "startChar": 18,
+        "endLine": 111,
+        "endChar": 55
+      },
+      "revId": "301fa8959681b5fb2f7d15476cf91f61228c4230",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "93d8ac28_1b2c6eec",
+        "filename": "src/trigger.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 1000534
+      },
+      "writtenOn": "2021-03-03T12:00:58Z",
+      "side": 1,
+      "message": "Could this be replaced with https://en.cppreference.com/w/cpp/utility/variant/visit ?\nSee example 4 (visit with overloads for each underlying variant type).\nIt will make sure you handle all possible variant types and fail to compile otherwise",
+      "revId": "301fa8959681b5fb2f7d15476cf91f61228c4230",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fadd5b95_11e65ee1",
+        "filename": "src/trigger.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1000534
+      },
+      "writtenOn": "2021-03-03T12:00:58Z",
+      "side": 1,
+      "message": "could be replaced with \u0027auto\u0027 - type is clearly deductible from get_if\u003c\u003e paremeter",
+      "range": {
+        "startLine": 124,
+        "startChar": 23,
+        "endLine": 124,
+        "endChar": 60
+      },
+      "revId": "301fa8959681b5fb2f7d15476cf91f61228c4230",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "7a7b7eec_fc06c82b",
         "filename": "tests/src/test_trigger.cpp",
         "patchSetId": 3
