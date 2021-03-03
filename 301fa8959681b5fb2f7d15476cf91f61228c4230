@@ -71,6 +71,30 @@
     },
     {
       "key": {
+        "uuid": "26eecd87_a1c2d5ce",
+        "filename": "src/trigger.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1000534
+      },
+      "writtenOn": "2021-03-03T12:03:59Z",
+      "side": 1,
+      "message": "unexploitable*",
+      "parentUuid": "f6a199f0_7718239a",
+      "range": {
+        "startLine": 25,
+        "startChar": 28,
+        "endLine": 25,
+        "endChar": 58
+      },
+      "revId": "301fa8959681b5fb2f7d15476cf91f61228c4230",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "f975940c_a4181d73",
         "filename": "src/trigger.cpp",
         "patchSetId": 3
@@ -82,6 +106,24 @@
       "writtenOn": "2021-03-03T12:00:58Z",
       "side": 1,
       "message": "No \u0027ReportVersion\u0027 field indicating compatibility of file with application (update/downgrade scenarios). See Report::storeConfiguration()",
+      "revId": "301fa8959681b5fb2f7d15476cf91f61228c4230",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9d7fb5af_22928285",
+        "filename": "src/trigger.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1000534
+      },
+      "writtenOn": "2021-03-03T12:03:59Z",
+      "side": 1,
+      "message": "Of course I\u0027ve meant \u0027equivalent to ReportVersion\u0027",
+      "parentUuid": "f975940c_a4181d73",
       "revId": "301fa8959681b5fb2f7d15476cf91f61228c4230",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
