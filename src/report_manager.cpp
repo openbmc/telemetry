@@ -176,7 +176,7 @@ interfaces::Report& ReportManager::addReport(
                     param.at_index<0>().at_label<Path>()),
                 utils::enumToString(param.at_index<1>()), param.at_index<2>(),
                 param.at_index<3>(), utils::enumToString(param.at_index<4>()),
-                param.at_index<5>().t.count());
+                param.at_index<5>().count());
         });
 
     verifyAddReport(reportName, reportingType, interval, metricParams);

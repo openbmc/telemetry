@@ -36,12 +36,11 @@ class TestReport : public Test
     TestReport()
     {
         ON_CALL(*metricMocks[0], getReading())
-            .WillByDefault(ReturnRefOfCopy(MetricValue{"a", "b", 17.1, 114}));
+            .WillByDefault(Return(MetricValue{"a", "b", 17.1, 114}));
         ON_CALL(*metricMocks[1], getReading())
-            .WillByDefault(ReturnRefOfCopy(MetricValue{"aa", "bb", 42.0, 74}));
+            .WillByDefault(Return(MetricValue{"aa", "bb", 42.0, 74}));
         ON_CALL(*metricMocks[2], getReading())
-            .WillByDefault(
-                ReturnRefOfCopy(MetricValue{"aaa", "bbb", 100.7, 21}));
+            .WillByDefault(Return(MetricValue{"aaa", "bbb", 100.7, 21}));
 
         for (size_t i = 0; i < metricMocks.size(); ++i)
         {
