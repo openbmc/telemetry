@@ -48,6 +48,30 @@
     },
     {
       "key": {
+        "uuid": "3109fcb4_5d07e25b",
+        "filename": "src/trigger.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-03-04T10:58:23Z",
+      "side": 1,
+      "message": "It is good practice to initialize everything when created. Later result of storeConfiguration is assigned to it.",
+      "parentUuid": "1ec28443_d667ca2a",
+      "range": {
+        "startLine": 22,
+        "startChar": 29,
+        "endLine": 22,
+        "endChar": 45
+      },
+      "revId": "301fa8959681b5fb2f7d15476cf91f61228c4230",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "f6a199f0_7718239a",
         "filename": "src/trigger.cpp",
         "patchSetId": 3
@@ -204,6 +228,30 @@
       "writtenOn": "2021-03-02T09:20:53Z",
       "side": 1,
       "message": "Consider to moving it to function. Try to avoid `sut \u003d nullptr`. Best would be to move tests to new class and inherit TestTrigger that overrides SetUp() so you do not have to set sut to nullptr.\nSimilar pattern is applied to TestReport and TestReportStore\nhttps://github.com/openbmc/telemetry/blob/master/tests/src/test_report.cpp#L233",
+      "range": {
+        "startLine": 127,
+        "startChar": 0,
+        "endLine": 136,
+        "endChar": 45
+      },
+      "revId": "301fa8959681b5fb2f7d15476cf91f61228c4230",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6c400034_52bf358c",
+        "filename": "tests/src/test_trigger.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-03-04T10:58:23Z",
+      "side": 1,
+      "message": "+1\n\nYou can create new test class with empty SetUp, this way sup will be null ptr at this point, then with new function Jozef mention you can just call:\nsut \u003d makeTrigger(triggerParams);",
+      "parentUuid": "7a7b7eec_fc06c82b",
       "range": {
         "startLine": 127,
         "startChar": 0,
