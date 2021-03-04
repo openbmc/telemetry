@@ -3,6 +3,7 @@
 #include "metric.hpp"
 #include "report.hpp"
 #include "sensor.hpp"
+#include "utils/clock.hpp"
 #include "utils/conversion.hpp"
 #include "utils/dbus_mapper.hpp"
 #include "utils/transform.hpp"
@@ -33,7 +34,8 @@ std::unique_ptr<interfaces::Report> ReportFactory::make(
                 param.at_label<ts::OperationType>(), param.at_label<ts::Id>(),
                 param.at_label<ts::MetricMetadata>(),
                 param.at_label<ts::CollectionTimeScope>(),
-                param.at_label<ts::CollectionDuration>());
+                param.at_label<ts::CollectionDuration>(),
+                std::make_unique<Clock>());
         });
 
     return std::make_unique<Report>(
