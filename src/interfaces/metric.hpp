@@ -16,7 +16,7 @@ class Metric
     virtual ~Metric() = default;
 
     virtual void initialize() = 0;
-    virtual const MetricValue& getReading() const = 0;
+    virtual MetricValue getReading() const = 0;
     virtual LabeledMetricParameters dumpConfiguration() const = 0;
 };
 

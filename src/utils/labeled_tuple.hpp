@@ -1,5 +1,7 @@
 #pragma once
 
+#include "types/collection_duration.hpp"
+
 #include <nlohmann/json.hpp>
 #include <sdbusplus/message/types.hpp>
 
@@ -25,12 +27,12 @@ inline void from_json(const nlohmann::json& j,
 namespace detail
 {
 
+template <class U>
+static U& ref();
+
 template <class T>
 struct has_utils_from_json
 {
-    template <class U>
-    static U& ref();
-
     template <class U>
     static std::true_type check(
         decltype(utils::from_json(ref<const nlohmann::json>(), ref<U>()))*);
@@ -44,6 +46,23 @@ struct has_utils_from_json
 
 template <class T>
 constexpr bool has_utils_from_json_v = has_utils_from_json<T>::value;
+
+template <class T>
+struct has_utils_to_json
+{
+    template <class U>
+    static std::true_type
+        check(decltype(utils::to_json(ref<nlohmann::json>(), ref<const U>()))*);
+
+    template <class>
+    static std::false_type check(...);
+
+    static constexpr bool value =
+        decltype(check<std::decay_t<T>>(nullptr))::value;
+};
+
+template <class T>
+constexpr bool has_utils_to_json_v = has_utils_to_json<T>::value;
 
 } // namespace detail
 
@@ -126,7 +145,16 @@ struct LabeledTuple<std::tuple<Args...>, Labels...>
     void to_json_item(nlohmann::json& j) const
     {
         using Label = std::tuple_element_t<Idx, std::tuple<Labels...>>;
-        j[Label::str()] = std::get<Idx>(value);
+        using T = std::tuple_element_t<Idx, tuple_type>;
+        nlohmann::json& item = j[Label::str()];
+        if constexpr (detail::has_utils_to_json_v<T>)
+        {
+            utils::to_json(item, std::get<Idx>(value));
+        }
+        else
+        {
+            item = std::get<Idx>(value);
+        }
     }
 
     template <size_t... Idx>
