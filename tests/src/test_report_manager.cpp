@@ -317,7 +317,7 @@ TEST_P(TestReportManagerWithAggregationOperationType,
             "MetricId1",
             "Metadata1",
             CollectionTimeScope::point,
-            CollectionDuration(std::chrono::milliseconds(0u))}}});
+            CollectionDuration(DurationType(0u))}}});
 
     reportFactoryMock.expectMake(reportParams, Ref(*sut), Ref(storageMock))
         .WillOnce(Return(ByMove(std::move(reportMockPtr))));

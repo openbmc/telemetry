@@ -4,7 +4,11 @@
 #include "types/collection_time_scope.hpp"
 #include "types/operation_type.hpp"
 
+#include <chrono>
+#include <cstdint>
+#include <ostream>
 #include <string>
+#include <vector>
 
 class MetricParams final
 {
@@ -64,11 +68,63 @@ class MetricParams final
         return collectionDurationProperty;
     }
 
+    MetricParams& readings(
+        std::vector<std::pair<DurationType, double>> value)
+    {
+        readingsProperty = std::move(value);
+        return *this;
+    }
+
+    MetricParams& reading(DurationType delta, double reading)
+    {
+        readingsProperty.emplace_back(delta, reading);
+        return *this;
+    }
+
+    const std::vector<std::pair<DurationType, double>>&
+        readings() const
+    {
+        return readingsProperty;
+    }
+
+    MetricParams& expectedReading(DurationType delta,
+                                  double reading)
+    {
+        expectedReadingProperty = std::make_pair(delta, reading);
+        return *this;
+    }
+
+    const std::pair<DurationType, double>& expectedReading() const
+    {
+        return expectedReadingProperty;
+    }
+
   private:
     OperationType operationTypeProperty = {};
     std::string idProperty = "MetricId";
     std::string metadataProperty = "MetricMetadata";
     CollectionTimeScope collectionTimeScopeProperty = {};
     CollectionDuration collectionDurationProperty =
-        CollectionDuration(std::chrono::milliseconds(0u));
+        CollectionDuration(DurationType(0u));
+    std::vector<std::pair<DurationType, double>> readingsProperty =
+        {};
+    std::pair<DurationType, double> expectedReadingProperty = {};
 };
+
+inline std::ostream& operator<<(std::ostream& os, const MetricParams& mp)
+{
+    using utils::enumToString;
+
+    os << "{ op: " << enumToString(mp.operationType())
+       << ", timeScope: " << enumToString(mp.collectionTimeScope())
+       << ", duration: " << mp.collectionDuration().t.count()
+       << ", readings: { ";
+    for (auto [timestamp, reading] : mp.readings())
+    {
+        os << reading << "(" << timestamp.count() << "ms), ";
+    }
+
+    auto [timestamp, reading] = mp.expectedReading();
+    os << " }, expected: " << reading << "(" << timestamp.count() << "ms) }";
+    return os;
+}

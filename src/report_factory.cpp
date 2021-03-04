@@ -3,6 +3,7 @@
 #include "metric.hpp"
 #include "report.hpp"
 #include "sensor.hpp"
+#include "utils/clock.hpp"
 #include "utils/conversion.hpp"
 #include "utils/dbus_mapper.hpp"
 #include "utils/transform.hpp"
@@ -18,7 +19,7 @@ ReportFactory::ReportFactory(
 std::unique_ptr<interfaces::Report> ReportFactory::make(
     const std::string& name, const std::string& reportingType,
     bool emitsReadingsSignal, bool logToMetricReportsCollection,
-    std::chrono::milliseconds period, interfaces::ReportManager& reportManager,
+    DurationType period, interfaces::ReportManager& reportManager,
     interfaces::JsonStorage& reportStorage,
     std::vector<LabeledMetricParameters> labeledMetricParams) const
 {
@@ -29,7 +30,7 @@ std::unique_ptr<interfaces::Report> ReportFactory::make(
             return std::make_shared<Metric>(
                 getSensors(param.at_index<0>()), param.at_index<1>(),
                 param.at_index<2>(), param.at_index<3>(), param.at_index<4>(),
-                param.at_index<5>());
+                param.at_index<5>(), std::make_unique<Clock>());
         });
 
     return std::make_unique<Report>(
@@ -89,6 +90,6 @@ std::vector<LabeledMetricParameters> ReportFactory::convertMetricParams(
             std::move(sensorParameters),
             utils::stringToOperationType(operationType), id, metadata,
             utils::stringToCollectionTimeScope(collectionTimeScope),
-            CollectionDuration(std::chrono::milliseconds(collectionDuration)));
+            CollectionDuration(DurationType(collectionDuration)));
     });
 }

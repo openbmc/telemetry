@@ -23,7 +23,7 @@ class TestDiscreteThreshold : public Test
     std::shared_ptr<DiscreteThreshold> sut;
 
     std::shared_ptr<DiscreteThreshold>
-        makeThreshold(std::chrono::milliseconds dwellTime,
+        makeThreshold(DurationType dwellTime,
                       double thresholdValue)
     {
         std::vector<std::unique_ptr<interfaces::TriggerAction>> actions;
@@ -68,10 +68,10 @@ struct DiscreteParams
         size_t sensor;
         uint64_t timestamp;
         double value;
-        std::chrono::milliseconds sleepAfter;
+        DurationType sleepAfter;
 
         UpdateParams(size_t sensor, uint64_t timestamp, double value,
-                     std::chrono::milliseconds sleepAfter = 0ms) :
+                     DurationType sleepAfter = 0ms) :
             sensor(sensor),
             timestamp(timestamp), value(value), sleepAfter(sleepAfter)
         {}
@@ -82,10 +82,10 @@ struct DiscreteParams
         size_t sensor;
         uint64_t timestamp;
         double value;
-        std::chrono::milliseconds waitMin;
+        DurationType waitMin;
 
         ExpectedParams(size_t sensor, uint64_t timestamp, double value,
-                       std::chrono::milliseconds waitMin = 0ms) :
+                       DurationType waitMin = 0ms) :
             sensor(sensor),
             timestamp(timestamp), value(value), waitMin(waitMin)
         {}
@@ -109,7 +109,7 @@ struct DiscreteParams
         return *this;
     }
 
-    DiscreteParams& DwellTime(std::chrono::milliseconds val)
+    DiscreteParams& DwellTime(DurationType val)
     {
         dwellTime = std::move(val);
         return *this;
@@ -139,7 +139,7 @@ struct DiscreteParams
     std::vector<UpdateParams> updates;
     std::vector<ExpectedParams> expected;
     double thresholdValue = 0.0;
-    std::chrono::milliseconds dwellTime = 0ms;
+    DurationType dwellTime = 0ms;
 };
 
 class TestDiscreteThresholdCommon :
@@ -147,7 +147,7 @@ class TestDiscreteThresholdCommon :
     public WithParamInterface<DiscreteParams>
 {
   public:
-    void sleep(std::chrono::milliseconds duration)
+    void sleep(DurationType duration)
     {
         if (duration != 0ms)
         {

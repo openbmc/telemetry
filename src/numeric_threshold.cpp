@@ -7,7 +7,7 @@ NumericThreshold::NumericThreshold(
     std::vector<std::shared_ptr<interfaces::Sensor>> sensorsIn,
     std::vector<std::string> sensorNames,
     std::vector<std::unique_ptr<interfaces::TriggerAction>> actionsIn,
-    std::chrono::milliseconds dwellTimeIn, numeric::Direction direction,
+    DurationType dwellTimeIn, numeric::Direction direction,
     double thresholdValueIn) :
     ioc(ioc),
     sensors(std::move(sensorsIn)), actions(std::move(actionsIn)),
@@ -72,7 +72,7 @@ void NumericThreshold::startTimer(const std::string& sensorName,
                                   uint64_t timestamp, double value, bool& dwell,
                                   boost::asio::steady_timer& timer)
 {
-    if (dwellTime == std::chrono::milliseconds::zero())
+    if (dwellTime == DurationType::zero())
     {
         commit(sensorName, timestamp, value);
     }
