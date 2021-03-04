@@ -1,0 +1,87 @@
+#!/usr/bin/env ruby
+
+gem 'cmd-editor'
+
+require 'cmd-editor'
+require 'tempfile'
+require 'optionparser'
+
+autoload :Open3, 'open3'
+
+class Application
+  attr_accessor :user, :changeId
+
+  def initialize
+    @user = nil
+  end
+
+  def run
+    raise 'Change-Id not found' unless changeId_
+    raise 'Reviewers list is empty' unless reviewers_.size > 0
+
+    reviewersArgs = reviewers_.collect { |r| ['-a', r] }.flatten
+
+    system 'ssh', '-p', '29418', url_,
+           'gerrit', 'set-reviewers', changeId_, *reviewersArgs
+    system 'ssh', '-p', '29418', url_,
+           'gerrit', 'set-topic', '-t', 'telemetry'
+  end
+
+private
+  def changeId_
+    @changeId ||= proc {
+      out, st = Open3.capture2e('git', 'log', '-n', '1')
+
+      if st.exitstatus == 0
+        out.each_line(chomp: true).each { |line|
+          if m = line.match(/Change-Id:\s*(\w+)/)
+            return m[1]
+          end
+        }
+        nil
+      end
+    }.call
+  end
+
+  def reviewers_
+    @reviewers ||= Array.new.tap { |result|
+      IO.readlines(File.join(File.dirname(__FILE__), '..', 'MAINTAINERS'), chomp: true).each { |line|
+        if m = line.match(/(M|R):.*?<([^!]*?@[^!]*?\.[^!]*?)>/)
+          result << m[2]
+        end
+      }
+    }
+  end
+
+  def url_
+    if @user
+      "#{@user}@gerrit.openbmc-project.xyz"
+    else
+      'gerrit.openbmc-project.xyz'
+    end
+  end
+end
+
+app = Application.new
+
+OptionParser.new { |op|
+  op.separator ''
+  op.separator 'Scripts extracts reviewers and maintainers from ../MAINTAINERS and sets them as gerrit reviewers'
+  op.separator ''
+  op.separator 'Options:'
+
+  op.on('--user USER', 'sets non default user name, by default user name is resolved by system') { |v|
+    app.user = v
+  }
+
+  op.on('--change-id CHANGE_ID', 'sets non default user name, by default change id is taken from git log -n 1') { |v|
+    app.changeId = v
+  }
+
+  op.on_tail('--help', 'displays this message') {
+    $stdout.puts op
+    exit 0
+  }
+}.parse!(ARGV)
+
+app.run
