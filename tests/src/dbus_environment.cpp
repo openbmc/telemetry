@@ -66,14 +66,13 @@ std::function<void()> DbusEnvironment::setPromise(std::string_view name)
     return [p = std::move(promise)]() { p->set_value(true); };
 }
 
-bool DbusEnvironment::waitForFuture(std::string_view name,
-                                    std::chrono::milliseconds timeout)
+bool DbusEnvironment::waitForFuture(std::string_view name, DurationType timeout)
 {
     return waitForFuture(getFuture(name), timeout);
 }
 
 bool DbusEnvironment::waitForFutures(std::string_view name,
-                                     std::chrono::milliseconds timeout)
+                                     DurationType timeout)
 {
     auto& data = futures[std::string(name)];
     auto ret = waitForFutures(
@@ -98,7 +97,7 @@ std::future<bool> DbusEnvironment::getFuture(std::string_view name)
     return {};
 }
 
-void DbusEnvironment::sleepFor(std::chrono::milliseconds timeout)
+void DbusEnvironment::sleepFor(DurationType timeout)
 {
     auto end = std::chrono::high_resolution_clock::now() + timeout;
 
@@ -111,14 +110,13 @@ void DbusEnvironment::sleepFor(std::chrono::milliseconds timeout)
     synchronizeIoc();
 }
 
-std::chrono::milliseconds
-    DbusEnvironment::measureTime(std::function<void()> fun)
+DurationType DbusEnvironment::measureTime(std::function<void()> fun)
 {
     auto begin = std::chrono::high_resolution_clock::now();
     fun();
     auto end = std::chrono::high_resolution_clock::now();
 
-    return std::chrono::duration_cast<std::chrono::milliseconds>(end - begin);
+    return std::chrono::duration_cast<DurationType>(end - begin);
 }
 
 boost::asio::io_context DbusEnvironment::ioc;

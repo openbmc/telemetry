@@ -14,7 +14,7 @@ Report::Report(boost::asio::io_context& ioc,
                const std::string& reportingTypeIn,
                const bool emitsReadingsUpdateIn,
                const bool logToMetricReportsCollectionIn,
-               const std::chrono::milliseconds intervalIn,
+               const DurationType intervalIn,
                interfaces::ReportManager& reportManager,
                interfaces::JsonStorage& reportStorageIn,
                std::vector<std::shared_ptr<interfaces::Metric>> metricsIn) :
@@ -72,7 +72,7 @@ std::unique_ptr<sdbusplus::asio::dbus_interface> Report::makeReportInterface()
         "Interval", static_cast<uint64_t>(interval.count()),
         sdbusplus::vtable::property_::emits_change,
         [this](uint64_t newVal, auto&) {
-            std::chrono::milliseconds newValT(newVal);
+            DurationType newValT(newVal);
             if (newValT < ReportManager::minInterval)
             {
                 return false;
@@ -151,7 +151,7 @@ void Report::timerProc(boost::system::error_code ec, Report& self)
     self.scheduleTimer(self.interval);
 }
 
-void Report::scheduleTimer(std::chrono::milliseconds timerInterval)
+void Report::scheduleTimer(DurationType timerInterval)
 {
     timer.expires_after(timerInterval);
     timer.async_wait(

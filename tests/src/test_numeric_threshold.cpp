@@ -22,8 +22,8 @@ class TestNumericThreshold : public Test
     TriggerActionMock& actionMock = *actionMockPtr;
     std::shared_ptr<NumericThreshold> sut;
 
-    void makeThreshold(std::chrono::milliseconds dwellTime,
-                       numeric::Direction direction, double thresholdValue)
+    void makeThreshold(DurationType dwellTime, numeric::Direction direction,
+                       double thresholdValue)
     {
         std::vector<std::unique_ptr<interfaces::TriggerAction>> actions;
         actions.push_back(std::move(actionMockPtr));

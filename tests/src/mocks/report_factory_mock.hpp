@@ -22,8 +22,7 @@ class ReportFactoryMock : public interfaces::ReportFactory
                 utils::stringToOperationType(std::get<1>(params)),
                 std::get<2>(params), std::get<3>(params),
                 utils::stringToCollectionTimeScope(std::get<4>(params)),
-                CollectionDuration(
-                    std::chrono::milliseconds(std::get<5>(params))));
+                CollectionDuration(DurationType(std::get<5>(params))));
         });
     }
 
@@ -48,7 +47,7 @@ class ReportFactoryMock : public interfaces::ReportFactory
 
     MOCK_METHOD(std::unique_ptr<interfaces::Report>, make,
                 (const std::string&, const std::string&, bool, bool,
-                 std::chrono::milliseconds, interfaces::ReportManager&,
+                 DurationType, interfaces::ReportManager&,
                  interfaces::JsonStorage&,
                  std::vector<LabeledMetricParameters>),
                 (const, override));

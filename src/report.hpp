@@ -20,8 +20,7 @@ class Report : public interfaces::Report
            const std::shared_ptr<sdbusplus::asio::object_server>& objServer,
            const std::string& reportName, const std::string& reportingType,
            const bool emitsReadingsSignal,
-           const bool logToMetricReportsCollection,
-           const std::chrono::milliseconds period,
+           const bool logToMetricReportsCollection, const DurationType period,
            interfaces::ReportManager& reportManager,
            interfaces::JsonStorage& reportStorage,
            std::vector<std::shared_ptr<interfaces::Metric>> metrics);
@@ -48,12 +47,12 @@ class Report : public interfaces::Report
   private:
     std::unique_ptr<sdbusplus::asio::dbus_interface> makeReportInterface();
     static void timerProc(boost::system::error_code, Report& self);
-    void scheduleTimer(std::chrono::milliseconds interval);
+    void scheduleTimer(DurationType interval);
 
     const std::string name;
     const std::string path;
     std::string reportingType;
-    std::chrono::milliseconds interval;
+    DurationType interval;
     bool emitsReadingsUpdate;
     bool logToMetricReportsCollection;
     ReadingParametersPastVersion readingParametersPastVersion;
