@@ -5,6 +5,7 @@
 #include "interfaces/threshold.hpp"
 #include "interfaces/trigger_action.hpp"
 #include "interfaces/trigger_types.hpp"
+#include "types/duration_type.hpp"
 
 #include <boost/asio/steady_timer.hpp>
 
@@ -23,8 +24,7 @@ class DiscreteThreshold :
         std::vector<std::shared_ptr<interfaces::Sensor>> sensors,
         std::vector<std::string> sensorNames,
         std::vector<std::unique_ptr<interfaces::TriggerAction>> actions,
-        std::chrono::milliseconds dwellTime, double thresholdValue,
-        std::string name);
+        DurationType dwellTime, double thresholdValue, std::string name);
     DiscreteThreshold(const DiscreteThreshold&) = delete;
     DiscreteThreshold(DiscreteThreshold&&) = delete;
     ~DiscreteThreshold()
@@ -39,7 +39,7 @@ class DiscreteThreshold :
     boost::asio::io_context& ioc;
     const std::vector<std::shared_ptr<interfaces::Sensor>> sensors;
     const std::vector<std::unique_ptr<interfaces::TriggerAction>> actions;
-    const std::chrono::milliseconds dwellTime;
+    const DurationType dwellTime;
     const double thresholdValue;
     const std::string name;
 

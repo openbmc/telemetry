@@ -1,6 +1,7 @@
 #pragma once
 
 #include "report_manager.hpp"
+#include "types/duration_type.hpp"
 #include "types/types.hpp"
 
 #include <chrono>
@@ -53,13 +54,13 @@ class ReportParams final
         return logToMetricReportCollectionProperty;
     }
 
-    ReportParams& interval(std::chrono::milliseconds val)
+    ReportParams& interval(DurationType val)
     {
         intervalProperty = val;
         return *this;
     }
 
-    std::chrono::milliseconds interval() const
+    DurationType interval() const
     {
         return intervalProperty;
     }
@@ -80,7 +81,7 @@ class ReportParams final
     std::string reportingTypeProperty = "OnRequest";
     bool emitReadingUpdateProperty = true;
     bool logToMetricReportCollectionProperty = true;
-    std::chrono::milliseconds intervalProperty = ReportManager::minInterval;
+    DurationType intervalProperty = ReportManager::minInterval;
     std::vector<LabeledMetricParameters> metricParametersProperty{
         {LabeledMetricParameters{
              {LabeledSensorParameters{"Service",
@@ -89,7 +90,7 @@ class ReportParams final
              "MetricId1",
              "Metadata1",
              CollectionTimeScope::point,
-             CollectionDuration(std::chrono::milliseconds(0u))},
+             CollectionDuration(DurationType(0u))},
          LabeledMetricParameters{
              {LabeledSensorParameters{"Service",
                                       "/xyz/openbmc_project/sensors/power/p2"}},
@@ -97,5 +98,5 @@ class ReportParams final
              "MetricId2",
              "Metadata2",
              CollectionTimeScope::point,
-             CollectionDuration(std::chrono::milliseconds(0u))}}};
+             CollectionDuration(DurationType(0u))}}};
 };

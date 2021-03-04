@@ -1,3 +1,4 @@
+#include "fakes/clock_fake.hpp"
 #include "helpers.hpp"
 #include "metric.hpp"
 #include "mocks/sensor_mock.hpp"
@@ -35,17 +36,18 @@ class TestMetric : public Test
             utils::convContainer<std::shared_ptr<interfaces::Sensor>>(
                 sensorMocks),
             p.operationType(), p.id(), p.metadata(), p.collectionTimeScope(),
-            p.collectionDuration());
+            p.collectionDuration(), std::move(clockFakePtr));
     }
 
-    MetricParams params =
-        MetricParams()
-            .id("id")
-            .metadata("metadata")
-            .operationType(OperationType::avg)
-            .collectionTimeScope(CollectionTimeScope::interval)
-            .collectionDuration(CollectionDuration(42ms));
+    MetricParams params = MetricParams()
+                              .id("id")
+                              .metadata("metadata")
+                              .operationType(OperationType::avg)
+                              .collectionTimeScope(CollectionTimeScope::point)
+                              .collectionDuration(CollectionDuration(0ms));
     std::vector<std::shared_ptr<SensorMock>> sensorMocks = makeSensorMocks(1u);
+    std::unique_ptr<ClockFake> clockFakePtr = std::make_unique<ClockFake>();
+    ClockFake& clockFake = *clockFakePtr;
     std::shared_ptr<Metric> sut;
 };
 
@@ -150,14 +152,196 @@ TEST_F(TestMetricAfterInitialization, dumpsConfiguration)
     const auto conf = sut->dumpConfiguration();
 
     LabeledMetricParameters expected = {};
-    expected.at_label<ts::Id>() = "id";
-    expected.at_label<ts::MetricMetadata>() = "metadata";
-    expected.at_label<ts::OperationType>() = OperationType::avg;
-    expected.at_label<ts::CollectionTimeScope>() =
-        CollectionTimeScope::interval;
-    expected.at_label<ts::CollectionDuration>() = CollectionDuration(42ms);
+    expected.at_label<ts::Id>() = params.id();
+    expected.at_label<ts::MetricMetadata>() = params.metadata();
+    expected.at_label<ts::OperationType>() = params.operationType();
+    expected.at_label<ts::CollectionTimeScope>() = params.collectionTimeScope();
+    expected.at_label<ts::CollectionDuration>() = params.collectionDuration();
     expected.at_label<ts::SensorPath>() = {
         LabeledSensorParameters("service1", "path1")};
 
     EXPECT_THAT(conf, Eq(expected));
+}
+
+class TestMetricCalculationFunctions :
+    public TestMetric,
+    public WithParamInterface<MetricParams>
+{
+  public:
+    void SetUp() override
+    {
+        clockFakePtr->set(0ms);
+
+        sut = makeSut(params.operationType(GetParam().operationType())
+                          .collectionTimeScope(GetParam().collectionTimeScope())
+                          .collectionDuration(GetParam().collectionDuration()));
+    }
+
+    static std::vector<std::pair<DurationType, double>>
+        defaultReadings()
+    {
+        std::vector<std::pair<DurationType, double>> ret;
+        ret.emplace_back(10ms, 14.);
+        ret.emplace_back(1ms, 3.);
+        ret.emplace_back(5ms, 7.);
+        return ret;
+    }
+};
+
+MetricParams defaultSingleParams()
+{
+    return MetricParams()
+        .operationType(OperationType::single)
+        .readings(TestMetricCalculationFunctions::defaultReadings())
+        .expectedReading(11ms, 7.0);
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    OperationSingleReturnsLastReading, TestMetricCalculationFunctions,
+    Values(
+        defaultSingleParams().collectionTimeScope(CollectionTimeScope::point),
+        defaultSingleParams()
+            .collectionTimeScope(CollectionTimeScope::interval)
+            .collectionDuration(CollectionDuration(100ms)),
+        defaultSingleParams().collectionTimeScope(
+            CollectionTimeScope::startup)));
+
+MetricParams defaultPointParams()
+{
+    return defaultSingleParams().collectionTimeScope(
+        CollectionTimeScope::point);
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    TimeScopePointReturnsLastReading, TestMetricCalculationFunctions,
+    Values(defaultPointParams().operationType(OperationType::single),
+           defaultPointParams().operationType(OperationType::min),
+           defaultPointParams().operationType(OperationType::max),
+           defaultPointParams().operationType(OperationType::sum),
+           defaultPointParams().operationType(OperationType::avg)));
+
+MetricParams defaultMinParams()
+{
+    return defaultSingleParams().operationType(OperationType::min);
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    ReturnsMinForGivenTimeScope, TestMetricCalculationFunctions,
+    Values(defaultMinParams()
+               .collectionTimeScope(CollectionTimeScope::interval)
+               .collectionDuration(CollectionDuration(100ms))
+               .expectedReading(10ms, 3.0),
+           defaultMinParams()
+               .collectionTimeScope(CollectionTimeScope::interval)
+               .collectionDuration(CollectionDuration(3ms))
+               .expectedReading(13ms, 7.0),
+           defaultMinParams()
+               .collectionTimeScope(CollectionTimeScope::startup)
+               .expectedReading(10ms, 3.0)));
+
+MetricParams defaultMaxParams()
+{
+    return defaultSingleParams().operationType(OperationType::max);
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    ReturnsMaxForGivenTimeScope, TestMetricCalculationFunctions,
+    Values(defaultMaxParams()
+               .collectionTimeScope(CollectionTimeScope::interval)
+               .collectionDuration(CollectionDuration(100ms))
+               .expectedReading(0ms, 14.0),
+           defaultMaxParams()
+               .collectionTimeScope(CollectionTimeScope::interval)
+               .collectionDuration(CollectionDuration(6ms))
+               .expectedReading(10ms, 14.0),
+           defaultMaxParams()
+               .collectionTimeScope(CollectionTimeScope::interval)
+               .collectionDuration(CollectionDuration(5ms))
+               .expectedReading(11ms, 7.0),
+           defaultMaxParams()
+               .collectionTimeScope(CollectionTimeScope::startup)
+               .expectedReading(0ms, 14.0)));
+
+MetricParams defaultSumParams()
+{
+    return defaultSingleParams().operationType(OperationType::sum);
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    ReturnsSumForGivenTimeScope, TestMetricCalculationFunctions,
+    Values(defaultSumParams()
+               .collectionTimeScope(CollectionTimeScope::interval)
+               .collectionDuration(CollectionDuration(100ms))
+               .expectedReading(16ms, 14. * 10 + 3. * 1 + 7 * 5),
+           defaultSumParams()
+               .collectionTimeScope(CollectionTimeScope::interval)
+               .collectionDuration(CollectionDuration(8ms))
+               .expectedReading(16ms, 14. * 2 + 3. * 1 + 7 * 5),
+           defaultSumParams()
+               .collectionTimeScope(CollectionTimeScope::interval)
+               .collectionDuration(CollectionDuration(6ms))
+               .expectedReading(16ms, 3. * 1 + 7 * 5),
+           defaultSumParams()
+               .collectionTimeScope(CollectionTimeScope::startup)
+               .expectedReading(16ms, 14. * 10 + 3. * 1 + 7 * 5)));
+
+MetricParams defaultAvgParams()
+{
+    return defaultSingleParams().operationType(OperationType::avg);
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    ReturnsAvgForGivenTimeScope, TestMetricCalculationFunctions,
+    Values(defaultAvgParams()
+               .collectionTimeScope(CollectionTimeScope::interval)
+               .collectionDuration(CollectionDuration(100ms))
+               .expectedReading(16ms, (14. * 10 + 3. * 1 + 7 * 5) / 16.),
+           defaultAvgParams()
+               .collectionTimeScope(CollectionTimeScope::interval)
+               .collectionDuration(CollectionDuration(8ms))
+               .expectedReading(16ms, (14. * 2 + 3. * 1 + 7 * 5) / 8.),
+           defaultAvgParams()
+               .collectionTimeScope(CollectionTimeScope::interval)
+               .collectionDuration(CollectionDuration(6ms))
+               .expectedReading(16ms, (3. * 1 + 7 * 5) / 6.),
+           defaultAvgParams()
+               .collectionTimeScope(CollectionTimeScope::startup)
+               .expectedReading(16ms, (14. * 10 + 3. * 1 + 7 * 5) / 16.)));
+
+TEST_P(TestMetricCalculationFunctions, calculatesReadingValue)
+{
+    for (auto [timestamp, reading] : GetParam().readings())
+    {
+        sut->sensorUpdated(*sensorMocks.front(), clockFake.timestamp(),
+                           reading);
+        clockFake.advance(timestamp);
+    }
+
+    const auto [expectedTimestamp, expectedReading] =
+        GetParam().expectedReading();
+    const auto readings = sut->getReadings();
+
+    EXPECT_THAT(readings, ElementsAre(MetricValue{
+                              "id", "metadata", expectedReading,
+                              ClockFake::toTimestamp(expectedTimestamp)}));
+}
+
+TEST_P(TestMetricCalculationFunctions,
+       calculatedReadingValueWithIntermediateCalculations)
+{
+    for (auto [timestamp, reading] : GetParam().readings())
+    {
+        sut->sensorUpdated(*sensorMocks.front(), clockFake.timestamp(),
+                           reading);
+        clockFake.advance(timestamp);
+        sut->getReadings();
+    }
+
+    const auto [expectedTimestamp, expectedReading] =
+        GetParam().expectedReading();
+    const auto readings = sut->getReadings();
+
+    EXPECT_THAT(readings, ElementsAre(MetricValue{
+                              "id", "metadata", expectedReading,
+                              ClockFake::toTimestamp(expectedTimestamp)}));
 }
