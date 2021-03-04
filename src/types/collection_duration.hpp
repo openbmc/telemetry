@@ -6,6 +6,7 @@
 #include <nlohmann/json.hpp>
 
 #include <chrono>
+#include <cstdint>
 
 BOOST_STRONG_TYPEDEF(Milliseconds, CollectionDuration)
 

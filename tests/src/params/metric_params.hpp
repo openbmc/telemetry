@@ -4,7 +4,11 @@
 #include "types/collection_time_scope.hpp"
 #include "types/operation_type.hpp"
 
+#include <chrono>
+#include <cstdint>
+#include <ostream>
 #include <string>
+#include <vector>
 
 class MetricParams final
 {
@@ -64,6 +68,28 @@ class MetricParams final
         return collectionDurationProperty;
     }
 
+    MetricParams& readings(std::vector<std::pair<Milliseconds, double>> value)
+    {
+        readingsProperty = std::move(value);
+        return *this;
+    }
+
+    const std::vector<std::pair<Milliseconds, double>>& readings() const
+    {
+        return readingsProperty;
+    }
+
+    MetricParams& expectedReading(Milliseconds delta, double reading)
+    {
+        expectedReadingProperty = std::make_pair(delta, reading);
+        return *this;
+    }
+
+    const std::pair<Milliseconds, double>& expectedReading() const
+    {
+        return expectedReadingProperty;
+    }
+
   private:
     OperationType operationTypeProperty = {};
     std::string idProperty = "MetricId";
@@ -71,4 +97,24 @@ class MetricParams final
     CollectionTimeScope collectionTimeScopeProperty = {};
     CollectionDuration collectionDurationProperty =
         CollectionDuration(Milliseconds(0u));
+    std::vector<std::pair<Milliseconds, double>> readingsProperty = {};
+    std::pair<Milliseconds, double> expectedReadingProperty = {};
 };
+
+inline std::ostream& operator<<(std::ostream& os, const MetricParams& mp)
+{
+    using utils::enumToString;
+
+    os << "{ op: " << enumToString(mp.operationType())
+       << ", timeScope: " << enumToString(mp.collectionTimeScope())
+       << ", duration: " << mp.collectionDuration().t.count()
+       << ", readings: { ";
+    for (auto [timestamp, reading] : mp.readings())
+    {
+        os << reading << "(" << timestamp.count() << "ms), ";
+    }
+
+    auto [timestamp, reading] = mp.expectedReading();
+    os << " }, expected: " << reading << "(" << timestamp.count() << "ms) }";
+    return os;
+}
