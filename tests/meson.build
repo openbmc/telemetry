@@ -11,6 +11,7 @@ test(
     executable(
         'telemetry-ut',
         [
+            '../src/details/collection_function.cpp',
             '../src/discrete_threshold.cpp',
             '../src/metric.cpp',
             '../src/numeric_threshold.cpp',
