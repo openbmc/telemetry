@@ -84,9 +84,7 @@ class TriggerParams
     std::vector<LabeledSensorInfo> labeledSensorsProperty = {
         {"service1", "/xyz/openbmc_project/sensors/temperature/BMC_Temp",
          "metadata1"}};
-
     std::vector<std::string> reportNamesProperty = {"Report1"};
-
     LabeledTriggerThresholdParams labeledThresholdsProperty =
         std::vector<numeric::LabeledThresholdParam>{
             numeric::LabeledThresholdParam{numeric::Type::lowerCritical,

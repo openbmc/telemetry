@@ -12,12 +12,11 @@ class MetricMock : public interfaces::Metric
         using namespace testing;
 
         ON_CALL(*this, getReadings())
-            .WillByDefault(ReturnRefOfCopy(std::vector<MetricValue>()));
+            .WillByDefault(Return(std::vector<MetricValue>()));
     }
 
     MOCK_METHOD(void, initialize, (), (override));
-    MOCK_METHOD(const std::vector<MetricValue>&, getReadings, (),
-                (const, override));
+    MOCK_METHOD(std::vector<MetricValue>, getReadings, (), (const, override));
     MOCK_METHOD(LabeledMetricParameters, dumpConfiguration, (),
                 (const, override));
 };
