@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "a9893e76_a8a03cc0",
+        "filename": ".gitignore",
+        "patchSetId": 3
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2021-03-04T11:41:17Z",
+      "side": 1,
+      "message": "This .gitignore file already has a vscode section which allows some configuration files to be used (see lines 157-163). To keep things tidy, make sure these files are still needed and keep all vscode rules in one place.",
+      "revId": "301fa8959681b5fb2f7d15476cf91f61228c4230",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "a9bc1754_adbfa33d",
         "filename": "/COMMIT_MSG",
         "patchSetId": 3
