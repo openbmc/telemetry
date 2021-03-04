@@ -1,6 +1,7 @@
 #pragma once
 
 #include "interfaces/trigger_types.hpp"
+#include "types/duration_type.hpp"
 
 #include <sdbusplus/message.hpp>
 
@@ -84,9 +85,9 @@ class TriggerParams
     TriggerThresholdParams thresholdsProperty =
         std::vector<numeric::ThresholdParam>{
             {numeric::typeToString(numeric::Type::lowerCritical),
-             std::chrono::milliseconds(10).count(),
+             DurationType(10).count(),
              numeric::directionToString(numeric::Direction::decreasing), 0.0},
             {numeric::typeToString(numeric::Type::upperCritical),
-             std::chrono::milliseconds(10).count(),
+             DurationType(10).count(),
              numeric::directionToString(numeric::Direction::increasing), 90.0}};
 };

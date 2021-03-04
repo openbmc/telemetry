@@ -57,8 +57,7 @@ std::unique_ptr<interfaces::Trigger> TriggerFactory::make(
 
             thresholds.emplace_back(std::make_shared<DiscreteThreshold>(
                 bus->get_io_context(), sensors, sensorNames, std::move(actions),
-                std::chrono::milliseconds(dwellTime), thresholdValue,
-                thresholdName));
+                DurationType(dwellTime), thresholdValue, thresholdName));
         }
         if (params.empty())
         {
@@ -113,7 +112,7 @@ std::unique_ptr<interfaces::Trigger> TriggerFactory::make(
 
             thresholds.emplace_back(std::make_shared<NumericThreshold>(
                 bus->get_io_context(), sensors, sensorNames, std::move(actions),
-                std::chrono::milliseconds(dwellTime),
+                DurationType(dwellTime),
                 numeric::stringToDirection(directionStr), value));
         }
     }

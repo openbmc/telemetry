@@ -46,7 +46,7 @@ class TestReport : public Test
         for (size_t i = 0; i < metricParameters.size(); ++i)
         {
             ON_CALL(*metricMocks[i], getReadings())
-                .WillByDefault(ReturnRefOfCopy(std::vector({readings[i]})));
+                .WillByDefault(Return(std::vector({readings[i]})));
             ON_CALL(*metricMocks[i], dumpConfiguration())
                 .WillByDefault(Return(metricParameters[i]));
         }

@@ -59,7 +59,7 @@ ReportManager::ReportManager(
                     return addReport(yield, reportName, reportingType,
                                      emitsReadingsUpdate,
                                      logToMetricReportsCollection,
-                                     std::chrono::milliseconds(interval),
+                                     DurationType(interval),
                                      convertToReadingParameters(
                                          std::move(metricParams)))
                         .getPath();
@@ -77,7 +77,7 @@ ReportManager::ReportManager(
                     return addReport(yield, reportName, reportingType,
                                      emitsReadingsUpdate,
                                      logToMetricReportsCollection,
-                                     std::chrono::milliseconds(interval),
+                                     DurationType(interval),
                                      std::move(metricParams))
                         .getPath();
                 });
@@ -104,7 +104,7 @@ void ReportManager::verifyReportNameLength(const std::string& reportName)
 
 void ReportManager::verifyAddReport(
     const std::string& reportName, const std::string& reportingType,
-    std::chrono::milliseconds interval,
+    DurationType interval,
     const std::vector<LabeledMetricParameters>& readingParams)
 {
     if (reports.size() >= maxReports)
@@ -168,7 +168,7 @@ void ReportManager::verifyAddReport(
 interfaces::Report& ReportManager::addReport(
     boost::asio::yield_context& yield, const std::string& reportName,
     const std::string& reportingType, const bool emitsReadingsUpdate,
-    const bool logToMetricReportsCollection, std::chrono::milliseconds interval,
+    const bool logToMetricReportsCollection, DurationType interval,
     ReadingParameters metricParams)
 {
     auto labeledMetricParams =
@@ -182,7 +182,7 @@ interfaces::Report& ReportManager::addReport(
 interfaces::Report& ReportManager::addReport(
     const std::string& reportName, const std::string& reportingType,
     const bool emitsReadingsUpdate, const bool logToMetricReportsCollection,
-    std::chrono::milliseconds interval,
+    DurationType interval,
     std::vector<LabeledMetricParameters> labeledMetricParams)
 {
     verifyAddReport(reportName, reportingType, interval, labeledMetricParams);
@@ -222,8 +222,7 @@ void ReportManager::loadFromPersistent()
                     .get<std::vector<LabeledMetricParameters>>();
 
             addReport(name, reportingType, emitsReadingsSignal,
-                      logToMetricReportsCollection,
-                      std::chrono::milliseconds(interval),
+                      logToMetricReportsCollection, DurationType(interval),
                       std::move(readingParameters));
         }
         catch (const std::exception& e)
