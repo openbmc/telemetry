@@ -53,8 +53,7 @@ class TestReport : public Test
                 LabeledSensorParameters("service"s + id, "path"s + id);
             auto metricParameters = LabeledMetricParameters(
                 std::move(sensorParameters), utils::toOperationType(i),
-                "id"s + id, "metadata"s + id, CollectionTimeScope::point,
-                CollectionDuration(0ms));
+                "id"s + id, "metadata"s + id);
 
             ON_CALL(*metricMocks[i], dumpConfiguration())
                 .WillByDefault(Return(std::move(metricParameters)));
@@ -127,7 +126,7 @@ class TestReport : public Test
                                                  const T& newValue)
     {
         auto setPromise = std::promise<boost::system::error_code>();
-        auto future = setPromise.get_future();
+        auto setFuture = setPromise.get_future();
         sdbusplus::asio::setProperty(
             *DbusEnvironment::getBus(), DbusEnvironment::serviceName(), path,
             Report::reportIfaceName, property, std::move(newValue),
@@ -135,7 +134,7 @@ class TestReport : public Test
                  std::move(setPromise)](boost::system::error_code ec) mutable {
                 setPromise.set_value(ec);
             });
-        return DbusEnvironment::waitForFuture(std::move(future));
+        return DbusEnvironment::waitForFuture(std::move(setFuture));
     }
 
     boost::system::error_code deleteReport(const std::string& path)
@@ -263,32 +262,20 @@ INSTANTIATE_TEST_SUITE_P(
                "ReadingParameters",
                nlohmann::json(
                    {{{tstring::SensorPath::str(),
-                      {{tstring::Service::str(), "service0"},
-                       {tstring::Path::str(), "path0"}}},
+                      {{"service", "service0"}, {"path", "path0"}}},
                      {tstring::OperationType::str(), OperationType::single},
                      {tstring::Id::str(), "id0"},
-                     {tstring::MetricMetadata::str(), "metadata0"},
-                     {tstring::CollectionTimeScope::str(),
-                      CollectionTimeScope::point},
-                     {tstring::CollectionDuration::str(), 0}},
+                     {tstring::MetricMetadata::str(), "metadata0"}},
                     {{tstring::SensorPath::str(),
-                      {{tstring::Service::str(), "service1"},
-                       {tstring::Path::str(), "path1"}}},
+                      {{"service", "service1"}, {"path", "path1"}}},
                      {tstring::OperationType::str(), OperationType::max},
                      {tstring::Id::str(), "id1"},
-                     {tstring::MetricMetadata::str(), "metadata1"},
-                     {tstring::CollectionTimeScope::str(),
-                      CollectionTimeScope::point},
-                     {tstring::CollectionDuration::str(), 0}},
+                     {tstring::MetricMetadata::str(), "metadata1"}},
                     {{tstring::SensorPath::str(),
-                      {{tstring::Service::str(), "service2"},
-                       {tstring::Path::str(), "path2"}}},
+                      {{"service", "service2"}, {"path", "path2"}}},
                      {tstring::OperationType::str(), OperationType::min},
                      {tstring::Id::str(), "id2"},
-                     {tstring::MetricMetadata::str(), "metadata2"},
-                     {tstring::CollectionTimeScope::str(),
-                      CollectionTimeScope::point},
-                     {tstring::CollectionDuration::str(), 0}}}))));
+                     {tstring::MetricMetadata::str(), "metadata2"}}}))));
 
 TEST_P(TestReportStore, settingPersistencyToTrueStoresReport)
 {

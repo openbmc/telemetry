@@ -57,7 +57,7 @@ class TestReportManager : public Test
                 addReportPromise.set_value({ec, path});
             },
             DbusEnvironment::serviceName(), ReportManager::reportManagerPath,
-            ReportManager::reportManagerIfaceName, "AddReportFutureVersion",
+            ReportManager::reportManagerIfaceName, "AddReport",
             params.reportName(), params.reportingType(),
             params.emitReadingUpdate(), params.logToMetricReportCollection(),
             static_cast<uint64_t>(params.interval().count()),
@@ -74,10 +74,10 @@ class TestReportManager : public Test
             *DbusEnvironment::getBus(), DbusEnvironment::serviceName(),
             ReportManager::reportManagerPath,
             ReportManager::reportManagerIfaceName, property,
-            [&propertyPromise](const boost::system::error_code& ec, T t) {
+            [&propertyPromise](boost::system::error_code ec, T t) {
                 if (ec)
                 {
-                    utils::setException(propertyPromise, "Get property failed");
+                    utils::setException(propertyPromise, "GetProperty failed");
                     return;
                 }
                 propertyPromise.set_value(t);
@@ -274,9 +274,7 @@ TEST_P(TestReportManagerWithAggregationOperationType,
               "/xyz/openbmc_project/sensors/power/p1")},
           utils::enumToString(operationType),
           "MetricId1",
-          "Metadata1",
-          utils::enumToString(CollectionTimeScope::point),
-          0u}});
+          "Metadata1"}});
 
     reportFactoryMock.expectMake(_, reportParams, Ref(*sut), Ref(storageMock))
         .WillOnce(Return(ByMove(std::move(reportMockPtr))));
@@ -314,10 +312,7 @@ class TestReportManagerStorage : public TestReportManager
             return LabeledMetricParameters(
                 LabeledSensorParameters("service", std::get<0>(item)),
                 utils::stringToOperationType(std::get<1>(item)),
-                std::get<2>(item), std::get<3>(item),
-                utils::stringToCollectionTimeScope(std::get<4>(item)),
-                CollectionDuration(
-                    std::chrono::milliseconds(std::get<5>(item))));
+                std::get<2>(item), std::get<3>(item));
         });
     }
 
