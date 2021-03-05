@@ -32,15 +32,20 @@ class TestTrigger : public Test
     template <class T>
     static T getProperty(const std::string& path, const std::string& property)
     {
-        std::promise<T> propertyPromise;
+        auto propertyPromise = std::promise<T>{};
+        auto promiseFuture = propertyPromise.get_future();
         sdbusplus::asio::getProperty<T>(
             *DbusEnvironment::getBus(), DbusEnvironment::serviceName(), path,
             Trigger::triggerIfaceName, property,
-            [&propertyPromise](boost::system::error_code) {
-                utils::setException(propertyPromise, "GetProperty failed");
-            },
-            [&propertyPromise](T t) { propertyPromise.set_value(t); });
-        return DbusEnvironment::waitForFuture(propertyPromise.get_future());
+            [&propertyPromise](boost::system::error_code ec, T t) {
+                if (ec)
+                {
+                    utils::setException(propertyPromise, "GetProperty failed");
+                    return;
+                }
+                propertyPromise.set_value(t);
+            });
+        return DbusEnvironment::waitForFuture(std::move(promiseFuture));
     }
 
     boost::system::error_code deleteTrigger(const std::string& path)

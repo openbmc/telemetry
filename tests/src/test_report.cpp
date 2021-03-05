@@ -53,8 +53,7 @@ class TestReport : public Test
                 LabeledSensorParameters("service"s + id, "path"s + id);
             auto metricParameters = LabeledMetricParameters(
                 std::move(sensorParameters), utils::toOperationType(i),
-                "id"s + id, "metadata"s + id, CollectionTimeScope::point,
-                CollectionDuration(0ms));
+                "id"s + id, "metadata"s + id);
 
             ON_CALL(*metricMocks[i], dumpConfiguration())
                 .WillByDefault(Return(std::move(metricParameters)));
@@ -87,15 +86,20 @@ class TestReport : public Test
     template <class T>
     static T getProperty(const std::string& path, const std::string& property)
     {
-        std::promise<T> propertyPromise;
+        auto propertyPromise = std::promise<T>();
+        auto propertyFuture = propertyPromise.get_future();
         sdbusplus::asio::getProperty<T>(
             *DbusEnvironment::getBus(), DbusEnvironment::serviceName(), path,
             Report::reportIfaceName, property,
-            [&propertyPromise](boost::system::error_code) {
-                utils::setException(propertyPromise, "GetProperty failed");
-            },
-            [&propertyPromise](T t) { propertyPromise.set_value(t); });
-        return DbusEnvironment::waitForFuture(propertyPromise.get_future());
+            [&propertyPromise](boost::system::error_code ec, T t) {
+                if (ec)
+                {
+                    utils::setException(propertyPromise, "GetProperty failed");
+                    return;
+                }
+                propertyPromise.set_value(t);
+            });
+        return DbusEnvironment::waitForFuture(std::move(propertyFuture));
     }
 
     boost::system::error_code call(const std::string& path,
@@ -121,17 +125,16 @@ class TestReport : public Test
                                                  const std::string& property,
                                                  const T& newValue)
     {
-        std::promise<boost::system::error_code> setPromise;
+        auto setPromise = std::promise<boost::system::error_code>();
+        auto setFuture = setPromise.get_future();
         sdbusplus::asio::setProperty(
             *DbusEnvironment::getBus(), DbusEnvironment::serviceName(), path,
             Report::reportIfaceName, property, std::move(newValue),
-            [&setPromise](boost::system::error_code ec) {
+            [setPromise =
+                 std::move(setPromise)](boost::system::error_code ec) mutable {
                 setPromise.set_value(ec);
-            },
-            [&setPromise]() {
-                setPromise.set_value(boost::system::error_code{});
             });
-        return DbusEnvironment::waitForFuture(setPromise.get_future());
+        return DbusEnvironment::waitForFuture(std::move(setFuture));
     }
 
     boost::system::error_code deleteReport(const std::string& path)
@@ -259,32 +262,20 @@ INSTANTIATE_TEST_SUITE_P(
                "ReadingParameters",
                nlohmann::json(
                    {{{tstring::SensorPath::str(),
-                      {{tstring::Service::str(), "service0"},
-                       {tstring::Path::str(), "path0"}}},
+                      {{"service", "service0"}, {"path", "path0"}}},
                      {tstring::OperationType::str(), OperationType::single},
                      {tstring::Id::str(), "id0"},
-                     {tstring::MetricMetadata::str(), "metadata0"},
-                     {tstring::CollectionTimeScope::str(),
-                      CollectionTimeScope::point},
-                     {tstring::CollectionDuration::str(), 0}},
+                     {tstring::MetricMetadata::str(), "metadata0"}},
                     {{tstring::SensorPath::str(),
-                      {{tstring::Service::str(), "service1"},
-                       {tstring::Path::str(), "path1"}}},
+                      {{"service", "service1"}, {"path", "path1"}}},
                      {tstring::OperationType::str(), OperationType::max},
                      {tstring::Id::str(), "id1"},
-                     {tstring::MetricMetadata::str(), "metadata1"},
-                     {tstring::CollectionTimeScope::str(),
-                      CollectionTimeScope::point},
-                     {tstring::CollectionDuration::str(), 0}},
+                     {tstring::MetricMetadata::str(), "metadata1"}},
                     {{tstring::SensorPath::str(),
-                      {{tstring::Service::str(), "service2"},
-                       {tstring::Path::str(), "path2"}}},
+                      {{"service", "service2"}, {"path", "path2"}}},
                      {tstring::OperationType::str(), OperationType::min},
                      {tstring::Id::str(), "id2"},
-                     {tstring::MetricMetadata::str(), "metadata2"},
-                     {tstring::CollectionTimeScope::str(),
-                      CollectionTimeScope::point},
-                     {tstring::CollectionDuration::str(), 0}}}))));
+                     {tstring::MetricMetadata::str(), "metadata2"}}}))));
 
 TEST_P(TestReportStore, settingPersistencyToTrueStoresReport)
 {

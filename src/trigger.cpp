@@ -1,6 +1,6 @@
 #include "trigger.hpp"
 
-#include "types/types.hpp"
+#include "interfaces/types.hpp"
 
 Trigger::Trigger(
     boost::asio::io_context& ioc,

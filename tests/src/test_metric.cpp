@@ -8,8 +8,6 @@
 #include <gmock/gmock.h>
 
 using namespace testing;
-using namespace std::chrono_literals;
-
 namespace tstring = utils::tstring;
 
 using Timestamp = uint64_t;
@@ -21,8 +19,7 @@ class TestMetric : public Test
         std::make_shared<NiceMock<SensorMock>>();
 
     std::shared_ptr<Metric> sut = std::make_shared<Metric>(
-        sensorMock, OperationType::avg, "id", "metadata",
-        CollectionTimeScope::point, CollectionDuration(0ms));
+        sensorMock, OperationType::avg, "id", "metadata");
 };
 
 TEST_F(TestMetric, subscribesForSensorDuringInitialization)
