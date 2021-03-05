@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "d6c1e8ca_6472b76f",
+        "filename": ".gitignore",
+        "patchSetId": 3
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000534
+      },
+      "writtenOn": "2021-03-05T07:39:53Z",
+      "side": 1,
+      "message": "Good point. This gitignore file has been created automatically but it doesn\u0027t comply with OpenBMC standards. vscode part of gitignore allows for certain files to be tracked by git. I believe we should just remove the exceptions from vscode part.",
+      "parentUuid": "a9893e76_a8a03cc0",
+      "revId": "301fa8959681b5fb2f7d15476cf91f61228c4230",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "a9bc1754_adbfa33d",
         "filename": "/COMMIT_MSG",
         "patchSetId": 3
