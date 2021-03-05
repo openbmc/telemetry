@@ -154,6 +154,30 @@
     },
     {
       "key": {
+        "uuid": "2389d896_8705d5b9",
+        "filename": "src/trigger.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1000677
+      },
+      "writtenOn": "2021-03-05T13:07:00Z",
+      "side": 1,
+      "message": "dbus specification does not limit name/path length. The problem is when we try to save it to filesystem. There is a limit for a length of a path. To WA we use std::hash(). Same implementation is done in Report class.\nAbout collision detection, please, leave it as TODO. For me it might be not cover in this patch",
+      "parentUuid": "26eecd87_a1c2d5ce",
+      "range": {
+        "startLine": 25,
+        "startChar": 28,
+        "endLine": 25,
+        "endChar": 58
+      },
+      "revId": "301fa8959681b5fb2f7d15476cf91f61228c4230",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "f975940c_a4181d73",
         "filename": "src/trigger.cpp",
         "patchSetId": 3
