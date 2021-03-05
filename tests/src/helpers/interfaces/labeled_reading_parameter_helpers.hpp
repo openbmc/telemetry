@@ -1,7 +1,7 @@
 #pragma once
 
 #include "helpers/interfaces/labeled_sensor_parameter_helpers.hpp"
-#include "types/types.hpp"
+#include "interfaces/types.hpp"
 
 #include <ostream>
 

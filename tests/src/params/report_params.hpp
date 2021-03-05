@@ -1,7 +1,7 @@
 #pragma once
 
+#include "interfaces/types.hpp"
 #include "report_manager.hpp"
-#include "types/types.hpp"
 
 #include <chrono>
 #include <string>
@@ -86,14 +86,10 @@ class ReportParams final
              "/xyz/openbmc_project/sensors/power/p1")},
          utils::enumToString(OperationType::single),
          "MetricId1",
-         "Metadata1",
-         utils::enumToString(CollectionTimeScope::point),
-         0u},
+         "Metadata1"},
         {{sdbusplus::message::object_path(
              "/xyz/openbmc_project/sensors/power/p2")},
          utils::enumToString(OperationType::single),
          "MetricId2",
-         "Metadata2",
-         utils::enumToString(CollectionTimeScope::point),
-         0u}};
+         "Metadata2"}};
 };

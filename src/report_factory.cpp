@@ -43,8 +43,7 @@ std::unique_ptr<interfaces::Report> ReportFactory::make(
             -> std::shared_ptr<interfaces::Metric> {
             return std::make_shared<Metric>(
                 getSensor(param.at_index<0>()), param.at_index<1>(),
-                param.at_index<2>(), param.at_index<3>(), param.at_index<4>(),
-                param.at_index<5>());
+                param.at_index<2>(), param.at_index<3>());
         });
 
     return std::make_unique<Report>(
@@ -70,8 +69,7 @@ std::vector<LabeledMetricParameters> ReportFactory::convertMetricParams(
     auto tree = utils::getSubTreeSensors(yield, bus);
 
     return utils::transform(metricParams, [&tree](const auto& item) {
-        const auto& [sensorPath, operationType, id, metadata,
-                     collectionTimeScope, collectionDuration] = item;
+        const auto& [sensorPath, operationType, id, metadata] = item;
 
         auto it = std::find_if(
             tree.begin(), tree.end(),
@@ -82,10 +80,7 @@ std::vector<LabeledMetricParameters> ReportFactory::convertMetricParams(
             const auto& [service, ifaces] = it->second.front();
             return LabeledMetricParameters(
                 LabeledSensorParameters(service, sensorPath),
-                utils::stringToOperationType(operationType), id, metadata,
-                utils::stringToCollectionTimeScope(collectionTimeScope),
-                CollectionDuration(
-                    std::chrono::milliseconds(collectionDuration)));
+                utils::stringToOperationType(operationType), id, metadata);
         }
 
         throw sdbusplus::exception::SdBusError(

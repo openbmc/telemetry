@@ -1,6 +1,6 @@
 #pragma once
 
-#include "types/types.hpp"
+#include "interfaces/types.hpp"
 
 #include <ostream>
 
