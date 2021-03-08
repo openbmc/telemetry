@@ -39,10 +39,10 @@ class ReportManager : public interfaces::ReportManager
     std::vector<std::unique_ptr<interfaces::Report>> reports;
 
     void verifyReportNameLength(const std::string& reportName);
-    void verifyAddReport(const std::string& reportName,
-                         const std::string& reportingType,
-                         std::chrono::milliseconds interval,
-                         const ReadingParameters& readingParams);
+    void verifyAddReport(
+        const std::string& reportName, const std::string& reportingType,
+        std::chrono::milliseconds interval,
+        const std::vector<LabeledMetricParameters>& readingParams);
     interfaces::Report& addReport(boost::asio::yield_context& yield,
                                   const std::string& reportName,
                                   const std::string& reportingType,

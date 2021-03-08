@@ -1,7 +1,7 @@
 #include "report_manager.hpp"
 
-#include "interfaces/types.hpp"
 #include "report.hpp"
+#include "types/types.hpp"
 #include "utils/conversion.hpp"
 #include "utils/transform.hpp"
 
@@ -10,6 +10,19 @@
 
 #include <stdexcept>
 #include <system_error>
+
+ReadingParameters
+    convertToReadingParameters(ReadingParametersPastVersion params)
+{
+    return utils::transform(params, [](const auto& param) {
+        using namespace std::chrono_literals;
+
+        return ReadingParameters::value_type(
+            std::vector{{std::get<0>(param)}}, std::get<1>(param),
+            std::get<2>(param), std::get<3>(param),
+            utils::enumToString(CollectionTimeScope::point), 0u);
+    });
+}
 
 ReportManager::ReportManager(
     std::unique_ptr<interfaces::ReportFactory> reportFactoryIn,
@@ -42,7 +55,25 @@ ReportManager::ReportManager(
                                     const bool emitsReadingsUpdate,
                                     const bool logToMetricReportsCollection,
                                     const uint64_t interval,
-                                    ReadingParameters metricParams) {
+                                    ReadingParametersPastVersion metricParams) {
+                    return addReport(yield, reportName, reportingType,
+                                     emitsReadingsUpdate,
+                                     logToMetricReportsCollection,
+                                     std::chrono::milliseconds(interval),
+                                     convertToReadingParameters(
+                                         std::move(metricParams)))
+                        .getPath();
+                });
+
+            dbusIface.register_method(
+                "AddReportFutureVersion",
+                [this](boost::asio::yield_context& yield,
+                       const std::string& reportName,
+                       const std::string& reportingType,
+                       const bool emitsReadingsUpdate,
+                       const bool logToMetricReportsCollection,
+                       const uint64_t interval,
+                       ReadingParameters metricParams) {
                     return addReport(yield, reportName, reportingType,
                                      emitsReadingsUpdate,
                                      logToMetricReportsCollection,
@@ -71,10 +102,10 @@ void ReportManager::verifyReportNameLength(const std::string& reportName)
     }
 }
 
-void ReportManager::verifyAddReport(const std::string& reportName,
-                                    const std::string& reportingType,
-                                    std::chrono::milliseconds interval,
-                                    const ReadingParameters& readingParams)
+void ReportManager::verifyAddReport(
+    const std::string& reportName, const std::string& reportingType,
+    std::chrono::milliseconds interval,
+    const std::vector<LabeledMetricParameters>& readingParams)
 {
     if (reports.size() >= maxReports)
     {
@@ -119,9 +150,12 @@ void ReportManager::verifyAddReport(const std::string& reportName,
 
     try
     {
-        for (const auto& item : readingParams)
+        namespace ts = utils::tstring;
+
+        for (const LabeledMetricParameters& item : readingParams)
         {
-            utils::stringToOperationType(std::get<1>(item));
+            utils::toOperationType(
+                utils::toUnderlying(item.at_label<ts::OperationType>()));
         }
     }
     catch (const std::exception& e)
@@ -137,13 +171,12 @@ interfaces::Report& ReportManager::addReport(
     const bool logToMetricReportsCollection, std::chrono::milliseconds interval,
     ReadingParameters metricParams)
 {
-    verifyAddReport(reportName, reportingType, interval, metricParams);
+    auto labeledMetricParams =
+        reportFactory->convertMetricParams(yield, metricParams);
 
-    reports.emplace_back(reportFactory->make(
-        yield, reportName, reportingType, emitsReadingsUpdate,
-        logToMetricReportsCollection, interval, std::move(metricParams), *this,
-        *reportStorage));
-    return *reports.back();
+    return addReport(reportName, reportingType, emitsReadingsUpdate,
+                     logToMetricReportsCollection, interval,
+                     std::move(labeledMetricParams));
 }
 
 interfaces::Report& ReportManager::addReport(
@@ -152,23 +185,12 @@ interfaces::Report& ReportManager::addReport(
     std::chrono::milliseconds interval,
     std::vector<LabeledMetricParameters> labeledMetricParams)
 {
-    auto metricParams = utils::transform(
-        labeledMetricParams, [](const LabeledMetricParameters& param) {
-            using namespace utils::tstring;
+    verifyAddReport(reportName, reportingType, interval, labeledMetricParams);
 
-            return ReadingParameters::value_type(
-                sdbusplus::message::object_path(
-                    param.at_index<0>().at_label<Path>()),
-                utils::enumToString(param.at_index<1>()), param.at_index<2>(),
-                param.at_index<3>());
-        });
-
-    verifyAddReport(reportName, reportingType, interval, metricParams);
-
-    reports.emplace_back(reportFactory->make(
-        reportName, reportingType, emitsReadingsUpdate,
-        logToMetricReportsCollection, interval, std::move(metricParams), *this,
-        *reportStorage, labeledMetricParams));
+    reports.emplace_back(
+        reportFactory->make(reportName, reportingType, emitsReadingsUpdate,
+                            logToMetricReportsCollection, interval, *this,
+                            *reportStorage, labeledMetricParams));
     return *reports.back();
 }
 

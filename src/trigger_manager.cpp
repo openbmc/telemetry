@@ -1,5 +1,7 @@
 #include "trigger_manager.hpp"
 
+#include <iostream>
+
 TriggerManager::TriggerManager(
     std::unique_ptr<interfaces::TriggerFactory> triggerFactoryIn,
     const std::shared_ptr<sdbusplus::asio::object_server>& objServer) :
