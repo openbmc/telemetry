@@ -10,8 +10,9 @@ class Metric :
     public std::enable_shared_from_this<Metric>
 {
   public:
-    Metric(std::shared_ptr<interfaces::Sensor> sensor,
-           OperationType operationType, std::string id, std::string metadata);
+    Metric(std::vector<std::shared_ptr<interfaces::Sensor>> sensors,
+           OperationType operationType, std::string id, std::string metadata,
+           CollectionTimeScope, CollectionDuration);
 
     void initialize() override;
     const MetricValue& getReading() const override;
@@ -22,7 +23,9 @@ class Metric :
   private:
     MetricValue& findMetric(interfaces::Sensor&);
 
-    std::shared_ptr<interfaces::Sensor> sensor;
+    std::vector<MetricValue> readings;
+    std::vector<std::shared_ptr<interfaces::Sensor>> sensors;
     OperationType operationType;
-    MetricValue reading;
+    CollectionTimeScope timeScope;
+    CollectionDuration collectionDuration;
 };

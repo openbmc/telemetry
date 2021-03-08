@@ -25,6 +25,7 @@ test(
             '../src/trigger_actions.cpp',
             '../src/trigger_factory.cpp',
             '../src/trigger_manager.cpp',
+            '../src/types/types.cpp',
             'src/dbus_environment.cpp',
             'src/main.cpp',
             'src/stubs/dbus_sensor_object.cpp',

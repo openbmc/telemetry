@@ -25,38 +25,30 @@ class TestReport : public Test
     std::unique_ptr<ReportManagerMock> reportManagerMock =
         std::make_unique<NiceMock<ReportManagerMock>>();
     testing::NiceMock<StorageMock> storageMock;
-    std::vector<std::shared_ptr<MetricMock>> metricMocks = {
-        std::make_shared<NiceMock<MetricMock>>(),
-        std::make_shared<NiceMock<MetricMock>>(),
-        std::make_shared<NiceMock<MetricMock>>()};
+    std::vector<std::shared_ptr<MetricMock>> metricMocks;
     std::unique_ptr<Report> sut;
 
     MockFunction<void()> checkPoint;
 
-    TestReport()
+    void initMetricMocks(
+        const std::vector<LabeledMetricParameters>& metricParameters)
     {
-        ON_CALL(*metricMocks[0], getReading())
-            .WillByDefault(ReturnRefOfCopy(MetricValue{"a", "b", 17.1, 114}));
-        ON_CALL(*metricMocks[1], getReading())
-            .WillByDefault(ReturnRefOfCopy(MetricValue{"aa", "bb", 42.0, 74}));
-        ON_CALL(*metricMocks[2], getReading())
-            .WillByDefault(
-                ReturnRefOfCopy(MetricValue{"aaa", "bbb", 100.7, 21}));
-
-        for (size_t i = 0; i < metricMocks.size(); ++i)
+        for (auto i = metricMocks.size(); i < metricParameters.size(); ++i)
         {
-            using namespace std::string_literals;
+            metricMocks.emplace_back(std::make_shared<NiceMock<MetricMock>>());
+        }
+        metricMocks.resize(metricParameters.size());
 
-            auto id = std::to_string(i);
+        std::vector<MetricValue> readings{{MetricValue{"a", "b", 17.1, 114},
+                                           MetricValue{"aa", "bb", 42.0, 74}}};
+        readings.resize(metricParameters.size());
 
-            auto sensorParameters =
-                LabeledSensorParameters("service"s + id, "path"s + id);
-            auto metricParameters = LabeledMetricParameters(
-                std::move(sensorParameters), utils::toOperationType(i),
-                "id"s + id, "metadata"s + id);
-
+        for (size_t i = 0; i < metricParameters.size(); ++i)
+        {
+            ON_CALL(*metricMocks[i], getReading())
+                .WillByDefault(ReturnRefOfCopy(readings[i]));
             ON_CALL(*metricMocks[i], dumpConfiguration())
-                .WillByDefault(Return(std::move(metricParameters)));
+                .WillByDefault(Return(metricParameters[i]));
         }
     }
 
@@ -73,12 +65,13 @@ class TestReport : public Test
 
     std::unique_ptr<Report> makeReport(const ReportParams& params)
     {
+        initMetricMocks(params.metricParameters());
+
         return std::make_unique<Report>(
             DbusEnvironment::getIoc(), DbusEnvironment::getObjServer(),
             params.reportName(), params.reportingType(),
             params.emitReadingUpdate(), params.logToMetricReportCollection(),
-            params.interval(), params.readingParameters(), *reportManagerMock,
-            storageMock,
+            params.interval(), *reportManagerMock, storageMock,
             utils::convContainer<std::shared_ptr<interfaces::Metric>>(
                 metricMocks));
     }
@@ -126,7 +119,7 @@ class TestReport : public Test
                                                  const T& newValue)
     {
         auto setPromise = std::promise<boost::system::error_code>();
-        auto setFuture = setPromise.get_future();
+        auto future = setPromise.get_future();
         sdbusplus::asio::setProperty(
             *DbusEnvironment::getBus(), DbusEnvironment::serviceName(), path,
             Report::reportIfaceName, property, std::move(newValue),
@@ -134,7 +127,7 @@ class TestReport : public Test
                  std::move(setPromise)](boost::system::error_code ec) mutable {
                 setPromise.set_value(ec);
             });
-        return DbusEnvironment::waitForFuture(std::move(setFuture));
+        return DbusEnvironment::waitForFuture(std::move(future));
     }
 
     boost::system::error_code deleteReport(const std::string& path)
@@ -153,9 +146,9 @@ TEST_F(TestReport, verifyIfPropertiesHaveValidValue)
     EXPECT_THAT(
         getProperty<bool>(sut->getPath(), "LogToMetricReportsCollection"),
         Eq(defaultParams.logToMetricReportCollection()));
-    EXPECT_THAT(
-        getProperty<ReadingParameters>(sut->getPath(), "ReadingParameters"),
-        Eq(defaultParams.readingParameters()));
+    EXPECT_THAT(getProperty<ReadingParameters>(
+                    sut->getPath(), "ReadingParametersFutureVersion"),
+                Eq(toReadingParameters(defaultParams.metricParameters())));
 }
 
 TEST_F(TestReport, readingsAreInitialyEmpty)
@@ -247,7 +240,7 @@ class TestReportStore :
 
 INSTANTIATE_TEST_SUITE_P(
     _, TestReportStore,
-    Values(std::make_pair("Version"s, nlohmann::json(3)),
+    Values(std::make_pair("Version"s, nlohmann::json(4)),
            std::make_pair("Name"s, nlohmann::json(ReportParams().reportName())),
            std::make_pair("ReportingType",
                           nlohmann::json(ReportParams().reportingType())),
@@ -262,20 +255,25 @@ INSTANTIATE_TEST_SUITE_P(
                "ReadingParameters",
                nlohmann::json(
                    {{{tstring::SensorPath::str(),
-                      {{"service", "service0"}, {"path", "path0"}}},
+                      {{{tstring::Service::str(), "Service"},
+                        {tstring::Path::str(),
+                         "/xyz/openbmc_project/sensors/power/p1"}}}},
                      {tstring::OperationType::str(), OperationType::single},
-                     {tstring::Id::str(), "id0"},
-                     {tstring::MetricMetadata::str(), "metadata0"}},
+                     {tstring::Id::str(), "MetricId1"},
+                     {tstring::MetricMetadata::str(), "Metadata1"},
+                     {tstring::CollectionTimeScope::str(),
+                      CollectionTimeScope::point},
+                     {tstring::CollectionDuration::str(), 0}},
                     {{tstring::SensorPath::str(),
-                      {{"service", "service1"}, {"path", "path1"}}},
-                     {tstring::OperationType::str(), OperationType::max},
-                     {tstring::Id::str(), "id1"},
-                     {tstring::MetricMetadata::str(), "metadata1"}},
-                    {{tstring::SensorPath::str(),
-                      {{"service", "service2"}, {"path", "path2"}}},
-                     {tstring::OperationType::str(), OperationType::min},
-                     {tstring::Id::str(), "id2"},
-                     {tstring::MetricMetadata::str(), "metadata2"}}}))));
+                      {{{tstring::Service::str(), "Service"},
+                        {tstring::Path::str(),
+                         "/xyz/openbmc_project/sensors/power/p2"}}}},
+                     {tstring::OperationType::str(), OperationType::single},
+                     {tstring::Id::str(), "MetricId2"},
+                     {tstring::MetricMetadata::str(), "Metadata2"},
+                     {tstring::CollectionTimeScope::str(),
+                      CollectionTimeScope::point},
+                     {tstring::CollectionDuration::str(), 0}}}))));
 
 TEST_P(TestReportStore, settingPersistencyToTrueStoresReport)
 {
@@ -422,8 +420,7 @@ TEST_F(TestReportOnRequestType, updatesReadingWhenUpdateIsCalled)
 
     EXPECT_THAT(readings,
                 ElementsAre(std::make_tuple("a"s, "b"s, 17.1, 114u),
-                            std::make_tuple("aa"s, "bb"s, 42.0, 74u),
-                            std::make_tuple("aaa"s, "bbb"s, 100.7, 21u)));
+                            std::make_tuple("aa"s, "bb"s, 42.0, 74u)));
 }
 
 class TestReportNonOnRequestType :
@@ -499,8 +496,7 @@ TEST_F(TestReportPeriodicReport, readingsAreUpdatedAfterIntervalExpires)
 
     EXPECT_THAT(readings,
                 ElementsAre(std::make_tuple("a"s, "b"s, 17.1, 114u),
-                            std::make_tuple("aa"s, "bb"s, 42.0, 74u),
-                            std::make_tuple("aaa"s, "bbb"s, 100.7, 21u)));
+                            std::make_tuple("aa"s, "bb"s, 42.0, 74u)));
 }
 
 class TestReportInitialization : public TestReport

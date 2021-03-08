@@ -8,6 +8,8 @@
 #include <gmock/gmock.h>
 
 using namespace testing;
+using namespace std::chrono_literals;
+
 namespace tstring = utils::tstring;
 
 using Timestamp = uint64_t;
@@ -15,16 +17,18 @@ using Timestamp = uint64_t;
 class TestMetric : public Test
 {
   public:
-    std::shared_ptr<SensorMock> sensorMock =
-        std::make_shared<NiceMock<SensorMock>>();
+    std::vector<std::shared_ptr<SensorMock>> sensorMocks{
+        {std::make_shared<NiceMock<SensorMock>>()}};
 
     std::shared_ptr<Metric> sut = std::make_shared<Metric>(
-        sensorMock, OperationType::avg, "id", "metadata");
+        utils::convContainer<std::shared_ptr<interfaces::Sensor>>(sensorMocks),
+        OperationType::avg, "id", "metadata", CollectionTimeScope::point,
+        CollectionDuration(0ms));
 };
 
 TEST_F(TestMetric, subscribesForSensorDuringInitialization)
 {
-    EXPECT_CALL(*sensorMock,
+    EXPECT_CALL(*sensorMocks.front(),
                 registerForUpdates(Truly([sut = sut.get()](const auto& a0) {
                     return a0.lock().get() == sut;
                 })));
@@ -53,7 +57,7 @@ TEST_F(TestMetricAfterInitialization, containsEmptyReading)
 
 TEST_F(TestMetricAfterInitialization, updatesMetricValuesOnSensorUpdate)
 {
-    sut->sensorUpdated(*sensorMock, Timestamp{18}, 31.2);
+    sut->sensorUpdated(*sensorMocks.front(), Timestamp{18}, 31.2);
 
     ASSERT_THAT(sut->getReading(),
                 Eq(MetricValue{"id", "metadata", 31.2, 18u}));
@@ -99,14 +103,14 @@ TEST_F(TestMetricAfterInitialization, containsMetadataInJsonDump)
 
 TEST_F(TestMetricAfterInitialization, containsSensorPathInJsonDump)
 {
-    ON_CALL(*sensorMock, id())
+    ON_CALL(*sensorMocks.front(), id())
         .WillByDefault(Return(SensorMock::makeId("service1", "path1")));
 
     const auto conf = sut->dumpConfiguration();
 
     EXPECT_THAT(conf.at_label<utils::tstring::SensorPath>(),
-                Eq(LabeledSensorParameters("service1", "path1")));
+                ElementsAre(LabeledSensorParameters("service1", "path1")));
     EXPECT_THAT(
         conf.to_json().at(tstring::SensorPath::str()),
-        Eq(nlohmann::json({{"service", "service1"}, {"path", "path1"}})));
+        Eq(nlohmann::json({{{"service", "service1"}, {"path", "path1"}}})));
 }
