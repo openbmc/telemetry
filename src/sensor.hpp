@@ -2,6 +2,7 @@
 
 #include "interfaces/sensor.hpp"
 #include "interfaces/sensor_listener.hpp"
+#include "types/milliseconds.hpp"
 #include "utils/unique_call.hpp"
 
 #include <boost/asio/high_resolution_timer.hpp>
@@ -41,7 +42,7 @@ class Sensor final :
     interfaces::Sensor::Id sensorId;
     boost::asio::io_context& ioc;
     std::shared_ptr<sdbusplus::asio::connection> bus;
-    std::chrono::milliseconds timerInterval = std::chrono::milliseconds(0);
+    Milliseconds timerInterval = Milliseconds(0);
     std::optional<boost::asio::high_resolution_timer> timer;
 
     utils::UniqueCall uniqueCall;

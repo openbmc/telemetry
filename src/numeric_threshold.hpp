@@ -4,7 +4,8 @@
 #include "interfaces/sensor_listener.hpp"
 #include "interfaces/threshold.hpp"
 #include "interfaces/trigger_action.hpp"
-#include "interfaces/trigger_types.hpp"
+#include "types/milliseconds.hpp"
+#include "types/trigger_types.hpp"
 
 #include <boost/asio/steady_timer.hpp>
 
@@ -23,7 +24,7 @@ class NumericThreshold :
         std::vector<std::shared_ptr<interfaces::Sensor>> sensors,
         std::vector<std::string> sensorNames,
         std::vector<std::unique_ptr<interfaces::TriggerAction>> actions,
-        std::chrono::milliseconds dwellTime, numeric::Direction direction,
+        Milliseconds dwellTime, numeric::Direction direction,
         double thresholdValue);
     ~NumericThreshold();
 
@@ -35,7 +36,7 @@ class NumericThreshold :
     boost::asio::io_context& ioc;
     const std::vector<std::shared_ptr<interfaces::Sensor>> sensors;
     const std::vector<std::unique_ptr<interfaces::TriggerAction>> actions;
-    const std::chrono::milliseconds dwellTime;
+    const Milliseconds dwellTime;
     const numeric::Direction direction;
     const double thresholdValue;
 

@@ -4,7 +4,7 @@
 #include "interfaces/sensor_listener.hpp"
 #include "interfaces/threshold.hpp"
 #include "interfaces/trigger_action.hpp"
-#include "interfaces/trigger_types.hpp"
+#include "types/trigger_types.hpp"
 
 #include <boost/asio/steady_timer.hpp>
 

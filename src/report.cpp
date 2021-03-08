@@ -14,20 +14,30 @@ Report::Report(boost::asio::io_context& ioc,
                const std::string& reportingTypeIn,
                const bool emitsReadingsUpdateIn,
                const bool logToMetricReportsCollectionIn,
-               const std::chrono::milliseconds intervalIn,
-               const ReadingParameters& readingParametersIn,
+               const Milliseconds intervalIn,
                interfaces::ReportManager& reportManager,
                interfaces::JsonStorage& reportStorageIn,
-               std::vector<std::shared_ptr<interfaces::Metric>> metrics) :
+               std::vector<std::shared_ptr<interfaces::Metric>> metricsIn) :
     name(reportName),
     path(reportDir + name), reportingType(reportingTypeIn),
     interval(intervalIn), emitsReadingsUpdate(emitsReadingsUpdateIn),
     logToMetricReportsCollection(logToMetricReportsCollectionIn),
-    readingParameters(readingParametersIn), objServer(objServer),
-    metrics(std::move(metrics)), timer(ioc),
+    objServer(objServer), metrics(std::move(metricsIn)), timer(ioc),
     fileName(std::to_string(std::hash<std::string>{}(name))),
     reportStorage(reportStorageIn)
 {
+    readingParameters =
+        toReadingParameters(utils::transform(metrics, [](const auto& metric) {
+            return metric->dumpConfiguration();
+        }));
+
+    readingParametersPastVersion =
+        utils::transform(readingParameters, [](const auto& item) {
+            return ReadingParametersPastVersion::value_type(
+                std::get<0>(item).front(), std::get<1>(item), std::get<2>(item),
+                std::get<3>(item));
+        });
+
     deleteIface = objServer->add_unique_interface(
         path, deleteIfaceName, [this, &ioc, &reportManager](auto& dbusIface) {
             dbusIface.register_method("Delete", [this, &ioc, &reportManager] {
@@ -59,10 +69,10 @@ std::unique_ptr<sdbusplus::asio::dbus_interface> Report::makeReportInterface()
 {
     auto dbusIface = objServer->add_unique_interface(path, reportIfaceName);
     dbusIface->register_property_rw(
-        "Interval", static_cast<uint64_t>(interval.count()),
+        "Interval", interval.count(),
         sdbusplus::vtable::property_::emits_change,
         [this](uint64_t newVal, auto&) {
-            std::chrono::milliseconds newValT(newVal);
+            Milliseconds newValT(newVal);
             if (newValT < ReportManager::minInterval)
             {
                 return false;
@@ -70,9 +80,7 @@ std::unique_ptr<sdbusplus::asio::dbus_interface> Report::makeReportInterface()
             interval = newValT;
             return true;
         },
-        [this](const auto&) {
-            return static_cast<uint64_t>(interval.count());
-        });
+        [this](const auto&) { return interval.count(); });
     dbusIface->register_property_rw(
         "Persistency", persistency, sdbusplus::vtable::property_::emits_change,
         [this](bool newVal, const auto&) {
@@ -104,7 +112,11 @@ std::unique_ptr<sdbusplus::asio::dbus_interface> Report::makeReportInterface()
         "ReportingType", reportingType, sdbusplus::vtable::property_::const_,
         [this](const auto&) { return reportingType; });
     dbusIface->register_property_r(
-        "ReadingParameters", readingParameters,
+        "ReadingParameters", readingParametersPastVersion,
+        sdbusplus::vtable::property_::const_,
+        [this](const auto&) { return readingParametersPastVersion; });
+    dbusIface->register_property_r(
+        "ReadingParametersFutureVersion", readingParameters,
         sdbusplus::vtable::property_::const_,
         [this](const auto&) { return readingParameters; });
     dbusIface->register_property_r(
@@ -137,7 +149,7 @@ void Report::timerProc(boost::system::error_code ec, Report& self)
     self.scheduleTimer(self.interval);
 }
 
-void Report::scheduleTimer(std::chrono::milliseconds timerInterval)
+void Report::scheduleTimer(Milliseconds timerInterval)
 {
     timer.expires_after(timerInterval);
     timer.async_wait(
@@ -146,17 +158,23 @@ void Report::scheduleTimer(std::chrono::milliseconds timerInterval)
 
 void Report::updateReadings()
 {
-    std::tuple_element_t<1, Readings> readingsCache(metrics.size());
+    using ReadingsValue = std::tuple_element_t<1, Readings>;
+    std::get<ReadingsValue>(cachedReadings).clear();
 
-    std::transform(std::begin(metrics), std::end(metrics),
-                   std::begin(readingsCache), [](const auto& metric) {
-                       const auto& reading = metric->getReading();
-                       return std::make_tuple(reading.id, reading.metadata,
-                                              reading.value, reading.timestamp);
-                   });
+    for (const auto& metric : metrics)
+    {
+        for (const auto& reading : metric->getReadings())
+        {
+            std::get<1>(cachedReadings)
+                .emplace_back(reading.id, reading.metadata, reading.value,
+                              reading.timestamp);
+        }
+    }
 
-    std::get<0>(readings) = std::time(0);
-    std::get<1>(readings) = std::move(readingsCache);
+    using ReadingsTimestamp = std::tuple_element_t<0, Readings>;
+    std::get<ReadingsTimestamp>(cachedReadings) = std::time(0);
+
+    std::swap(readings, cachedReadings);
 
     reportIface->signal_property("Readings");
 }

@@ -1,7 +1,7 @@
 #include "trigger.hpp"
 
-#include "interfaces/trigger_types.hpp"
-#include "interfaces/types.hpp"
+#include "types/report_types.hpp"
+#include "types/trigger_types.hpp"
 #include "utils/conversion_trigger.hpp"
 #include "utils/transform.hpp"
 

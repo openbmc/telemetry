@@ -7,8 +7,7 @@ DiscreteThreshold::DiscreteThreshold(
     std::vector<std::shared_ptr<interfaces::Sensor>> sensorsIn,
     std::vector<std::string> sensorNames,
     std::vector<std::unique_ptr<interfaces::TriggerAction>> actionsIn,
-    std::chrono::milliseconds dwellTimeIn, double thresholdValueIn,
-    std::string name) :
+    Milliseconds dwellTimeIn, double thresholdValueIn, std::string name) :
     ioc(ioc),
     sensors(std::move(sensorsIn)), actions(std::move(actionsIn)),
     dwellTime(dwellTimeIn), thresholdValue(thresholdValueIn), name(name)
@@ -65,7 +64,7 @@ void DiscreteThreshold::startTimer(interfaces::Sensor& sensor,
                                    uint64_t timestamp, double value)
 {
     auto& [sensorName, dwell, timer] = getDetails(sensor);
-    if (dwellTime == std::chrono::milliseconds::zero())
+    if (dwellTime == Milliseconds::zero())
     {
         commit(sensorName, timestamp, value);
     }
