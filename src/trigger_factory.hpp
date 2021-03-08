@@ -35,8 +35,6 @@ class TriggerFactory : public interfaces::TriggerFactory
     SensorCache& sensorCache;
     interfaces::ReportManager& reportManager;
 
-    std::pair<std::vector<std::shared_ptr<interfaces::Sensor>>,
-              std::vector<std::string>>
-        getSensors(
-            const std::vector<LabeledSensorInfo>& labeledSensorsInfo) const;
+    std::pair<Sensors, std::vector<std::string>> getSensors(
+        const std::vector<LabeledSensorInfo>& labeledSensorsInfo) const;
 };

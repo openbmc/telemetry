@@ -25,12 +25,12 @@ class TestTrigger : public Test
             .name("Trigger2")
             .isDiscrete(true)
             .thresholdParams(std::vector<discrete::LabeledThresholdParam>{
-                discrete::LabeledThresholdParam{
-                    "userId", discrete::Severity::warning,
-                    std::chrono::milliseconds(10).count(), 15.2},
-                discrete::LabeledThresholdParam{
-                    "userId_2", discrete::Severity::critical,
-                    std::chrono::milliseconds(5).count(), 32.7},
+                discrete::LabeledThresholdParam{"userId",
+                                                discrete::Severity::warning,
+                                                Milliseconds(10).count(), 15.2},
+                discrete::LabeledThresholdParam{"userId_2",
+                                                discrete::Severity::critical,
+                                                Milliseconds(5).count(), 32.7},
             });
 
     std::unique_ptr<TriggerManagerMock> triggerManagerMockPtr =

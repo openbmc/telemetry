@@ -45,8 +45,8 @@ std::unique_ptr<interfaces::Trigger> TriggerFactory::make(
                 labeledThresholdParam.at_label<ts::UserId>();
             discrete::Severity severity =
                 labeledThresholdParam.at_label<ts::Severity>();
-            std::chrono::milliseconds dwellTime = std::chrono::milliseconds(
-                labeledThresholdParam.at_label<ts::DwellTime>());
+            auto dwellTime =
+                Milliseconds(labeledThresholdParam.at_label<ts::DwellTime>());
             double thresholdValue =
                 labeledThresholdParam.at_label<ts::ThresholdValue>();
 
@@ -68,8 +68,7 @@ std::unique_ptr<interfaces::Trigger> TriggerFactory::make(
 
             thresholds.emplace_back(std::make_shared<DiscreteThreshold>(
                 bus->get_io_context(), sensors, sensorNames, std::move(actions),
-                std::chrono::milliseconds(dwellTime), thresholdValue,
-                thresholdName));
+                Milliseconds(dwellTime), thresholdValue, thresholdName));
         }
         if (labeledDiscreteThresholdParams.empty())
         {
@@ -106,8 +105,8 @@ std::unique_ptr<interfaces::Trigger> TriggerFactory::make(
         {
             std::vector<std::unique_ptr<interfaces::TriggerAction>> actions;
             auto type = labeledThresholdParam.at_label<ts::Type>();
-            auto dwellTime = std::chrono::milliseconds(
-                labeledThresholdParam.at_label<ts::DwellTime>());
+            auto dwellTime =
+                Milliseconds(labeledThresholdParam.at_label<ts::DwellTime>());
             auto direction = labeledThresholdParam.at_label<ts::Direction>();
             auto thresholdValue =
                 double{labeledThresholdParam.at_label<ts::ThresholdValue>()};
@@ -145,12 +144,10 @@ std::unique_ptr<interfaces::Trigger> TriggerFactory::make(
         triggerStorage);
 }
 
-std::pair<std::vector<std::shared_ptr<interfaces::Sensor>>,
-          std::vector<std::string>>
-    TriggerFactory::getSensors(
-        const std::vector<LabeledSensorInfo>& labeledSensorsInfo) const
+std::pair<Sensors, std::vector<std::string>> TriggerFactory::getSensors(
+    const std::vector<LabeledSensorInfo>& labeledSensorsInfo) const
 {
-    std::vector<std::shared_ptr<interfaces::Sensor>> sensors;
+    Sensors sensors;
     std::vector<std::string> sensorNames;
 
     for (const auto& labeledSensorInfo : labeledSensorsInfo)

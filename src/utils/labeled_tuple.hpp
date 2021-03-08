@@ -170,15 +170,15 @@ struct LabeledTuple<std::tuple<Args...>, Labels...>
 };
 
 template <class... Args, class... Labels>
-void to_json(nlohmann::json& json,
-             const LabeledTuple<std::tuple<Args...>, Labels...>& tuple)
+inline void to_json(nlohmann::json& json,
+                    const LabeledTuple<std::tuple<Args...>, Labels...>& tuple)
 {
     json = tuple.to_json();
 }
 
 template <class... Args, class... Labels>
-void from_json(const nlohmann::json& json,
-               LabeledTuple<std::tuple<Args...>, Labels...>& tuple)
+inline void from_json(const nlohmann::json& json,
+                      LabeledTuple<std::tuple<Args...>, Labels...>& tuple)
 {
     tuple.from_json(json);
 }

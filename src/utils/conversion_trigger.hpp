@@ -1,7 +1,7 @@
 #pragma once
 
 #include "interfaces/json_storage.hpp"
-#include "interfaces/trigger_types.hpp"
+#include "types/trigger_types.hpp"
 
 namespace utils
 {
