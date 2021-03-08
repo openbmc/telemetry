@@ -46,3 +46,5 @@ class Sensor
 };
 
 } // namespace interfaces
+
+using Sensors = Sensors;

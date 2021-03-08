@@ -1,7 +1,7 @@
 #pragma once
 
-#include "interfaces/types.hpp"
 #include "metric_value.hpp"
+#include "types/report_types.hpp"
 
 #include <nlohmann/json.hpp>
 
@@ -16,7 +16,7 @@ class Metric
     virtual ~Metric() = default;
 
     virtual void initialize() = 0;
-    virtual const MetricValue& getReading() const = 0;
+    virtual std::vector<MetricValue> getReadings() const = 0;
     virtual LabeledMetricParameters dumpConfiguration() const = 0;
 };
 

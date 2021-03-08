@@ -1,5 +1,6 @@
 #pragma once
 
+#include "interfaces/clock.hpp"
 #include "interfaces/metric.hpp"
 #include "interfaces/sensor.hpp"
 #include "interfaces/sensor_listener.hpp"
@@ -10,19 +11,36 @@ class Metric :
     public std::enable_shared_from_this<Metric>
 {
   public:
-    Metric(std::shared_ptr<interfaces::Sensor> sensor,
-           OperationType operationType, std::string id, std::string metadata);
+    Metric(Sensors sensors, OperationType operationType, std::string id,
+           std::string metadata, CollectionTimeScope, CollectionDuration,
+           std::unique_ptr<interfaces::Clock>);
+    ~Metric();
 
     void initialize() override;
-    const MetricValue& getReading() const override;
+    std::vector<MetricValue> getReadings() const override;
     void sensorUpdated(interfaces::Sensor&, uint64_t) override;
     void sensorUpdated(interfaces::Sensor&, uint64_t, double value) override;
     LabeledMetricParameters dumpConfiguration() const override;
 
   private:
-    MetricValue& findMetric(interfaces::Sensor&);
+    class CollectionData;
+    class DataPoint;
+    class DataInterval;
+    class DataStartup;
 
-    std::shared_ptr<interfaces::Sensor> sensor;
+    static std::vector<std::unique_ptr<CollectionData>>
+        makeCollectionData(size_t size, OperationType, CollectionTimeScope,
+                           CollectionDuration);
+
+    CollectionData& findAssociatedData(interfaces::Sensor& notifier);
+
+    std::string id;
+    std::string metadata;
+    std::vector<MetricValue> readings;
+    Sensors sensors;
     OperationType operationType;
-    MetricValue reading;
+    CollectionTimeScope collectionTimeScope;
+    CollectionDuration collectionDuration;
+    std::vector<std::unique_ptr<CollectionData>> collectionAlgorithms;
+    std::unique_ptr<interfaces::Clock> clock;
 };

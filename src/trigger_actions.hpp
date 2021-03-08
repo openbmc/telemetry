@@ -2,7 +2,7 @@
 
 #include "interfaces/report_manager.hpp"
 #include "interfaces/trigger_action.hpp"
-#include "interfaces/trigger_types.hpp"
+#include "types/trigger_types.hpp"
 
 namespace action
 {

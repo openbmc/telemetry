@@ -3,8 +3,7 @@
 #include <phosphor-logging/log.hpp>
 
 OnChangeThreshold::OnChangeThreshold(
-    std::vector<std::shared_ptr<interfaces::Sensor>> sensorsIn,
-    std::vector<std::string> sensorNamesIn,
+    Sensors sensorsIn, std::vector<std::string> sensorNamesIn,
     std::vector<std::unique_ptr<interfaces::TriggerAction>> actionsIn) :
     sensors(std::move(sensorsIn)),
     sensorNames(std::move(sensorNamesIn)), actions(std::move(actionsIn))

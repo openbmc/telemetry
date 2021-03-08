@@ -11,6 +11,7 @@ test(
     executable(
         'telemetry-ut',
         [
+            '../src/details/collection_function.cpp',
             '../src/discrete_threshold.cpp',
             '../src/metric.cpp',
             '../src/numeric_threshold.cpp',
@@ -25,6 +26,7 @@ test(
             '../src/trigger_actions.cpp',
             '../src/trigger_factory.cpp',
             '../src/trigger_manager.cpp',
+            '../src/types/report_types.cpp',
             '../src/utils/conversion_trigger.cpp',
             'src/dbus_environment.cpp',
             'src/main.cpp',
