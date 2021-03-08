@@ -1,13 +1,13 @@
 #include "metric.hpp"
 
-#include "interfaces/types.hpp"
+#include "types/types.hpp"
 #include "utils/transform.hpp"
 
 #include <algorithm>
 
 Metric::Metric(std::shared_ptr<interfaces::Sensor> sensor,
                OperationType operationType, std::string id,
-               std::string metadata) :
+               std::string metadata, CollectionTimeScope, CollectionDuration) :
     sensor(std::move(sensor)),
     operationType(std::move(operationType)), reading{std::move(id),
                                                      std::move(metadata), 0.,
@@ -52,5 +52,6 @@ LabeledMetricParameters Metric::dumpConfiguration() const
     auto sensorPath =
         LabeledSensorParameters(sensor->id().service, sensor->id().path);
     return LabeledMetricParameters(std::move(sensorPath), operationType,
-                                   reading.id, reading.metadata);
+                                   reading.id, reading.metadata, timeScope,
+                                   collectionDuration);
 }

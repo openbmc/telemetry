@@ -4,7 +4,7 @@
 #include "interfaces/metric.hpp"
 #include "interfaces/report.hpp"
 #include "interfaces/report_manager.hpp"
-#include "interfaces/types.hpp"
+#include "types/types.hpp"
 
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/steady_timer.hpp>
@@ -56,6 +56,7 @@ class Report : public interfaces::Report
     std::chrono::milliseconds interval;
     bool emitsReadingsUpdate;
     bool logToMetricReportsCollection;
+    ReadingParametersPastVersion readingParametersPastVersion;
     ReadingParameters readingParameters;
     bool persistency;
     Readings readings = {};
