@@ -27,10 +27,10 @@ class TestTrigger : public Test
             .thresholdParams(std::vector<discrete::LabeledThresholdParam>{
                 discrete::LabeledThresholdParam{
                     "userId", discrete::Severity::warning,
-                    std::chrono::milliseconds(10).count(), "15.2"},
+                    Milliseconds(10).count(), "15.2"},
                 discrete::LabeledThresholdParam{
                     "userId_2", discrete::Severity::critical,
-                    std::chrono::milliseconds(5).count(), "32.7"},
+                    Milliseconds(5).count(), "32.7"},
             });
 
     std::unique_ptr<TriggerManagerMock> triggerManagerMockPtr =

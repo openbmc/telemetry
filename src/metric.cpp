@@ -1,27 +1,36 @@
 #include "metric.hpp"
 
-#include "interfaces/types.hpp"
+#include "types/report_types.hpp"
+#include "utils/json.hpp"
 #include "utils/transform.hpp"
 
 #include <algorithm>
 
-Metric::Metric(std::shared_ptr<interfaces::Sensor> sensor,
-               OperationType operationType, std::string id,
-               std::string metadata) :
-    sensor(std::move(sensor)),
-    operationType(std::move(operationType)), reading{std::move(id),
-                                                     std::move(metadata), 0.,
-                                                     0u}
-{}
+Metric::Metric(Sensors sensorsIn, OperationType operationTypeIn,
+               std::string idIn, std::string metadataIn,
+               CollectionTimeScope timeScopeIn,
+               CollectionDuration collectionDurationIn) :
+    id(idIn),
+    metadata(metadataIn),
+    readings(sensorsIn.size(),
+             MetricValue{std::move(idIn), std::move(metadataIn), 0., 0u}),
+    sensors(std::move(sensorsIn)), operationType(operationTypeIn),
+    timeScope(timeScopeIn), collectionDuration(collectionDurationIn)
+{
+    tryUnpackJsonMetadata();
+}
 
 void Metric::initialize()
 {
-    sensor->registerForUpdates(weak_from_this());
+    for (const auto& sensor : sensors)
+    {
+        sensor->registerForUpdates(weak_from_this());
+    }
 }
 
-const MetricValue& Metric::getReading() const
+const std::vector<MetricValue>& Metric::getReadings() const
 {
-    return reading;
+    return readings;
 }
 
 void Metric::sensorUpdated(interfaces::Sensor& notifier, uint64_t timestamp)
@@ -40,17 +49,41 @@ void Metric::sensorUpdated(interfaces::Sensor& notifier, uint64_t timestamp,
 
 MetricValue& Metric::findMetric(interfaces::Sensor& notifier)
 {
-    if (sensor.get() != &notifier)
-    {
-        throw std::out_of_range("unknown sensor");
-    }
-    return reading;
+    auto it = std::find_if(
+        sensors.begin(), sensors.end(),
+        [&notifier](const auto& sensor) { return sensor.get() == &notifier; });
+    auto index = std::distance(sensors.begin(), it);
+    return readings.at(index);
 }
 
 LabeledMetricParameters Metric::dumpConfiguration() const
 {
-    auto sensorPath =
-        LabeledSensorParameters(sensor->id().service, sensor->id().path);
-    return LabeledMetricParameters(std::move(sensorPath), operationType,
-                                   reading.id, reading.metadata);
+    auto sensorPath = utils::transform(sensors, [this](const auto& sensor) {
+        return LabeledSensorParameters(sensor->id().service, sensor->id().path);
+    });
+
+    return LabeledMetricParameters(std::move(sensorPath), operationType, id,
+                                   metadata, timeScope, collectionDuration);
+}
+
+void Metric::tryUnpackJsonMetadata()
+{
+    try
+    {
+        const nlohmann::json parsedMetadata = nlohmann::json::parse(metadata);
+        if (const auto metricProperties =
+                utils::readJson<std::vector<std::string>>(parsedMetadata,
+                                                          "MetricProperties"))
+        {
+            if (readings.size() == metricProperties->size())
+            {
+                for (size_t i = 0; i < readings.size(); ++i)
+                {
+                    readings[i].metadata = (*metricProperties)[i];
+                }
+            }
+        }
+    }
+    catch (const nlohmann::json::parse_error& e)
+    {}
 }

@@ -3,6 +3,7 @@
 #include "helpers.hpp"
 #include "mocks/sensor_mock.hpp"
 #include "mocks/trigger_action_mock.hpp"
+#include "types/milliseconds.hpp"
 #include "utils/conv_container.hpp"
 
 #include <gmock/gmock.h>
@@ -22,9 +23,8 @@ class TestDiscreteThreshold : public Test
     TriggerActionMock& actionMock = *actionMockPtr;
     std::shared_ptr<DiscreteThreshold> sut;
 
-    std::shared_ptr<DiscreteThreshold>
-        makeThreshold(std::chrono::milliseconds dwellTime,
-                      double thresholdValue)
+    std::shared_ptr<DiscreteThreshold> makeThreshold(Milliseconds dwellTime,
+                                                     double thresholdValue)
     {
         std::vector<std::unique_ptr<interfaces::TriggerAction>> actions;
         actions.push_back(std::move(actionMockPtr));
@@ -68,10 +68,10 @@ struct DiscreteParams
         size_t sensor;
         uint64_t timestamp;
         double value;
-        std::chrono::milliseconds sleepAfter;
+        Milliseconds sleepAfter;
 
         UpdateParams(size_t sensor, uint64_t timestamp, double value,
-                     std::chrono::milliseconds sleepAfter = 0ms) :
+                     Milliseconds sleepAfter = 0ms) :
             sensor(sensor),
             timestamp(timestamp), value(value), sleepAfter(sleepAfter)
         {}
@@ -82,10 +82,10 @@ struct DiscreteParams
         size_t sensor;
         uint64_t timestamp;
         double value;
-        std::chrono::milliseconds waitMin;
+        Milliseconds waitMin;
 
         ExpectedParams(size_t sensor, uint64_t timestamp, double value,
-                       std::chrono::milliseconds waitMin = 0ms) :
+                       Milliseconds waitMin = 0ms) :
             sensor(sensor),
             timestamp(timestamp), value(value), waitMin(waitMin)
         {}
@@ -109,7 +109,7 @@ struct DiscreteParams
         return *this;
     }
 
-    DiscreteParams& DwellTime(std::chrono::milliseconds val)
+    DiscreteParams& DwellTime(Milliseconds val)
     {
         dwellTime = std::move(val);
         return *this;
@@ -139,7 +139,7 @@ struct DiscreteParams
     std::vector<UpdateParams> updates;
     std::vector<ExpectedParams> expected;
     double thresholdValue = 0.0;
-    std::chrono::milliseconds dwellTime = 0ms;
+    Milliseconds dwellTime = 0ms;
 };
 
 class TestDiscreteThresholdCommon :
@@ -147,7 +147,7 @@ class TestDiscreteThresholdCommon :
     public WithParamInterface<DiscreteParams>
 {
   public:
-    void sleep(std::chrono::milliseconds duration)
+    void sleep(Milliseconds duration)
     {
         if (duration != 0ms)
         {

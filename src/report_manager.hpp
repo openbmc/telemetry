@@ -39,21 +39,21 @@ class ReportManager : public interfaces::ReportManager
     std::vector<std::unique_ptr<interfaces::Report>> reports;
 
     void verifyReportNameLength(const std::string& reportName);
-    void verifyAddReport(const std::string& reportName,
-                         const std::string& reportingType,
-                         std::chrono::milliseconds interval,
-                         const ReadingParameters& readingParams);
+    void verifyAddReport(
+        const std::string& reportName, const std::string& reportingType,
+        Milliseconds interval,
+        const std::vector<LabeledMetricParameters>& readingParams);
     interfaces::Report& addReport(boost::asio::yield_context& yield,
                                   const std::string& reportName,
                                   const std::string& reportingType,
                                   const bool emitsReadingsUpdate,
                                   const bool logToMetricReportsCollection,
-                                  std::chrono::milliseconds interval,
+                                  Milliseconds interval,
                                   ReadingParameters metricParams);
     interfaces::Report& addReport(
         const std::string& reportName, const std::string& reportingType,
         const bool emitsReadingsUpdate, const bool logToMetricReportsCollection,
-        std::chrono::milliseconds interval,
+        Milliseconds interval,
         std::vector<LabeledMetricParameters> metricParams);
     void loadFromPersistent();
 
@@ -62,8 +62,7 @@ class ReportManager : public interfaces::ReportManager
     static constexpr size_t maxReadingParams{TELEMETRY_MAX_READING_PARAMS};
     static constexpr size_t maxReportNameLength{
         TELEMETRY_MAX_REPORT_NAME_LENGTH};
-    static constexpr std::chrono::milliseconds minInterval{
-        TELEMETRY_MIN_INTERVAL};
+    static constexpr Milliseconds minInterval{TELEMETRY_MIN_INTERVAL};
     static constexpr const char* reportManagerIfaceName =
         "xyz.openbmc_project.Telemetry.ReportManager";
     static constexpr const char* reportManagerPath =

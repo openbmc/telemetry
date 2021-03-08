@@ -4,7 +4,7 @@
 #include "interfaces/threshold.hpp"
 #include "interfaces/trigger.hpp"
 #include "interfaces/trigger_manager.hpp"
-#include "interfaces/trigger_types.hpp"
+#include "types/trigger_types.hpp"
 
 #include <boost/asio/io_context.hpp>
 #include <sdbusplus/asio/object_server.hpp>

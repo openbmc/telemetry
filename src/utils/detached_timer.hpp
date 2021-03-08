@@ -1,5 +1,7 @@
 #pragma once
 
+#include "types/milliseconds.hpp"
+
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/steady_timer.hpp>
 
@@ -9,8 +11,8 @@ namespace utils
 {
 
 template <class F>
-void makeDetachedTimer(boost::asio::io_context& ioc,
-                       std::chrono::milliseconds delay, F&& fun)
+void makeDetachedTimer(boost::asio::io_context& ioc, Milliseconds delay,
+                       F&& fun)
 {
     auto timer = std::make_unique<boost::asio::steady_timer>(ioc);
     timer->expires_after(delay);

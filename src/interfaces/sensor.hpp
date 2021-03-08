@@ -6,6 +6,7 @@
 #include <string>
 #include <string_view>
 #include <tuple>
+#include <vector>
 
 namespace interfaces
 {
@@ -46,3 +47,5 @@ class Sensor
 };
 
 } // namespace interfaces
+
+using Sensors = std::vector<std::shared_ptr<interfaces::Sensor>>;

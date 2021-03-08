@@ -3,7 +3,7 @@
 #include "interfaces/json_storage.hpp"
 #include "interfaces/trigger.hpp"
 #include "interfaces/trigger_manager.hpp"
-#include "interfaces/trigger_types.hpp"
+#include "types/trigger_types.hpp"
 
 #include <boost/asio/spawn.hpp>
 #include <sdbusplus/message/types.hpp>
