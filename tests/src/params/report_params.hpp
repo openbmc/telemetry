@@ -1,7 +1,7 @@
 #pragma once
 
-#include "interfaces/types.hpp"
 #include "report_manager.hpp"
+#include "types/types.hpp"
 
 #include <chrono>
 #include <string>
@@ -64,15 +64,15 @@ class ReportParams final
         return intervalProperty;
     }
 
-    ReportParams& readingParameters(ReadingParameters val)
+    ReportParams& metricParameters(std::vector<LabeledMetricParameters> val)
     {
-        readingParametersProperty = std::move(val);
+        metricParametersProperty = std::move(val);
         return *this;
     }
 
-    const ReadingParameters& readingParameters() const
+    const std::vector<LabeledMetricParameters>& metricParameters() const
     {
-        return readingParametersProperty;
+        return metricParametersProperty;
     }
 
   private:
@@ -81,15 +81,21 @@ class ReportParams final
     bool emitReadingUpdateProperty = true;
     bool logToMetricReportCollectionProperty = true;
     std::chrono::milliseconds intervalProperty = ReportManager::minInterval;
-    ReadingParameters readingParametersProperty = {
-        {{sdbusplus::message::object_path(
-             "/xyz/openbmc_project/sensors/power/p1")},
-         utils::enumToString(OperationType::single),
-         "MetricId1",
-         "Metadata1"},
-        {{sdbusplus::message::object_path(
-             "/xyz/openbmc_project/sensors/power/p2")},
-         utils::enumToString(OperationType::single),
-         "MetricId2",
-         "Metadata2"}};
+    std::vector<LabeledMetricParameters> metricParametersProperty{
+        {LabeledMetricParameters{
+             {LabeledSensorParameters{"Service",
+                                      "/xyz/openbmc_project/sensors/power/p1"}},
+             OperationType::single,
+             "MetricId1",
+             "Metadata1",
+             CollectionTimeScope::point,
+             CollectionDuration(std::chrono::milliseconds(0u))},
+         LabeledMetricParameters{
+             {LabeledSensorParameters{"Service",
+                                      "/xyz/openbmc_project/sensors/power/p2"}},
+             OperationType::single,
+             "MetricId2",
+             "Metadata2",
+             CollectionTimeScope::point,
+             CollectionDuration(std::chrono::milliseconds(0u))}}};
 };
