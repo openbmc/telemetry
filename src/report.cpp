@@ -28,6 +28,13 @@ Report::Report(boost::asio::io_context& ioc,
     fileName(std::to_string(std::hash<std::string>{}(name))),
     reportStorage(reportStorageIn)
 {
+    readingParametersPastVersion =
+        utils::transform(readingParameters, [](const auto& item) {
+            return ReadingParametersPastVersion::value_type(
+                std::get<0>(item), std::get<1>(item), std::get<2>(item),
+                std::get<3>(item));
+        });
+
     deleteIface = objServer->add_unique_interface(
         path, deleteIfaceName, [this, &ioc, &reportManager](auto& dbusIface) {
             dbusIface.register_method("Delete", [this, &ioc, &reportManager] {
@@ -93,7 +100,11 @@ Report::Report(boost::asio::io_context& ioc,
                 sdbusplus::vtable::property_::const_,
                 [this](const auto&) { return reportingType; });
             dbusIface.register_property_r(
-                "ReadingParameters", readingParameters,
+                "ReadingParameters", readingParametersPastVersion,
+                sdbusplus::vtable::property_::const_,
+                [this](const auto&) { return readingParametersPastVersion; });
+            dbusIface.register_property_r(
+                "ReadingParametersFutureVersion", readingParameters,
                 sdbusplus::vtable::property_::const_,
                 [this](const auto&) { return readingParameters; });
             dbusIface.register_property_r(
