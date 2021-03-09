@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "91b3004c_250b6611",
+        "filename": ".gitignore",
+        "patchSetId": 3
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000570
+      },
+      "writtenOn": "2021-03-09T21:11:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d6c1e8ca_6472b76f",
+      "revId": "301fa8959681b5fb2f7d15476cf91f61228c4230",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a9bc1754_adbfa33d",
         "filename": "/COMMIT_MSG",
         "patchSetId": 3
@@ -48,6 +66,30 @@
       "writtenOn": "2021-03-03T12:00:58Z",
       "side": 1,
       "message": "I would expect such changes to also be tested on real system in following scenarios:\n- starting app without configuration\n- restart app with configuration stored - it\u0027s restored properly\n- restart app with configuration in incorrect version \n- restart app with configuration malformed",
+      "range": {
+        "startLine": 15,
+        "startChar": 3,
+        "endLine": 15,
+        "endChar": 22
+      },
+      "revId": "301fa8959681b5fb2f7d15476cf91f61228c4230",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f6ae4dfb_afd1cde7",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1000570
+      },
+      "writtenOn": "2021-03-09T21:11:43Z",
+      "side": 1,
+      "message": "In this patch, there is only \"save\" part. I going to push \"read\" part within the next patch and then I am going do test proposed scenarios in real system.",
+      "parentUuid": "a9bc1754_adbfa33d",
       "range": {
         "startLine": 15,
         "startChar": 3,
@@ -104,6 +146,30 @@
       "revId": "301fa8959681b5fb2f7d15476cf91f61228c4230",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "18c3ae5f_67f1b3de",
+        "filename": "src/trigger.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1000570
+      },
+      "writtenOn": "2021-03-09T21:11:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3109fcb4_5d07e25b",
+      "range": {
+        "startLine": 22,
+        "startChar": 29,
+        "endLine": 22,
+        "endChar": 45
+      },
+      "revId": "301fa8959681b5fb2f7d15476cf91f61228c4230",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     },
     {
       "key": {
@@ -178,6 +244,30 @@
     },
     {
       "key": {
+        "uuid": "5192b169_7b340ce3",
+        "filename": "src/trigger.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1000570
+      },
+      "writtenOn": "2021-03-09T21:11:43Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "2389d896_8705d5b9",
+      "range": {
+        "startLine": 25,
+        "startChar": 28,
+        "endLine": 25,
+        "endChar": 58
+      },
+      "revId": "301fa8959681b5fb2f7d15476cf91f61228c4230",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f975940c_a4181d73",
         "filename": "src/trigger.cpp",
         "patchSetId": 3
@@ -210,6 +300,24 @@
       "revId": "301fa8959681b5fb2f7d15476cf91f61228c4230",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "68b23710_c94f20c1",
+        "filename": "src/trigger.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1000570
+      },
+      "writtenOn": "2021-03-09T21:11:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9d7fb5af_22928285",
+      "revId": "301fa8959681b5fb2f7d15476cf91f61228c4230",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     },
     {
       "key": {
@@ -253,6 +361,48 @@
     },
     {
       "key": {
+        "uuid": "d8892d57_70a2ae3b",
+        "filename": "src/trigger.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 1000570
+      },
+      "writtenOn": "2021-03-09T21:11:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "56427c77_e026c727",
+      "range": {
+        "startLine": 111,
+        "startChar": 18,
+        "endLine": 111,
+        "endChar": 55
+      },
+      "revId": "301fa8959681b5fb2f7d15476cf91f61228c4230",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a210dfca_261aa2f2",
+        "filename": "src/trigger.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 1000570
+      },
+      "writtenOn": "2021-03-09T21:11:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "93d8ac28_1b2c6eec",
+      "revId": "301fa8959681b5fb2f7d15476cf91f61228c4230",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fadd5b95_11e65ee1",
         "filename": "src/trigger.cpp",
         "patchSetId": 3
@@ -273,6 +423,30 @@
       "revId": "301fa8959681b5fb2f7d15476cf91f61228c4230",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "654b8f96_7a9fe9c1",
+        "filename": "src/trigger.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1000570
+      },
+      "writtenOn": "2021-03-09T21:11:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fadd5b95_11e65ee1",
+      "range": {
+        "startLine": 124,
+        "startChar": 23,
+        "endLine": 124,
+        "endChar": 60
+      },
+      "revId": "301fa8959681b5fb2f7d15476cf91f61228c4230",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     },
     {
       "key": {
@@ -320,6 +494,30 @@
       "revId": "301fa8959681b5fb2f7d15476cf91f61228c4230",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8705c4c9_4f670f8f",
+        "filename": "tests/src/test_trigger.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 1000570
+      },
+      "writtenOn": "2021-03-09T21:11:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6c400034_52bf358c",
+      "range": {
+        "startLine": 127,
+        "startChar": 0,
+        "endLine": 136,
+        "endChar": 45
+      },
+      "revId": "301fa8959681b5fb2f7d15476cf91f61228c4230",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }
