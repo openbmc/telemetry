@@ -7,6 +7,22 @@
 namespace action
 {
 
+static const std::string timestampToString(double timestamp)
+{
+    std::time_t t = static_cast<time_t>(timestamp);
+    std::array<char, sizeof("YYYY-MM-DDThh:mm:ssZ")> buf = {};
+    size_t size =
+        std::strftime(buf.data(), buf.size(), "%FT%TZ", std::gmtime(&t));
+    if (size == 0)
+    {
+        throw std::runtime_error("Failed to parse timestamp to string");
+    }
+    return std::string(buf.data(), size);
+}
+
+namespace numeric
+{
+
 static const char* getDirection(double value, double threshold)
 {
     if (value < threshold)
@@ -24,13 +40,13 @@ const char* LogToJournal::getType() const
 {
     switch (type)
     {
-        case numeric::Type::upperCritical:
+        case ::numeric::Type::upperCritical:
             return "UpperCritical";
-        case numeric::Type::lowerCritical:
+        case ::numeric::Type::lowerCritical:
             return "LowerCritical";
-        case numeric::Type::upperWarning:
+        case ::numeric::Type::upperWarning:
             return "UpperWarning";
-        case numeric::Type::lowerWarning:
+        case ::numeric::Type::lowerWarning:
             return "LowerWarning";
     }
     throw std::runtime_error("Invalid type");
@@ -39,19 +55,10 @@ const char* LogToJournal::getType() const
 void LogToJournal::commit(const std::string& sensorName, uint64_t timestamp,
                           double value)
 {
-    std::time_t t = static_cast<time_t>(timestamp);
-    std::array<char, sizeof("YYYY-MM-DDThh:mm:ssZ")> buf = {};
-    size_t size =
-        std::strftime(buf.data(), buf.size(), "%FT%TZ", std::gmtime(&t));
-    if (size == 0)
-    {
-        throw std::runtime_error("Failed to parse timestamp to string");
-    }
-
     std::string msg = std::string(getType()) +
                       " numeric threshold condition is met on sensor " +
                       sensorName + ", recorded value " + std::to_string(value) +
-                      ", timestamp " + std::string(buf.data(), size) +
+                      ", timestamp " + timestampToString(timestamp) +
                       ", direction " +
                       std::string(getDirection(value, threshold));
 
@@ -62,13 +69,13 @@ const char* LogToRedfish::getMessageId() const
 {
     switch (type)
     {
-        case numeric::Type::upperCritical:
+        case ::numeric::Type::upperCritical:
             return "OpenBMC.0.1.0.NumericThresholdUpperCritical";
-        case numeric::Type::lowerCritical:
+        case ::numeric::Type::lowerCritical:
             return "OpenBMC.0.1.0.NumericThresholdLowerCritical";
-        case numeric::Type::upperWarning:
+        case ::numeric::Type::upperWarning:
             return "OpenBMC.0.1.0.NumericThresholdUpperWarning";
-        case numeric::Type::lowerWarning:
+        case ::numeric::Type::lowerWarning:
             return "OpenBMC.0.1.0.NumericThresholdLowerWarning";
     }
     throw std::runtime_error("Invalid type");
@@ -84,6 +91,84 @@ void LogToRedfish::commit(const std::string& sensorName, uint64_t timestamp,
                                  sensorName.c_str(), value, timestamp,
                                  getDirection(value, threshold)));
 }
+
+} // namespace numeric
+
+namespace discrete
+{
+const char* LogToJournal::getSeverity() const
+{
+    switch (severity)
+    {
+        case ::discrete::Severity::ok:
+            return "OK";
+        case ::discrete::Severity::warning:
+            return "Warning";
+        case ::discrete::Severity::critical:
+            return "Critical";
+    }
+    throw std::runtime_error("Invalid severity");
+}
+
+void LogToJournal::commit(const std::string& sensorName, uint64_t timestamp,
+                          double value)
+{
+    std::string msg = std::string(getSeverity()) +
+                      " discrete threshold condition is met on sensor " +
+                      sensorName + ", recorded value " + std::to_string(value) +
+                      ", timestamp " + timestampToString(timestamp);
+
+    phosphor::logging::log<phosphor::logging::level::INFO>(msg.c_str());
+}
+
+const char* LogToRedfish::getMessageId() const
+{
+    switch (severity)
+    {
+        case ::discrete::Severity::ok:
+            return "OpenBMC.0.1.0.DiscreteThresholdOk";
+        case ::discrete::Severity::warning:
+            return "OpenBMC.0.1.0.DiscreteThresholdWarning";
+        case ::discrete::Severity::critical:
+            return "OpenBMC.0.1.0.DiscreteThresholdCritical";
+    }
+    throw std::runtime_error("Invalid severity");
+}
+
+void LogToRedfish::commit(const std::string& sensorName, uint64_t timestamp,
+                          double value)
+{
+    phosphor::logging::log<phosphor::logging::level::INFO>(
+        "Discrete treshold condition is met",
+        phosphor::logging::entry("REDFISH_MESSAGE_ID=%s", getMessageId()),
+        phosphor::logging::entry("REDFISH_MESSAGE_ARGS=%s,%f,%llu",
+                                 sensorName.c_str(), value, timestamp));
+}
+
+namespace onChange
+{
+void LogToJournal::commit(const std::string& sensorName, uint64_t timestamp,
+                          double value)
+{
+    std::string msg = "Value changed on sensor " + sensorName +
+                      ", recorded value " + std::to_string(value) +
+                      ", timestamp " + timestampToString(timestamp);
+
+    phosphor::logging::log<phosphor::logging::level::INFO>(msg.c_str());
+}
+
+void LogToRedfish::commit(const std::string& sensorName, uint64_t timestamp,
+                          double value)
+{
+    const char* messageId = "OpenBMC.0.1.0.DiscreteThresholdOnChange";
+    phosphor::logging::log<phosphor::logging::level::INFO>(
+        "Uncondtional discrete threshold triggered",
+        phosphor::logging::entry("REDFISH_MESSAGE_ID=%s", messageId),
+        phosphor::logging::entry("REDFISH_MESSAGE_ARGS=%s,%f,%llu",
+                                 sensorName.c_str(), value, timestamp));
+}
+} // namespace onChange
+} // namespace discrete
 
 void UpdateReport::commit(const std::string&, uint64_t, double)
 {
