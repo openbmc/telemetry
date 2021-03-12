@@ -17,13 +17,6 @@ TriggerManager::TriggerManager(
                                                 std::string>>& sensors,
                     const std::vector<std::string>& reportNames,
                     const TriggerThresholdParams& thresholds) {
-                    if (isDiscrete)
-                    {
-                        throw sdbusplus::exception::SdBusError(
-                            static_cast<int>(std::errc::not_supported),
-                            "Only numeric threshold is supported");
-                    }
-
                     if (triggers.size() >= maxTriggers)
                     {
                         throw sdbusplus::exception::SdBusError(
@@ -41,6 +34,8 @@ TriggerManager::TriggerManager(
                         }
                     }
 
+                    validateThresholds(thresholds, isDiscrete);
+
                     triggers.emplace_back(triggerFactory->make(
                         yield, name, isDiscrete, logToJournal, logToRedfish,
                         updateReport, sensors, reportNames, thresholds, *this));
@@ -55,4 +50,26 @@ void TriggerManager::removeTrigger(const interfaces::Trigger* trigger)
         std::remove_if(triggers.begin(), triggers.end(),
                        [trigger](const auto& x) { return trigger == x.get(); }),
         triggers.end());
+}
+
+void TriggerManager::validateThresholds(
+    const TriggerThresholdParams& thresholds, bool isDiscrete)
+{
+    if (isDiscrete)
+    {
+        const auto& discreteParams =
+            std::get<std::vector<discrete::ThresholdParam>>(thresholds);
+
+        std::set<std::string> thresholdNames;
+        for (auto& [thresholdName, severityStr, dwellTime, onChange, tValue] :
+             discreteParams)
+        {
+            if (!thresholdNames.insert(thresholdName).second)
+            {
+                throw sdbusplus::exception::SdBusError(
+                    static_cast<int>(std::errc::file_exists),
+                    "Duplicate discrete threshold name");
+            }
+        }
+    }
 }

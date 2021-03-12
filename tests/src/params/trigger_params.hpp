@@ -21,6 +21,12 @@ class TriggerParams
         return nameProperty;
     }
 
+    TriggerParams& isDiscrete(bool val)
+    {
+        discreteProperty = std::move(val);
+        return *this;
+    }
+
     bool isDiscrete() const
     {
         return discreteProperty;
@@ -50,6 +56,12 @@ class TriggerParams
     const std::vector<std::string>& reportNames() const
     {
         return reportNamesProperty;
+    }
+
+    TriggerParams& thresholdParams(TriggerThresholdParams val)
+    {
+        thresholdsProperty = std::move(val);
+        return *this;
     }
 
     const TriggerThresholdParams& thresholdParams() const
