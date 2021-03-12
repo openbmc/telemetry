@@ -38,7 +38,7 @@ inline std::string severityToString(Severity v)
 }
 
 using ThresholdParam =
-    std::tuple<std::string, std::string, std::variant<double>, uint64_t>;
+    std::tuple<std::string, std::string, uint64_t, bool, double>;
 } // namespace discrete
 
 namespace numeric
@@ -101,3 +101,5 @@ using ThresholdParam = std::tuple<std::string, uint64_t, std::string, double>;
 using TriggerThresholdParams =
     std::variant<std::vector<numeric::ThresholdParam>,
                  std::vector<discrete::ThresholdParam>>;
+
+using TriggerLoggingType = std::variant<numeric::Type, discrete::Severity>;
