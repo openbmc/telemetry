@@ -1,6 +1,8 @@
 #include "trigger_factory.hpp"
 
+#include "discrete_threshold.hpp"
 #include "numeric_threshold.hpp"
+#include "on_change_threshold.hpp"
 #include "sensor.hpp"
 #include "trigger.hpp"
 #include "trigger_actions.hpp"
@@ -24,40 +26,96 @@ std::unique_ptr<interfaces::Trigger> TriggerFactory::make(
     const TriggerThresholdParams& thresholdParams,
     interfaces::TriggerManager& triggerManager) const
 {
-    if (isDiscrete)
-    {
-        throw std::runtime_error("Not implemented!");
-    }
-
     auto [sensors, sensorNames] = getSensors(yield, sensorPaths);
     std::vector<std::shared_ptr<interfaces::Threshold>> thresholds;
 
-    const auto& params =
-        std::get<std::vector<numeric::ThresholdParam>>(thresholdParams);
-    for (const auto& [typeStr, dwellTime, directionStr, value] : params)
+    if (isDiscrete)
     {
-        numeric::Type type = numeric::stringToType(typeStr);
-        std::vector<std::unique_ptr<interfaces::TriggerAction>> actions;
-        if (logToJournal)
+        const auto& params =
+            std::get<std::vector<discrete::ThresholdParam>>(thresholdParams);
+        for (const auto& [thresholdName, severityStr, dwellTime,
+                          thresholdValue] : params)
         {
-            actions.emplace_back(
-                std::make_unique<action::LogToJournal>(type, value));
-        }
-        if (logToRedfish)
-        {
-            actions.emplace_back(
-                std::make_unique<action::LogToRedfish>(type, value));
-        }
-        if (updateReport)
-        {
-            actions.emplace_back(std::make_unique<action::UpdateReport>(
-                reportManager, reportNames));
-        }
+            discrete::Severity severity =
+                discrete::stringToSeverity(severityStr);
+            std::vector<std::unique_ptr<interfaces::TriggerAction>> actions;
+            if (logToJournal)
+            {
+                actions.emplace_back(
+                    std::make_unique<action::discrete::LogToJournal>(severity));
+            }
+            if (logToRedfish)
+            {
+                actions.emplace_back(
+                    std::make_unique<action::discrete::LogToRedfish>(severity));
+            }
+            if (updateReport)
+            {
+                actions.emplace_back(std::make_unique<action::UpdateReport>(
+                    reportManager, reportNames));
+            }
 
-        thresholds.emplace_back(std::make_shared<NumericThreshold>(
-            bus->get_io_context(), sensors, sensorNames, std::move(actions),
-            std::chrono::milliseconds(dwellTime),
-            numeric::stringToDirection(directionStr), value));
+            thresholds.emplace_back(std::make_shared<DiscreteThreshold>(
+                bus->get_io_context(), sensors, sensorNames, std::move(actions),
+                std::chrono::milliseconds(dwellTime), thresholdValue,
+                thresholdName));
+        }
+        if (params.empty())
+        {
+            std::vector<std::unique_ptr<interfaces::TriggerAction>> actions;
+            if (logToJournal)
+            {
+                actions.emplace_back(
+                    std::make_unique<
+                        action::discrete::onChange::LogToJournal>());
+            }
+            if (logToRedfish)
+            {
+                actions.emplace_back(
+                    std::make_unique<
+                        action::discrete::onChange::LogToRedfish>());
+            }
+            if (updateReport)
+            {
+                actions.emplace_back(std::make_unique<action::UpdateReport>(
+                    reportManager, reportNames));
+            }
+
+            thresholds.emplace_back(std::make_shared<OnChangeThreshold>(
+                sensors, sensorNames, std::move(actions)));
+        }
+    }
+    else
+    {
+        const auto& params =
+            std::get<std::vector<numeric::ThresholdParam>>(thresholdParams);
+        for (const auto& [typeStr, dwellTime, directionStr, value] : params)
+        {
+            numeric::Type type = numeric::stringToType(typeStr);
+            std::vector<std::unique_ptr<interfaces::TriggerAction>> actions;
+            if (logToJournal)
+            {
+                actions.emplace_back(
+                    std::make_unique<action::numeric::LogToJournal>(type,
+                                                                    value));
+            }
+            if (logToRedfish)
+            {
+                actions.emplace_back(
+                    std::make_unique<action::numeric::LogToRedfish>(type,
+                                                                    value));
+            }
+            if (updateReport)
+            {
+                actions.emplace_back(std::make_unique<action::UpdateReport>(
+                    reportManager, reportNames));
+            }
+
+            thresholds.emplace_back(std::make_shared<NumericThreshold>(
+                bus->get_io_context(), sensors, sensorNames, std::move(actions),
+                std::chrono::milliseconds(dwellTime),
+                numeric::stringToDirection(directionStr), value));
+        }
     }
 
     return std::make_unique<Trigger>(
@@ -81,7 +139,7 @@ std::pair<std::vector<std::shared_ptr<interfaces::Sensor>>,
     {
         auto found = std::find_if(
             tree.begin(), tree.end(),
-            [&sensorPath](const auto& x) { return x.first == sensorPath; });
+            [&sp = sensorPath](const auto& x) { return x.first == sp; });
         if (found == tree.end())
         {
             throw std::runtime_error("Not found");

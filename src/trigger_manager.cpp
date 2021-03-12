@@ -17,13 +17,6 @@ TriggerManager::TriggerManager(
                                                 std::string>>& sensors,
                     const std::vector<std::string>& reportNames,
                     const TriggerThresholdParams& thresholds) {
-                    if (isDiscrete)
-                    {
-                        throw sdbusplus::exception::SdBusError(
-                            static_cast<int>(std::errc::not_supported),
-                            "Only numeric threshold is supported");
-                    }
-
                     if (triggers.size() >= maxTriggers)
                     {
                         throw sdbusplus::exception::SdBusError(
