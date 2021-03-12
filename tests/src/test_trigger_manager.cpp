@@ -51,6 +51,50 @@ TEST_F(TestTriggerManager, addTrigger)
     EXPECT_THAT(path, Eq(triggerMock.getPath()));
 }
 
+TEST_F(TestTriggerManager, addTriggerWithDiscreteThresholds)
+{
+    TriggerParams triggerParamsDiscrete;
+    auto thresholds = std::vector<discrete::ThresholdParam>{
+        {"discrete_threshold1",
+         discrete::severityToString(discrete::Severity::ok), 10, false, 11.0},
+        {"discrete_threshold2",
+         discrete::severityToString(discrete::Severity::warning), 10, false,
+         12.0},
+        {"discrete_threshold3",
+         discrete::severityToString(discrete::Severity::critical), 10, false,
+         13.0},
+        {"discrete_threshold4",
+         discrete::severityToString(discrete::Severity::ok), 10, true, 0.0}};
+
+    triggerParamsDiscrete.thresholdParams(thresholds).isDiscrete(true);
+
+    auto [ec, path] = addTrigger(triggerParamsDiscrete);
+    EXPECT_THAT(ec.value(), Eq(boost::system::errc::success));
+    EXPECT_THAT(path, Eq(triggerMock.getPath()));
+}
+
+TEST_F(TestTriggerManager,
+       DISABLED_failToAddTriggerWithDuplicateDiscreteThresholdName)
+{
+    TriggerParams triggerParamsDiscrete;
+    auto thresholds = std::vector<discrete::ThresholdParam>{
+        {"discrete_threshold1",
+         discrete::severityToString(discrete::Severity::ok), 10, false, 11.0},
+        {"discrete_threshold2",
+         discrete::severityToString(discrete::Severity::warning), 10, false,
+         12.0},
+        {"discrete_threshold1",
+         discrete::severityToString(discrete::Severity::critical), 10, false,
+         13.0},
+        {"discrete_threshold4",
+         discrete::severityToString(discrete::Severity::ok), 10, true, 0.0}};
+    triggerParamsDiscrete.thresholdParams(thresholds).isDiscrete(true);
+
+    auto [ec, path] = addTrigger(triggerParamsDiscrete);
+    EXPECT_THAT(ec.value(), Eq(boost::system::errc::file_exists));
+    EXPECT_THAT(path, Eq(std::string()));
+}
+
 TEST_F(TestTriggerManager, DISABLED_failToAddTriggerTwice)
 {
     triggerFactoryMock.expectMake(triggerParams, Ref(*sut))
