@@ -72,6 +72,17 @@ bool DbusEnvironment::waitForFuture(std::string_view name,
     return waitForFuture(getFuture(name), timeout);
 }
 
+bool DbusEnvironment::waitForFutures(std::string_view name,
+                                     std::chrono::milliseconds timeout)
+{
+    auto& data = futures[std::string(name)];
+    auto ret = waitForFutures(
+        std::move(data), true, [](auto sum, auto val) { return sum && val; },
+        timeout);
+    data = std::vector<std::future<bool>>{};
+    return ret;
+}
+
 std::future<bool> DbusEnvironment::getFuture(std::string_view name)
 {
     auto& data = futures[std::string(name)];

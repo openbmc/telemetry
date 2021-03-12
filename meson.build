@@ -71,6 +71,7 @@ add_project_arguments(
 executable(
     'telemetry',
     [
+        'src/discrete_threshold.cpp',
         'src/main.cpp',
         'src/metric.cpp',
         'src/numeric_threshold.cpp',

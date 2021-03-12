@@ -7,84 +7,176 @@ using namespace testing;
 
 namespace action
 {
+namespace numeric
+{
+using LogParam = std::tuple<::numeric::Type, double, double>;
 
-using LogParam = std::pair<numeric::Type, double>;
+static auto getCorrectParams()
+{
+    return Values(std::make_tuple(::numeric::Type::upperCritical, 91.1, 90),
+                  std::make_tuple(::numeric::Type::lowerCritical, 91.2, 90),
+                  std::make_tuple(::numeric::Type::upperWarning, 88.5, 90),
+                  std::make_tuple(::numeric::Type::lowerWarning, 88.6, 90));
+}
 
-class TestLogToJournal : public Test, public WithParamInterface<LogParam>
+static auto getIncorrectParams()
+{
+    return Values(
+        std::make_tuple(::numeric::Type::upperCritical, 90.0, 90),
+        std::make_tuple(static_cast<::numeric::Type>(-1), 88.0, 90),
+        std::make_tuple(static_cast<::numeric::Type>(123), 123.0, 90));
+}
+
+class TestLogToJournalNumeric : public Test, public WithParamInterface<LogParam>
 {
   public:
     void SetUp() override
     {
-        auto [type, threshold] = GetParam();
-        sut = std::make_unique<LogToJournal>(type, threshold);
+        auto [type, threshold, value] = GetParam();
+        sut = std::make_unique<numeric::LogToJournal>(type, threshold);
+        commmitValue = value;
+    }
+
+    std::unique_ptr<numeric::LogToJournal> sut;
+    double commmitValue;
+};
+
+INSTANTIATE_TEST_SUITE_P(LogToJournalNumericParams, TestLogToJournalNumeric,
+                         getCorrectParams());
+
+TEST_P(TestLogToJournalNumeric, commitAnActionDoesNotThrow)
+{
+    EXPECT_NO_THROW(sut->commit("Test", 100'000, commmitValue));
+}
+
+class TestLogToJournalNumericThrow : public TestLogToJournalNumeric
+{};
+
+INSTANTIATE_TEST_SUITE_P(_, TestLogToJournalNumericThrow, getIncorrectParams());
+
+TEST_P(TestLogToJournalNumericThrow, commitAnActionExpectThrow)
+{
+    EXPECT_THROW(sut->commit("Test", 100'000, commmitValue),
+                 std::runtime_error);
+}
+
+class TestLogToRedfishNumeric : public Test, public WithParamInterface<LogParam>
+{
+  public:
+    void SetUp() override
+    {
+        auto [type, threshold, value] = GetParam();
+        sut = std::make_unique<LogToRedfish>(type, threshold);
+        commmitValue = value;
+    }
+
+    std::unique_ptr<LogToRedfish> sut;
+    double commmitValue;
+};
+
+INSTANTIATE_TEST_SUITE_P(LogToRedfishNumericParams, TestLogToRedfishNumeric,
+                         getCorrectParams());
+
+TEST_P(TestLogToRedfishNumeric, commitExpectNoThrow)
+{
+    EXPECT_NO_THROW(sut->commit("Test", 100'000, commmitValue));
+}
+
+class TestLogToRedfishNumericThrow : public TestLogToRedfishNumeric
+{};
+
+INSTANTIATE_TEST_SUITE_P(_, TestLogToRedfishNumericThrow, getIncorrectParams());
+
+TEST_P(TestLogToRedfishNumericThrow, commitExpectToThrow)
+{
+    EXPECT_THROW(sut->commit("Test", 100'000, commmitValue),
+                 std::runtime_error);
+}
+
+} // namespace numeric
+
+namespace discrete
+{
+using LogParam = ::discrete::Severity;
+
+static auto getCorrectParams()
+{
+    return Values(::discrete::Severity::critical, ::discrete::Severity::warning,
+                  ::discrete::Severity::ok);
+}
+
+static auto getIncorrectParams()
+{
+    return Values(static_cast<::discrete::Severity>(-1),
+                  static_cast<::discrete::Severity>(42));
+}
+
+class TestLogToJournalDiscrete :
+    public Test,
+    public WithParamInterface<LogParam>
+{
+  public:
+    void SetUp() override
+    {
+        auto severity = GetParam();
+        sut = std::make_unique<LogToJournal>(severity);
     }
 
     std::unique_ptr<LogToJournal> sut;
 };
 
-INSTANTIATE_TEST_SUITE_P(
-    LogToJournalParams, TestLogToJournal,
-    Values(std::make_pair(numeric::Type::upperCritical, 91.1),
-           std::make_pair(numeric::Type::lowerCritical, 91.2),
-           std::make_pair(numeric::Type::upperWarning, 88.5),
-           std::make_pair(numeric::Type::lowerWarning, 88.6)));
+INSTANTIATE_TEST_SUITE_P(LogToJournalDiscreteParams, TestLogToJournalDiscrete,
+                         getCorrectParams());
 
-TEST_P(TestLogToJournal, commitAnActionDoesNotThrow)
+TEST_P(TestLogToJournalDiscrete, commitAnActionDoesNotThrow)
 {
     EXPECT_NO_THROW(sut->commit("Test", 100'000, 90.0));
 }
 
-class TestLogToJournalThrow : public TestLogToJournal
+class TestLogToJournalDiscreteThrow : public TestLogToJournalDiscrete
 {};
 
-INSTANTIATE_TEST_SUITE_P(
-    _, TestLogToJournalThrow,
-    Values(std::make_pair(numeric::Type::upperCritical, 90.0),
-           std::make_pair(static_cast<numeric::Type>(-1), 88.0),
-           std::make_pair(static_cast<numeric::Type>(123), 123.0)));
+INSTANTIATE_TEST_SUITE_P(_, TestLogToJournalDiscreteThrow,
+                         getIncorrectParams());
 
-TEST_P(TestLogToJournalThrow, commitAnActionExpectThrow)
+TEST_P(TestLogToJournalDiscreteThrow, commitAnActionExpectThrow)
 {
     EXPECT_THROW(sut->commit("Test", 100'000, 90.0), std::runtime_error);
 }
 
-class TestLogToRedfish : public Test, public WithParamInterface<LogParam>
+class TestLogToRedfishDiscrete :
+    public Test,
+    public WithParamInterface<LogParam>
 {
   public:
     void SetUp() override
     {
-        auto [type, threshold] = GetParam();
-        sut = std::make_unique<LogToRedfish>(type, threshold);
+        auto severity = GetParam();
+        sut = std::make_unique<LogToRedfish>(severity);
     }
 
     std::unique_ptr<LogToRedfish> sut;
 };
 
-INSTANTIATE_TEST_SUITE_P(
-    LogToRedfishParams, TestLogToRedfish,
-    Values(std::make_pair(numeric::Type::upperCritical, 91.1),
-           std::make_pair(numeric::Type::lowerCritical, 91.4),
-           std::make_pair(numeric::Type::upperWarning, 88.6),
-           std::make_pair(numeric::Type::lowerWarning, 88.5)));
+INSTANTIATE_TEST_SUITE_P(LogToRedfishDiscreteParams, TestLogToRedfishDiscrete,
+                         getCorrectParams());
 
-TEST_P(TestLogToRedfish, commitExpectNoThrow)
+TEST_P(TestLogToRedfishDiscrete, commitExpectNoThrow)
 {
     EXPECT_NO_THROW(sut->commit("Test", 100'000, 90.0));
 }
 
-class TestLogToRedfishThrow : public TestLogToRedfish
+class TestLogToRedfishDiscreteThrow : public TestLogToRedfishDiscrete
 {};
 
-INSTANTIATE_TEST_SUITE_P(
-    _, TestLogToRedfishThrow,
-    Values(std::make_pair(numeric::Type::upperCritical, 90.0),
-           std::make_pair(static_cast<numeric::Type>(-1), 88.5),
-           std::make_pair(static_cast<numeric::Type>(123), 123.6)));
+INSTANTIATE_TEST_SUITE_P(_, TestLogToRedfishDiscreteThrow,
+                         getIncorrectParams());
 
-TEST_P(TestLogToRedfishThrow, commitExpectToThrow)
+TEST_P(TestLogToRedfishDiscreteThrow, commitExpectToThrow)
 {
     EXPECT_THROW(sut->commit("Test", 100'000, 90.0), std::runtime_error);
 }
+} // namespace discrete
 
 class TestUpdateReport : public Test
 {

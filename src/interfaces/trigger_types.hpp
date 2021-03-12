@@ -38,7 +38,7 @@ inline std::string severityToString(Severity v)
 }
 
 using ThresholdParam =
-    std::tuple<std::string, std::string, std::variant<double>, uint64_t>;
+    std::tuple<std::string, std::string, uint64_t, bool, double>;
 } // namespace discrete
 
 namespace numeric
