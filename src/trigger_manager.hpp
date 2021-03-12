@@ -28,6 +28,8 @@ class TriggerManager : public interfaces::TriggerManager
     std::unique_ptr<sdbusplus::asio::dbus_interface> managerIface;
     std::vector<std::unique_ptr<interfaces::Trigger>> triggers;
 
+    void validateThresholds(const TriggerThresholdParams&, bool);
+
   public:
     static constexpr size_t maxTriggers{TELEMETRY_MAX_TRIGGERS};
     static constexpr const char* triggerManagerIfaceName =

@@ -7,10 +7,11 @@
 namespace action
 {
 
-class LogToJournal : public interfaces::TriggerAction
+class LogToJournalNumeric : public interfaces::TriggerAction
 {
   public:
-    LogToJournal(numeric::Type type, double val) : type(type), threshold(val)
+    LogToJournalNumeric(numeric::Type type, double val) :
+        type(type), threshold(val)
     {}
 
     void commit(const std::string& id, uint64_t timestamp,
@@ -23,10 +24,11 @@ class LogToJournal : public interfaces::TriggerAction
     const char* getType() const;
 };
 
-class LogToRedfish : public interfaces::TriggerAction
+class LogToRedfishNumeric : public interfaces::TriggerAction
 {
   public:
-    LogToRedfish(numeric::Type type, double val) : type(type), threshold(val)
+    LogToRedfishNumeric(numeric::Type type, double val) :
+        type(type), threshold(val)
     {}
 
     void commit(const std::string& id, uint64_t timestamp,
@@ -35,6 +37,36 @@ class LogToRedfish : public interfaces::TriggerAction
   private:
     numeric::Type type;
     double threshold;
+
+    const char* getMessageId() const;
+};
+
+class LogToJournalDiscrete : public interfaces::TriggerAction
+{
+  public:
+    LogToJournalDiscrete(discrete::Severity severity) : severity(severity)
+    {}
+
+    void commit(const std::string& id, uint64_t timestamp,
+                double value) override;
+
+  private:
+    discrete::Severity severity;
+
+    const char* getSeverity() const;
+};
+
+class LogToRedfishDiscrete : public interfaces::TriggerAction
+{
+  public:
+    LogToRedfishDiscrete(discrete::Severity severity) : severity(severity)
+    {}
+
+    void commit(const std::string& id, uint64_t timestamp,
+                double value) override;
+
+  private:
+    discrete::Severity severity;
 
     const char* getMessageId() const;
 };

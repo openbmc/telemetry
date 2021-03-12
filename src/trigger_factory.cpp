@@ -1,5 +1,6 @@
 #include "trigger_factory.hpp"
 
+#include "discrete_threshold.hpp"
 #include "numeric_threshold.hpp"
 #include "sensor.hpp"
 #include "trigger.hpp"
@@ -24,40 +25,75 @@ std::unique_ptr<interfaces::Trigger> TriggerFactory::make(
     const TriggerThresholdParams& thresholdParams,
     interfaces::TriggerManager& triggerManager) const
 {
-    if (isDiscrete)
-    {
-        throw std::runtime_error("Not implemented!");
-    }
-
     auto [sensors, sensorNames] = getSensors(yield, sensorPaths);
     std::vector<std::shared_ptr<interfaces::Threshold>> thresholds;
 
-    const auto& params =
-        std::get<std::vector<numeric::ThresholdParam>>(thresholdParams);
-    for (const auto& [typeStr, dwellTime, directionStr, value] : params)
+    if (isDiscrete)
     {
-        numeric::Type type = numeric::stringToType(typeStr);
-        std::vector<std::unique_ptr<interfaces::TriggerAction>> actions;
-        if (logToJournal)
+        const auto& params =
+            std::get<std::vector<discrete::ThresholdParam>>(thresholdParams);
+        for (const auto& [thresholdName, severityStr, dwellTime, onChange,
+                          value] : params)
         {
-            actions.emplace_back(
-                std::make_unique<action::LogToJournal>(type, value));
-        }
-        if (logToRedfish)
-        {
-            actions.emplace_back(
-                std::make_unique<action::LogToRedfish>(type, value));
-        }
-        if (updateReport)
-        {
-            actions.emplace_back(std::make_unique<action::UpdateReport>(
-                reportManager, reportNames));
-        }
+            discrete::Severity severity =
+                discrete::stringToSeverity(severityStr);
+            std::optional<double> thresholdValue;
+            if (!onChange)
+            {
+                thresholdValue = value;
+            }
+            std::vector<std::unique_ptr<interfaces::TriggerAction>> actions;
+            if (logToJournal)
+            {
+                actions.emplace_back(
+                    std::make_unique<action::LogToJournalDiscrete>(severity));
+            }
+            if (logToRedfish)
+            {
+                actions.emplace_back(
+                    std::make_unique<action::LogToRedfishDiscrete>(severity));
+            }
+            if (updateReport)
+            {
+                actions.emplace_back(std::make_unique<action::UpdateReport>(
+                    reportManager, reportNames));
+            }
 
-        thresholds.emplace_back(std::make_shared<NumericThreshold>(
-            bus->get_io_context(), sensors, sensorNames, std::move(actions),
-            std::chrono::milliseconds(dwellTime),
-            numeric::stringToDirection(directionStr), value));
+            thresholds.emplace_back(std::make_shared<DiscreteThreshold>(
+                bus->get_io_context(), sensors, sensorNames, std::move(actions),
+                std::chrono::milliseconds(dwellTime), thresholdValue,
+                thresholdName));
+        }
+    }
+    else
+    {
+        const auto& params =
+            std::get<std::vector<numeric::ThresholdParam>>(thresholdParams);
+        for (const auto& [typeStr, dwellTime, directionStr, value] : params)
+        {
+            numeric::Type type = numeric::stringToType(typeStr);
+            std::vector<std::unique_ptr<interfaces::TriggerAction>> actions;
+            if (logToJournal)
+            {
+                actions.emplace_back(
+                    std::make_unique<action::LogToJournalNumeric>(type, value));
+            }
+            if (logToRedfish)
+            {
+                actions.emplace_back(
+                    std::make_unique<action::LogToRedfishNumeric>(type, value));
+            }
+            if (updateReport)
+            {
+                actions.emplace_back(std::make_unique<action::UpdateReport>(
+                    reportManager, reportNames));
+            }
+
+            thresholds.emplace_back(std::make_shared<NumericThreshold>(
+                bus->get_io_context(), sensors, sensorNames, std::move(actions),
+                std::chrono::milliseconds(dwellTime),
+                numeric::stringToDirection(directionStr), value));
+        }
     }
 
     return std::make_unique<Trigger>(

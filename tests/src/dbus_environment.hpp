@@ -1,3 +1,5 @@
+#pragma once
+
 #include <sdbusplus/asio/object_server.hpp>
 #include <sdbusplus/asio/property.hpp>
 
@@ -36,32 +38,58 @@ class DbusEnvironment : public ::testing::Environment
         synchronizeIoc();
     }
 
-    template <class T>
-    static T waitForFuture(
-        std::future<T> future,
+    template <class T, class F>
+    static T waitForFutures(
+        std::vector<std::future<T>> futures, T init, F&& accumulator,
         std::chrono::milliseconds timeout = std::chrono::seconds(10))
     {
         constexpr auto precission = std::chrono::milliseconds(10);
         auto elapsed = std::chrono::milliseconds(0);
 
-        while (future.valid() && elapsed < timeout)
+        auto sum = init;
+        for (auto& future : futures)
         {
-            synchronizeIoc();
+            while (future.valid() && elapsed < timeout)
+            {
+                synchronizeIoc();
 
-            if (future.wait_for(precission) == std::future_status::ready)
-            {
-                return future.get();
-            }
-            else
-            {
-                elapsed += precission;
+                if (future.wait_for(precission) == std::future_status::ready)
+                {
+                    sum = accumulator(sum, future.get());
+                }
+                else
+                {
+                    elapsed += precission;
+                }
             }
         }
 
-        throw std::runtime_error("Timed out while waiting for future");
+        if (elapsed >= timeout)
+        {
+            throw std::runtime_error("Timed out while waiting for future");
+        }
+
+        return sum;
+    }
+
+    template <class T>
+    static T waitForFuture(
+        std::future<T> future,
+        std::chrono::milliseconds timeout = std::chrono::seconds(10))
+    {
+        std::vector<std::future<T>> futures;
+        futures.emplace_back(std::move(future));
+
+        return waitForFutures(
+            std::move(futures), T{},
+            [](auto, const auto& value) { return value; }, timeout);
     }
 
     static bool waitForFuture(
+        std::string_view name,
+        std::chrono::milliseconds timeout = std::chrono::seconds(10));
+
+    static bool waitForFutures(
         std::string_view name,
         std::chrono::milliseconds timeout = std::chrono::seconds(10));
 
