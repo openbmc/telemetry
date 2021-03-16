@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "063bb366_0a346107",
+        "filename": "src/trigger.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 143,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-03-16T09:37:19Z",
+      "side": 1,
+      "message": "since in both cases you assing it to same field you can change it to something like this:\n\ndata[\"ThresholdParams\"] \u003d std::visit()\n\nIn both cases you can return nlohmann::json object\n\nnit: try creaating visitor clas then it will look like this:\ndata[\"ThresholdParams\"] \u003d std::visit(ThresholdParamToJson(), thresholdParams);\n\nVisitor class will be simple:\nclass ThresholdParamToJson {\npublic:\n  nlohmann::json operator()(const std::vector\u003cnumeric::ThresholdParam\u003e\u0026 arg) {\n  return utils::transform(arg, [](const auto\u0026 thresholdParam) {\n                            const auto\u0026 [type, dwellTime, direction,\n                                         thresholdValue] \u003d thresholdParam;\n                            return numeric::LabeledThresholdParam(\n                                numeric::stringToType(type), dwellTime,\n                                numeric::stringToDirection(direction),\n                                thresholdValue);\n                        });\n}\n\n  // same with other type\n}",
+      "range": {
+        "startLine": 119,
+        "startChar": 8,
+        "endLine": 143,
+        "endChar": 29
+      },
+      "revId": "b551f3b90abc9ad5a04caf343eb3bd3537b93134",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
