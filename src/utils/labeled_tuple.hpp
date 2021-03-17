@@ -69,6 +69,11 @@ struct LabeledTuple<std::tuple<Args...>, Labels...>
     LabeledTuple& operator=(const LabeledTuple&) = default;
     LabeledTuple& operator=(LabeledTuple&&) = default;
 
+    tuple_type as_tuple() const
+    {
+        return value;
+    }
+
     nlohmann::json to_json() const
     {
         nlohmann::json j;

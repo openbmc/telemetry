@@ -5,6 +5,7 @@
 #include "params/trigger_params.hpp"
 #include "trigger.hpp"
 #include "utils/set_exception.hpp"
+#include "utils/transform.hpp"
 
 using namespace testing;
 using namespace std::literals::string_literals;
@@ -26,13 +27,22 @@ class TestTrigger : public Test
         sut = makeTrigger(triggerParams);
     }
 
+    static std::vector<LabeledSensorInfo>
+        convertToLabeledSensor(const SensorsInfo& sensorsInfo)
+    {
+        return utils::transform(sensorsInfo, [](const auto& sensorInfo) {
+            const auto& [sensorPath, sensorMetadata] = sensorInfo;
+            return LabeledSensorInfo("service1", sensorPath, sensorMetadata);
+        });
+    }
+
     std::unique_ptr<Trigger> makeTrigger(const TriggerParams& params)
     {
         return std::make_unique<Trigger>(
             DbusEnvironment::getIoc(), DbusEnvironment::getObjServer(),
             params.name(), params.isDiscrete(), params.logToJournal(),
-            params.logToRedfish(), params.updateReport(), params.sensors(),
-            params.reportNames(), params.thresholdParams(),
+            params.logToRedfish(), params.updateReport(), params.reportNames(),
+            params.sensors(), params.thresholdParams(),
             std::vector<std::shared_ptr<interfaces::Threshold>>{},
             *triggerManagerMockPtr, storageMock);
     }
@@ -107,13 +117,14 @@ TEST_F(TestTrigger, checkIfPropertiesAreSet)
     EXPECT_THAT((getProperty<std::vector<
                      std::pair<sdbusplus::message::object_path, std::string>>>(
                     sut->getPath(), "Sensors")),
-                Eq(triggerParams.sensors()));
+                Eq(fromLabeledSensorsInfo(triggerParams.sensors())));
     EXPECT_THAT(
         getProperty<std::vector<std::string>>(sut->getPath(), "ReportNames"),
         Eq(triggerParams.reportNames()));
     EXPECT_THAT(
         getProperty<TriggerThresholdParams>(sut->getPath(), "Thresholds"),
-        Eq(triggerParams.thresholdParams()));
+        Eq(std::visit(FromLabeledThresholdParamConversion(),
+                      triggerParams.thresholdParams())));
 }
 
 TEST_F(TestTrigger, deleteTrigger)
@@ -225,9 +236,10 @@ TEST_F(TestTriggerStore, settingPersistencyToTrueStoresTriggerReportNames)
 TEST_F(TestTriggerStore, settingPersistencyToTrueStoresTriggerSensors)
 {
     nlohmann::json expectedItem;
+    expectedItem["service"] = "service1";
     expectedItem["sensorPath"] =
         "/xyz/openbmc_project/sensors/temperature/BMC_Temp";
-    expectedItem["sensorMetadata"] = "";
+    expectedItem["sensorMetadata"] = "metadata1";
 
     ASSERT_THAT(storedConfiguration.at("Sensors"), ElementsAre(expectedItem));
 }

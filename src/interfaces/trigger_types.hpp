@@ -44,8 +44,8 @@ using ThresholdParam = std::tuple<std::string, std::string, double, uint64_t>;
 using LabeledThresholdParam =
     utils::LabeledTuple<std::tuple<std::string, Severity, double, uint64_t>,
                         utils::tstring::UserId, utils::tstring::Severity,
-                        utils::tstring::DwellTime,
-                        utils::tstring::ThresholdValue>;
+                        utils::tstring::ThresholdValue,
+                        utils::tstring::DwellTime>;
 } // namespace discrete
 
 namespace numeric
@@ -111,14 +111,18 @@ using LabeledThresholdParam =
                         utils::tstring::ThresholdValue>;
 } // namespace numeric
 
-using TriggerSensors =
+using SensorsInfo =
     std::vector<std::pair<sdbusplus::message::object_path, std::string>>;
 
-using LabeledTriggerSensor =
-    utils::LabeledTuple<std::tuple<std::string, std::string>,
-                        utils::tstring::SensorPath,
+using LabeledSensorInfo =
+    utils::LabeledTuple<std::tuple<std::string, std::string, std::string>,
+                        utils::tstring::Service, utils::tstring::SensorPath,
                         utils::tstring::SensorMetadata>;
 
 using TriggerThresholdParams =
     std::variant<std::vector<numeric::ThresholdParam>,
                  std::vector<discrete::ThresholdParam>>;
+
+using LabeledTriggerThresholdParams =
+    std::variant<std::vector<numeric::LabeledThresholdParam>,
+                 std::vector<discrete::LabeledThresholdParam>>;

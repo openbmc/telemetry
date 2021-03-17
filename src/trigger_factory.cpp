@@ -5,6 +5,7 @@
 #include "trigger.hpp"
 #include "trigger_actions.hpp"
 #include "utils/dbus_mapper.hpp"
+#include "utils/transform.hpp"
 
 TriggerFactory::TriggerFactory(
     std::shared_ptr<sdbusplus::asio::connection> bus,
@@ -15,40 +16,56 @@ TriggerFactory::TriggerFactory(
     reportManager(reportManager)
 {}
 
-std::unique_ptr<interfaces::Trigger>
-    TriggerFactory::make(boost::asio::yield_context& yield,
-                         const std::string& name, bool isDiscrete,
-                         bool logToJournal, bool logToRedfish,
-                         bool updateReport, const TriggerSensors& sensorPaths,
-                         const std::vector<std::string>& reportNames,
-                         const TriggerThresholdParams& thresholdParams,
-                         interfaces::TriggerManager& triggerManager,
-                         interfaces::JsonStorage& triggerStorage) const
+std::unique_ptr<interfaces::Trigger> TriggerFactory::make(
+    const std::string& name, bool isDiscrete, bool logToJournal,
+    bool logToRedfish, bool updateReport,
+    const std::vector<std::string>& reportNames,
+    interfaces::TriggerManager& triggerManager,
+    interfaces::JsonStorage& triggerStorage,
+    const LabeledTriggerThresholdParams& labeledThresholdParams,
+    const std::vector<LabeledSensorInfo>& labeledSensorsInfo) const
 {
     if (isDiscrete)
     {
         throw std::runtime_error("Not implemented!");
     }
 
-    auto [sensors, sensorNames] = getSensors(yield, sensorPaths);
+    const auto& [sensors, sensorNames] = getSensors(labeledSensorsInfo);
+
     std::vector<std::shared_ptr<interfaces::Threshold>> thresholds;
 
-    const auto& params =
-        std::get<std::vector<numeric::ThresholdParam>>(thresholdParams);
-    for (const auto& [typeStr, dwellTime, directionStr, value] : params)
+    const auto& labeledNumericThresholdParams =
+        std::get<std::vector<numeric::LabeledThresholdParam>>(
+            labeledThresholdParams);
+
+    for (const auto& labeledThresholdParam : labeledNumericThresholdParams)
     {
-        numeric::Type type = numeric::stringToType(typeStr);
+        namespace ts = utils::tstring;
         std::vector<std::unique_ptr<interfaces::TriggerAction>> actions;
+
+        numeric::Type type = labeledThresholdParam.at_label<ts::Type>();
+
+        std::chrono::milliseconds dwellTime = std::chrono::milliseconds(
+            labeledThresholdParam.at_label<ts::DwellTime>());
+
+        numeric::Direction direction =
+            labeledThresholdParam.at_label<ts::Direction>();
+
+        double thresholdValue =
+            labeledThresholdParam.at_label<ts::ThresholdValue>();
+
         if (logToJournal)
         {
             actions.emplace_back(
-                std::make_unique<action::LogToJournal>(type, value));
+                std::make_unique<action::LogToJournal>(type, thresholdValue));
         }
+
         if (logToRedfish)
         {
             actions.emplace_back(
-                std::make_unique<action::LogToRedfish>(type, value));
+                std::make_unique<action::LogToRedfish>(type, thresholdValue));
         }
+
         if (updateReport)
         {
             actions.emplace_back(std::make_unique<action::UpdateReport>(
@@ -57,28 +74,57 @@ std::unique_ptr<interfaces::Trigger>
 
         thresholds.emplace_back(std::make_shared<NumericThreshold>(
             bus->get_io_context(), sensors, sensorNames, std::move(actions),
-            std::chrono::milliseconds(dwellTime),
-            numeric::stringToDirection(directionStr), value));
+            dwellTime, direction, thresholdValue));
     }
 
     return std::make_unique<Trigger>(
         bus->get_io_context(), objServer, name, isDiscrete, logToJournal,
-        logToRedfish, updateReport, sensorPaths, reportNames, thresholdParams,
-        std::move(thresholds), triggerManager, triggerStorage);
+        logToRedfish, updateReport, reportNames, labeledSensorsInfo,
+        labeledThresholdParams, std::move(thresholds), triggerManager,
+        triggerStorage);
 }
 
 std::pair<std::vector<std::shared_ptr<interfaces::Sensor>>,
           std::vector<std::string>>
     TriggerFactory::getSensors(
-        boost::asio::yield_context& yield,
-        const std::vector<std::pair<sdbusplus::message::object_path,
-                                    std::string>>& sensorPaths) const
+        const std::vector<LabeledSensorInfo>& labeledSensorsInfo) const
+{
+    std::vector<std::shared_ptr<interfaces::Sensor>> sensors;
+    std::vector<std::string> sensorNames;
+
+    for (const auto& labeledSensorInfo : labeledSensorsInfo)
+    {
+        namespace ts = utils::tstring;
+
+        const auto& service = labeledSensorInfo.at_label<ts::Service>();
+        const auto& sensorPath = labeledSensorInfo.at_label<ts::SensorPath>();
+        const auto& metadata = labeledSensorInfo.at_label<ts::SensorMetadata>();
+
+        sensors.emplace_back(sensorCache.makeSensor<Sensor>(
+            service, sensorPath, bus->get_io_context(), bus));
+
+        if (metadata.empty())
+        {
+            sensorNames.emplace_back(sensorPath);
+        }
+        else
+        {
+            sensorNames.emplace_back(metadata);
+        }
+    }
+
+    return {sensors, sensorNames};
+}
+
+std::vector<LabeledSensorInfo>
+    TriggerFactory::getLabeledSensorsInfo(boost::asio::yield_context& yield,
+                                          const SensorsInfo& sensorsInfo) const
 {
     auto tree = utils::getSubTreeSensors(yield, bus);
 
-    std::vector<std::shared_ptr<interfaces::Sensor>> sensors;
-    std::vector<std::string> sensorNames;
-    for (const auto& [sensorPath, metadata] : sensorPaths)
+    std::vector<LabeledSensorInfo> labeledSensorsInfo;
+
+    for (const auto& [sensorPath, metadata] : sensorsInfo)
     {
         auto found = std::find_if(
             tree.begin(), tree.end(),
@@ -90,16 +136,9 @@ std::pair<std::vector<std::shared_ptr<interfaces::Sensor>>,
 
         const auto& service = found->second[0].first;
         const auto& path = found->first;
-        sensors.emplace_back(sensorCache.makeSensor<Sensor>(
-            service, path, bus->get_io_context(), bus));
-        if (metadata.empty())
-        {
-            sensorNames.emplace_back(sensorPath);
-        }
-        else
-        {
-            sensorNames.emplace_back(metadata);
-        }
+
+        labeledSensorsInfo.emplace_back(service, path, metadata);
     }
-    return {sensors, sensorNames};
+
+    return labeledSensorsInfo;
 }

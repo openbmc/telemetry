@@ -21,6 +21,12 @@ class TriggerParams
         return nameProperty;
     }
 
+    TriggerParams& isDiscrete(bool val)
+    {
+        discreteProperty = val;
+        return *this;
+    }
+
     bool isDiscrete() const
     {
         return discreteProperty;
@@ -36,9 +42,9 @@ class TriggerParams
         return logToRedfishProperty;
     }
 
-    TriggerParams& updateReport(bool updateReport)
+    TriggerParams& updateReport(bool val)
     {
-        updateReportProperty = updateReport;
+        updateReportProperty = val;
         return *this;
     }
 
@@ -47,9 +53,9 @@ class TriggerParams
         return updateReportProperty;
     }
 
-    const TriggerSensors& sensors() const
+    const std::vector<LabeledSensorInfo>& sensors() const
     {
-        return sensorsProperty;
+        return labeledSensorsProperty;
     }
 
     const std::vector<std::string>& reportNames() const
@@ -57,9 +63,15 @@ class TriggerParams
         return reportNamesProperty;
     }
 
-    const TriggerThresholdParams& thresholdParams() const
+    const LabeledTriggerThresholdParams& thresholdParams() const
     {
-        return thresholdsProperty;
+        return labeledThresholdsProperty;
+    }
+
+    TriggerParams& thresholdParams(LabeledTriggerThresholdParams val)
+    {
+        labeledThresholdsProperty = val;
+        return *this;
     }
 
   private:
@@ -68,17 +80,20 @@ class TriggerParams
     bool logToJournalProperty = false;
     bool logToRedfishProperty = false;
     bool updateReportProperty = true;
-    TriggerSensors sensorsProperty = {
-        {sdbusplus::message::object_path(
-             "/xyz/openbmc_project/sensors/temperature/BMC_Temp"),
-         ""}};
+    std::vector<LabeledSensorInfo> labeledSensorsProperty = {
+        {"service1", "/xyz/openbmc_project/sensors/temperature/BMC_Temp",
+         "metadata1"}};
+
     std::vector<std::string> reportNamesProperty = {"Report1"};
-    TriggerThresholdParams thresholdsProperty =
-        std::vector<numeric::ThresholdParam>{
-            {numeric::typeToString(numeric::Type::lowerCritical),
-             std::chrono::milliseconds(10).count(),
-             numeric::directionToString(numeric::Direction::decreasing), 0.0},
-            {numeric::typeToString(numeric::Type::upperCritical),
-             std::chrono::milliseconds(10).count(),
-             numeric::directionToString(numeric::Direction::increasing), 90.0}};
+
+    LabeledTriggerThresholdParams labeledThresholdsProperty =
+        std::vector<numeric::LabeledThresholdParam>{
+            numeric::LabeledThresholdParam{
+                numeric::Type::lowerCritical,
+                std::chrono::milliseconds(10).count(),
+                numeric::Direction::decreasing, 0.0},
+            numeric::LabeledThresholdParam{
+                numeric::Type::upperCritical,
+                std::chrono::milliseconds(10).count(),
+                numeric::Direction::increasing, 90.0}};
 };
