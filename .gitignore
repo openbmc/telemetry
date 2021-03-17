@@ -2,6 +2,7 @@ build/
 xyz.openbmc_project.Telemetry.service
 telemetry
 __pycache__
+*.bak
 
 # Created by https://www.toptal.com/developers/gitignore/api/vim,intellij,meson,visualstudiocode
 # Edit at https://www.toptal.com/developers/gitignore?templates=vim,intellij,meson,visualstudiocode
@@ -161,5 +162,10 @@ tags
 # Ignore all local history of files
 .history
 .ionide
+
+### Eclipse IDE ###
+.cproject
+.project
+.settings/*
 
 # End of https://www.toptal.com/developers/gitignore/api/vim,intellij,meson,visualstudiocode
