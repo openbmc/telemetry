@@ -11,21 +11,38 @@
 
 #include <memory>
 
+class ToLabeledThresholdParamConversion
+{
+  public:
+    LabeledTriggerThresholdParams
+        operator()(const std::vector<numeric::ThresholdParam>& arg) const;
+    LabeledTriggerThresholdParams
+        operator()(const std::vector<discrete::ThresholdParam>& arg) const;
+};
+
+class FromLabeledThresholdParamConversion
+{
+  public:
+    TriggerThresholdParams operator()(
+        const std::vector<numeric::LabeledThresholdParam>& arg) const;
+    TriggerThresholdParams operator()(
+        const std::vector<discrete::LabeledThresholdParam>& arg) const;
+};
+
 class Trigger : public interfaces::Trigger
 {
   public:
-    Trigger(
-        boost::asio::io_context& ioc,
-        const std::shared_ptr<sdbusplus::asio::object_server>& objServer,
-        const std::string& name, const bool isDiscrete, const bool logToJournal,
-        const bool logToRedfish, const bool updateReport,
-        const std::vector<
-            std::pair<sdbusplus::message::object_path, std::string>>& sensorsIn,
-        const std::vector<std::string>& reportNames,
-        const TriggerThresholdParams& thresholdParams,
-        std::vector<std::shared_ptr<interfaces::Threshold>>&& thresholds,
-        interfaces::TriggerManager& triggerManager,
-        interfaces::JsonStorage& triggerStorage);
+    Trigger(boost::asio::io_context& ioc,
+            const std::shared_ptr<sdbusplus::asio::object_server>& objServer,
+            const std::string& name, const bool isDiscrete,
+            const bool logToJournal, const bool logToRedfish,
+            const bool updateReport,
+            const std::vector<std::string>& reportNames,
+            const std::vector<LabeledSensorInfo>& LabeledSensorsInfoIn,
+            const LabeledTriggerThresholdParams& labeledThresholdParamsIn,
+            std::vector<std::shared_ptr<interfaces::Threshold>>&& thresholds,
+            interfaces::TriggerManager& triggerManager,
+            interfaces::JsonStorage& triggerStorage);
 
     Trigger(const Trigger&) = delete;
     Trigger(Trigger&&) = delete;
@@ -52,9 +69,9 @@ class Trigger : public interfaces::Trigger
     bool updateReport;
     const std::string path;
     bool persistent = false;
-    TriggerSensors sensors;
     std::vector<std::string> reportNames;
-    TriggerThresholdParams thresholdParams;
+    std::vector<LabeledSensorInfo> labeledSensorsInfo;
+    LabeledTriggerThresholdParams labeledThresholdParams;
     std::unique_ptr<sdbusplus::asio::dbus_interface> deleteIface;
     std::unique_ptr<sdbusplus::asio::dbus_interface> triggerIface;
     std::vector<std::shared_ptr<interfaces::Threshold>> thresholds;
@@ -71,3 +88,8 @@ class Trigger : public interfaces::Trigger
         "xyz.openbmc_project.Object.Delete";
     static constexpr size_t triggerVersion = 0;
 };
+
+nlohmann::json labeledThresholdParamsToJson(
+    const LabeledTriggerThresholdParams& labeledThresholdParams);
+
+SensorsInfo fromLabeledSensorsInfo(const std::vector<LabeledSensorInfo>& infos);
