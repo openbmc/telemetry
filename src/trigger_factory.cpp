@@ -7,6 +7,9 @@
 #include "trigger.hpp"
 #include "trigger_actions.hpp"
 #include "utils/dbus_mapper.hpp"
+#include "utils/transform.hpp"
+
+namespace ts = utils::tstring;
 
 TriggerFactory::TriggerFactory(
     std::shared_ptr<sdbusplus::asio::connection> bus,
@@ -17,29 +20,36 @@ TriggerFactory::TriggerFactory(
     reportManager(reportManager)
 {}
 
-std::unique_ptr<interfaces::Trigger>
-    TriggerFactory::make(boost::asio::yield_context& yield,
-                         const std::string& name, bool isDiscrete,
-                         bool logToJournal, bool logToRedfish,
-                         bool updateReport, const TriggerSensors& sensorPaths,
-                         const std::vector<std::string>& reportNames,
-                         const TriggerThresholdParams& thresholdParams,
-                         interfaces::TriggerManager& triggerManager,
-                         interfaces::JsonStorage& triggerStorage) const
+std::unique_ptr<interfaces::Trigger> TriggerFactory::make(
+    const std::string& name, bool isDiscrete, bool logToJournal,
+    bool logToRedfish, bool updateReport,
+    const std::vector<std::string>& reportNames,
+    interfaces::TriggerManager& triggerManager,
+    interfaces::JsonStorage& triggerStorage,
+    const LabeledTriggerThresholdParams& labeledThresholdParams,
+    const std::vector<LabeledSensorInfo>& labeledSensorsInfo) const
 {
-    auto [sensors, sensorNames] = getSensors(yield, sensorPaths);
+    const auto& [sensors, sensorNames] = getSensors(labeledSensorsInfo);
     std::vector<std::shared_ptr<interfaces::Threshold>> thresholds;
 
     if (isDiscrete)
     {
-        const auto& params =
-            std::get<std::vector<discrete::ThresholdParam>>(thresholdParams);
-        for (const auto& [thresholdName, severityStr, dwellTime,
-                          thresholdValue] : params)
+        const auto& labeledDiscreteThresholdParams =
+            std::get<std::vector<discrete::LabeledThresholdParam>>(
+                labeledThresholdParams);
+        for (const auto& labeledThresholdParam : labeledDiscreteThresholdParams)
         {
-            discrete::Severity severity =
-                discrete::stringToSeverity(severityStr);
             std::vector<std::unique_ptr<interfaces::TriggerAction>> actions;
+
+            std::string thresholdName =
+                labeledThresholdParam.at_label<ts::UserId>();
+            discrete::Severity severity =
+                labeledThresholdParam.at_label<ts::Severity>();
+            std::chrono::milliseconds dwellTime = std::chrono::milliseconds(
+                labeledThresholdParam.at_label<ts::DwellTime>());
+            double thresholdValue =
+                labeledThresholdParam.at_label<ts::ThresholdValue>();
+
             if (logToJournal)
             {
                 actions.emplace_back(
@@ -61,7 +71,7 @@ std::unique_ptr<interfaces::Trigger>
                 std::chrono::milliseconds(dwellTime), thresholdValue,
                 thresholdName));
         }
-        if (params.empty())
+        if (labeledDiscreteThresholdParams.empty())
         {
             std::vector<std::unique_ptr<interfaces::TriggerAction>> actions;
             if (logToJournal)
@@ -88,24 +98,34 @@ std::unique_ptr<interfaces::Trigger>
     }
     else
     {
-        const auto& params =
-            std::get<std::vector<numeric::ThresholdParam>>(thresholdParams);
-        for (const auto& [typeStr, dwellTime, directionStr, value] : params)
+        const auto& labeledNumericThresholdParams =
+            std::get<std::vector<numeric::LabeledThresholdParam>>(
+                labeledThresholdParams);
+
+        for (const auto& labeledThresholdParam : labeledNumericThresholdParams)
         {
-            numeric::Type type = numeric::stringToType(typeStr);
             std::vector<std::unique_ptr<interfaces::TriggerAction>> actions;
+            auto type = labeledThresholdParam.at_label<ts::Type>();
+            auto dwellTime = std::chrono::milliseconds(
+                labeledThresholdParam.at_label<ts::DwellTime>());
+            auto direction = labeledThresholdParam.at_label<ts::Direction>();
+            auto thresholdValue =
+                double{labeledThresholdParam.at_label<ts::ThresholdValue>()};
+
             if (logToJournal)
             {
                 actions.emplace_back(
-                    std::make_unique<action::numeric::LogToJournal>(type,
-                                                                    value));
+                    std::make_unique<action::numeric::LogToJournal>(
+                        type, thresholdValue));
             }
+
             if (logToRedfish)
             {
                 actions.emplace_back(
-                    std::make_unique<action::numeric::LogToRedfish>(type,
-                                                                    value));
+                    std::make_unique<action::numeric::LogToRedfish>(
+                        type, thresholdValue));
             }
+
             if (updateReport)
             {
                 actions.emplace_back(std::make_unique<action::UpdateReport>(
@@ -114,42 +134,34 @@ std::unique_ptr<interfaces::Trigger>
 
             thresholds.emplace_back(std::make_shared<NumericThreshold>(
                 bus->get_io_context(), sensors, sensorNames, std::move(actions),
-                std::chrono::milliseconds(dwellTime),
-                numeric::stringToDirection(directionStr), value));
+                dwellTime, direction, thresholdValue));
         }
     }
 
     return std::make_unique<Trigger>(
         bus->get_io_context(), objServer, name, isDiscrete, logToJournal,
-        logToRedfish, updateReport, sensorPaths, reportNames, thresholdParams,
-        std::move(thresholds), triggerManager, triggerStorage);
+        logToRedfish, updateReport, reportNames, labeledSensorsInfo,
+        labeledThresholdParams, std::move(thresholds), triggerManager,
+        triggerStorage);
 }
 
 std::pair<std::vector<std::shared_ptr<interfaces::Sensor>>,
           std::vector<std::string>>
     TriggerFactory::getSensors(
-        boost::asio::yield_context& yield,
-        const std::vector<std::pair<sdbusplus::message::object_path,
-                                    std::string>>& sensorPaths) const
+        const std::vector<LabeledSensorInfo>& labeledSensorsInfo) const
 {
-    auto tree = utils::getSubTreeSensors(yield, bus);
-
     std::vector<std::shared_ptr<interfaces::Sensor>> sensors;
     std::vector<std::string> sensorNames;
-    for (const auto& [sensorPath, metadata] : sensorPaths)
-    {
-        auto found = std::find_if(
-            tree.begin(), tree.end(),
-            [&sensorPath](const auto& x) { return x.first == sensorPath; });
-        if (found == tree.end())
-        {
-            throw std::runtime_error("Not found");
-        }
 
-        const auto& service = found->second[0].first;
-        const auto& path = found->first;
+    for (const auto& labeledSensorInfo : labeledSensorsInfo)
+    {
+        const auto& service = labeledSensorInfo.at_label<ts::Service>();
+        const auto& sensorPath = labeledSensorInfo.at_label<ts::SensorPath>();
+        const auto& metadata = labeledSensorInfo.at_label<ts::SensorMetadata>();
+
         sensors.emplace_back(sensorCache.makeSensor<Sensor>(
-            service, path, bus->get_io_context(), bus));
+            service, sensorPath, bus->get_io_context(), bus));
+
         if (metadata.empty())
         {
             sensorNames.emplace_back(sensorPath);
@@ -159,5 +171,27 @@ std::pair<std::vector<std::shared_ptr<interfaces::Sensor>>,
             sensorNames.emplace_back(metadata);
         }
     }
+
     return {sensors, sensorNames};
+}
+
+std::vector<LabeledSensorInfo>
+    TriggerFactory::getLabeledSensorsInfo(boost::asio::yield_context& yield,
+                                          const SensorsInfo& sensorsInfo) const
+{
+    auto tree = utils::getSubTreeSensors(yield, bus);
+
+    return utils::transform(sensorsInfo, [&tree](const auto& item) {
+        const auto& [sensorPath, metadata] = item;
+        auto found = std::find_if(
+            tree.begin(), tree.end(),
+            [&sensorPath](const auto& x) { return x.first == sensorPath; });
+
+        if (tree.end() != found)
+        {
+            const auto& [service, ifaces] = found->second.front();
+            return LabeledSensorInfo(service, sensorPath, metadata);
+        }
+        throw std::runtime_error("Not found");
+    });
 }

@@ -15,16 +15,19 @@ class TriggerFactory : public interfaces::TriggerFactory
                    SensorCache& sensorCache,
                    interfaces::ReportManager& reportManager);
 
-    std::unique_ptr<interfaces::Trigger> make(
-        boost::asio::yield_context& yield, const std::string& name,
-        bool isDiscrete, bool logToJournal, bool logToRedfish,
-        bool updateReport,
-        const std::vector<
-            std::pair<sdbusplus::message::object_path, std::string>>& sensors,
-        const std::vector<std::string>& reportNames,
-        const TriggerThresholdParams& thresholdParams,
-        interfaces::TriggerManager& triggerManager,
-        interfaces::JsonStorage& triggerStorage) const override;
+    std::unique_ptr<interfaces::Trigger>
+        make(const std::string& name, bool isDiscrete, bool logToJournal,
+             bool logToRedfish, bool updateReport,
+             const std::vector<std::string>& reportNames,
+             interfaces::TriggerManager& triggerManager,
+             interfaces::JsonStorage& triggerStorage,
+             const LabeledTriggerThresholdParams& labeledThresholdParams,
+             const std::vector<LabeledSensorInfo>& labeledSensorsinfo)
+            const override;
+
+    std::vector<LabeledSensorInfo>
+        getLabeledSensorsInfo(boost::asio::yield_context& yield,
+                              const SensorsInfo& sensorsInfo) const;
 
   private:
     std::shared_ptr<sdbusplus::asio::connection> bus;
@@ -34,8 +37,6 @@ class TriggerFactory : public interfaces::TriggerFactory
 
     std::pair<std::vector<std::shared_ptr<interfaces::Sensor>>,
               std::vector<std::string>>
-        getSensors(boost::asio::yield_context& yield,
-                   const std::vector<
-                       std::pair<sdbusplus::message::object_path, std::string>>&
-                       sensorPaths) const;
+        getSensors(
+            const std::vector<LabeledSensorInfo>& labeledSensorsInfo) const;
 };
