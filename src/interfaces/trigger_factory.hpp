@@ -20,15 +20,17 @@ class TriggerFactory
     virtual ~TriggerFactory() = default;
 
     virtual std::unique_ptr<interfaces::Trigger> make(
-        boost::asio::yield_context& yield, const std::string& name,
-        bool isDiscrete, bool logToJournal, bool logToRedfish,
-        bool updateReport,
-        const std::vector<
-            std::pair<sdbusplus::message::object_path, std::string>>& sensors,
+        const std::string& name, bool isDiscrete, bool logToJournal,
+        bool logToRedfish, bool updateReport,
         const std::vector<std::string>& reportNames,
-        const TriggerThresholdParams& thresholdParams,
         interfaces::TriggerManager& triggerManager,
-        interfaces::JsonStorage& triggerStorage) const = 0;
+        interfaces::JsonStorage& triggerStorage,
+        const LabeledTriggerThresholdParams& labeledThresholdParams,
+        const std::vector<LabeledSensorInfo>& labeledSensorsInfo) const = 0;
+
+    virtual std::vector<LabeledSensorInfo>
+        getLabeledSensorsInfo(boost::asio::yield_context& yield,
+                              const SensorsInfo& sensorsInfo) const = 0;
 };
 
 } // namespace interfaces

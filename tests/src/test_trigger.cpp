@@ -4,7 +4,9 @@
 #include "mocks/trigger_manager_mock.hpp"
 #include "params/trigger_params.hpp"
 #include "trigger.hpp"
+#include "utils/conversion_trigger.hpp"
 #include "utils/set_exception.hpp"
+#include "utils/transform.hpp"
 
 using namespace testing;
 using namespace std::literals::string_literals;
@@ -26,13 +28,22 @@ class TestTrigger : public Test
         sut = makeTrigger(triggerParams);
     }
 
+    static std::vector<LabeledSensorInfo>
+        convertToLabeledSensor(const SensorsInfo& sensorsInfo)
+    {
+        return utils::transform(sensorsInfo, [](const auto& sensorInfo) {
+            const auto& [sensorPath, sensorMetadata] = sensorInfo;
+            return LabeledSensorInfo("service1", sensorPath, sensorMetadata);
+        });
+    }
+
     std::unique_ptr<Trigger> makeTrigger(const TriggerParams& params)
     {
         return std::make_unique<Trigger>(
             DbusEnvironment::getIoc(), DbusEnvironment::getObjServer(),
             params.name(), params.isDiscrete(), params.logToJournal(),
-            params.logToRedfish(), params.updateReport(), params.sensors(),
-            params.reportNames(), params.thresholdParams(),
+            params.logToRedfish(), params.updateReport(), params.reportNames(),
+            params.sensors(), params.thresholdParams(),
             std::vector<std::shared_ptr<interfaces::Threshold>>{},
             *triggerManagerMockPtr, storageMock);
     }
@@ -107,13 +118,14 @@ TEST_F(TestTrigger, checkIfPropertiesAreSet)
     EXPECT_THAT((getProperty<std::vector<
                      std::pair<sdbusplus::message::object_path, std::string>>>(
                     sut->getPath(), "Sensors")),
-                Eq(triggerParams.sensors()));
+                Eq(utils::fromLabeledSensorsInfo(triggerParams.sensors())));
     EXPECT_THAT(
         getProperty<std::vector<std::string>>(sut->getPath(), "ReportNames"),
         Eq(triggerParams.reportNames()));
     EXPECT_THAT(
         getProperty<TriggerThresholdParams>(sut->getPath(), "Thresholds"),
-        Eq(triggerParams.thresholdParams()));
+        Eq(std::visit(utils::FromLabeledThresholdParamConversion(),
+                      triggerParams.thresholdParams())));
 }
 
 TEST_F(TestTrigger, deleteTrigger)
@@ -171,15 +183,31 @@ TEST_F(TestTriggerErrors, creatingTriggerThrowsExceptionWhenNameIsInvalid)
 class TestTriggerStore : public TestTrigger
 {
   public:
+    TriggerParams triggerDiscreteParams =
+        TriggerParams()
+            .name("Trigger2")
+            .isDiscrete(true)
+            .thresholdParams(std::vector<discrete::LabeledThresholdParam>{
+                discrete::LabeledThresholdParam{
+                    "userId", discrete::Severity::warning,
+                    std::chrono::milliseconds(10).count(), 15.0},
+                discrete::LabeledThresholdParam{
+                    "userId_2", discrete::Severity::critical,
+                    std::chrono::milliseconds(5).count(), 32.0},
+            });
+    std::unique_ptr<Trigger> sutDiscrete;
+    nlohmann::json storedConfiguration, storedDiscreteConfiguration;
+
     void SetUp() override
     {
         ON_CALL(storageMock, store(_, _))
             .WillByDefault(SaveArg<1>(&storedConfiguration));
-
         sut = makeTrigger(triggerParams);
-    }
 
-    nlohmann::json storedConfiguration;
+        ON_CALL(storageMock, store(_, _))
+            .WillByDefault(SaveArg<1>(&storedDiscreteConfiguration));
+        sutDiscrete = makeTrigger(triggerDiscreteParams);
+    }
 };
 
 TEST_F(TestTriggerStore, settingPersistencyToTrueStoresTriggerVersion)
@@ -225,9 +253,10 @@ TEST_F(TestTriggerStore, settingPersistencyToTrueStoresTriggerReportNames)
 TEST_F(TestTriggerStore, settingPersistencyToTrueStoresTriggerSensors)
 {
     nlohmann::json expectedItem;
+    expectedItem["service"] = "service1";
     expectedItem["sensorPath"] =
         "/xyz/openbmc_project/sensors/temperature/BMC_Temp";
-    expectedItem["sensorMetadata"] = "";
+    expectedItem["sensorMetadata"] = "metadata1";
 
     ASSERT_THAT(storedConfiguration.at("Sensors"), ElementsAre(expectedItem));
 }
@@ -249,5 +278,27 @@ TEST_F(TestTriggerStore, settingPersistencyToTrueStoresTriggerThresholdParams)
     expectedItem1["thresholdValue"] = 90.0;
 
     ASSERT_THAT(storedConfiguration.at("ThresholdParams"),
+                ElementsAre(expectedItem0, expectedItem1));
+}
+
+TEST_F(TestTriggerStore,
+       settingPersistencyToTrueStoresDiscreteTriggerThresholdParams)
+{
+    ASSERT_THAT(storedDiscreteConfiguration.at("ThresholdParamsDiscriminator"),
+                Eq(1));
+
+    nlohmann::json expectedItem0;
+    expectedItem0["userId"] = "userId";
+    expectedItem0["severity"] = discrete::Severity::warning;
+    expectedItem0["dwellTime"] = 10;
+    expectedItem0["thresholdValue"] = 15.0;
+
+    nlohmann::json expectedItem1;
+    expectedItem1["userId"] = "userId_2";
+    expectedItem1["severity"] = discrete::Severity::critical;
+    expectedItem1["dwellTime"] = 5;
+    expectedItem1["thresholdValue"] = 32.0;
+
+    ASSERT_THAT(storedDiscreteConfiguration.at("ThresholdParams"),
                 ElementsAre(expectedItem0, expectedItem1));
 }
