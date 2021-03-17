@@ -1,34 +1,104 @@
 #include "trigger.hpp"
 
+#include "interfaces/trigger_types.hpp"
 #include "interfaces/types.hpp"
 #include "utils/transform.hpp"
 
 #include <phosphor-logging/log.hpp>
 
-template <class... Ts>
-struct overloaded : Ts...
+LabeledTriggerThresholdParams ToLabeledThresholdParamConversion::operator()(
+    const std::vector<numeric::ThresholdParam>& arg) const
 {
-    using Ts::operator()...;
-};
-template <class... Ts>
-overloaded(Ts...) -> overloaded<Ts...>;
+    return utils::transform(arg, [](const auto& thresholdParam) {
+        const auto& [type, dwellTime, direction, thresholdValue] =
+            thresholdParam;
+        return numeric::LabeledThresholdParam(
+            numeric::stringToType(type), dwellTime,
+            numeric::stringToDirection(direction), thresholdValue);
+    });
+}
+
+LabeledTriggerThresholdParams ToLabeledThresholdParamConversion::operator()(
+    const std::vector<discrete::ThresholdParam>& arg) const
+{
+    return utils::transform(arg, [](const auto& thresholdParam) {
+        const auto& [userId, severity, thresholdValue, dwellTime] =
+            thresholdParam;
+        return discrete::LabeledThresholdParam(
+            userId, discrete::stringToSeverity(severity), thresholdValue,
+            dwellTime);
+    });
+}
+
+TriggerThresholdParams FromLabeledThresholdParamConversion::operator()(
+    const std::vector<numeric::LabeledThresholdParam>& arg) const
+{
+    return utils::transform(
+        arg, [](const numeric::LabeledThresholdParam& labeledThresholdParam) {
+            namespace ts = utils::tstring;
+
+            return numeric::ThresholdParam(
+                numeric::typeToString(
+                    labeledThresholdParam.at_label<ts::Type>()),
+                labeledThresholdParam.at_label<ts::DwellTime>(),
+                numeric::directionToString(
+                    labeledThresholdParam.at_label<ts::Direction>()),
+                labeledThresholdParam.at_label<ts::ThresholdValue>());
+        });
+}
+
+TriggerThresholdParams FromLabeledThresholdParamConversion::operator()(
+    const std::vector<discrete::LabeledThresholdParam>& arg) const
+{
+    return utils::transform(
+        arg, [](const discrete::LabeledThresholdParam& labeledThresholdParam) {
+            namespace ts = utils::tstring;
+
+            return discrete::ThresholdParam(
+                labeledThresholdParam.at_label<ts::UserId>(),
+                discrete::severityToString(
+                    labeledThresholdParam.at_label<ts::Severity>()),
+                labeledThresholdParam.at_label<ts::ThresholdValue>(),
+                labeledThresholdParam.at_label<ts::DwellTime>());
+        });
+}
+
+nlohmann::json labeledThresholdParamsToJson(
+    const LabeledTriggerThresholdParams& labeledThresholdParams)
+{
+    return std::visit([](const auto& lt) { return nlohmann::json(lt); },
+                      labeledThresholdParams);
+}
+
+SensorsInfo fromLabeledSensorsInfo(const std::vector<LabeledSensorInfo>& infos)
+{
+    namespace ts = utils::tstring;
+
+    return utils::transform(infos, [](const LabeledSensorInfo& val) {
+        return SensorsInfo::value_type(
+            sdbusplus::message::object_path(val.at_label<ts::SensorPath>()),
+            val.at_label<ts::SensorMetadata>());
+    });
+}
 
 Trigger::Trigger(
     boost::asio::io_context& ioc,
     const std::shared_ptr<sdbusplus::asio::object_server>& objServer,
     const std::string& nameIn, const bool isDiscreteIn,
     const bool logToJournalIn, const bool logToRedfishIn,
-    const bool updateReportIn, const TriggerSensors& sensorsIn,
-    const std::vector<std::string>& reportNamesIn,
-    const TriggerThresholdParams& thresholdParamsIn,
+    const bool updateReportIn, const std::vector<std::string>& reportNamesIn,
+    const std::vector<LabeledSensorInfo>& LabeledSensorsInfoIn,
+    const LabeledTriggerThresholdParams& labeledThresholdParamsIn,
     std::vector<std::shared_ptr<interfaces::Threshold>>&& thresholdsIn,
     interfaces::TriggerManager& triggerManager,
     interfaces::JsonStorage& triggerStorageIn) :
     name(nameIn),
     isDiscrete(isDiscreteIn), logToJournal(logToJournalIn),
     logToRedfish(logToRedfishIn), updateReport(updateReportIn),
-    path(triggerDir + name), sensors(sensorsIn), reportNames(reportNamesIn),
-    thresholdParams(thresholdParamsIn), thresholds(std::move(thresholdsIn)),
+    path(triggerDir + name), reportNames(reportNamesIn),
+    labeledSensorsInfo(LabeledSensorsInfoIn),
+    labeledThresholdParams(labeledThresholdParamsIn),
+    thresholds(std::move(thresholdsIn)),
     fileName(std::to_string(std::hash<std::string>{}(name))),
     triggerStorage(triggerStorageIn)
 {
@@ -72,13 +142,22 @@ Trigger::Trigger(
                 [this](const auto&) { return persistent; });
 
             dbusIface.register_property_r(
-                "Thresholds", thresholdParams,
+                "Thresholds", TriggerThresholdParams{},
                 sdbusplus::vtable::property_::emits_change,
-                [](const auto& x) { return x; });
+                [this](const auto&) {
+                    return std::visit(FromLabeledThresholdParamConversion(),
+                                      labeledThresholdParams);
+                });
+
             dbusIface.register_property_r(
-                "Sensors", sensors, sdbusplus::vtable::property_::emits_change,
-                [](const auto& x) { return x; });
+                "Sensors", SensorsInfo{},
+                sdbusplus::vtable::property_::emits_change,
+                [this](const auto&) {
+                    return fromLabeledSensorsInfo(labeledSensorsInfo);
+                });
+
             dbusIface.register_property_r(
+
                 "ReportNames", reportNames,
                 sdbusplus::vtable::property_::emits_change,
                 [](const auto& x) { return x; });
@@ -110,44 +189,15 @@ bool Trigger::storeConfiguration() const
 
         data["Version"] = triggerVersion;
         data["Name"] = name;
-        data["ThresholdParamsDiscriminator"] = thresholdParams.index();
-        data["IsDiscrete"] = isDiscrete;
+        data["ThresholdParamsDiscriminator"] = labeledThresholdParams.index();
+        data["IsDiscrete"] = labeledThresholdParams.index() == 1;
         data["LogToJournal"] = logToJournal;
         data["LogToRedfish"] = logToRedfish;
         data["UpdateReport"] = updateReport;
-
-        std::visit(
-            overloaded{
-                [&](const std::vector<numeric::ThresholdParam>& arg) {
-                    data["ThresholdParams"] =
-                        utils::transform(arg, [](const auto& thresholdParam) {
-                            const auto& [type, dwellTime, direction,
-                                         thresholdValue] = thresholdParam;
-                            return numeric::LabeledThresholdParam(
-                                numeric::stringToType(type), dwellTime,
-                                numeric::stringToDirection(direction),
-                                thresholdValue);
-                        });
-                },
-                [&](const std::vector<discrete::ThresholdParam>& arg) {
-                    data["ThresholdParams"] =
-                        utils::transform(arg, [](const auto& thresholdParam) {
-                            const auto& [userId, severity, dwellTime,
-                                         thresholdValue] = thresholdParam;
-                            return discrete::LabeledThresholdParam(
-                                userId, discrete::stringToSeverity(severity),
-                                dwellTime, thresholdValue);
-                        });
-                },
-            },
-            thresholdParams);
-
+        data["ThresholdParams"] =
+            labeledThresholdParamsToJson(labeledThresholdParams);
         data["ReportNames"] = reportNames;
-
-        data["Sensors"] = utils::transform(sensors, [](const auto& sensor) {
-            const auto& [sensorPath, sensorMetadata] = sensor;
-            return LabeledTriggerSensor(sensorPath, sensorMetadata);
-        });
+        data["Sensors"] = labeledSensorsInfo;
 
         triggerStorage.store(fileName, data);
     }
