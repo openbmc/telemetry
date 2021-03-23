@@ -1,0 +1,101 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e735861e_6ced865d",
+        "filename": "src/discrete_threshold.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1000677
+      },
+      "writtenOn": "2021-03-23T09:42:38Z",
+      "side": 1,
+      "message": "You can add else here, because value won\u0027t change between 58 line an 63",
+      "revId": "ff36652b851316b8b08182ae1f78f65abebf11e3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ff21ed00_b4a550b7",
+        "filename": "src/discrete_threshold.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1000677
+      },
+      "writtenOn": "2021-03-23T09:42:38Z",
+      "side": 1,
+      "message": "It seems that startingValue has the same value as previousValue, am I right? Or I am missing the point. I do not see a point for startingValue variable",
+      "range": {
+        "startLine": 71,
+        "startChar": 31,
+        "endLine": 71,
+        "endChar": 44
+      },
+      "revId": "ff36652b851316b8b08182ae1f78f65abebf11e3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "49800d2a_785d1b3a",
+        "filename": "src/discrete_threshold.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1000677
+      },
+      "writtenOn": "2021-03-23T09:42:38Z",
+      "side": 1,
+      "message": "It should not be optional here. You do not check inside the function if optional has a value. Consider to remove TriggeringContext. You need only timestamp and value here.",
+      "revId": "ff36652b851316b8b08182ae1f78f65abebf11e3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5d035a9e_5f67aa4d",
+        "filename": "src/trigger_actions.hpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1000677
+      },
+      "writtenOn": "2021-03-23T09:42:38Z",
+      "side": 1,
+      "message": "Maybe instead adding postfix put those classes in to namespaces: discrete and numeric. Up to you",
+      "range": {
+        "startLine": 10,
+        "startChar": 6,
+        "endLine": 10,
+        "endChar": 26
+      },
+      "revId": "ff36652b851316b8b08182ae1f78f65abebf11e3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "dfd2aff3_7c41a897",
+        "filename": "src/trigger_manager.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1000677
+      },
+      "writtenOn": "2021-03-23T09:42:38Z",
+      "side": 1,
+      "message": "Are you sure that name for Discrete thresholds should be unique?",
+      "revId": "ff36652b851316b8b08182ae1f78f65abebf11e3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
