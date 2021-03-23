@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "22639724_3f5753ac",
+        "filename": ".gitignore",
+        "patchSetId": 6
+      },
+      "lineNbr": 158,
+      "author": {
+        "id": 1000677
+      },
+      "writtenOn": "2021-03-23T09:20:49Z",
+      "side": 0,
+      "message": "Why do you remove it?",
+      "revId": "9f9ff90a39219ff3a2f1179f74fc9a6dc857e5ab",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
