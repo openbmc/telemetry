@@ -132,6 +132,30 @@
     },
     {
       "key": {
+        "uuid": "a3a8ed9a_ba2c5f4e",
+        "filename": "src/discrete_threshold.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1000677
+      },
+      "writtenOn": "2021-03-23T13:57:17Z",
+      "side": 1,
+      "message": "I can see the point, it is only affecting the \"OnChange\" option. But the \"OnChange\" option should not use the timer and DwellTime according to Redfish specification and Telemetry dbus interface",
+      "parentUuid": "8fb6d639_f157a73a",
+      "range": {
+        "startLine": 71,
+        "startChar": 31,
+        "endLine": 71,
+        "endChar": 44
+      },
+      "revId": "ff36652b851316b8b08182ae1f78f65abebf11e3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "49800d2a_785d1b3a",
         "filename": "src/discrete_threshold.cpp",
         "patchSetId": 6
@@ -197,6 +221,24 @@
       "side": 1,
       "message": "I agree - this might be problematic. But Currently if we create onChange trigger with 10s dwell time, and following sequence 10, 11, 12, 3000, 3001 (all during dwellTime, and lets assume that previous reading had value 9).\n- we can commit 10, which started the timer, but 4 different reading happened after it.\n- we can commit 3001 as it was the last update during the dwellTime\n\nwhich one should be choosen?",
       "parentUuid": "a5792452_2247e60c",
+      "revId": "ff36652b851316b8b08182ae1f78f65abebf11e3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9c70ed65_4d7b0778",
+        "filename": "src/discrete_threshold.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1000677
+      },
+      "writtenOn": "2021-03-23T13:57:17Z",
+      "side": 1,
+      "message": "Ok, I can see your point. Thanks for explanation. I thought that we should not take in consideration DwellTime when \"OnChange\" is set for discrete threshold. Ref: https://github.com/openbmc/phosphor-dbus-interfaces/blob/master/xyz/openbmc_project/Telemetry/Trigger.interface.yaml#L59",
+      "parentUuid": "532ffb03_dd4cc559",
       "revId": "ff36652b851316b8b08182ae1f78f65abebf11e3",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
