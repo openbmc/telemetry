@@ -198,6 +198,24 @@
       "revId": "ff36652b851316b8b08182ae1f78f65abebf11e3",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "27d73097_5fb63b59",
+        "filename": "src/trigger_manager.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1000677
+      },
+      "writtenOn": "2021-03-23T12:44:49Z",
+      "side": 1,
+      "message": "Can you be more specific? I do not see in Redfish spec that unique name for discrete threshold is required",
+      "parentUuid": "bb06cf38_795f31ab",
+      "revId": "ff36652b851316b8b08182ae1f78f65abebf11e3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }
