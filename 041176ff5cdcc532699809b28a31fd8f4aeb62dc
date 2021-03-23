@@ -143,6 +143,30 @@
     },
     {
       "key": {
+        "uuid": "6b83f8fe_bd204db5",
+        "filename": "src/discrete_threshold.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-03-23T13:44:14Z",
+      "side": 1,
+      "message": "std::optional can be compared with T, it return true when equal, false when optional is empty or not equal, but since you checked before if there is value in optional it looks better.",
+      "parentUuid": "980fcd91_2c6d16f8",
+      "range": {
+        "startLine": 64,
+        "startChar": 12,
+        "endLine": 64,
+        "endChar": 35
+      },
+      "revId": "041176ff5cdcc532699809b28a31fd8f4aeb62dc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ed7bb9b1_12627834",
         "filename": "tests/src/params/trigger_params.hpp",
         "patchSetId": 1
