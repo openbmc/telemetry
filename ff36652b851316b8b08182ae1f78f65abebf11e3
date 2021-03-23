@@ -84,6 +84,30 @@
     },
     {
       "key": {
+        "uuid": "36550652_383034db",
+        "filename": "src/discrete_threshold.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1000677
+      },
+      "writtenOn": "2021-03-23T13:17:01Z",
+      "side": 1,
+      "message": "ex. you have a sensor that only have two values - open and close. User want to know that open state was set for 10 seconds. If state change to close below 10 seconds than it means that you should drop the timer. Am I right?",
+      "parentUuid": "751e68a4_a90c9893",
+      "range": {
+        "startLine": 71,
+        "startChar": 31,
+        "endLine": 71,
+        "endChar": 44
+      },
+      "revId": "ff36652b851316b8b08182ae1f78f65abebf11e3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "49800d2a_785d1b3a",
         "filename": "src/discrete_threshold.cpp",
         "patchSetId": 6
@@ -113,6 +137,24 @@
       "side": 1,
       "message": "I think this needs to stay, we need reference to optional triggerringContext, because:\n- timestamp and value might be updated in case of \u0027onChange\u0027 discrete trigger\n- after calling commit, we need to set it to std::nullopt as this is checked in sensorUpdated (instead of passing \u0027bool\u0026 dwell\u0027).\n\ntriggerringContext is also given a value before each startTimer() call so I was not checking if it had a value.",
       "parentUuid": "49800d2a_785d1b3a",
+      "revId": "ff36652b851316b8b08182ae1f78f65abebf11e3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a5792452_2247e60c",
+        "filename": "src/discrete_threshold.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1000677
+      },
+      "writtenOn": "2021-03-23T13:17:01Z",
+      "side": 1,
+      "message": "I based my opinion on how it is done in numeric threshold. value and timestamp should not change over time after timer started.\nex. there is a sensor that have two readings - open and close, user only wants to commit an action when readings is set to open for 10 seconds and more. If we commit an action with new value - close - it is problematic for user to understand what happened",
+      "parentUuid": "009c9123_baee91f9",
       "revId": "ff36652b851316b8b08182ae1f78f65abebf11e3",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
@@ -216,6 +258,24 @@
       "revId": "ff36652b851316b8b08182ae1f78f65abebf11e3",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7019ec5b_df8f7eb0",
+        "filename": "src/trigger_manager.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1000677
+      },
+      "writtenOn": "2021-03-23T13:17:01Z",
+      "side": 1,
+      "message": "Up to you if unique name is required",
+      "parentUuid": "27d73097_5fb63b59",
+      "revId": "ff36652b851316b8b08182ae1f78f65abebf11e3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }
