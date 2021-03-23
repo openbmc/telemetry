@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "b6cb93ec_0201967b",
+        "filename": "src/discrete_threshold.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2021-03-23T12:30:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e735861e_6ced865d",
+      "revId": "ff36652b851316b8b08182ae1f78f65abebf11e3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ff21ed00_b4a550b7",
         "filename": "src/discrete_threshold.cpp",
         "patchSetId": 6
@@ -30,6 +48,30 @@
       "writtenOn": "2021-03-23T09:42:38Z",
       "side": 1,
       "message": "It seems that startingValue has the same value as previousValue, am I right? Or I am missing the point. I do not see a point for startingValue variable",
+      "range": {
+        "startLine": 71,
+        "startChar": 31,
+        "endLine": 71,
+        "endChar": 44
+      },
+      "revId": "ff36652b851316b8b08182ae1f78f65abebf11e3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "751e68a4_a90c9893",
+        "filename": "src/discrete_threshold.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2021-03-23T12:30:46Z",
+      "side": 1,
+      "message": "Consider following case. We get following readings, all within dwellTime timeframe: 10.0 -\u003e 11.0 -\u003e 13.00 -\u003e 11.0 -\u003e 10.0. The startingValue is set to 10.0, startTimer(...) is called, and previousValue is updated after every new reading. The timer should be cancelled only after we encounter value 10.0 again during dwellTime. We need to store this value for proper comparison.",
+      "parentUuid": "ff21ed00_b4a550b7",
       "range": {
         "startLine": 71,
         "startChar": 31,
@@ -59,6 +101,24 @@
     },
     {
       "key": {
+        "uuid": "009c9123_baee91f9",
+        "filename": "src/discrete_threshold.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2021-03-23T12:30:46Z",
+      "side": 1,
+      "message": "I think this needs to stay, we need reference to optional triggerringContext, because:\n- timestamp and value might be updated in case of \u0027onChange\u0027 discrete trigger\n- after calling commit, we need to set it to std::nullopt as this is checked in sensorUpdated (instead of passing \u0027bool\u0026 dwell\u0027).\n\ntriggerringContext is also given a value before each startTimer() call so I was not checking if it had a value.",
+      "parentUuid": "49800d2a_785d1b3a",
+      "revId": "ff36652b851316b8b08182ae1f78f65abebf11e3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "5d035a9e_5f67aa4d",
         "filename": "src/trigger_actions.hpp",
         "patchSetId": 6
@@ -82,6 +142,30 @@
     },
     {
       "key": {
+        "uuid": "d99a98f8_256f5642",
+        "filename": "src/trigger_actions.hpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2021-03-23T12:30:46Z",
+      "side": 1,
+      "message": "Good idea - this will make things more readable",
+      "parentUuid": "5d035a9e_5f67aa4d",
+      "range": {
+        "startLine": 10,
+        "startChar": 6,
+        "endLine": 10,
+        "endChar": 26
+      },
+      "revId": "ff36652b851316b8b08182ae1f78f65abebf11e3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "dfd2aff3_7c41a897",
         "filename": "src/trigger_manager.cpp",
         "patchSetId": 6
@@ -96,6 +180,24 @@
       "revId": "ff36652b851316b8b08182ae1f78f65abebf11e3",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bb06cf38_795f31ab",
+        "filename": "src/trigger_manager.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2021-03-23T12:30:46Z",
+      "side": 1,
+      "message": "Yes - it was discussed with Piotr Matuszczak",
+      "parentUuid": "dfd2aff3_7c41a897",
+      "revId": "ff36652b851316b8b08182ae1f78f65abebf11e3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }
