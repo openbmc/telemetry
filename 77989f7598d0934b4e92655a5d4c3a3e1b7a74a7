@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e4a545ee_eaacb316",
+        "filename": "src/types/types.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000677
+      },
+      "writtenOn": "2021-03-23T09:46:05Z",
+      "side": 1,
+      "message": "Consider to rename it to report_types.hpp, up to you",
+      "revId": "77989f7598d0934b4e92655a5d4c3a3e1b7a74a7",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
