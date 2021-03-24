@@ -46,6 +46,30 @@
       "revId": "e720c90d4d28d9da48796dbf7670e665fe7ed2dc",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7baf2a5b_b5673c44",
+        "filename": "tests/src/test_trigger.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1000677
+      },
+      "writtenOn": "2021-03-24T15:53:09Z",
+      "side": 1,
+      "message": "Ok, thanks for explanation",
+      "parentUuid": "df4a7ccb_9b66a0d4",
+      "range": {
+        "startLine": 12,
+        "startChar": 24,
+        "endLine": 12,
+        "endChar": 47
+      },
+      "revId": "e720c90d4d28d9da48796dbf7670e665fe7ed2dc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }
