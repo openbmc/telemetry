@@ -16,6 +16,24 @@
       "revId": "9f9ff90a39219ff3a2f1179f74fc9a6dc857e5ab",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bc8a2879_6e698458",
+        "filename": ".gitignore",
+        "patchSetId": 6
+      },
+      "lineNbr": 158,
+      "author": {
+        "id": 1000570
+      },
+      "writtenOn": "2021-03-24T15:37:50Z",
+      "side": 0,
+      "message": "Szymon Dompke\nMar 04\nThis .gitignore file already has a vscode section which allows some configuration files to be used (see lines 157-163). To keep things tidy, make sure these files are still needed and keep all vscode rules in one place.\n\nAdrian Ambrożewicz\nMar 05\nGood point. This gitignore file has been created automatically but it doesn\u0027t comply with OpenBMC standards. vscode part of gitignore allows for certain files to be tracked by git. I believe we should just remove the exceptions from vscode part.",
+      "parentUuid": "22639724_3f5753ac",
+      "revId": "9f9ff90a39219ff3a2f1179f74fc9a6dc857e5ab",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }
