@@ -189,6 +189,54 @@
     },
     {
       "key": {
+        "uuid": "dbf6ba4b_e80907c6",
+        "filename": "src/trigger_actions.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2021-03-30T16:04:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c249acb3_66c02917",
+      "range": {
+        "startLine": 10,
+        "startChar": 0,
+        "endLine": 10,
+        "endChar": 7
+      },
+      "revId": "3f521da1ce77db5b254e8a2c609f65988e4b54d1",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d62abf3a_3f7d24b4",
+        "filename": "src/trigger_actions.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2021-03-30T16:04:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6c6a70f8_dd546d10",
+      "range": {
+        "startLine": 10,
+        "startChar": 7,
+        "endLine": 10,
+        "endChar": 13
+      },
+      "revId": "3f521da1ce77db5b254e8a2c609f65988e4b54d1",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6eb79132_20a80ba5",
         "filename": "tests/src/test_discrete_threshold.cpp",
         "patchSetId": 7
@@ -212,6 +260,30 @@
     },
     {
       "key": {
+        "uuid": "00a5eeb8_cef19ab7",
+        "filename": "tests/src/test_discrete_threshold.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2021-03-30T16:04:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6eb79132_20a80ba5",
+      "range": {
+        "startLine": 41,
+        "startChar": 8,
+        "endLine": 41,
+        "endChar": 33
+      },
+      "revId": "3f521da1ce77db5b254e8a2c609f65988e4b54d1",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b29e2454_d7b7e8ca",
         "filename": "tests/src/test_discrete_threshold.cpp",
         "patchSetId": 7
@@ -232,6 +304,30 @@
       "revId": "3f521da1ce77db5b254e8a2c609f65988e4b54d1",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1049d151_08d2a29e",
+        "filename": "tests/src/test_discrete_threshold.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 328,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2021-03-30T16:04:34Z",
+      "side": 1,
+      "message": "OnChange with DwellTime cases are removed, so I think it is no longer needeed",
+      "parentUuid": "b29e2454_d7b7e8ca",
+      "range": {
+        "startLine": 319,
+        "startChar": 0,
+        "endLine": 328,
+        "endChar": 48
+      },
+      "revId": "3f521da1ce77db5b254e8a2c609f65988e4b54d1",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }
