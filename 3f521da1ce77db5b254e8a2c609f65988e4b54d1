@@ -1,0 +1,165 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a2da6e74_f2d28d44",
+        "filename": "src/discrete_threshold.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-03-30T07:46:45Z",
+      "side": 1,
+      "message": "nit: is there a reason for it to be in cpp file?",
+      "range": {
+        "startLine": 24,
+        "startChar": 0,
+        "endLine": 25,
+        "endChar": 2
+      },
+      "revId": "3f521da1ce77db5b254e8a2c609f65988e4b54d1",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "06db2f5a_738a6151",
+        "filename": "src/discrete_threshold.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-03-30T07:46:45Z",
+      "side": 1,
+      "message": "Because of this we need to delete copy and move constructor, if copied by accident it will be hard to detect errors.",
+      "range": {
+        "startLine": 104,
+        "startChar": 26,
+        "endLine": 104,
+        "endChar": 62
+      },
+      "revId": "3f521da1ce77db5b254e8a2c609f65988e4b54d1",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3c695b35_df7654af",
+        "filename": "src/discrete_threshold.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-03-30T07:46:45Z",
+      "side": 1,
+      "message": "nit: triggeringContext-\u003etimestamp, triggeringContext-\u003evalue",
+      "range": {
+        "startLine": 112,
+        "startChar": 31,
+        "endLine": 112,
+        "endChar": 61
+      },
+      "revId": "3f521da1ce77db5b254e8a2c609f65988e4b54d1",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6c6a70f8_dd546d10",
+        "filename": "src/trigger_actions.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-03-30T07:46:45Z",
+      "side": 1,
+      "message": "return object should not be const, below we return const pointer which is different.",
+      "range": {
+        "startLine": 10,
+        "startChar": 7,
+        "endLine": 10,
+        "endChar": 13
+      },
+      "revId": "3f521da1ce77db5b254e8a2c609f65988e4b54d1",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c249acb3_66c02917",
+        "filename": "src/trigger_actions.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-03-30T07:46:45Z",
+      "side": 1,
+      "message": "In my opinion it is better to not use static, c++ way of creating functions visible only in current file is to create anonymous namespace",
+      "range": {
+        "startLine": 10,
+        "startChar": 0,
+        "endLine": 10,
+        "endChar": 7
+      },
+      "revId": "3f521da1ce77db5b254e8a2c609f65988e4b54d1",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6eb79132_20a80ba5",
+        "filename": "tests/src/test_discrete_threshold.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-03-30T07:46:45Z",
+      "side": 1,
+      "message": "nit: sut \u003d makeThreshold(0ms, 90.0); it just reads better.",
+      "range": {
+        "startLine": 41,
+        "startChar": 8,
+        "endLine": 41,
+        "endChar": 33
+      },
+      "revId": "3f521da1ce77db5b254e8a2c609f65988e4b54d1",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b29e2454_d7b7e8ca",
+        "filename": "tests/src/test_discrete_threshold.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 328,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-03-30T07:46:45Z",
+      "side": 1,
+      "message": "This one deserve own name:\n\nINSTANTIATE_TEST_SUITE_P(\n    _, NoCommitWhenDeletedBeforeDwellTimeExpires, // for example of course.\n    Values(DiscreteParams()\n               .DwellTime(200ms)\n               .Updates({{0, 1, 80.0, 300ms}})\n               .Expected({})));",
+      "range": {
+        "startLine": 319,
+        "startChar": 0,
+        "endLine": 328,
+        "endChar": 48
+      },
+      "revId": "3f521da1ce77db5b254e8a2c609f65988e4b54d1",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
