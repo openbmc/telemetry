@@ -156,6 +156,30 @@
     },
     {
       "key": {
+        "uuid": "3ab4f9a5_d81e7f4a",
+        "filename": "src/discrete_threshold.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2021-03-30T12:48:10Z",
+      "side": 1,
+      "message": "You are right, onChange trigger should not use dwellTime, fixed in latest patchset.",
+      "parentUuid": "a3a8ed9a_ba2c5f4e",
+      "range": {
+        "startLine": 71,
+        "startChar": 31,
+        "endLine": 71,
+        "endChar": 44
+      },
+      "revId": "ff36652b851316b8b08182ae1f78f65abebf11e3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "49800d2a_785d1b3a",
         "filename": "src/discrete_threshold.cpp",
         "patchSetId": 6
@@ -242,6 +266,24 @@
       "revId": "ff36652b851316b8b08182ae1f78f65abebf11e3",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "47eefe3f_45b55544",
+        "filename": "src/discrete_threshold.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2021-03-30T12:48:10Z",
+      "side": 1,
+      "message": "You are right, onChange trigger should not use dwellTime, fixed in latest patchset.",
+      "parentUuid": "9c70ed65_4d7b0778",
+      "revId": "ff36652b851316b8b08182ae1f78f65abebf11e3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     },
     {
       "key": {
