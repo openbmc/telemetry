@@ -144,6 +144,30 @@
     },
     {
       "key": {
+        "uuid": "485aa24c_8d865eda",
+        "filename": "src/trigger_actions.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2021-04-01T15:04:59Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "89fda9fe_fa6c28ee",
+      "range": {
+        "startLine": 12,
+        "startChar": 30,
+        "endLine": 12,
+        "endChar": 37
+      },
+      "revId": "987dada77e645f04ca38cf9f293fc38fdb741e2a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ab9cbf0c_6ac23ba3",
         "filename": "src/trigger_actions.cpp",
         "patchSetId": 9
@@ -358,6 +382,30 @@
     },
     {
       "key": {
+        "uuid": "741b2cbb_ec2de8cc",
+        "filename": "src/trigger_factory.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 142,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2021-04-01T15:04:59Z",
+      "side": 1,
+      "message": "It seems that CI is using g++ once again. I removed this \u0027fix\u0027. It is possibly still not compatible with C+17 standard, but I will create separate path set for this issue.",
+      "parentUuid": "b1cd96b0_b6aa9894",
+      "range": {
+        "startLine": 142,
+        "startChar": 0,
+        "endLine": 142,
+        "endChar": 73
+      },
+      "revId": "987dada77e645f04ca38cf9f293fc38fdb741e2a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3c83751f_39de006a",
         "filename": "tests/src/test_discrete_threshold.cpp",
         "patchSetId": 9
@@ -378,6 +426,30 @@
       "revId": "987dada77e645f04ca38cf9f293fc38fdb741e2a",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "99231c1b_31bad27f",
+        "filename": "tests/src/test_discrete_threshold.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2021-04-01T15:04:59Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3c83751f_39de006a",
+      "range": {
+        "startLine": 29,
+        "startChar": 8,
+        "endLine": 29,
+        "endChar": 53
+      },
+      "revId": "987dada77e645f04ca38cf9f293fc38fdb741e2a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }

@@ -120,6 +120,30 @@
     },
     {
       "key": {
+        "uuid": "98ad96c8_ee2986d7",
+        "filename": "src/discrete_threshold.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2021-04-01T15:04:59Z",
+      "side": 1,
+      "message": "I see, as a solution to prevent any future/possible reallocation consequences, getDetails() will be called from starTimer as well, instead of passing \u0026dwell. I also removed copy and move constructor for discrete trigger, so passing \u0027this\u0027 in lambda should be safer.",
+      "parentUuid": "b3a20e97_80b0789b",
+      "range": {
+        "startLine": 104,
+        "startChar": 26,
+        "endLine": 104,
+        "endChar": 62
+      },
+      "revId": "3f521da1ce77db5b254e8a2c609f65988e4b54d1",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3c695b35_df7654af",
         "filename": "src/discrete_threshold.cpp",
         "patchSetId": 7
