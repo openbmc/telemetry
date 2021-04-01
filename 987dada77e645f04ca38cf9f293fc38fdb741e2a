@@ -307,6 +307,29 @@
       "revId": "987dada77e645f04ca38cf9f293fc38fdb741e2a",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3c83751f_39de006a",
+        "filename": "tests/src/test_discrete_threshold.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-04-01T12:32:13Z",
+      "side": 1,
+      "message": "Is it needed? Why not just return make_shared\u003c\u003e(...);",
+      "range": {
+        "startLine": 29,
+        "startChar": 8,
+        "endLine": 29,
+        "endChar": 53
+      },
+      "revId": "987dada77e645f04ca38cf9f293fc38fdb741e2a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }

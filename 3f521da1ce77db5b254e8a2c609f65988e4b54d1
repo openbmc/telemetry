@@ -96,6 +96,30 @@
     },
     {
       "key": {
+        "uuid": "b3a20e97_80b0789b",
+        "filename": "src/discrete_threshold.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-04-01T12:32:13Z",
+      "side": 1,
+      "message": "Same situation applies to \u0026dwell, it is only small part of details but to make it work you need to ensure ThresholdDetail is neither copyable nor moveable.",
+      "parentUuid": "8273b208_75eee51b",
+      "range": {
+        "startLine": 104,
+        "startChar": 26,
+        "endLine": 104,
+        "endChar": 62
+      },
+      "revId": "3f521da1ce77db5b254e8a2c609f65988e4b54d1",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "3c695b35_df7654af",
         "filename": "src/discrete_threshold.cpp",
         "patchSetId": 7
