@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1d7ff987_8095ae14",
+        "filename": "src/trigger_actions.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1000677
+      },
+      "writtenOn": "2021-04-01T10:11:38Z",
+      "side": 1,
+      "message": "Why it is double? The timestamp parameter for commit() methods is of type uint64_t",
+      "range": {
+        "startLine": 12,
+        "startChar": 30,
+        "endLine": 12,
+        "endChar": 37
+      },
+      "revId": "987dada77e645f04ca38cf9f293fc38fdb741e2a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ab9cbf0c_6ac23ba3",
+        "filename": "src/trigger_actions.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1000677
+      },
+      "writtenOn": "2021-04-01T10:11:38Z",
+      "side": 1,
+      "message": "You are already in numeric namespace. I guess that you can remove \"::numeric\" from this and other lines",
+      "range": {
+        "startLine": 46,
+        "startChar": 13,
+        "endLine": 46,
+        "endChar": 24
+      },
+      "revId": "987dada77e645f04ca38cf9f293fc38fdb741e2a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c5535c10_9c5757f0",
+        "filename": "src/trigger_factory.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 142,
+      "author": {
+        "id": 1000677
+      },
+      "writtenOn": "2021-04-01T10:11:38Z",
+      "side": 1,
+      "message": "It seems irrelevant to whole patch. Can you undo it? Thanks in advance",
+      "range": {
+        "startLine": 142,
+        "startChar": 0,
+        "endLine": 142,
+        "endChar": 73
+      },
+      "revId": "987dada77e645f04ca38cf9f293fc38fdb741e2a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
