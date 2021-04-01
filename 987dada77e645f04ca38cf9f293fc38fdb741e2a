@@ -73,6 +73,30 @@
     },
     {
       "key": {
+        "uuid": "f4d10c65_12768b3e",
+        "filename": "src/trigger_actions.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2021-04-01T12:32:18Z",
+      "side": 1,
+      "message": "Krzysztof Grobelny Mar 30\nIn my opinion it is better to not use static, c++ way of creating functions visible only in current file is to create anonymous namespace",
+      "parentUuid": "aec4b83b_2dbbce8d",
+      "range": {
+        "startLine": 10,
+        "startChar": 0,
+        "endLine": 10,
+        "endChar": 9
+      },
+      "revId": "987dada77e645f04ca38cf9f293fc38fdb741e2a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1d7ff987_8095ae14",
         "filename": "src/trigger_actions.cpp",
         "patchSetId": 9
@@ -179,6 +203,30 @@
       "side": 1,
       "message": "Maybe change the order? For example: numeric::action::LogToJournal",
       "parentUuid": "6af679cf_e2a4ca0f",
+      "range": {
+        "startLine": 46,
+        "startChar": 13,
+        "endLine": 46,
+        "endChar": 24
+      },
+      "revId": "987dada77e645f04ca38cf9f293fc38fdb741e2a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c5125750_a971c23e",
+        "filename": "src/trigger_actions.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2021-04-01T12:32:18Z",
+      "side": 1,
+      "message": "For me current hierarchy makes more logical sense, and I would rather not change it.\n  - numeric\n  - discrete\n  - action\n    - numeric\n    - discrete\n      - onChange\n\n::numeric and ::discrete are used for types definitions, while action::numeric, action::discrete, and action::discrete::onChange is used for actions\nThis also allows to make generic actions, not specialized for trigger type - like action::UpdateReport",
+      "parentUuid": "a57daa5d_af4b8d80",
       "range": {
         "startLine": 46,
         "startChar": 13,
