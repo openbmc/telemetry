@@ -70,6 +70,121 @@
       "revId": "e720c90d4d28d9da48796dbf7670e665fe7ed2dc",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c6d36cb_2b9501e3",
+        "filename": "tests/src/test_trigger.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-04-12T09:43:28Z",
+      "side": 1,
+      "message": "If there is no value in option it will cases access to not initialized memory.\n\nstd::optional\u003cT\u003e can be compared directly with type T",
+      "range": {
+        "startLine": 138,
+        "startChar": 69,
+        "endLine": 138,
+        "endChar": 77
+      },
+      "revId": "e720c90d4d28d9da48796dbf7670e665fe7ed2dc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8478699b_66649ad0",
+        "filename": "tests/src/test_trigger.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 153,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-04-12T09:43:28Z",
+      "side": 1,
+      "message": "Incorrect test name. Should be something like this, exceptionDuringStoreReportDissablesPersistency",
+      "range": {
+        "startLine": 153,
+        "startChar": 26,
+        "endLine": 153,
+        "endChar": 73
+      },
+      "revId": "e720c90d4d28d9da48796dbf7670e665fe7ed2dc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "20669f08_7aa4bf6e",
+        "filename": "tests/src/test_trigger.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 252,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-04-12T09:43:28Z",
+      "side": 1,
+      "message": "This should be stored as array of elements instead of array of array of elements.\n\nASSERT_THAT(storedConfiguration.at(\"ThresholdParams\"),\n            ElementsAre(expectedItem0, expectedItem1));",
+      "range": {
+        "startLine": 251,
+        "startChar": 4,
+        "endLine": 252,
+        "endChar": 72
+      },
+      "revId": "e720c90d4d28d9da48796dbf7670e665fe7ed2dc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "052c34cb_3a4bc638",
+        "filename": "tests/src/test_trigger.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 255,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-04-12T09:43:28Z",
+      "side": 1,
+      "message": "inherit from TestTriggerStore,\n\nON_CALL(storageMock, store(_, _))\n            .WillByDefault(SaveArg\u003c1\u003e(\u0026storedConfiguration));\n\ncan be moved to TestTriggerStore constructor\n\nthis way some code duplication can be removed",
+      "range": {
+        "startLine": 255,
+        "startChar": 40,
+        "endLine": 255,
+        "endChar": 51
+      },
+      "revId": "e720c90d4d28d9da48796dbf7670e665fe7ed2dc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "47196c58_bc7b3d37",
+        "filename": "tests/src/test_trigger.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 287,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-04-12T09:43:28Z",
+      "side": 1,
+      "message": "nit: Move to line 300 or 301, when possible asserts should be grouped together in tests.",
+      "range": {
+        "startLine": 287,
+        "startChar": 4,
+        "endLine": 287,
+        "endChar": 79
+      },
+      "revId": "e720c90d4d28d9da48796dbf7670e665fe7ed2dc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }
