@@ -1,0 +1,297 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3463f181_1c690321",
+        "filename": "src/trigger_factory.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-04-12T10:23:30Z",
+      "side": 1,
+      "message": "auto, type is quite obvious",
+      "range": {
+        "startLine": 46,
+        "startChar": 8,
+        "endLine": 46,
+        "endChar": 21
+      },
+      "revId": "abe55554000d223fac2e62da95afcc84831b681e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "287594b6_a478d6d4",
+        "filename": "src/trigger_factory.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-04-12T10:23:30Z",
+      "side": 1,
+      "message": "auto, type is already present on right side",
+      "range": {
+        "startLine": 48,
+        "startChar": 8,
+        "endLine": 48,
+        "endChar": 33
+      },
+      "revId": "abe55554000d223fac2e62da95afcc84831b681e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "29c6263c_4f3a191e",
+        "filename": "src/trigger_factory.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-04-12T10:23:30Z",
+      "side": 1,
+      "message": "auto, type is quite obvious",
+      "range": {
+        "startLine": 51,
+        "startChar": 8,
+        "endLine": 51,
+        "endChar": 26
+      },
+      "revId": "abe55554000d223fac2e62da95afcc84831b681e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4991c6f9_38e9c2da",
+        "filename": "src/trigger_factory.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-04-12T10:23:30Z",
+      "side": 1,
+      "message": "auto thresholdValue \u003d\n            double{labeledThresholdParam.at_label\u003cts::ThresholdValue\u003e()};\n\nThis form is more type safe, it will compile only if there is no precision loss.",
+      "range": {
+        "startLine": 54,
+        "startChar": 8,
+        "endLine": 55,
+        "endChar": 65
+      },
+      "revId": "abe55554000d223fac2e62da95afcc84831b681e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "aa247967_b5968b55",
+        "filename": "src/trigger_factory.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 143,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-04-12T10:23:30Z",
+      "side": 1,
+      "message": "Use utils::transform instead",
+      "range": {
+        "startLine": 125,
+        "startChar": 0,
+        "endLine": 143,
+        "endChar": 30
+      },
+      "revId": "abe55554000d223fac2e62da95afcc84831b681e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a1a70c6b_d309e292",
+        "filename": "src/trigger_factory.cpp.bak",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-04-12T10:23:30Z",
+      "side": 1,
+      "message": "*.bak file, delete it and add rule to exclude *.bak files in .gitignore",
+      "revId": "abe55554000d223fac2e62da95afcc84831b681e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "742ebaff_0519c6fe",
+        "filename": "src/trigger_manager.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-04-12T10:23:30Z",
+      "side": 1,
+      "message": "What if load return empty optional? You never check that.",
+      "range": {
+        "startLine": 106,
+        "startChar": 8,
+        "endLine": 106,
+        "endChar": 72
+      },
+      "revId": "abe55554000d223fac2e62da95afcc84831b681e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "aa1679c4_a3b58d8d",
+        "filename": "src/trigger_manager.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-04-12T10:23:30Z",
+      "side": 1,
+      "message": "Upgrade of telemetry-service can cause this error, it means it is runtime_error not logic_error.",
+      "range": {
+        "startLine": 112,
+        "startChar": 27,
+        "endLine": 112,
+        "endChar": 38
+      },
+      "revId": "abe55554000d223fac2e62da95afcc84831b681e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "87659617_b93b5186",
+        "filename": "src/trigger_manager.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-04-12T10:23:30Z",
+      "side": 1,
+      "message": "Should be const std::string\u0026",
+      "range": {
+        "startLine": 114,
+        "startChar": 12,
+        "endLine": 114,
+        "endChar": 29
+      },
+      "revId": "abe55554000d223fac2e62da95afcc84831b681e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f3ae15e7_04fd3ac2",
+        "filename": "src/utils/labeled_tuple.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-04-12T10:23:30Z",
+      "side": 1,
+      "message": "Seems to be not used anywhere.",
+      "range": {
+        "startLine": 72,
+        "startChar": 0,
+        "endLine": 75,
+        "endChar": 5
+      },
+      "revId": "abe55554000d223fac2e62da95afcc84831b681e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "92ba9b20_796fc12d",
+        "filename": "tests/src/test_trigger_manager.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 208,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-04-12T10:23:30Z",
+      "side": 1,
+      "message": "You can remove this test. It is 100% covered in triggerManagerCtorAddProperRemoveInvalidTriggerFromStorage.",
+      "range": {
+        "startLine": 200,
+        "startChar": 0,
+        "endLine": 208,
+        "endChar": 1
+      },
+      "revId": "abe55554000d223fac2e62da95afcc84831b681e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1bc01041_c24b7392",
+        "filename": "tests/src/test_trigger_manager.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 215,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-04-12T10:23:30Z",
+      "side": 1,
+      "message": "nit: How about userId1? There is no harm if we add some extra information in tests, we can avoid jumping that way.",
+      "range": {
+        "startLine": 215,
+        "startChar": 14,
+        "endLine": 215,
+        "endChar": 15
+      },
+      "revId": "abe55554000d223fac2e62da95afcc84831b681e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bf6177de_5c2096b1",
+        "filename": "tests/src/test_trigger_manager.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 238,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-04-12T10:23:30Z",
+      "side": 1,
+      "message": "nit: Adds",
+      "range": {
+        "startLine": 238,
+        "startChar": 25,
+        "endLine": 238,
+        "endChar": 28
+      },
+      "revId": "abe55554000d223fac2e62da95afcc84831b681e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
