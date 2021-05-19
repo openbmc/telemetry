@@ -3,7 +3,7 @@
 set -e
 
 if [[ ! -d boost_1_74_0 ]]; then
-    wget https://dl.bintray.com/boostorg/release/1.74.0/source/boost_1_74_0.tar.gz
+    wget https://boostorg.jfrog.io/artifactory/main/release/1.74.0/source/boost_1_74_0.tar.gz
     tar xfz boost_1_74_0.tar.gz
 fi
 
