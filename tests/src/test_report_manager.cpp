@@ -108,6 +108,26 @@ TEST_F(TestReportManager, addReport)
     EXPECT_THAT(path, Eq(reportMock.getPath()));
 }
 
+TEST_F(TestReportManager, DISABLED_failToAddReportWithTooLongName)
+{
+    reportFactoryMock.expectMake(_, std::nullopt, Ref(*sut), Ref(storageMock))
+        .Times(0);
+    reportFactoryMock.expectMake(std::nullopt, Ref(*sut), Ref(storageMock), _)
+        .Times(0);
+    std::stringstream reportNameStream;
+
+    for (size_t i = 0; i < ReportManager::maxReportNameLength + 1; ++i)
+    {
+        reportNameStream << "z";
+    }
+
+    reportParams.reportName(reportNameStream.str());
+
+    auto [ec, path] = addReport(reportParams);
+    EXPECT_THAT(ec.value(), Eq(boost::system::errc::invalid_argument));
+    EXPECT_THAT(path, Eq(std::string()));
+}
+
 TEST_F(TestReportManager, DISABLED_failToAddReportTwice)
 {
     reportFactoryMock.expectMake(_, reportParams, Ref(*sut), Ref(storageMock))
