@@ -28,6 +28,10 @@ ReportManager::ReportManager(
                 "MaxReports", size_t{}, sdbusplus::vtable::property_::const_,
                 [](const auto&) { return maxReports; });
             dbusIface.register_property_r(
+                "MaxReportNameLength", size_t{},
+                sdbusplus::vtable::property_::const_,
+                [](const auto&) { return maxReportNameLength; });
+            dbusIface.register_property_r(
                 "MinInterval", uint64_t{}, sdbusplus::vtable::property_::const_,
                 [](const auto&) -> uint64_t { return minInterval.count(); });
 
@@ -57,6 +61,16 @@ void ReportManager::removeReport(const interfaces::Report* report)
         reports.end());
 }
 
+void ReportManager::verifyReportNameLength(const std::string& reportName)
+{
+    if (reportName.length() > maxReportNameLength)
+    {
+        throw sdbusplus::exception::SdBusError(
+            static_cast<int>(std::errc::invalid_argument),
+            "Report name exceed maximum length");
+    }
+}
+
 void ReportManager::verifyAddReport(const std::string& reportName,
                                     const std::string& reportingType,
                                     std::chrono::milliseconds interval,
@@ -68,6 +82,8 @@ void ReportManager::verifyAddReport(const std::string& reportName,
             static_cast<int>(std::errc::too_many_files_open),
             "Reached maximal report count");
     }
+
+    verifyReportNameLength(reportName);
 
     for (const auto& report : reports)
     {

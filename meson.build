@@ -65,6 +65,8 @@ add_project_arguments(
         get_option('max-reading-parameters').to_string(),
     '-DTELEMETRY_MIN_INTERVAL=' + get_option('min-interval').to_string(),
     '-DTELEMETRY_MAX_TRIGGERS=' + get_option('max-triggers').to_string(),
+    '-DTELEMETRY_MAX_REPORT_NAME_LENGTH=' +
+        get_option('max-report-name-length').to_string(),
     language: 'cpp'
 )
 
