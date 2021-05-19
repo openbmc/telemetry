@@ -62,6 +62,25 @@ void ReportManager::verifyAddReport(const std::string& reportName,
                                     std::chrono::milliseconds interval,
                                     const ReadingParameters& readingParams)
 {
+    size_t characterCount = 0;
+    for (const char& character : reportName)
+    {
+        if (character == '/')
+        {
+            characterCount = 0;
+        }
+        else
+        {
+            ++characterCount;
+
+            if (characterCount > maxReportNameComponentLength)
+            {
+                throw sdbusplus::exception::SdBusError(
+                    static_cast<int>(std::errc::invalid_argument),
+                    "Report name segment exceed maximum length");
+            }
+        }
+    }
     if (reports.size() >= maxReports)
     {
         throw sdbusplus::exception::SdBusError(
