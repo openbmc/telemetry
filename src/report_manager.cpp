@@ -57,6 +57,30 @@ void ReportManager::removeReport(const interfaces::Report* report)
         reports.end());
 }
 
+void ReportManager::verifyReportNameComponentsLength(
+    const std::string& reportName)
+{
+    size_t characterCount = 0;
+    for (auto character : reportName)
+    {
+        if (character == '/')
+        {
+            characterCount = 0;
+        }
+        else
+        {
+            ++characterCount;
+
+            if (characterCount > maxReportNameComponentLength)
+            {
+                throw sdbusplus::exception::SdBusError(
+                    static_cast<int>(std::errc::invalid_argument),
+                    "Report name component exceed maximum length");
+            }
+        }
+    }
+}
+
 void ReportManager::verifyAddReport(const std::string& reportName,
                                     const std::string& reportingType,
                                     std::chrono::milliseconds interval,
@@ -68,6 +92,8 @@ void ReportManager::verifyAddReport(const std::string& reportName,
             static_cast<int>(std::errc::too_many_files_open),
             "Reached maximal report count");
     }
+
+    verifyReportNameComponentsLength(reportName);
 
     for (const auto& report : reports)
     {
