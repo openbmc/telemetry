@@ -5,6 +5,8 @@
 #include "interfaces/report_factory.hpp"
 #include "interfaces/report_manager.hpp"
 
+#include <systemd/sd-bus-protocol.h>
+
 #include <sdbusplus/asio/object_server.hpp>
 
 #include <chrono>
@@ -36,6 +38,7 @@ class ReportManager : public interfaces::ReportManager
     std::unique_ptr<sdbusplus::asio::dbus_interface> reportManagerIface;
     std::vector<std::unique_ptr<interfaces::Report>> reports;
 
+    void verifyReportNameLength(const std::string& reportName);
     void verifyAddReport(const std::string& reportName,
                          const std::string& reportingType,
                          std::chrono::milliseconds interval,
@@ -57,6 +60,8 @@ class ReportManager : public interfaces::ReportManager
   public:
     static constexpr size_t maxReports{TELEMETRY_MAX_REPORTS};
     static constexpr size_t maxReadingParams{TELEMETRY_MAX_READING_PARAMS};
+    static constexpr size_t maxReportNameLength{
+        TELEMETRY_MAX_REPORT_NAME_LENGTH};
     static constexpr std::chrono::milliseconds minInterval{
         TELEMETRY_MIN_INTERVAL};
     static constexpr const char* reportManagerIfaceName =

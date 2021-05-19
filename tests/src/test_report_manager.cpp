@@ -108,6 +108,45 @@ TEST_F(TestReportManager, addReport)
     EXPECT_THAT(path, Eq(reportMock.getPath()));
 }
 
+TEST_F(TestReportManager, addReportWithMaxLengthName)
+{
+    std::stringstream reportNameStream;
+    std::stringstream pathStream;
+
+    for (size_t i = 0; i < ReportManager::maxReportNameLength; ++i)
+    {
+        reportNameStream << "z";
+    }
+    reportParams.reportName(reportNameStream.str());
+    reportFactoryMock.expectMake(_, reportParams, Ref(*sut), Ref(storageMock));
+
+    auto [ec, path] = addReport(reportParams);
+
+    EXPECT_THAT(ec.value(), Eq(boost::system::errc::success));
+    EXPECT_THAT(path, Eq("/"s + reportNameStream.str()));
+}
+
+TEST_F(TestReportManager, DISABLED_failToAddReportWithTooLongName)
+{
+    reportFactoryMock.expectMake(_, std::nullopt, Ref(*sut), Ref(storageMock))
+        .Times(0);
+    reportFactoryMock.expectMake(std::nullopt, Ref(*sut), Ref(storageMock), _)
+        .Times(0);
+    std::stringstream reportNameStream;
+
+    for (size_t i = 0; i < ReportManager::maxReportNameLength + 1; ++i)
+    {
+        reportNameStream << "z";
+    }
+
+    reportParams.reportName(reportNameStream.str());
+
+    auto [ec, path] = addReport(reportParams);
+
+    EXPECT_THAT(ec.value(), Eq(boost::system::errc::invalid_argument));
+    EXPECT_THAT(path, Eq(std::string()));
+}
+
 TEST_F(TestReportManager, DISABLED_failToAddReportTwice)
 {
     reportFactoryMock.expectMake(_, reportParams, Ref(*sut), Ref(storageMock))
@@ -116,6 +155,7 @@ TEST_F(TestReportManager, DISABLED_failToAddReportTwice)
     addReport(reportParams);
 
     auto [ec, path] = addReport(reportParams);
+
     EXPECT_THAT(ec.value(), Eq(boost::system::errc::file_exists));
     EXPECT_THAT(path, Eq(std::string()));
 }
@@ -131,6 +171,7 @@ TEST_F(TestReportManager, DISABLED_failToAddReportWithInvalidInterval)
     reportParams.interval(reportParams.interval() - 1ms);
 
     auto [ec, path] = addReport(reportParams);
+
     EXPECT_THAT(ec.value(), Eq(boost::system::errc::invalid_argument));
     EXPECT_THAT(path, Eq(std::string()));
 }
@@ -145,6 +186,7 @@ TEST_F(TestReportManager, DISABLED_failToAddReportWithInvalidReportingType)
     reportParams.reportingType("Invalid");
 
     auto [ec, path] = addReport(reportParams);
+
     EXPECT_THAT(ec.value(), Eq(boost::system::errc::invalid_argument));
     EXPECT_THAT(path, Eq(std::string()));
 }
@@ -164,6 +206,7 @@ TEST_F(TestReportManager, DISABLED_failToAddReportWithMoreSensorsThanExpected)
     reportParams.readingParameters(std::move(readingParams));
 
     auto [ec, path] = addReport(reportParams);
+
     EXPECT_THAT(ec.value(), Eq(boost::system::errc::argument_list_too_long));
     EXPECT_THAT(path, Eq(std::string()));
 }
@@ -184,6 +227,7 @@ TEST_F(TestReportManager, DISABLED_failToAddReportWhenMaxReportIsReached)
     reportParams.reportName(reportParams.reportName() +
                             std::to_string(ReportManager::maxReports));
     auto [ec, path] = addReport(reportParams);
+
     EXPECT_THAT(ec.value(), Eq(boost::system::errc::too_many_files_open));
     EXPECT_THAT(path, Eq(std::string()));
 }
@@ -280,6 +324,7 @@ TEST_P(TestReportManagerWithAggregationOperationType,
         .WillOnce(Return(ByMove(std::move(reportMockPtr))));
 
     auto [ec, path] = addReport(reportParams);
+
     EXPECT_THAT(ec.value(), Eq(boost::system::errc::success));
     EXPECT_THAT(path, Eq("/"s + reportParams.reportName()));
 }
