@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a0f28ad_942a7860",
+        "filename": "tests/src/test_report_manager.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-05-20T11:25:55Z",
+      "side": 1,
+      "message": "unused local variable",
+      "range": {
+        "startLine": 114,
+        "startChar": 4,
+        "endLine": 114,
+        "endChar": 33
+      },
+      "revId": "135ee19454c1489657165088944ac3edb28569fb",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ea6553ad_1657c031",
+        "filename": "tests/src/test_report_manager.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 140,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-05-20T11:25:55Z",
+      "side": 1,
+      "message": "Create helper function which builds longs name, no need to duplicate it between tests.",
+      "range": {
+        "startLine": 135,
+        "startChar": 0,
+        "endLine": 140,
+        "endChar": 5
+      },
+      "revId": "135ee19454c1489657165088944ac3edb28569fb",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
