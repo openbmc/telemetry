@@ -41,76 +41,8 @@ Report::Report(boost::asio::io_context& ioc,
             });
         });
 
-    reportIface = objServer->add_unique_interface(
-        path, reportIfaceName, [this](auto& dbusIface) {
-            dbusIface.register_property_rw(
-                "Interval", static_cast<uint64_t>(interval.count()),
-                sdbusplus::vtable::property_::emits_change,
-                [this](uint64_t newVal, auto&) {
-                    std::chrono::milliseconds newValT(newVal);
-                    if (newValT < ReportManager::minInterval)
-                    {
-                        return false;
-                    }
-                    interval = newValT;
-                    return true;
-                },
-                [this](const auto&) {
-                    return static_cast<uint64_t>(interval.count());
-                });
-            persistency = storeConfiguration();
-            dbusIface.register_property_rw(
-                "Persistency", persistency,
-                sdbusplus::vtable::property_::emits_change,
-                [this](bool newVal, const auto&) {
-                    if (newVal == persistency)
-                    {
-                        return true;
-                    }
-                    if (newVal)
-                    {
-                        persistency = storeConfiguration();
-                    }
-                    else
-                    {
-                        reportStorage.remove(fileName);
-                        persistency = false;
-                    }
-                    return true;
-                },
-                [this](const auto&) { return persistency; });
-
-            auto readingsFlag = sdbusplus::vtable::property_::none;
-            if (emitsReadingsUpdate)
-            {
-                readingsFlag = sdbusplus::vtable::property_::emits_change;
-            }
-            dbusIface.register_property_r(
-                "Readings", readings, readingsFlag,
-                [this](const auto&) { return readings; });
-            dbusIface.register_property_r(
-                "ReportingType", reportingType,
-                sdbusplus::vtable::property_::const_,
-                [this](const auto&) { return reportingType; });
-            dbusIface.register_property_r(
-                "ReadingParameters", readingParameters,
-                sdbusplus::vtable::property_::const_,
-                [this](const auto&) { return readingParameters; });
-            dbusIface.register_property_r(
-                "EmitsReadingsUpdate", emitsReadingsUpdate,
-                sdbusplus::vtable::property_::const_,
-                [this](const auto&) { return emitsReadingsUpdate; });
-            dbusIface.register_property_r(
-                "LogToMetricReportsCollection", logToMetricReportsCollection,
-                sdbusplus::vtable::property_::const_,
-                [this](const auto&) { return logToMetricReportsCollection; });
-            dbusIface.register_method("Update", [this] {
-                if (reportingType == "OnRequest")
-                {
-                    updateReadings();
-                }
-            });
-        });
+    persistency = storeConfiguration();
+    reportIface = makeReportInterface();
 
     if (reportingType == "Periodic")
     {
@@ -121,6 +53,77 @@ Report::Report(boost::asio::io_context& ioc,
     {
         metric->initialize();
     }
+}
+
+std::unique_ptr<sdbusplus::asio::dbus_interface> Report::makeReportInterface()
+{
+    auto dbusIface = objServer->add_unique_interface(path, reportIfaceName);
+    dbusIface->register_property_rw(
+        "Interval", static_cast<uint64_t>(interval.count()),
+        sdbusplus::vtable::property_::emits_change,
+        [this](uint64_t newVal, auto&) {
+            std::chrono::milliseconds newValT(newVal);
+            if (newValT < ReportManager::minInterval)
+            {
+                return false;
+            }
+            interval = newValT;
+            return true;
+        },
+        [this](const auto&) {
+            return static_cast<uint64_t>(interval.count());
+        });
+    dbusIface->register_property_rw(
+        "Persistency", persistency, sdbusplus::vtable::property_::emits_change,
+        [this](bool newVal, const auto&) {
+            if (newVal == persistency)
+            {
+                return true;
+            }
+            if (newVal)
+            {
+                persistency = storeConfiguration();
+            }
+            else
+            {
+                reportStorage.remove(fileName);
+                persistency = false;
+            }
+            return true;
+        },
+        [this](const auto&) { return persistency; });
+
+    auto readingsFlag = sdbusplus::vtable::property_::none;
+    if (emitsReadingsUpdate)
+    {
+        readingsFlag = sdbusplus::vtable::property_::emits_change;
+    }
+    dbusIface->register_property_r("Readings", readings, readingsFlag,
+                                   [this](const auto&) { return readings; });
+    dbusIface->register_property_r(
+        "ReportingType", reportingType, sdbusplus::vtable::property_::const_,
+        [this](const auto&) { return reportingType; });
+    dbusIface->register_property_r(
+        "ReadingParameters", readingParameters,
+        sdbusplus::vtable::property_::const_,
+        [this](const auto&) { return readingParameters; });
+    dbusIface->register_property_r(
+        "EmitsReadingsUpdate", emitsReadingsUpdate,
+        sdbusplus::vtable::property_::const_,
+        [this](const auto&) { return emitsReadingsUpdate; });
+    dbusIface->register_property_r(
+        "LogToMetricReportsCollection", logToMetricReportsCollection,
+        sdbusplus::vtable::property_::const_,
+        [this](const auto&) { return logToMetricReportsCollection; });
+    dbusIface->register_method("Update", [this] {
+        if (reportingType == "OnRequest")
+        {
+            updateReadings();
+        }
+    });
+    constexpr bool skipPropertiesChangedSignal = true;
+    dbusIface->initialize(skipPropertiesChangedSignal);
+    return dbusIface;
 }
 
 void Report::timerProc(boost::system::error_code ec, Report& self)
