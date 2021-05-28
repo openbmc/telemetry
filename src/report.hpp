@@ -47,6 +47,7 @@ class Report : public interfaces::Report
     bool storeConfiguration() const;
 
   private:
+    std::unique_ptr<sdbusplus::asio::dbus_interface> makeReportInterface();
     static void timerProc(boost::system::error_code, Report& self);
     void scheduleTimer(std::chrono::milliseconds interval);
 
@@ -57,7 +58,7 @@ class Report : public interfaces::Report
     bool emitsReadingsUpdate;
     bool logToMetricReportsCollection;
     ReadingParameters readingParameters;
-    bool persistency;
+    bool persistency = false;
     Readings readings = {};
     std::shared_ptr<sdbusplus::asio::object_server> objServer;
     std::unique_ptr<sdbusplus::asio::dbus_interface> reportIface;
