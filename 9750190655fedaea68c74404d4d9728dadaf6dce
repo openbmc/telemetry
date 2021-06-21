@@ -42,6 +42,30 @@
     },
     {
       "key": {
+        "uuid": "dc5c23cc_8aa174b2",
+        "filename": "src/metric.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 266,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-06-21T10:50:18Z",
+      "side": 1,
+      "message": "Because there is forward declaration of CollectionData in hpp file this cannot be moved to class definition, it won\u0027t compile.",
+      "parentUuid": "95aba82e_8fe3b91b",
+      "range": {
+        "startLine": 266,
+        "startChar": 0,
+        "endLine": 266,
+        "endChar": 28
+      },
+      "revId": "9750190655fedaea68c74404d4d9728dadaf6dce",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "12747d09_82b6334a",
         "filename": "src/metric.hpp",
         "patchSetId": 4
@@ -53,6 +77,30 @@
       "writtenOn": "2021-03-30T10:38:16Z",
       "side": 1,
       "message": "Not all are used here. Is it required?",
+      "range": {
+        "startLine": 27,
+        "startChar": 0,
+        "endLine": 36,
+        "endChar": 27
+      },
+      "revId": "9750190655fedaea68c74404d4d9728dadaf6dce",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8038dbca_d02c1fe1",
+        "filename": "src/metric.hpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-06-21T10:50:18Z",
+      "side": 1,
+      "message": "If we want to keep CollectionFunction, CollectionData then yes.",
+      "parentUuid": "12747d09_82b6334a",
       "range": {
         "startLine": 27,
         "startChar": 0,
@@ -99,6 +147,24 @@
       "writtenOn": "2021-03-30T10:38:16Z",
       "side": 1,
       "message": "Did you move make_shared\u003cMetric\u003e to SetUp because of move operation? Maybe use ctor instead SetUp()? Using ctor instead  SetUp will allow you to remove TestMetric::SetUp() from 58 line",
+      "revId": "9750190655fedaea68c74404d4d9728dadaf6dce",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7b3da769_f77a9a00",
+        "filename": "tests/src/test_metric.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-06-21T10:50:18Z",
+      "side": 1,
+      "message": "But that will break setup in 135 which assumes that sut object is not yet created when manipulating time using fake clock.",
+      "parentUuid": "3a661211_545acb6d",
       "revId": "9750190655fedaea68c74404d4d9728dadaf6dce",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
