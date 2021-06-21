@@ -66,6 +66,30 @@
     },
     {
       "key": {
+        "uuid": "14b724d7_f4688639",
+        "filename": "src/metric.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 266,
+      "author": {
+        "id": 1000677
+      },
+      "writtenOn": "2021-06-21T11:25:47Z",
+      "side": 1,
+      "message": "Ok. Thanks for explanation",
+      "parentUuid": "dc5c23cc_8aa174b2",
+      "range": {
+        "startLine": 266,
+        "startChar": 0,
+        "endLine": 266,
+        "endChar": 28
+      },
+      "revId": "9750190655fedaea68c74404d4d9728dadaf6dce",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "12747d09_82b6334a",
         "filename": "src/metric.hpp",
         "patchSetId": 4
@@ -101,6 +125,30 @@
       "side": 1,
       "message": "If we want to keep CollectionFunction, CollectionData then yes.",
       "parentUuid": "12747d09_82b6334a",
+      "range": {
+        "startLine": 27,
+        "startChar": 0,
+        "endLine": 36,
+        "endChar": 27
+      },
+      "revId": "9750190655fedaea68c74404d4d9728dadaf6dce",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "48551f25_fa19c1f2",
+        "filename": "src/metric.hpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1000677
+      },
+      "writtenOn": "2021-06-21T11:25:47Z",
+      "side": 1,
+      "message": "Collection* classes sounds ok. But the rest, like Function* (which I guess inherits from CollectionFunction) are not required.",
+      "parentUuid": "8038dbca_d02c1fe1",
       "range": {
         "startLine": 27,
         "startChar": 0,
@@ -168,6 +216,24 @@
       "revId": "9750190655fedaea68c74404d4d9728dadaf6dce",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1aff1eed_dd4b85b3",
+        "filename": "tests/src/test_metric.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1000677
+      },
+      "writtenOn": "2021-06-21T11:25:47Z",
+      "side": 1,
+      "message": "Ok, make sense to me. Thanks for explanation",
+      "parentUuid": "7b3da769_f77a9a00",
+      "revId": "9750190655fedaea68c74404d4d9728dadaf6dce",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }
