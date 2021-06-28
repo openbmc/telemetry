@@ -77,9 +77,18 @@ TEST_F(TestMetric, parsesSensorMetadata)
     sensorMocks = makeSensorMocks(2);
     sut = makeSut(params.metadata(metadata.dump()));
 
-    EXPECT_THAT(sut->getReadings(),
-                ElementsAre(MetricValue{"id", "sensor1", 0., 0u},
-                            MetricValue{"id", "sensor2", 0., 0u}));
+    EXPECT_THAT(
+        sut->getReadings(),
+        ElementsAre(MetricValue{"id",
+                                nlohmann::json{{"SensorDbusPath", ""},
+                                               {"SensorRedfishUri", "sensor1"}}
+                                    .dump(),
+                                0., 0u},
+                    MetricValue{"id",
+                                nlohmann::json{{"SensorDbusPath", ""},
+                                               {"SensorRedfishUri", "sensor2"}}
+                                    .dump(),
+                                0., 0u}));
 }
 
 TEST_F(TestMetric, parsesSensorMetadataWhenMoreMetadataThanSensors)

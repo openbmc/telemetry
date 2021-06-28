@@ -1,10 +1,11 @@
 #include "metric.hpp"
 
 #include "types/types.hpp"
-#include "utils/json.hpp"
+#include "utils/labeled_tuple.hpp"
 #include "utils/transform.hpp"
 
 #include <algorithm>
+#include <iostream>
 
 Metric::Metric(std::vector<std::shared_ptr<interfaces::Sensor>> sensorsIn,
                OperationType operationTypeIn, std::string idIn,
@@ -17,23 +18,30 @@ Metric::Metric(std::vector<std::shared_ptr<interfaces::Sensor>> sensorsIn,
     sensors(std::move(sensorsIn)), operationType(operationTypeIn),
     timeScope(timeScopeIn), collectionDuration(collectionDurationIn)
 {
+    using MetricMetadata =
+        utils::LabeledTuple<std::tuple<std::vector<std::string>>,
+                            utils::tstring::MetricProperties>;
+
+    using ReadingMetadata =
+        utils::LabeledTuple<std::tuple<std::string, std::string>,
+                            utils::tstring::SensorDbusPath,
+                            utils::tstring::SensorRedfishUri>;
     try
     {
-        const nlohmann::json parsedMetadata = nlohmann::json::parse(metadata);
-        if (const auto metricProperties =
-                utils::readJson<std::vector<std::string>>(parsedMetadata,
-                                                          "MetricProperties"))
+        const MetricMetadata parsedMetadata =
+            nlohmann::json::parse(metadata).get<MetricMetadata>();
+
+        if (readings.size() == parsedMetadata.at_index<0>().size())
         {
-            if (readings.size() == metricProperties->size())
+            for (size_t i = 0; i < readings.size(); ++i)
             {
-                for (size_t i = 0; i < readings.size(); ++i)
-                {
-                    readings[i].metadata = (*metricProperties)[i];
-                }
+                ReadingMetadata readingMetadata{
+                    sensors[i]->id().path, parsedMetadata.at_index<0>()[i]};
+                readings[i].metadata = nlohmann::json(readingMetadata).dump();
             }
         }
     }
-    catch (const nlohmann::json::parse_error& e)
+    catch (const nlohmann::json::parse_error&)
     {}
 }
 
