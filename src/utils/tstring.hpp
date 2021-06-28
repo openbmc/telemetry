@@ -72,5 +72,29 @@ struct CollectionDuration
     }
 };
 
+struct MetricProperties
+{
+    static std::string str()
+    {
+        return "MetricProperties";
+    }
+};
+
+struct SensorDbusPath
+{
+    static std::string str()
+    {
+        return "SensorDbusPath";
+    }
+};
+
+struct SensorRedfishUri
+{
+    static std::string str()
+    {
+        return "SensorRedfishUri";
+    }
+};
+
 } // namespace tstring
 } // namespace utils
