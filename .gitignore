@@ -112,7 +112,10 @@ fabric.properties
 ### Meson ###
 # subproject directories
 /subprojects/*
-!/subprojects/*.wrap
+!/subprojects/googletest.wrap
+!/subprojects/nlohmann.wrap
+!/subprojects/phosphor-logging.wrap
+!/subprojects/sdbusplus.wrap
 
 # Meson Directories
 meson-logs
