@@ -37,7 +37,8 @@ inline std::string severityToString(Severity v)
     return std::string(utils::enumToString(details::convDataSeverity, v));
 }
 
-using ThresholdParam = std::tuple<std::string, std::string, uint64_t, double>;
+using ThresholdParam =
+    std::tuple<std::string, std::string, uint64_t, std::string>;
 } // namespace discrete
 
 namespace numeric

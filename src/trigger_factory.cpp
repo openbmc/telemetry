@@ -34,7 +34,7 @@ std::unique_ptr<interfaces::Trigger> TriggerFactory::make(
         const auto& params =
             std::get<std::vector<discrete::ThresholdParam>>(thresholdParams);
         for (const auto& [thresholdName, severityStr, dwellTime,
-                          thresholdValue] : params)
+                          thresholdValueStr] : params)
         {
             discrete::Severity severity =
                 discrete::stringToSeverity(severityStr);
@@ -57,8 +57,8 @@ std::unique_ptr<interfaces::Trigger> TriggerFactory::make(
 
             thresholds.emplace_back(std::make_shared<DiscreteThreshold>(
                 bus->get_io_context(), sensors, sensorNames, std::move(actions),
-                std::chrono::milliseconds(dwellTime), thresholdValue,
-                thresholdName));
+                std::chrono::milliseconds(dwellTime),
+                std::stod(thresholdValueStr), thresholdName));
         }
         if (params.empty())
         {
