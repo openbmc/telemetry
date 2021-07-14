@@ -47,7 +47,7 @@ std::unique_ptr<interfaces::Trigger> TriggerFactory::make(
                 labeledThresholdParam.at_label<ts::Severity>();
             std::chrono::milliseconds dwellTime = std::chrono::milliseconds(
                 labeledThresholdParam.at_label<ts::DwellTime>());
-            double thresholdValue =
+            std::string thresholdValueStr =
                 labeledThresholdParam.at_label<ts::ThresholdValue>();
 
             if (logToJournal)
@@ -68,8 +68,8 @@ std::unique_ptr<interfaces::Trigger> TriggerFactory::make(
 
             thresholds.emplace_back(std::make_shared<DiscreteThreshold>(
                 bus->get_io_context(), sensors, sensorNames, std::move(actions),
-                std::chrono::milliseconds(dwellTime), thresholdValue,
-                thresholdName));
+                std::chrono::milliseconds(dwellTime),
+                std::stod(thresholdValueStr), thresholdName));
         }
         if (labeledDiscreteThresholdParams.empty())
         {

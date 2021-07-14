@@ -76,9 +76,9 @@ TEST_F(TestTriggerManager, addTriggerWithDiscreteThresholds)
 {
     TriggerParams triggerParamsDiscrete;
     auto thresholds = std::vector<discrete::LabeledThresholdParam>{
-        {"discrete_threshold1", discrete::Severity::ok, 10, 11.0},
-        {"discrete_threshold2", discrete::Severity::warning, 10, 12.0},
-        {"discrete_threshold3", discrete::Severity::critical, 10, 13.0}};
+        {"discrete_threshold1", discrete::Severity::ok, 10, "11.0"},
+        {"discrete_threshold2", discrete::Severity::warning, 10, "12.0"},
+        {"discrete_threshold3", discrete::Severity::critical, 10, "13.0"}};
 
     triggerParamsDiscrete.thresholdParams(thresholds).isDiscrete(true);
 
@@ -230,8 +230,8 @@ TEST_F(TestTriggerManagerStorage,
 {
     LabeledTriggerThresholdParams thresholdParams =
         std::vector<discrete::LabeledThresholdParam>{
-            {"userId1", discrete::Severity::warning, 15, 10.0},
-            {"userId2", discrete::Severity::critical, 5, 20.0}};
+            {"userId1", discrete::Severity::warning, 15, "10.0"},
+            {"userId2", discrete::Severity::critical, 5, "20.0"}};
 
     data1["ThresholdParamsDiscriminator"] = thresholdParams.index();
 
