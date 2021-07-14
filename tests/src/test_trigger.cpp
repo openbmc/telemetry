@@ -27,10 +27,10 @@ class TestTrigger : public Test
             .thresholdParams(std::vector<discrete::LabeledThresholdParam>{
                 discrete::LabeledThresholdParam{
                     "userId", discrete::Severity::warning,
-                    std::chrono::milliseconds(10).count(), 15.2},
+                    std::chrono::milliseconds(10).count(), "15.2"},
                 discrete::LabeledThresholdParam{
                     "userId_2", discrete::Severity::critical,
-                    std::chrono::milliseconds(5).count(), 32.7},
+                    std::chrono::milliseconds(5).count(), "32.7"},
             });
 
     std::unique_ptr<TriggerManagerMock> triggerManagerMockPtr =
@@ -341,13 +341,13 @@ TEST_F(TestTriggerStore,
     expectedItem0["userId"] = "userId";
     expectedItem0["severity"] = discrete::Severity::warning;
     expectedItem0["dwellTime"] = 10;
-    expectedItem0["thresholdValue"] = 15.2;
+    expectedItem0["thresholdValue"] = "15.2";
 
     nlohmann::json expectedItem1;
     expectedItem1["userId"] = "userId_2";
     expectedItem1["severity"] = discrete::Severity::critical;
     expectedItem1["dwellTime"] = 5;
-    expectedItem1["thresholdValue"] = 32.7;
+    expectedItem1["thresholdValue"] = "32.7";
 
     ASSERT_THAT(storedDiscreteConfiguration.at("ThresholdParamsDiscriminator"),
                 Eq(1));

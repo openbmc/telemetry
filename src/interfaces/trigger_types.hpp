@@ -39,13 +39,13 @@ inline std::string severityToString(Severity v)
     return std::string(utils::enumToString(details::convDataSeverity, v));
 }
 
-using ThresholdParam = std::tuple<std::string, std::string, uint64_t, double>;
+using ThresholdParam =
+    std::tuple<std::string, std::string, uint64_t, std::string>;
 
-using LabeledThresholdParam =
-    utils::LabeledTuple<std::tuple<std::string, Severity, uint64_t, double>,
-                        utils::tstring::UserId, utils::tstring::Severity,
-                        utils::tstring::DwellTime,
-                        utils::tstring::ThresholdValue>;
+using LabeledThresholdParam = utils::LabeledTuple<
+    std::tuple<std::string, Severity, uint64_t, std::string>,
+    utils::tstring::UserId, utils::tstring::Severity, utils::tstring::DwellTime,
+    utils::tstring::ThresholdValue>;
 } // namespace discrete
 
 namespace numeric
