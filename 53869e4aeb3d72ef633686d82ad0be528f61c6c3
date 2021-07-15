@@ -22,6 +22,30 @@
       "revId": "53869e4aeb3d72ef633686d82ad0be528f61c6c3",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b6b257a6_148910ea",
+        "filename": "tests/src/test_trigger.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2021-07-15T15:35:01Z",
+      "side": 1,
+      "message": "IMO it is good to keep it here though - Trigger elements are grouped by theirs type and so it is more consistent and likely easier to locate them using this layout.\nIt is also a good entry point for extending some of TestTrigger tests by units that cover discrete parameters, i.e.: please check test \u0027checkIfPropertiesAreSet\u0027 which can be extended or split to verify property of discrete threshold.",
+      "parentUuid": "458997b6_f8fdbe2d",
+      "range": {
+        "startLine": 40,
+        "startChar": 29,
+        "endLine": 40,
+        "endChar": 41
+      },
+      "revId": "53869e4aeb3d72ef633686d82ad0be528f61c6c3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }
