@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "de0c7f1a_9d234d36",
+        "filename": "src/interfaces/types.hpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2021-07-15T13:34:46Z",
+      "side": 0,
+      "message": "Can we also move trigger_types.hpp from interfaces/ to types/ - this would make this refactor more consistent.",
+      "revId": "85db8bdfac85e26742926f5aa6a938fe71d10cff",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
