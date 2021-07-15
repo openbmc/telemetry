@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e4bf8c4b_7a20dbc4",
+        "filename": "tests/src/test_metric.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-07-15T12:47:44Z",
+      "side": 1,
+      "message": "Consider using ReadingMetadata(\"\", \"sensor1\").dump() here instead, consider adding dump method to LabeledTuple",
+      "range": {
+        "startLine": 83,
+        "startChar": 32,
+        "endLine": 85,
+        "endChar": 43
+      },
+      "revId": "61ada016adac4edac9a90a794ce83cd2408c0b91",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
