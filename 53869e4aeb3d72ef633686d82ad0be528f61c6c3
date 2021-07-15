@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "458997b6_f8fdbe2d",
+        "filename": "tests/src/test_trigger.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-07-15T12:42:43Z",
+      "side": 1,
+      "message": "It looks like it is only used in line 268 which is different TestTriggerStore.",
+      "range": {
+        "startLine": 40,
+        "startChar": 29,
+        "endLine": 40,
+        "endChar": 41
+      },
+      "revId": "53869e4aeb3d72ef633686d82ad0be528f61c6c3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
