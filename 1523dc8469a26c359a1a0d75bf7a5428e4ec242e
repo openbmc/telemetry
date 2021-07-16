@@ -2,6 +2,121 @@
   "comments": [
     {
       "key": {
+        "uuid": "2ee1a633_9f3a1626",
+        "filename": "src/metric.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2021-07-16T09:55:52Z",
+      "side": 1,
+      "message": "Empty \u0027catch\u0027 exception handler, please define catch operation or rethrow if needed.",
+      "range": {
+        "startLine": 36,
+        "startChar": 0,
+        "endLine": 37,
+        "endChar": 6
+      },
+      "revId": "1523dc8469a26c359a1a0d75bf7a5428e4ec242e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f07a09cf_68e4adb2",
+        "filename": "src/metric.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2021-07-16T09:55:52Z",
+      "side": 1,
+      "message": "If notifier is no found in sensors then generic out of range exception is given, maybe customize exception message like \u0027unknown sensor\u0027 would be more informational?",
+      "range": {
+        "startLine": 73,
+        "startChar": 0,
+        "endLine": 73,
+        "endChar": 30
+      },
+      "revId": "1523dc8469a26c359a1a0d75bf7a5428e4ec242e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "20772af0_0d362a6a",
+        "filename": "src/metric.hpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2021-07-16T09:55:52Z",
+      "side": 1,
+      "message": "Long type definition, maybe type alias by \u0027using\u0027 could give more compact name?",
+      "range": {
+        "startLine": 13,
+        "startChar": 11,
+        "endLine": 13,
+        "endChar": 59
+      },
+      "revId": "1523dc8469a26c359a1a0d75bf7a5428e4ec242e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f3f2fc20_fade9c70",
+        "filename": "src/report.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2021-07-16T09:55:52Z",
+      "side": 1,
+      "message": "[*] Is there a chance to change magical numbers in std::get\u003c\u003e for something more informational?\nI.e. by using enum class?",
+      "range": {
+        "startLine": 37,
+        "startChar": 0,
+        "endLine": 38,
+        "endChar": 35
+      },
+      "revId": "1523dc8469a26c359a1a0d75bf7a5428e4ec242e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2a318051_e8fc4592",
+        "filename": "src/report.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 163,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2021-07-16T09:55:52Z",
+      "side": 1,
+      "message": "Like above in [*], magical numbers make code reading much harder.",
+      "range": {
+        "startLine": 163,
+        "startChar": 0,
+        "endLine": 163,
+        "endChar": 40
+      },
+      "revId": "1523dc8469a26c359a1a0d75bf7a5428e4ec242e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "77be736e_46e5ac96",
         "filename": "src/report_factory.cpp",
         "patchSetId": 7
@@ -18,6 +133,52 @@
         "startChar": 0,
         "endLine": 32,
         "endChar": 37
+      },
+      "revId": "1523dc8469a26c359a1a0d75bf7a5428e4ec242e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "18652435_4cf051ec",
+        "filename": "src/report_manager.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2021-07-16T09:55:52Z",
+      "side": 1,
+      "message": "Same as in [*], please consider dropping magic numbers in the code.",
+      "range": {
+        "startLine": 21,
+        "startChar": 1,
+        "endLine": 22,
+        "endChar": 51
+      },
+      "revId": "1523dc8469a26c359a1a0d75bf7a5428e4ec242e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4c591abf_880a2c5c",
+        "filename": "src/report_manager.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 158,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2021-07-16T09:55:52Z",
+      "side": 1,
+      "message": "If there is only a single reference to utils::tstring namespace then maybe full form of referencing is good enough? I.e.: utils::tstring::OperationType.",
+      "range": {
+        "startLine": 158,
+        "startChar": 50,
+        "endLine": 158,
+        "endChar": 67
       },
       "revId": "1523dc8469a26c359a1a0d75bf7a5428e4ec242e",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
