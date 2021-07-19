@@ -16,6 +16,24 @@
       "revId": "77989f7598d0934b4e92655a5d4c3a3e1b7a74a7",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "479e1b13_13d3589d",
+        "filename": "src/types/types.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-07-19T11:42:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e4a545ee_eaacb316",
+      "revId": "77989f7598d0934b4e92655a5d4c3a3e1b7a74a7",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }
