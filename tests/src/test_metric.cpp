@@ -71,15 +71,22 @@ TEST_F(TestMetric, containsEmptyReadingAfterCreated)
 
 TEST_F(TestMetric, parsesSensorMetadata)
 {
+    using ReadingMetadata =
+        utils::LabeledTuple<std::tuple<std::string, std::string>,
+                            utils::tstring::SensorDbusPath,
+                            utils::tstring::SensorRedfishUri>;
+
     nlohmann::json metadata;
     metadata["MetricProperties"] = {"sensor1", "sensor2"};
 
     sensorMocks = makeSensorMocks(2);
     sut = makeSut(params.metadata(metadata.dump()));
 
-    EXPECT_THAT(sut->getReadings(),
-                ElementsAre(MetricValue{"id", "sensor1", 0., 0u},
-                            MetricValue{"id", "sensor2", 0., 0u}));
+    EXPECT_THAT(
+        sut->getReadings(),
+        ElementsAre(
+            MetricValue{"id", ReadingMetadata("", "sensor1").dump(), 0., 0u},
+            MetricValue{"id", ReadingMetadata("", "sensor2").dump(), 0., 0u}));
 }
 
 TEST_F(TestMetric, parsesSensorMetadataWhenMoreMetadataThanSensors)
