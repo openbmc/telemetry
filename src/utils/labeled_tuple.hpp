@@ -81,6 +81,11 @@ struct LabeledTuple<std::tuple<Args...>, Labels...>
         from_json_all(j, std::make_index_sequence<sizeof...(Args)>());
     }
 
+    std::string dump() const
+    {
+        return to_json().dump();
+    }
+
     template <size_t Idx>
     const auto& at_index() const
     {
