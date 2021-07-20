@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fe505b61_acbc3858",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2021-07-20T16:13:39Z",
+      "side": 1,
+      "message": "Please execute also redfish tests for this modification, there are 4 test cases for numeric triggers and 4 test cases for discrete triggers, different scenarios are covered to assure that storing/restoring triggers works as expected.",
+      "range": {
+        "startLine": 15,
+        "startChar": 0,
+        "endLine": 15,
+        "endChar": 7
+      },
+      "revId": "2776b9edc976c00d297cd4654da6b675be6062be",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4cd23362_5f39e82f",
+        "filename": "src/trigger_factory.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2021-07-20T16:13:39Z",
+      "side": 1,
+      "message": "Maybe you could leave \u0027double thresholdValue \u003d\u0027 as before and do stod conversion here in place?  Less footprint needed in such approach.",
+      "range": {
+        "startLine": 50,
+        "startChar": 12,
+        "endLine": 50,
+        "endChar": 41
+      },
+      "revId": "2776b9edc976c00d297cd4654da6b675be6062be",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b46768bb_c49c8ec8",
+        "filename": "tests/src/test_trigger.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 344,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2021-07-20T16:13:39Z",
+      "side": 1,
+      "message": "Just an observation: very strange representation of threshold value, I would suggest to reconsider keeping double for such values, and go on with string here only as a last resort.",
+      "range": {
+        "startLine": 344,
+        "startChar": 38,
+        "endLine": 344,
+        "endChar": 44
+      },
+      "revId": "2776b9edc976c00d297cd4654da6b675be6062be",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
