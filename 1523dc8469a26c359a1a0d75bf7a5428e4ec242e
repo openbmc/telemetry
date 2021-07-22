@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "b8b55207_90bb3888",
+        "filename": "src/metric.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2021-07-22T10:28:09Z",
+      "side": 1,
+      "message": "Maybe it would be good to add a comment with short clarification in the code in here?\nLooking at the constructor with empty \u0027catch\u0027 is confusing on first sight.",
+      "parentUuid": "3577a93c_6f4f471b",
+      "range": {
+        "startLine": 36,
+        "startChar": 0,
+        "endLine": 37,
+        "endChar": 6
+      },
+      "revId": "1523dc8469a26c359a1a0d75bf7a5428e4ec242e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "f07a09cf_68e4adb2",
         "filename": "src/metric.cpp",
         "patchSetId": 7
@@ -93,6 +117,30 @@
       "revId": "1523dc8469a26c359a1a0d75bf7a5428e4ec242e",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c76536c6_07bf533d",
+        "filename": "src/metric.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2021-07-22T10:28:09Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "702b813e_a8a76d41",
+      "range": {
+        "startLine": 73,
+        "startChar": 0,
+        "endLine": 73,
+        "endChar": 30
+      },
+      "revId": "1523dc8469a26c359a1a0d75bf7a5428e4ec242e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     },
     {
       "key": {
@@ -163,6 +211,30 @@
       "revId": "1523dc8469a26c359a1a0d75bf7a5428e4ec242e",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "dfded225_1e852d16",
+        "filename": "src/report.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2021-07-22T10:28:09Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "63465d4b_102a9086",
+      "range": {
+        "startLine": 37,
+        "startChar": 0,
+        "endLine": 38,
+        "endChar": 35
+      },
+      "revId": "1523dc8469a26c359a1a0d75bf7a5428e4ec242e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     },
     {
       "key": {
@@ -307,6 +379,30 @@
     },
     {
       "key": {
+        "uuid": "e3e31bc0_f211c827",
+        "filename": "src/report_manager.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2021-07-22T10:28:09Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "552bb4e5_45e19d41",
+      "range": {
+        "startLine": 21,
+        "startChar": 1,
+        "endLine": 22,
+        "endChar": 51
+      },
+      "revId": "1523dc8469a26c359a1a0d75bf7a5428e4ec242e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4c591abf_880a2c5c",
         "filename": "src/report_manager.cpp",
         "patchSetId": 7
@@ -351,6 +447,30 @@
       "revId": "1523dc8469a26c359a1a0d75bf7a5428e4ec242e",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4500aa71_e712e544",
+        "filename": "src/report_manager.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 158,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2021-07-22T10:28:09Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "32d33549_27a5607d",
+      "range": {
+        "startLine": 158,
+        "startChar": 50,
+        "endLine": 158,
+        "endChar": 67
+      },
+      "revId": "1523dc8469a26c359a1a0d75bf7a5428e4ec242e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     },
     {
       "key": {
