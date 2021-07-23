@@ -16,8 +16,8 @@ class TriggerFactory : public interfaces::TriggerFactory
                    interfaces::ReportManager& reportManager);
 
     std::unique_ptr<interfaces::Trigger>
-        make(const std::string& name, bool isDiscrete, bool logToJournal,
-             bool logToRedfish, bool updateReport,
+        make(const std::string& name,
+             const std::vector<std::string>& triggerActions,
              const std::vector<std::string>& reportNames,
              interfaces::TriggerManager& triggerManager,
              interfaces::JsonStorage& triggerStorage,
