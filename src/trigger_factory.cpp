@@ -21,8 +21,7 @@ TriggerFactory::TriggerFactory(
 {}
 
 std::unique_ptr<interfaces::Trigger> TriggerFactory::make(
-    const std::string& name, bool isDiscrete, bool logToJournal,
-    bool logToRedfish, bool updateReport,
+    const std::string& name, const std::vector<std::string>& triggerActionsIn,
     const std::vector<std::string>& reportNames,
     interfaces::TriggerManager& triggerManager,
     interfaces::JsonStorage& triggerStorage,
@@ -30,9 +29,15 @@ std::unique_ptr<interfaces::Trigger> TriggerFactory::make(
     const std::vector<LabeledSensorInfo>& labeledSensorsInfo) const
 {
     const auto& [sensors, sensorNames] = getSensors(labeledSensorsInfo);
+    std::vector<TriggerAction> triggerActions;
+    std::transform(triggerActionsIn.begin(), triggerActionsIn.end(),
+                   std::back_inserter(triggerActions),
+                   [](auto& triggerActionStr) {
+                       return stringToTriggerAction(triggerActionStr);
+                   });
     std::vector<std::shared_ptr<interfaces::Threshold>> thresholds;
 
-    if (isDiscrete)
+    if (isTriggerThresholdDiscrete(labeledThresholdParams))
     {
         const auto& labeledDiscreteThresholdParams =
             std::get<std::vector<discrete::LabeledThresholdParam>>(
@@ -50,21 +55,8 @@ std::unique_ptr<interfaces::Trigger> TriggerFactory::make(
             std::string thresholdValue =
                 labeledThresholdParam.at_label<ts::ThresholdValue>();
 
-            if (logToJournal)
-            {
-                actions.emplace_back(
-                    std::make_unique<action::discrete::LogToJournal>(severity));
-            }
-            if (logToRedfish)
-            {
-                actions.emplace_back(
-                    std::make_unique<action::discrete::LogToRedfish>(severity));
-            }
-            if (updateReport)
-            {
-                actions.emplace_back(std::make_unique<action::UpdateReport>(
-                    reportManager, reportNames));
-            }
+            action::discrete::fillActions(actions, triggerActions, severity,
+                                          reportManager, reportNames);
 
             thresholds.emplace_back(std::make_shared<DiscreteThreshold>(
                 bus->get_io_context(), sensors, sensorNames, std::move(actions),
@@ -74,23 +66,8 @@ std::unique_ptr<interfaces::Trigger> TriggerFactory::make(
         if (labeledDiscreteThresholdParams.empty())
         {
             std::vector<std::unique_ptr<interfaces::TriggerAction>> actions;
-            if (logToJournal)
-            {
-                actions.emplace_back(
-                    std::make_unique<
-                        action::discrete::onChange::LogToJournal>());
-            }
-            if (logToRedfish)
-            {
-                actions.emplace_back(
-                    std::make_unique<
-                        action::discrete::onChange::LogToRedfish>());
-            }
-            if (updateReport)
-            {
-                actions.emplace_back(std::make_unique<action::UpdateReport>(
-                    reportManager, reportNames));
-            }
+            action::discrete::onChange::fillActions(actions, triggerActions,
+                                                    reportManager, reportNames);
 
             thresholds.emplace_back(std::make_shared<OnChangeThreshold>(
                 sensors, sensorNames, std::move(actions)));
@@ -112,25 +89,9 @@ std::unique_ptr<interfaces::Trigger> TriggerFactory::make(
             auto thresholdValue =
                 double{labeledThresholdParam.at_label<ts::ThresholdValue>()};
 
-            if (logToJournal)
-            {
-                actions.emplace_back(
-                    std::make_unique<action::numeric::LogToJournal>(
-                        type, thresholdValue));
-            }
-
-            if (logToRedfish)
-            {
-                actions.emplace_back(
-                    std::make_unique<action::numeric::LogToRedfish>(
-                        type, thresholdValue));
-            }
-
-            if (updateReport)
-            {
-                actions.emplace_back(std::make_unique<action::UpdateReport>(
-                    reportManager, reportNames));
-            }
+            action::numeric::fillActions(actions, triggerActions, type,
+                                         thresholdValue, reportManager,
+                                         reportNames);
 
             thresholds.emplace_back(std::make_shared<NumericThreshold>(
                 bus->get_io_context(), sensors, sensorNames, std::move(actions),
@@ -139,10 +100,9 @@ std::unique_ptr<interfaces::Trigger> TriggerFactory::make(
     }
 
     return std::make_unique<Trigger>(
-        bus->get_io_context(), objServer, name, isDiscrete, logToJournal,
-        logToRedfish, updateReport, reportNames, labeledSensorsInfo,
-        labeledThresholdParams, std::move(thresholds), triggerManager,
-        triggerStorage);
+        bus->get_io_context(), objServer, name, triggerActionsIn, reportNames,
+        labeledSensorsInfo, labeledThresholdParams, std::move(thresholds),
+        triggerManager, triggerStorage);
 }
 
 std::pair<Sensors, std::vector<std::string>> TriggerFactory::getSensors(

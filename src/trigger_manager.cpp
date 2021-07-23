@@ -21,8 +21,8 @@ TriggerManager::TriggerManager(
             iface.register_method(
                 "AddTrigger",
                 [this](boost::asio::yield_context& yield,
-                       const std::string& name, bool isDiscrete,
-                       bool logToJournal, bool logToRedfish, bool updateReport,
+                       const std::string& name,
+                       const std::vector<std::string>& triggerActions,
                        const SensorsInfo& sensors,
                        const std::vector<std::string>& reportNames,
                        const TriggerThresholdParamsExt& thresholds) {
@@ -34,9 +34,8 @@ TriggerManager::TriggerManager(
                     std::vector<LabeledSensorInfo> labeledSensorsInfo =
                         triggerFactory->getLabeledSensorsInfo(yield, sensors);
 
-                    return addTrigger(name, isDiscrete, logToJournal,
-                                      logToRedfish, updateReport,
-                                      labeledSensorsInfo, reportNames,
+                    return addTrigger(name, triggerActions, labeledSensorsInfo,
+                                      reportNames,
                                       labeledTriggerThresholdParams)
                         .getPath();
                 });
@@ -51,9 +50,7 @@ void TriggerManager::removeTrigger(const interfaces::Trigger* trigger)
         triggers.end());
 }
 
-void TriggerManager::verifyAddTrigger(
-    const std::string& triggerName, bool isDiscrete,
-    const LabeledTriggerThresholdParams& thresholdParams)
+void TriggerManager::verifyAddTrigger(const std::string& triggerName)
 {
     if (triggers.size() >= maxTriggers)
     {
@@ -73,18 +70,17 @@ void TriggerManager::verifyAddTrigger(
 }
 
 interfaces::Trigger& TriggerManager::addTrigger(
-    const std::string& triggerName, bool isDiscrete, bool logToJournal,
-    bool logToRedfish, bool updateReport,
+    const std::string& triggerName,
+    const std::vector<std::string>& triggerActions,
     const std::vector<LabeledSensorInfo>& labeledSensorsInfo,
     const std::vector<std::string>& reportNames,
     const LabeledTriggerThresholdParams& labeledThresholdParams)
 {
-    verifyAddTrigger(triggerName, isDiscrete, labeledThresholdParams);
+    verifyAddTrigger(triggerName);
 
     triggers.emplace_back(triggerFactory->make(
-        triggerName, isDiscrete, logToJournal, logToRedfish, updateReport,
-        reportNames, *this, *triggerStorage, labeledThresholdParams,
-        labeledSensorsInfo));
+        triggerName, triggerActions, reportNames, *this, *triggerStorage,
+        labeledThresholdParams, labeledSensorsInfo));
 
     return *triggers.back();
 }
@@ -111,10 +107,8 @@ void TriggerManager::loadFromPersistent()
             const std::string& name = data->at("Name").get_ref<std::string&>();
             int thresholdParamsDiscriminator =
                 data->at("ThresholdParamsDiscriminator").get<int>();
-            bool isDiscrete = data->at("IsDiscrete").get<bool>();
-            bool logToJournal = data->at("LogToJournal").get<bool>();
-            bool logToRedfish = data->at("LogToRedfish").get<bool>();
-            bool updateReport = data->at("UpdateReport").get<bool>();
+            const std::vector<std::string> triggerActions =
+                data->at("TriggerActions").get<std::vector<std::string>>();
 
             LabeledTriggerThresholdParams labeledThresholdParams;
             if (0 == thresholdParamsDiscriminator)
@@ -136,8 +130,7 @@ void TriggerManager::loadFromPersistent()
             auto labeledSensorsInfo =
                 data->at("Sensors").get<std::vector<LabeledSensorInfo>>();
 
-            addTrigger(name, isDiscrete, logToJournal, logToRedfish,
-                       updateReport, labeledSensorsInfo, reportNames,
+            addTrigger(name, triggerActions, labeledSensorsInfo, reportNames,
                        labeledThresholdParams);
         }
         catch (const std::exception& e)
