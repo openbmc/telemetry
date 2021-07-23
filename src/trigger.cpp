@@ -10,19 +10,16 @@
 Trigger::Trigger(
     boost::asio::io_context& ioc,
     const std::shared_ptr<sdbusplus::asio::object_server>& objServer,
-    const std::string& nameIn, const bool isDiscreteIn,
-    const bool logToJournalIn, const bool logToRedfishIn,
-    const bool updateReportIn, const std::vector<std::string>& reportNamesIn,
+    const std::string& nameIn, const std::vector<std::string>& triggerActionsIn,
+    const std::vector<std::string>& reportNamesIn,
     const std::vector<LabeledSensorInfo>& LabeledSensorsInfoIn,
     const LabeledTriggerThresholdParams& labeledThresholdParamsIn,
     std::vector<std::shared_ptr<interfaces::Threshold>>&& thresholdsIn,
     interfaces::TriggerManager& triggerManager,
     interfaces::JsonStorage& triggerStorageIn) :
     name(nameIn),
-    isDiscrete(isDiscreteIn), logToJournal(logToJournalIn),
-    logToRedfish(logToRedfishIn), updateReport(updateReportIn),
-    path(triggerDir + name), reportNames(reportNamesIn),
-    labeledSensorsInfo(LabeledSensorsInfoIn),
+    triggerActions(std::move(triggerActionsIn)), path(triggerDir + name),
+    reportNames(reportNamesIn), labeledSensorsInfo(LabeledSensorsInfoIn),
     labeledThresholdParams(labeledThresholdParamsIn),
     thresholds(std::move(thresholdsIn)),
     fileName(std::to_string(std::hash<std::string>{}(name))),
@@ -42,9 +39,7 @@ Trigger::Trigger(
         });
 
     triggerIface = objServer->add_unique_interface(
-        path, triggerIfaceName,
-        [this, isDiscreteIn, logToJournalIn, logToRedfishIn,
-         updateReportIn](auto& dbusIface) {
+        path, triggerIfaceName, [this](auto& dbusIface) {
             persistent = storeConfiguration();
             dbusIface.register_property_rw(
                 "Persistent", persistent,
@@ -84,22 +79,19 @@ Trigger::Trigger(
                 });
 
             dbusIface.register_property_r(
-
                 "ReportNames", reportNames,
                 sdbusplus::vtable::property_::emits_change,
                 [](const auto& x) { return x; });
-            dbusIface.register_property_r("Discrete", isDiscrete,
+
+            dbusIface.register_property_r(
+                "Discrete", false, sdbusplus::vtable::property_::const_,
+                [this](const auto& x) {
+                    return isTriggerThresholdDiscrete(labeledThresholdParams);
+                });
+
+            dbusIface.register_property_r("TriggerActions", triggerActions,
                                           sdbusplus::vtable::property_::const_,
-                                          [](const auto& x) { return x; });
-            dbusIface.register_property_r("LogToJournal", logToJournal,
-                                          sdbusplus::vtable::property_::const_,
-                                          [](const auto& x) { return x; });
-            dbusIface.register_property_r("LogToRedfish", logToRedfish,
-                                          sdbusplus::vtable::property_::const_,
-                                          [](const auto& x) { return x; });
-            dbusIface.register_property_r("UpdateReport", updateReport,
-                                          sdbusplus::vtable::property_::const_,
-                                          [](const auto& x) { return x; });
+                                          [this](const auto& x) { return x; });
         });
 
     for (const auto& threshold : thresholds)
@@ -117,10 +109,7 @@ bool Trigger::storeConfiguration() const
         data["Version"] = triggerVersion;
         data["Name"] = name;
         data["ThresholdParamsDiscriminator"] = labeledThresholdParams.index();
-        data["IsDiscrete"] = labeledThresholdParams.index() == 1;
-        data["LogToJournal"] = logToJournal;
-        data["LogToRedfish"] = logToRedfish;
-        data["UpdateReport"] = updateReport;
+        data["TriggerActions"] = triggerActions;
         data["ThresholdParams"] =
             utils::labeledThresholdParamsToJson(labeledThresholdParams);
         data["ReportNames"] = reportNames;

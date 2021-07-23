@@ -16,9 +16,8 @@ class Trigger : public interfaces::Trigger
   public:
     Trigger(boost::asio::io_context& ioc,
             const std::shared_ptr<sdbusplus::asio::object_server>& objServer,
-            const std::string& name, const bool isDiscrete,
-            const bool logToJournal, const bool logToRedfish,
-            const bool updateReport,
+            const std::string& name,
+            const std::vector<std::string>& triggerActions,
             const std::vector<std::string>& reportNames,
             const std::vector<LabeledSensorInfo>& LabeledSensorsInfoIn,
             const LabeledTriggerThresholdParams& labeledThresholdParamsIn,
@@ -45,10 +44,7 @@ class Trigger : public interfaces::Trigger
 
   private:
     const std::string name;
-    bool isDiscrete;
-    bool logToJournal;
-    bool logToRedfish;
-    bool updateReport;
+    std::vector<std::string> triggerActions;
     const std::string path;
     bool persistent = false;
     std::vector<std::string> reportNames;

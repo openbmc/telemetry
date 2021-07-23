@@ -21,36 +21,15 @@ class TriggerParams
         return nameProperty;
     }
 
-    TriggerParams& isDiscrete(bool val)
+    TriggerParams& triggerActions(const std::vector<std::string>& val)
     {
-        discreteProperty = val;
+        triggerActionsProperty = val;
         return *this;
     }
 
-    bool isDiscrete() const
+    const std::vector<std::string>& triggerActions() const
     {
-        return discreteProperty;
-    }
-
-    bool logToJournal() const
-    {
-        return logToJournalProperty;
-    }
-
-    bool logToRedfish() const
-    {
-        return logToRedfishProperty;
-    }
-
-    TriggerParams& updateReport(bool updateReport)
-    {
-        updateReportProperty = updateReport;
-        return *this;
-    }
-
-    bool updateReport() const
-    {
-        return updateReportProperty;
+        return triggerActionsProperty;
     }
 
     const std::vector<LabeledSensorInfo>& sensors() const
@@ -76,10 +55,8 @@ class TriggerParams
 
   private:
     std::string nameProperty = "Trigger1";
-    bool discreteProperty = false;
-    bool logToJournalProperty = false;
-    bool logToRedfishProperty = false;
-    bool updateReportProperty = true;
+    std::vector<std::string> triggerActionsProperty;
+
     std::vector<LabeledSensorInfo> labeledSensorsProperty = {
         {"service1", "/xyz/openbmc_project/sensors/temperature/BMC_Temp",
          "metadata1"}};

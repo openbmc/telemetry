@@ -95,6 +95,39 @@ void LogToRedfish::commit(const std::string& sensorName, uint64_t timestamp,
                                  getDirection(value, threshold)));
 }
 
+void fillActions(
+    std::vector<std::unique_ptr<interfaces::TriggerAction>>& actionsIf,
+    const std::vector<TriggerAction>& ActionsEnum, ::numeric::Type type,
+    double thresholdValue, interfaces::ReportManager& reportManager,
+    const std::vector<std::string>& reportNames)
+{
+    actionsIf.reserve(ActionsEnum.size());
+    for (auto actionType : ActionsEnum)
+    {
+        switch (actionType)
+        {
+            case TriggerAction::LogToLogService:
+            {
+                actionsIf.emplace_back(
+                    std::make_unique<LogToJournal>(type, thresholdValue));
+                break;
+            }
+            case TriggerAction::RedfishEvent:
+            {
+                actionsIf.emplace_back(
+                    std::make_unique<LogToRedfish>(type, thresholdValue));
+                break;
+            }
+            case TriggerAction::UpdateReport:
+            {
+                actionsIf.emplace_back(
+                    std::make_unique<UpdateReport>(reportManager, reportNames));
+                break;
+            }
+        }
+    }
+}
+
 } // namespace numeric
 
 namespace discrete
@@ -148,6 +181,39 @@ void LogToRedfish::commit(const std::string& sensorName, uint64_t timestamp,
                                  sensorName.c_str(), value, timestamp));
 }
 
+void fillActions(
+    std::vector<std::unique_ptr<interfaces::TriggerAction>>& actionsIf,
+    const std::vector<TriggerAction>& ActionsEnum,
+    ::discrete::Severity severity, interfaces::ReportManager& reportManager,
+    const std::vector<std::string>& reportNames)
+{
+    actionsIf.reserve(ActionsEnum.size());
+    for (auto actionType : ActionsEnum)
+    {
+        switch (actionType)
+        {
+            case TriggerAction::LogToLogService:
+            {
+                actionsIf.emplace_back(
+                    std::make_unique<LogToJournal>(severity));
+                break;
+            }
+            case TriggerAction::RedfishEvent:
+            {
+                actionsIf.emplace_back(
+                    std::make_unique<LogToRedfish>(severity));
+                break;
+            }
+            case TriggerAction::UpdateReport:
+            {
+                actionsIf.emplace_back(
+                    std::make_unique<UpdateReport>(reportManager, reportNames));
+                break;
+            }
+        }
+    }
+}
+
 namespace onChange
 {
 void LogToJournal::commit(const std::string& sensorName, uint64_t timestamp,
@@ -169,6 +235,37 @@ void LogToRedfish::commit(const std::string& sensorName, uint64_t timestamp,
         phosphor::logging::entry("REDFISH_MESSAGE_ID=%s", messageId),
         phosphor::logging::entry("REDFISH_MESSAGE_ARGS=%s,%f,%llu",
                                  sensorName.c_str(), value, timestamp));
+}
+
+void fillActions(
+    std::vector<std::unique_ptr<interfaces::TriggerAction>>& actionsIf,
+    const std::vector<TriggerAction>& ActionsEnum,
+    interfaces::ReportManager& reportManager,
+    const std::vector<std::string>& reportNames)
+{
+    actionsIf.reserve(ActionsEnum.size());
+    for (auto actionType : ActionsEnum)
+    {
+        switch (actionType)
+        {
+            case TriggerAction::LogToLogService:
+            {
+                actionsIf.emplace_back(std::make_unique<LogToJournal>());
+                break;
+            }
+            case TriggerAction::RedfishEvent:
+            {
+                actionsIf.emplace_back(std::make_unique<LogToRedfish>());
+                break;
+            }
+            case TriggerAction::UpdateReport:
+            {
+                actionsIf.emplace_back(
+                    std::make_unique<UpdateReport>(reportManager, reportNames));
+                break;
+            }
+        }
+    }
 }
 } // namespace onChange
 } // namespace discrete

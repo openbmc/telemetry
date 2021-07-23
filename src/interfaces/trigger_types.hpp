@@ -10,6 +10,32 @@
 #include <variant>
 #include <vector>
 
+enum class TriggerAction
+{
+    LogToLogService = 0,
+    RedfishEvent,
+    UpdateReport,
+};
+
+namespace details
+{
+constexpr std::array<std::pair<std::string_view, TriggerAction>, 3>
+    convDataTriggerAction = {
+        std::make_pair("LogToLogService", TriggerAction::LogToLogService),
+        std::make_pair("RedfishEvent", TriggerAction::RedfishEvent),
+        std::make_pair("UpdateReport", TriggerAction::UpdateReport)};
+}
+
+inline TriggerAction stringToTriggerAction(const std::string& str)
+{
+    return utils::stringToEnum(details::convDataTriggerAction, str);
+}
+
+inline std::string triggerActionToString(TriggerAction v)
+{
+    return std::string(utils::enumToString(details::convDataTriggerAction, v));
+}
+
 namespace discrete
 {
 
@@ -130,3 +156,10 @@ using TriggerThresholdParams =
 using LabeledTriggerThresholdParams =
     std::variant<std::vector<numeric::LabeledThresholdParam>,
                  std::vector<discrete::LabeledThresholdParam>>;
+
+inline bool
+    isTriggerThresholdDiscrete(const LabeledTriggerThresholdParams& params)
+{
+    return std::get_if<std::vector<discrete::LabeledThresholdParam>>(&params) !=
+           nullptr;
+}

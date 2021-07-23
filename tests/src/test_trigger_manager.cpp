@@ -29,8 +29,7 @@ class TestTriggerManager : public Test
             },
             DbusEnvironment::serviceName(), TriggerManager::triggerManagerPath,
             TriggerManager::triggerManagerIfaceName, "AddTrigger",
-            params.name(), params.isDiscrete(), params.logToJournal(),
-            params.logToRedfish(), params.updateReport(), sensorInfos,
+            params.name(), params.triggerActions(), sensorInfos,
             params.reportNames(),
             std::visit(utils::FromLabeledThresholdParamConversion(),
                        params.thresholdParams()));
@@ -80,7 +79,7 @@ TEST_F(TestTriggerManager, addTriggerWithDiscreteThresholds)
         {"discrete_threshold2", discrete::Severity::warning, 10, "12.0"},
         {"discrete_threshold3", discrete::Severity::critical, 10, "13.0"}};
 
-    triggerParamsDiscrete.thresholdParams(thresholds).isDiscrete(true);
+    triggerParamsDiscrete.thresholdParams(thresholds);
 
     auto [ec, path] = addTrigger(triggerParamsDiscrete);
     EXPECT_THAT(ec.value(), Eq(boost::system::errc::success));
@@ -92,7 +91,7 @@ TEST_F(TestTriggerManager, addDiscreteTriggerWithoutThresholds)
     TriggerParams triggerParamsDiscrete;
     auto thresholds = std::vector<discrete::LabeledThresholdParam>();
 
-    triggerParamsDiscrete.thresholdParams(thresholds).isDiscrete(true);
+    triggerParamsDiscrete.thresholdParams(thresholds);
 
     auto [ec, path] = addTrigger(triggerParamsDiscrete);
     EXPECT_THAT(ec.value(), Eq(boost::system::errc::success));
@@ -203,10 +202,7 @@ class TestTriggerManagerStorage : public TestTriggerManager
         {"Name", TriggerParams().name()},
         {"ThresholdParamsDiscriminator",
          TriggerParams().thresholdParams().index()},
-        {"IsDiscrete", TriggerParams().isDiscrete()},
-        {"LogToJournal", TriggerParams().logToJournal()},
-        {"LogToRedfish", TriggerParams().logToRedfish()},
-        {"UpdateReport", TriggerParams().updateReport()},
+        {"TriggerActions", TriggerParams().triggerActions()},
         {"ThresholdParams", utils::labeledThresholdParamsToJson(
                                 TriggerParams().thresholdParams())},
         {"ReportNames", TriggerParams().reportNames()},
