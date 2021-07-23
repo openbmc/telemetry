@@ -30,12 +30,11 @@ class TriggerManager : public interfaces::TriggerManager
     std::unique_ptr<sdbusplus::asio::dbus_interface> managerIface;
     std::vector<std::unique_ptr<interfaces::Trigger>> triggers;
 
-    void verifyAddTrigger(const std::string& triggerName, bool isDiscrete,
-                          const LabeledTriggerThresholdParams& thresholdParams);
+    void verifyAddTrigger(const std::string& triggerName);
 
     interfaces::Trigger&
-        addTrigger(const std::string& triggerName, bool isDiscrete,
-                   bool logToJournal, bool logToRedfish, bool updateReport,
+        addTrigger(const std::string& triggerName,
+                   const std::vector<std::string>& triggerActions,
                    const std::vector<LabeledSensorInfo>& labeledSensors,
                    const std::vector<std::string>& reportNames,
                    const LabeledTriggerThresholdParams& labeledThresholdParams);

@@ -40,6 +40,12 @@ class LogToRedfish : public interfaces::TriggerAction
 
     const char* getMessageId() const;
 };
+
+void fillActions(
+    std::vector<std::unique_ptr<interfaces::TriggerAction>>& actionsIf,
+    const std::vector<TriggerAction>& ActionsEnum, ::numeric::Type type,
+    double thresholdValue, interfaces::ReportManager& reportManager,
+    const std::vector<std::string>& reportNames);
 } // namespace numeric
 
 namespace discrete
@@ -74,6 +80,12 @@ class LogToRedfish : public interfaces::TriggerAction
     const char* getMessageId() const;
 };
 
+void fillActions(
+    std::vector<std::unique_ptr<interfaces::TriggerAction>>& actionsIf,
+    const std::vector<TriggerAction>& ActionsEnum,
+    ::discrete::Severity severity, interfaces::ReportManager& reportManager,
+    const std::vector<std::string>& reportNames);
+
 namespace onChange
 {
 class LogToJournal : public interfaces::TriggerAction
@@ -95,6 +107,12 @@ class LogToRedfish : public interfaces::TriggerAction
     void commit(const std::string& id, uint64_t timestamp,
                 double value) override;
 };
+
+void fillActions(
+    std::vector<std::unique_ptr<interfaces::TriggerAction>>& actionsIf,
+    const std::vector<TriggerAction>& ActionsEnum,
+    interfaces::ReportManager& reportManager,
+    const std::vector<std::string>& reportNames);
 } // namespace onChange
 
 } // namespace discrete
