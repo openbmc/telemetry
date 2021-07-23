@@ -15,15 +15,15 @@ class TriggerFactoryMock : public interfaces::TriggerFactory
     {
         using namespace testing;
 
-        ON_CALL(*this, make(A<const std::string&>(), _, _, _, _, _, _, _, _, _))
+        ON_CALL(*this, make(A<const std::string&>(), _, _, _, _, _, _))
             .WillByDefault(WithArgs<0>(Invoke([](const std::string& name) {
                 return std::make_unique<NiceMock<TriggerMock>>(name);
             })));
     }
 
     MOCK_METHOD(std::unique_ptr<interfaces::Trigger>, make,
-                (const std::string& name, bool isDiscrete, bool logToJournal,
-                 bool logToRedfish, bool updateReport,
+                (const std::string& name,
+                 const std::vector<std::string>& triggerActions,
                  const std::vector<std::string>& reportNames,
                  interfaces::TriggerManager& triggerManager,
                  interfaces::JsonStorage& triggerStorage,
@@ -53,11 +53,9 @@ class TriggerFactoryMock : public interfaces::TriggerFactory
                 .WillByDefault(Return(params.sensors()));
 
             return EXPECT_CALL(
-                *this,
-                make(params.name(), params.isDiscrete(), params.logToJournal(),
-                     params.logToRedfish(), params.updateReport(),
-                     params.reportNames(), tm, triggerStorage,
-                     params.thresholdParams(), params.sensors()));
+                *this, make(params.name(), params.triggerActions(),
+                            params.reportNames(), tm, triggerStorage,
+                            params.thresholdParams(), params.sensors()));
         }
         else
         {
@@ -69,8 +67,8 @@ class TriggerFactoryMock : public interfaces::TriggerFactory
             ON_CALL(*this, getLabeledSensorsInfo(_, _))
                 .WillByDefault(Return(dummy));
 
-            return EXPECT_CALL(
-                *this, make(_, _, _, _, _, _, tm, triggerStorage, _, dummy));
+            return EXPECT_CALL(*this,
+                               make(_, _, _, tm, triggerStorage, _, dummy));
         }
     }
 };

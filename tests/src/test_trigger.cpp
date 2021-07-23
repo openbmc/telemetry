@@ -23,7 +23,6 @@ class TestTrigger : public Test
     TriggerParams triggerDiscreteParams =
         TriggerParams()
             .name("Trigger2")
-            .isDiscrete(true)
             .thresholdParams(std::vector<discrete::LabeledThresholdParam>{
                 discrete::LabeledThresholdParam{
                     "userId", discrete::Severity::warning,
@@ -56,8 +55,7 @@ class TestTrigger : public Test
     {
         return std::make_unique<Trigger>(
             DbusEnvironment::getIoc(), DbusEnvironment::getObjServer(),
-            params.name(), params.isDiscrete(), params.logToJournal(),
-            params.logToRedfish(), params.updateReport(), params.reportNames(),
+            params.name(), params.triggerActions(), params.reportNames(),
             params.sensors(), params.thresholdParams(),
             std::vector<std::shared_ptr<interfaces::Threshold>>{},
             *triggerManagerMockPtr, storageMock);
@@ -122,14 +120,9 @@ class TestTrigger : public Test
 TEST_F(TestTrigger, checkIfPropertiesAreSet)
 {
     EXPECT_THAT(getProperty<bool>(sut->getPath(), "Persistent"), Eq(true));
-    EXPECT_THAT(getProperty<bool>(sut->getPath(), "Discrete"),
-                Eq(triggerParams.isDiscrete()));
-    EXPECT_THAT(getProperty<bool>(sut->getPath(), "LogToJournal"),
-                Eq(triggerParams.logToJournal()));
-    EXPECT_THAT(getProperty<bool>(sut->getPath(), "LogToRedfish"),
-                Eq(triggerParams.logToRedfish()));
-    EXPECT_THAT(getProperty<bool>(sut->getPath(), "UpdateReport"),
-                Eq(triggerParams.updateReport()));
+    EXPECT_THAT(
+        getProperty<std::vector<std::string>>(sut->getPath(), "TriggerActions"),
+        Eq(triggerParams.triggerActions()));
     EXPECT_THAT((getProperty<SensorsInfo>(sut->getPath(), "Sensors")),
                 Eq(utils::fromLabeledSensorsInfo(triggerParams.sensors())));
     EXPECT_THAT(
@@ -274,28 +267,10 @@ TEST_F(TestTriggerStore, settingPersistencyToTrueStoresTriggerName)
     ASSERT_THAT(storedConfiguration.at("Name"), Eq(triggerParams.name()));
 }
 
-TEST_F(TestTriggerStore, settingPersistencyToTrueStoresTriggerIsDiscrete)
+TEST_F(TestTriggerStore, settingPersistencyToTrueStoresTriggerTriggerActions)
 {
-    ASSERT_THAT(storedConfiguration.at("IsDiscrete"),
-                Eq(triggerParams.isDiscrete()));
-}
-
-TEST_F(TestTriggerStore, settingPersistencyToTrueStoresTriggerLogToJournal)
-{
-    ASSERT_THAT(storedConfiguration.at("LogToJournal"),
-                Eq(triggerParams.logToRedfish()));
-}
-
-TEST_F(TestTriggerStore, settingPersistencyToTrueStoresTriggerLogToRedfish)
-{
-    ASSERT_THAT(storedConfiguration.at("LogToRedfish"),
-                Eq(triggerParams.logToRedfish()));
-}
-
-TEST_F(TestTriggerStore, settingPersistencyToTrueStoresTriggerUpdateReport)
-{
-    ASSERT_THAT(storedConfiguration.at("UpdateReport"),
-                Eq(triggerParams.updateReport()));
+    ASSERT_THAT(storedConfiguration.at("TriggerActions"),
+                Eq(triggerParams.triggerActions()));
 }
 
 TEST_F(TestTriggerStore, settingPersistencyToTrueStoresTriggerReportNames)
