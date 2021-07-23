@@ -15,6 +15,9 @@ project(
     license: 'Apache-2.0',
 )
 
+summary({'Fast build with link-time optimizer disabled':
+            not get_option('b_lto')}, section: 'General')
+
 cpp = meson.get_compiler('cpp')
 add_project_arguments(
     cpp.get_supported_arguments([

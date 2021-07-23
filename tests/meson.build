@@ -56,7 +56,8 @@ test(
             phosphor_logging,
             sdbusplus,
         ],
-        include_directories: ['../src', 'src']
+        include_directories: ['../src', 'src'],
+        cpp_args: '-fno-lto'
     ),
     timeout: 120,
 )
