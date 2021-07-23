@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0df4fd44_4d3c96b2",
+        "filename": "src/metric.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2021-07-23T11:51:00Z",
+      "side": 1,
+      "message": "There is a redundancy of aliases: ReadingMetadata set here and in tests/src/test_metric.cpp:74. Can it be updated by increasing visibility of single alias ReadingMetadata for use here and in test_metric.cpp?",
+      "range": {
+        "startLine": 75,
+        "startChar": 10,
+        "endLine": 75,
+        "endChar": 25
+      },
+      "revId": "b37beb35b09acd6c5a6466848cb154ae8d664fd3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
