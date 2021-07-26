@@ -46,6 +46,30 @@
       "revId": "b37beb35b09acd6c5a6466848cb154ae8d664fd3",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "46c7b819_4fb49de6",
+        "filename": "src/metric.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2021-07-26T08:52:37Z",
+      "side": 1,
+      "message": "Ok, but still in case of related change need there are two places in the code to update.\n\nAdditionally, you have created labels for tuples but these labels are not used later on in the code, seems it makes sense only for readability.",
+      "parentUuid": "13ed3675_fa670761",
+      "range": {
+        "startLine": 75,
+        "startChar": 10,
+        "endLine": 75,
+        "endChar": 25
+      },
+      "revId": "b37beb35b09acd6c5a6466848cb154ae8d664fd3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }
