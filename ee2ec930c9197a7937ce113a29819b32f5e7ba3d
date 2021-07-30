@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "5162dd9e_731d0440",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2021-07-30T15:59:48Z",
+      "side": 1,
+      "message": "IMO the commit message is too vast, I am not sure if this is actually a problem but maybe you could make it more compact keeping the most important info?",
+      "range": {
+        "startLine": 7,
+        "startChar": 0,
+        "endLine": 38,
+        "endChar": 15
+      },
+      "revId": "ee2ec930c9197a7937ce113a29819b32f5e7ba3d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "97e450ac_3284f411",
         "filename": "src/interfaces/trigger_types.hpp",
         "patchSetId": 2
