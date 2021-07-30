@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "97e450ac_3284f411",
+        "filename": "src/interfaces/trigger_types.hpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2021-07-30T15:51:36Z",
+      "side": 1,
+      "message": "Is it possible to use here \"RedfishMetricReport\" instead?\nThen it will fit 1:1 to #/definitions/TriggerActionEnum from Triggers schema and additional mapping in bmcweb will not be needed.",
+      "range": {
+        "startLine": 26,
+        "startChar": 23,
+        "endLine": 26,
+        "endChar": 37
+      },
+      "revId": "ee2ec930c9197a7937ce113a29819b32f5e7ba3d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a6c5ba4e_5314b98c",
+        "filename": "src/interfaces/trigger_types.hpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2021-07-30T15:51:36Z",
+      "side": 1,
+      "message": "Function seems not to be used, and if so this is a dead code. I would vote for lazy programming approach - do not write a code until it is actually needed.",
+      "range": {
+        "startLine": 34,
+        "startChar": 0,
+        "endLine": 37,
+        "endChar": 1
+      },
+      "revId": "ee2ec930c9197a7937ce113a29819b32f5e7ba3d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ea3c433d_b7c74dc2",
+        "filename": "src/interfaces/trigger_types.hpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 163,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2021-07-30T15:51:36Z",
+      "side": 1,
+      "message": "I suggest to use std::holds_alternative in the wrapper instead. Bool is directly returned there.",
+      "range": {
+        "startLine": 163,
+        "startChar": 11,
+        "endLine": 163,
+        "endChar": 22
+      },
+      "revId": "ee2ec930c9197a7937ce113a29819b32f5e7ba3d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8b54ee10_ed4321b0",
+        "filename": "src/trigger_actions.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2021-07-30T15:51:36Z",
+      "side": 1,
+      "message": "What is your position regarding default clause in switch {} case {} construct? I would vote to add \u0027default\u0027 even if only defined cases occur, due to conformance with good coding guidelines.",
+      "range": {
+        "startLine": 126,
+        "startChar": 12,
+        "endLine": 126,
+        "endChar": 13
+      },
+      "revId": "ee2ec930c9197a7937ce113a29819b32f5e7ba3d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b4393f61_0bacef25",
+        "filename": "tests/src/params/trigger_params.hpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2021-07-30T15:51:36Z",
+      "side": 1,
+      "message": "triggerActionsProperty not initialized by substantial values so the vector will be empty. Maybe it would be good to add at least one action to have more variety in this variable and better base for tests to check.",
+      "range": {
+        "startLine": 58,
+        "startChar": 29,
+        "endLine": 58,
+        "endChar": 51
+      },
+      "revId": "ee2ec930c9197a7937ce113a29819b32f5e7ba3d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
