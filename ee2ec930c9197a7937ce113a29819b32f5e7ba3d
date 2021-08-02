@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "f07b7345_ad87342c",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2021-08-02T15:21:38Z",
+      "side": 1,
+      "message": "I agree that this might look a bit too long, but I tried to describe all modifications done in this change. Honestly, except for dbus examples, I have no idea how to make it shorter.",
+      "parentUuid": "5162dd9e_731d0440",
+      "range": {
+        "startLine": 7,
+        "startChar": 0,
+        "endLine": 38,
+        "endChar": 15
+      },
+      "revId": "ee2ec930c9197a7937ce113a29819b32f5e7ba3d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "97e450ac_3284f411",
         "filename": "src/interfaces/trigger_types.hpp",
         "patchSetId": 2
@@ -36,6 +60,30 @@
       "writtenOn": "2021-07-30T15:51:36Z",
       "side": 1,
       "message": "Is it possible to use here \"RedfishMetricReport\" instead?\nThen it will fit 1:1 to #/definitions/TriggerActionEnum from Triggers schema and additional mapping in bmcweb will not be needed.",
+      "range": {
+        "startLine": 26,
+        "startChar": 23,
+        "endLine": 26,
+        "endChar": 37
+      },
+      "revId": "ee2ec930c9197a7937ce113a29819b32f5e7ba3d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9d3c06f9_8371edf2",
+        "filename": "src/interfaces/trigger_types.hpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2021-08-02T15:21:38Z",
+      "side": 1,
+      "message": "Not all telemetry clients need to use redfish/bmcweb as an interface. This action does not require redfish and \u0027UpdateReport\u0027 sounds more generic for me. This can be converted to proper string on bmcweb side.\n\nThe other solution would be to handle both names on telemetry side as aliases (UpdateReport and RedfishMetricReport) but this could be difficult to document in dbus interfaces.",
+      "parentUuid": "97e450ac_3284f411",
       "range": {
         "startLine": 26,
         "startChar": 23,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "05785c18_5629d972",
+        "filename": "src/interfaces/trigger_types.hpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2021-08-02T15:21:38Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a6c5ba4e_5314b98c",
+      "range": {
+        "startLine": 34,
+        "startChar": 0,
+        "endLine": 37,
+        "endChar": 1
+      },
+      "revId": "ee2ec930c9197a7937ce113a29819b32f5e7ba3d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ea3c433d_b7c74dc2",
         "filename": "src/interfaces/trigger_types.hpp",
         "patchSetId": 2
@@ -94,6 +166,30 @@
     },
     {
       "key": {
+        "uuid": "7e7e513a_b650488d",
+        "filename": "src/interfaces/trigger_types.hpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 163,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2021-08-02T15:21:38Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ea3c433d_b7c74dc2",
+      "range": {
+        "startLine": 163,
+        "startChar": 11,
+        "endLine": 163,
+        "endChar": 22
+      },
+      "revId": "ee2ec930c9197a7937ce113a29819b32f5e7ba3d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8b54ee10_ed4321b0",
         "filename": "src/trigger_actions.cpp",
         "patchSetId": 2
@@ -105,6 +201,30 @@
       "writtenOn": "2021-07-30T15:51:36Z",
       "side": 1,
       "message": "What is your position regarding default clause in switch {} case {} construct? I would vote to add \u0027default\u0027 even if only defined cases occur, due to conformance with good coding guidelines.",
+      "range": {
+        "startLine": 126,
+        "startChar": 12,
+        "endLine": 126,
+        "endChar": 13
+      },
+      "revId": "ee2ec930c9197a7937ce113a29819b32f5e7ba3d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5f605425_6317abd7",
+        "filename": "src/trigger_actions.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2021-08-02T15:21:38Z",
+      "side": 1,
+      "message": "Our compiler is set to detect any missing case as an error - by not including default case, we have additional compile-time protection if developer won\u0027t handle newly added action.",
+      "parentUuid": "8b54ee10_ed4321b0",
       "range": {
         "startLine": 126,
         "startChar": 12,
@@ -137,6 +257,30 @@
       "revId": "ee2ec930c9197a7937ce113a29819b32f5e7ba3d",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6f0b14c7_d49071dc",
+        "filename": "tests/src/params/trigger_params.hpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2021-08-02T15:21:38Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b4393f61_0bacef25",
+      "range": {
+        "startLine": 58,
+        "startChar": 29,
+        "endLine": 58,
+        "endChar": 51
+      },
+      "revId": "ee2ec930c9197a7937ce113a29819b32f5e7ba3d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }
