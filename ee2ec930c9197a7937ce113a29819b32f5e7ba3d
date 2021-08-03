@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "371326bb_103d75a4",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2021-08-03T13:57:05Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "f07b7345_ad87342c",
+      "range": {
+        "startLine": 7,
+        "startChar": 0,
+        "endLine": 38,
+        "endChar": 15
+      },
+      "revId": "ee2ec930c9197a7937ce113a29819b32f5e7ba3d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "97e450ac_3284f411",
         "filename": "src/interfaces/trigger_types.hpp",
         "patchSetId": 2
@@ -93,6 +117,30 @@
       "revId": "ee2ec930c9197a7937ce113a29819b32f5e7ba3d",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "76a623d4_de0e3812",
+        "filename": "src/interfaces/trigger_types.hpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2021-08-03T13:57:05Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "9d3c06f9_8371edf2",
+      "range": {
+        "startLine": 26,
+        "startChar": 23,
+        "endLine": 26,
+        "endChar": 37
+      },
+      "revId": "ee2ec930c9197a7937ce113a29819b32f5e7ba3d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     },
     {
       "key": {
@@ -234,6 +282,30 @@
       "revId": "ee2ec930c9197a7937ce113a29819b32f5e7ba3d",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5254e943_2f447742",
+        "filename": "src/trigger_actions.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2021-08-03T13:57:05Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "5f605425_6317abd7",
+      "range": {
+        "startLine": 126,
+        "startChar": 12,
+        "endLine": 126,
+        "endChar": 13
+      },
+      "revId": "ee2ec930c9197a7937ce113a29819b32f5e7ba3d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     },
     {
       "key": {
