@@ -23,7 +23,7 @@ enum class Severity
 namespace details
 {
 constexpr std::array<std::pair<std::string_view, Severity>, 3>
-    convDataSeverity = {std::make_pair("Ok", Severity::ok),
+    convDataSeverity = {std::make_pair("OK", Severity::ok),
                         std::make_pair("Warning", Severity::warning),
                         std::make_pair("Critical", Severity::critical)};
 
