@@ -22,6 +22,30 @@
       "revId": "5cf34ac126d5ca99fb01b2ee7de71ec591fe45ad",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cd01668b_ff888469",
+        "filename": "src/trigger.hpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2021-08-11T13:38:55Z",
+      "side": 1,
+      "message": "I was also considering it, but this field serves currently only 2 functions:\n- used for dbus getter\n- used in persistency mechanic\nBoth of those require to convert it back to string, so wouldn\u0027t it be better to stay as it is?",
+      "parentUuid": "3c5ac57f_9e15d17d",
+      "range": {
+        "startLine": 20,
+        "startChar": 30,
+        "endLine": 20,
+        "endChar": 41
+      },
+      "revId": "5cf34ac126d5ca99fb01b2ee7de71ec591fe45ad",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }
