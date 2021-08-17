@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f77a97e8_cef21f19",
+        "filename": "src/metric.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2021-08-17T09:10:13Z",
+      "side": 1,
+      "message": "const auto\u0026 ?",
+      "range": {
+        "startLine": 59,
+        "startChar": 16,
+        "endLine": 59,
+        "endChar": 26
+      },
+      "revId": "4761fce99421bc5971f27dc7fd261854efd849c5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d4edc1e2_20d42998",
+        "filename": "src/metric.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2021-08-17T09:10:13Z",
+      "side": 1,
+      "message": "Move these to metric.hpp L: 17?",
+      "range": {
+        "startLine": 135,
+        "startChar": 0,
+        "endLine": 135,
+        "endChar": 28
+      },
+      "revId": "4761fce99421bc5971f27dc7fd261854efd849c5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "16d883d5_28700e3a",
+        "filename": "src/metric.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 154,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2021-08-17T09:10:13Z",
+      "side": 1,
+      "message": "add try-catch ?",
+      "range": {
+        "startLine": 153,
+        "startChar": 8,
+        "endLine": 154,
+        "endChar": 55
+      },
+      "revId": "4761fce99421bc5971f27dc7fd261854efd849c5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4f20741c_3c2fbeb5",
+        "filename": "src/metric.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 177,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2021-08-17T09:10:13Z",
+      "side": 1,
+      "message": "What happens if index \u003e collectionAlgorithms.size()?\n\nI think we can add try-catch ?",
+      "range": {
+        "startLine": 177,
+        "startChar": 11,
+        "endLine": 177,
+        "endChar": 42
+      },
+      "revId": "4761fce99421bc5971f27dc7fd261854efd849c5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
