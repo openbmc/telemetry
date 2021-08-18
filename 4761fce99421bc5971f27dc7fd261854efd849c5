@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "c73d065c_ee6d70ba",
+        "filename": "src/metric.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-08-18T13:04:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f77a97e8_cef21f19",
+      "range": {
+        "startLine": 59,
+        "startChar": 16,
+        "endLine": 59,
+        "endChar": 26
+      },
+      "revId": "4761fce99421bc5971f27dc7fd261854efd849c5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d4edc1e2_20d42998",
         "filename": "src/metric.cpp",
         "patchSetId": 14
@@ -36,6 +60,30 @@
       "writtenOn": "2021-08-17T09:10:13Z",
       "side": 1,
       "message": "Move these to metric.hpp L: 17?",
+      "range": {
+        "startLine": 135,
+        "startChar": 0,
+        "endLine": 135,
+        "endChar": 28
+      },
+      "revId": "4761fce99421bc5971f27dc7fd261854efd849c5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "99cd937c_fb5679fe",
+        "filename": "src/metric.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-08-18T13:04:41Z",
+      "side": 1,
+      "message": "It\u0027s here on purpose. Metric::Collection data is only defined in cpp file as a implementation detail. That\u0027s why destructor need to be defined here. Compiler won\u0027t know how to delete Metric::Collection outside of this translation unit.",
+      "parentUuid": "d4edc1e2_20d42998",
       "range": {
         "startLine": 135,
         "startChar": 0,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "2b6a7908_7ebcc9e9",
+        "filename": "src/metric.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 154,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-08-18T13:04:41Z",
+      "side": 1,
+      "message": "Why? I don\u0027t see any possible throw inside.",
+      "parentUuid": "16d883d5_28700e3a",
+      "range": {
+        "startLine": 153,
+        "startChar": 8,
+        "endLine": 154,
+        "endChar": 55
+      },
+      "revId": "4761fce99421bc5971f27dc7fd261854efd849c5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "4f20741c_3c2fbeb5",
         "filename": "src/metric.cpp",
         "patchSetId": 14
@@ -82,6 +154,30 @@
       "writtenOn": "2021-08-17T09:10:13Z",
       "side": 1,
       "message": "What happens if index \u003e collectionAlgorithms.size()?\n\nI think we can add try-catch ?",
+      "range": {
+        "startLine": 177,
+        "startChar": 11,
+        "endLine": 177,
+        "endChar": 42
+      },
+      "revId": "4761fce99421bc5971f27dc7fd261854efd849c5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ca0f6e1c_2b7123fd",
+        "filename": "src/metric.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 177,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-08-18T13:04:41Z",
+      "side": 1,
+      "message": "This exception should never happen, if it happens we need to detect it as fast as possible and fix it. If this throws we can consider whole telemetry not working, there is no recovery from it. That\u0027s why there is no catch.\n\nThere is bunch of unit tests that cover this case, if something is not right here CI will detect it.",
+      "parentUuid": "4f20741c_3c2fbeb5",
       "range": {
         "startLine": 177,
         "startChar": 11,
