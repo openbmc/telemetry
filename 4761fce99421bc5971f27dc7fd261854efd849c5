@@ -96,6 +96,30 @@
     },
     {
       "key": {
+        "uuid": "52c524ba_76feea90",
+        "filename": "src/metric.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2021-08-19T04:48:50Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "99cd937c_fb5679fe",
+      "range": {
+        "startLine": 135,
+        "startChar": 0,
+        "endLine": 135,
+        "endChar": 28
+      },
+      "revId": "4761fce99421bc5971f27dc7fd261854efd849c5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "16d883d5_28700e3a",
         "filename": "src/metric.cpp",
         "patchSetId": 14
@@ -143,6 +167,30 @@
     },
     {
       "key": {
+        "uuid": "8629f17e_e80f7808",
+        "filename": "src/metric.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 154,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2021-08-19T04:48:50Z",
+      "side": 1,
+      "message": "if resultReadings.size() \u003d\u003d 10 and collectionAlgorithms.size() \u003c 10\nI think collectionAlgorithms[i] will overflow, Correct?\n\nIn any case, it is a good habit to add `try-catch` when we operate the array.",
+      "parentUuid": "2b6a7908_7ebcc9e9",
+      "range": {
+        "startLine": 153,
+        "startChar": 8,
+        "endLine": 154,
+        "endChar": 55
+      },
+      "revId": "4761fce99421bc5971f27dc7fd261854efd849c5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "4f20741c_3c2fbeb5",
         "filename": "src/metric.cpp",
         "patchSetId": 14
@@ -178,6 +226,30 @@
       "side": 1,
       "message": "This exception should never happen, if it happens we need to detect it as fast as possible and fix it. If this throws we can consider whole telemetry not working, there is no recovery from it. That\u0027s why there is no catch.\n\nThere is bunch of unit tests that cover this case, if something is not right here CI will detect it.",
       "parentUuid": "4f20741c_3c2fbeb5",
+      "range": {
+        "startLine": 177,
+        "startChar": 11,
+        "endLine": 177,
+        "endChar": 42
+      },
+      "revId": "4761fce99421bc5971f27dc7fd261854efd849c5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3f6d3a18_9a965ddd",
+        "filename": "src/metric.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 177,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2021-08-19T04:48:50Z",
+      "side": 1,
+      "message": "as above",
+      "parentUuid": "ca0f6e1c_2b7123fd",
       "range": {
         "startLine": 177,
         "startChar": 11,
