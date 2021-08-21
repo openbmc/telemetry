@@ -33,9 +33,67 @@ using LabeledMetricParameters = utils::LabeledTuple<
     utils::tstring::Id, utils::tstring::MetricMetadata,
     utils::tstring::CollectionTimeScope, utils::tstring::CollectionDuration>;
 
-using Readings = std::tuple<
-    uint64_t,
-    std::vector<std::tuple<std::string, std::string, double, uint64_t>>>;
+using ReadingData = std::tuple<std::string, std::string, double, uint64_t>;
+
+using Readings = std::tuple<uint64_t, std::vector<ReadingData>>;
 
 ReadingParameters
     toReadingParameters(const std::vector<LabeledMetricParameters>& labeled);
+
+enum class UpdatePolicy
+{
+    Overwrite = 0,
+    AppendStopWhenFull,
+    AppendWrapWhenFull,
+    NewReport,
+    Default
+};
+
+namespace details
+{
+constexpr std::array<std::pair<std::string_view, UpdatePolicy>, 5>
+    convDataUpdatePolicy = {
+        std::make_pair("Overwrite", UpdatePolicy::Overwrite),
+        std::make_pair("AppendStopWhenFull", UpdatePolicy::AppendStopWhenFull),
+        std::make_pair("AppendWrapWhenFull", UpdatePolicy::AppendWrapWhenFull),
+        std::make_pair("NewReport", UpdatePolicy::NewReport),
+        std::make_pair("Default", UpdatePolicy::Default)};
+
+} // namespace details
+
+inline UpdatePolicy stringToUpdatePolicy(const std::string& str)
+{
+    return utils::stringToEnum(details::convDataUpdatePolicy, str);
+}
+
+inline std::string updatePolicyToString(UpdatePolicy v)
+{
+    return std::string(utils::enumToString(details::convDataUpdatePolicy, v));
+}
+
+enum class ReportingType
+{
+    OnChange = 0,
+    OnRequest,
+    Periodic
+};
+
+namespace details
+{
+constexpr std::array<std::pair<std::string_view, ReportingType>, 3>
+    convDataReportingType = {
+        std::make_pair("OnChange", ReportingType::OnChange),
+        std::make_pair("OnRequest", ReportingType::OnRequest),
+        std::make_pair("Periodic", ReportingType::Periodic)};
+
+} // namespace details
+
+inline ReportingType stringToReportingType(const std::string& str)
+{
+    return utils::stringToEnum(details::convDataReportingType, str);
+}
+
+inline std::string reportingTypeToString(ReportingType v)
+{
+    return std::string(utils::enumToString(details::convDataReportingType, v));
+}
