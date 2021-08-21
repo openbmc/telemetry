@@ -48,12 +48,14 @@ class ReportManager : public interfaces::ReportManager
                                   const std::string& reportingType,
                                   const bool emitsReadingsUpdate,
                                   const bool logToMetricReportsCollection,
-                                  Milliseconds interval,
+                                  Milliseconds interval, uint64_t appendLimit,
+                                  const std::string& updatePolicy,
                                   ReadingParameters metricParams);
     interfaces::Report& addReport(
         const std::string& reportName, const std::string& reportingType,
         const bool emitsReadingsUpdate, const bool logToMetricReportsCollection,
-        Milliseconds interval,
+        Milliseconds interval, uint64_t appendLimit,
+        const std::string& updatePolicy,
         std::vector<LabeledMetricParameters> metricParams);
     void loadFromPersistent();
 

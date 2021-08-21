@@ -14,7 +14,8 @@ Report::Report(boost::asio::io_context& ioc,
                const std::string& reportingTypeIn,
                const bool emitsReadingsUpdateIn,
                const bool logToMetricReportsCollectionIn,
-               const Milliseconds intervalIn,
+               const Milliseconds intervalIn, uint64_t appendLimitIn,
+               UpdatePolicy updatePolicyIn,
                interfaces::ReportManager& reportManager,
                interfaces::JsonStorage& reportStorageIn,
                std::vector<std::shared_ptr<interfaces::Metric>> metricsIn) :
@@ -22,7 +23,9 @@ Report::Report(boost::asio::io_context& ioc,
     path(reportDir + name), reportingType(reportingTypeIn),
     interval(intervalIn), emitsReadingsUpdate(emitsReadingsUpdateIn),
     logToMetricReportsCollection(logToMetricReportsCollectionIn),
-    objServer(objServer), metrics(std::move(metricsIn)), timer(ioc),
+    readingsBuffer(appendLimitIn), appendLimit(appendLimitIn),
+    updatePolicy(updatePolicyIn), objServer(objServer),
+    metrics(std::move(metricsIn)), timer(ioc),
     fileName(std::to_string(std::hash<std::string>{}(name))),
     reportStorage(reportStorageIn)
 {
@@ -127,6 +130,17 @@ std::unique_ptr<sdbusplus::asio::dbus_interface> Report::makeReportInterface()
         "LogToMetricReportsCollection", logToMetricReportsCollection,
         sdbusplus::vtable::property_::const_,
         [this](const auto&) { return logToMetricReportsCollection; });
+    dbusIface->register_property_r("AppendLimit", appendLimit,
+                                   sdbusplus::vtable::property_::emits_change,
+                                   [this](const auto&) { return appendLimit; });
+    dbusIface->register_property_rw(
+        "UpdatePolicy", std::string(),
+        sdbusplus::vtable::property_::emits_change,
+        [this](std::string newVal, const auto&) {
+            updatePolicy = stringToUpdatePolicy(newVal);
+            return true;
+        },
+        [this](const auto&) { return updatePolicyToString(updatePolicy); });
     dbusIface->register_method("Update", [this] {
         if (reportingType == "OnRequest")
         {
@@ -158,23 +172,28 @@ void Report::scheduleTimer(Milliseconds timerInterval)
 
 void Report::updateReadings()
 {
-    using ReadingsValue = std::tuple_element_t<1, Readings>;
-    std::get<ReadingsValue>(cachedReadings).clear();
+    if (updatePolicy == UpdatePolicy::Overwrite)
+    {
+        readingsBuffer.clear();
+    }
+    else if (updatePolicy == UpdatePolicy::AppendStopWhenFull &&
+             readingsBuffer.full())
+    {
+        // timer.cancel();
+        return;
+    }
 
     for (const auto& metric : metrics)
     {
         for (const auto& reading : metric->getReadings())
         {
-            std::get<1>(cachedReadings)
-                .emplace_back(reading.id, reading.metadata, reading.value,
-                              reading.timestamp);
+            readingsBuffer.emplace(reading.id, reading.metadata, reading.value,
+                                   reading.timestamp);
         }
     }
 
-    using ReadingsTimestamp = std::tuple_element_t<0, Readings>;
-    std::get<ReadingsTimestamp>(cachedReadings) = std::time(0);
-
-    std::swap(readings, cachedReadings);
+    readings = {std::time(0), std::vector<ReadingData>(readingsBuffer.begin(),
+                                                       readingsBuffer.end())};
 
     reportIface->signal_property("Readings");
 }
@@ -191,6 +210,8 @@ bool Report::storeConfiguration() const
         data["EmitsReadingsUpdate"] = emitsReadingsUpdate;
         data["LogToMetricReportsCollection"] = logToMetricReportsCollection;
         data["Interval"] = interval.count();
+        data["AppendLimit"] = appendLimit;
+        data["UpdatePolicy"] = updatePolicyToString(updatePolicy);
         data["ReadingParameters"] =
             utils::transform(metrics, [](const auto& metric) {
                 return metric->dumpConfiguration();

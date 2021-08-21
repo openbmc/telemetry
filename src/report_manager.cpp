@@ -56,12 +56,16 @@ ReportManager::ReportManager(
                                     const bool logToMetricReportsCollection,
                                     const uint64_t interval,
                                     ReadingParametersPastVersion metricParams) {
-                    return addReport(yield, reportName, reportingType,
-                                     emitsReadingsUpdate,
-                                     logToMetricReportsCollection,
-                                     Milliseconds(interval),
-                                     convertToReadingParameters(
-                                         std::move(metricParams)))
+                    return addReport(
+                               yield, reportName, reportingType,
+                               emitsReadingsUpdate,
+                               logToMetricReportsCollection,
+                               Milliseconds(interval), 3,
+                               std::string(
+                                   "AppendWrapWhenFull"), // TODO - remove
+                                                          // testing values
+                               convertToReadingParameters(
+                                   std::move(metricParams)))
                         .getPath();
                 });
 
@@ -74,11 +78,33 @@ ReportManager::ReportManager(
                        const bool logToMetricReportsCollection,
                        const uint64_t interval,
                        ReadingParameters metricParams) {
+                    return addReport(
+                               yield, reportName, reportingType,
+                               emitsReadingsUpdate,
+                               logToMetricReportsCollection,
+                               Milliseconds(interval), 3,
+                               std::string(
+                                   "AppendWrapWhenFull"), // TODO - remove
+                                                          // testing values
+                               std::move(metricParams))
+                        .getPath();
+                });
+
+            dbusIface.register_method(
+                "AddReportFutureFuture",
+                [this](boost::asio::yield_context& yield,
+                       const std::string& reportName,
+                       const std::string& reportingType,
+                       const bool emitsReadingsUpdate,
+                       const bool logToMetricReportsCollection,
+                       const uint64_t interval, const uint64_t appendLimit,
+                       const std::string& updatePolicy,
+                       ReadingParameters metricParams) {
                     return addReport(yield, reportName, reportingType,
                                      emitsReadingsUpdate,
                                      logToMetricReportsCollection,
-                                     Milliseconds(interval),
-                                     std::move(metricParams))
+                                     Milliseconds(interval), appendLimit,
+                                     updatePolicy, std::move(metricParams))
                         .getPath();
                 });
         });
@@ -169,28 +195,30 @@ interfaces::Report& ReportManager::addReport(
     boost::asio::yield_context& yield, const std::string& reportName,
     const std::string& reportingType, const bool emitsReadingsUpdate,
     const bool logToMetricReportsCollection, Milliseconds interval,
+    uint64_t appendLimit, const std::string& updatePolicy,
     ReadingParameters metricParams)
 {
     auto labeledMetricParams =
         reportFactory->convertMetricParams(yield, metricParams);
 
     return addReport(reportName, reportingType, emitsReadingsUpdate,
-                     logToMetricReportsCollection, interval,
-                     std::move(labeledMetricParams));
+                     logToMetricReportsCollection, interval, appendLimit,
+                     updatePolicy, std::move(labeledMetricParams));
 }
 
 interfaces::Report& ReportManager::addReport(
     const std::string& reportName, const std::string& reportingType,
     const bool emitsReadingsUpdate, const bool logToMetricReportsCollection,
-    Milliseconds interval,
+    Milliseconds interval, uint64_t appendLimit,
+    const std::string& updatePolicy,
     std::vector<LabeledMetricParameters> labeledMetricParams)
 {
     verifyAddReport(reportName, reportingType, interval, labeledMetricParams);
 
-    reports.emplace_back(
-        reportFactory->make(reportName, reportingType, emitsReadingsUpdate,
-                            logToMetricReportsCollection, interval, *this,
-                            *reportStorage, labeledMetricParams));
+    reports.emplace_back(reportFactory->make(
+        reportName, reportingType, emitsReadingsUpdate,
+        logToMetricReportsCollection, interval, appendLimit, updatePolicy,
+        *this, *reportStorage, labeledMetricParams));
     return *reports.back();
 }
 
@@ -217,13 +245,16 @@ void ReportManager::loadFromPersistent()
             bool logToMetricReportsCollection =
                 data->at("LogToMetricReportsCollection").get<bool>();
             uint64_t interval = data->at("Interval").get<uint64_t>();
+            uint64_t appendLimit = data->at("AppendLimit").get<uint64_t>();
+            std::string updatePolicy =
+                data->at("UpdatePolicy").get<std::string>();
             auto readingParameters =
                 data->at("ReadingParameters")
                     .get<std::vector<LabeledMetricParameters>>();
 
             addReport(name, reportingType, emitsReadingsSignal,
                       logToMetricReportsCollection, Milliseconds(interval),
-                      std::move(readingParameters));
+                      appendLimit, updatePolicy, std::move(readingParameters));
         }
         catch (const std::exception& e)
         {

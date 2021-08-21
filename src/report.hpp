@@ -5,6 +5,7 @@
 #include "interfaces/report.hpp"
 #include "interfaces/report_manager.hpp"
 #include "types/report_types.hpp"
+#include "utils/circular_vector.hpp"
 
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/steady_timer.hpp>
@@ -21,6 +22,7 @@ class Report : public interfaces::Report
            const std::string& reportName, const std::string& reportingType,
            const bool emitsReadingsSignal,
            const bool logToMetricReportsCollection, const Milliseconds period,
+           uint64_t appendLimitIn, UpdatePolicy updatePolicyIn,
            interfaces::ReportManager& reportManager,
            interfaces::JsonStorage& reportStorage,
            std::vector<std::shared_ptr<interfaces::Metric>> metrics);
@@ -58,8 +60,10 @@ class Report : public interfaces::Report
     ReadingParametersPastVersion readingParametersPastVersion;
     ReadingParameters readingParameters;
     bool persistency = false;
-    Readings cachedReadings = {};
+    CircularVector<ReadingData> readingsBuffer;
+    uint64_t appendLimit;
     Readings readings = {};
+    UpdatePolicy updatePolicy;
     std::shared_ptr<sdbusplus::asio::object_server> objServer;
     std::unique_ptr<sdbusplus::asio::dbus_interface> reportIface;
     std::unique_ptr<sdbusplus::asio::dbus_interface> deleteIface;

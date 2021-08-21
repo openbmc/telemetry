@@ -71,7 +71,9 @@ class TestReport : public Test
             DbusEnvironment::getIoc(), DbusEnvironment::getObjServer(),
             params.reportName(), params.reportingType(),
             params.emitReadingUpdate(), params.logToMetricReportCollection(),
-            params.interval(), *reportManagerMock, storageMock,
+            params.interval(), params.appendLimit(),
+            stringToUpdatePolicy(params.updatePolicy()), *reportManagerMock,
+            storageMock,
             utils::convContainer<std::shared_ptr<interfaces::Metric>>(
                 metricMocks));
     }

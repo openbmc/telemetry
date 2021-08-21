@@ -33,9 +33,36 @@ using LabeledMetricParameters = utils::LabeledTuple<
     utils::tstring::Id, utils::tstring::MetricMetadata,
     utils::tstring::CollectionTimeScope, utils::tstring::CollectionDuration>;
 
-using Readings = std::tuple<
-    uint64_t,
-    std::vector<std::tuple<std::string, std::string, double, uint64_t>>>;
+using ReadingData = std::tuple<std::string, std::string, double, uint64_t>;
+
+using Readings = std::tuple<uint64_t, std::vector<ReadingData>>;
 
 ReadingParameters
     toReadingParameters(const std::vector<LabeledMetricParameters>& labeled);
+
+enum class UpdatePolicy
+{
+    Overwrite = 0,
+    AppendStopWhenFull,
+    AppendWrapWhenFull
+};
+
+namespace details
+{
+constexpr std::array<std::pair<std::string_view, UpdatePolicy>, 3>
+    convDataUpdatePolicy = {
+        std::make_pair("Overwrite", UpdatePolicy::Overwrite),
+        std::make_pair("AppendStopWhenFull", UpdatePolicy::AppendStopWhenFull),
+        std::make_pair("AppendWrapWhenFull", UpdatePolicy::AppendWrapWhenFull)};
+
+} // namespace details
+
+inline UpdatePolicy stringToUpdatePolicy(const std::string& str)
+{
+    return utils::stringToEnum(details::convDataUpdatePolicy, str);
+}
+
+inline std::string updatePolicyToString(UpdatePolicy v)
+{
+    return std::string(utils::enumToString(details::convDataUpdatePolicy, v));
+}
