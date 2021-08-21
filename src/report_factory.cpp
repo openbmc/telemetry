@@ -17,9 +17,11 @@ ReportFactory::ReportFactory(
 {}
 
 std::unique_ptr<interfaces::Report> ReportFactory::make(
-    const std::string& name, const std::string& reportingType,
+    const std::string& name, const std::string& reportingTypeStr,
     bool emitsReadingsSignal, bool logToMetricReportsCollection,
-    Milliseconds period, interfaces::ReportManager& reportManager,
+    Milliseconds period, uint64_t appendLimit,
+    const std::string& updatePolicyStr,
+    interfaces::ReportManager& reportManager,
     interfaces::JsonStorage& reportStorage,
     std::vector<LabeledMetricParameters> labeledMetricParams) const
 {
@@ -38,10 +40,13 @@ std::unique_ptr<interfaces::Report> ReportFactory::make(
                 std::make_unique<Clock>());
         });
 
+    auto reportingType = stringToReportingType(reportingTypeStr);
+    auto updatePolicy = stringToUpdatePolicy(updatePolicyStr);
+
     return std::make_unique<Report>(
         bus->get_io_context(), objServer, name, reportingType,
-        emitsReadingsSignal, logToMetricReportsCollection, period,
-        reportManager, reportStorage, std::move(metrics));
+        emitsReadingsSignal, logToMetricReportsCollection, period, appendLimit,
+        updatePolicy, reportManager, reportStorage, std::move(metrics));
 }
 
 Sensors ReportFactory::getSensors(
