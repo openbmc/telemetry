@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "a8b8c1ff_39179ccb",
+        "filename": "src/metric.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-08-24T08:27:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a449d364_d16a40c8",
+      "revId": "9750190655fedaea68c74404d4d9728dadaf6dce",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "95aba82e_8fe3b91b",
         "filename": "src/metric.cpp",
         "patchSetId": 4
@@ -229,6 +247,30 @@
       "revId": "9750190655fedaea68c74404d4d9728dadaf6dce",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "34c5a75c_d6e78ded",
+        "filename": "tests/src/params/metric_params.hpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-08-24T08:27:07Z",
+      "side": 1,
+      "message": "Removed, it is not used yet.",
+      "parentUuid": "b952b9c9_99d9e866",
+      "range": {
+        "startLine": 55,
+        "startChar": 18,
+        "endLine": 55,
+        "endChar": 25
+      },
+      "revId": "9750190655fedaea68c74404d4d9728dadaf6dce",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     },
     {
       "key": {

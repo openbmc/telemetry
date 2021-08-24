@@ -191,6 +191,30 @@
     },
     {
       "key": {
+        "uuid": "94e26983_3d041014",
+        "filename": "src/metric.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 154,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-08-24T08:27:07Z",
+      "side": 1,
+      "message": "Both arrays have same size. resultReadings is a copy of readings with updated timestamp. Both readings and collectionAlgorithms have same (sensors.size()) there is no way to overflow.\n\nLet\u0027s consider we can try-catch here.\n- We won\u0027t get error code on dbus, error will be silently discarded. \n- If something is thrown it will be silently handled somehow, but all we can do is silently discard it. Unit tests won\u0027t fail and CI won\u0027t detect this error.\n\nIf we keep this throw with our current test coverage if something is wrong here CI won\u0027t allow this change to be merged. Also other tools that are run on CI are able to detect potential memory issues here. If you want we can change [] to .at that should change potential crash or valgrind error to failed test due to uncatched exception.\n\nPlease take a look at TEST_P(TestMetricCalculationFunctions, calculatesReadingValue), Metric constructor and this code. There is no way that any exception is thrown here we have it covered in unit tests.\n\nIf we catch this exception here how are we supposed to test it?",
+      "parentUuid": "8629f17e_e80f7808",
+      "range": {
+        "startLine": 153,
+        "startChar": 8,
+        "endLine": 154,
+        "endChar": 55
+      },
+      "revId": "4761fce99421bc5971f27dc7fd261854efd849c5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "4f20741c_3c2fbeb5",
         "filename": "src/metric.cpp",
         "patchSetId": 14
