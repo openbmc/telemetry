@@ -227,6 +227,30 @@
     },
     {
       "key": {
+        "uuid": "4dca90ae_056283f7",
+        "filename": "src/metric.hpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-09-03T07:43:47Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "ee663810_418554aa",
+      "range": {
+        "startLine": 27,
+        "startChar": 0,
+        "endLine": 36,
+        "endChar": 27
+      },
+      "revId": "9750190655fedaea68c74404d4d9728dadaf6dce",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b952b9c9_99d9e866",
         "filename": "tests/src/params/metric_params.hpp",
         "patchSetId": 4
