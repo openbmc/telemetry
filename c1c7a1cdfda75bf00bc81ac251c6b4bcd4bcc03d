@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5aa299c0_5b04af26",
+        "filename": "src/details/collection_function.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2021-09-03T10:46:43Z",
+      "side": 1,
+      "message": "nit: This short form of double value initialization can be overlooked and misinterpreted, maybe you could use full double value here like 0.0 or use list initialization like double{0.}?",
+      "range": {
+        "startLine": 79,
+        "startChar": 24,
+        "endLine": 79,
+        "endChar": 27
+      },
+      "revId": "c1c7a1cdfda75bf00bc81ac251c6b4bcd4bcc03d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2f32739b_1f643a40",
+        "filename": "src/metric.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2021-09-03T10:46:43Z",
+      "side": 1,
+      "message": "Is this include actually needed here?",
+      "range": {
+        "startLine": 9,
+        "startChar": 0,
+        "endLine": 9,
+        "endChar": 19
+      },
+      "revId": "c1c7a1cdfda75bf00bc81ac251c6b4bcd4bcc03d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c0f90a83_da62087c",
+        "filename": "src/metric.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2021-09-03T10:46:43Z",
+      "side": 1,
+      "message": "No customized destructor defined, maybe you could keep this line in header file only?",
+      "range": {
+        "startLine": 135,
+        "startChar": 0,
+        "endLine": 135,
+        "endChar": 28
+      },
+      "revId": "c1c7a1cdfda75bf00bc81ac251c6b4bcd4bcc03d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "623ec17a_fc13fdc2",
+        "filename": "src/metric.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 175,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2021-09-03T10:46:43Z",
+      "side": 1,
+      "message": "In this lambda there is no need do modify captured variable, could you therefore add \u0027const\u0027 to the parameter in findAssociatedData function signature?",
+      "range": {
+        "startLine": 175,
+        "startChar": 8,
+        "endLine": 175,
+        "endChar": 19
+      },
+      "revId": "c1c7a1cdfda75bf00bc81ac251c6b4bcd4bcc03d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
