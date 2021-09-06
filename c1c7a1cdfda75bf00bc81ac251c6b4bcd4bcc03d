@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "607cb50c_ead48a03",
+        "filename": "src/details/collection_function.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-09-06T11:36:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5aa299c0_5b04af26",
+      "range": {
+        "startLine": 79,
+        "startChar": 24,
+        "endLine": 79,
+        "endChar": 27
+      },
+      "revId": "c1c7a1cdfda75bf00bc81ac251c6b4bcd4bcc03d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2f32739b_1f643a40",
         "filename": "src/metric.cpp",
         "patchSetId": 16
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "4cd6e9d7_65e39115",
+        "filename": "src/metric.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-09-06T11:36:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2f32739b_1f643a40",
+      "range": {
+        "startLine": 9,
+        "startChar": 0,
+        "endLine": 9,
+        "endChar": 19
+      },
+      "revId": "c1c7a1cdfda75bf00bc81ac251c6b4bcd4bcc03d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c0f90a83_da62087c",
         "filename": "src/metric.cpp",
         "patchSetId": 16
@@ -59,6 +107,30 @@
       "writtenOn": "2021-09-03T10:46:43Z",
       "side": 1,
       "message": "No customized destructor defined, maybe you could keep this line in header file only?",
+      "range": {
+        "startLine": 135,
+        "startChar": 0,
+        "endLine": 135,
+        "endChar": 28
+      },
+      "revId": "c1c7a1cdfda75bf00bc81ac251c6b4bcd4bcc03d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b6ed7ec8_7011cde4",
+        "filename": "src/metric.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-09-06T11:36:20Z",
+      "side": 1,
+      "message": "It actually makes difference where it is defined. If you move it to .hpp files all member destructors will be inlined there. It will compile multiple times and need destructor code of all members.\n\nIn this case destructors of Metric::CollectionData, DataPoint, DataStartup, DataInterval are defined only this file and not available in .hpp file. This simply won\u0027t compile without moving this classes to .hpp file.",
+      "parentUuid": "c0f90a83_da62087c",
       "range": {
         "startLine": 135,
         "startChar": 0,
@@ -91,6 +163,30 @@
       "revId": "c1c7a1cdfda75bf00bc81ac251c6b4bcd4bcc03d",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "474ff380_517143fe",
+        "filename": "src/metric.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 175,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-09-06T11:36:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "623ec17a_fc13fdc2",
+      "range": {
+        "startLine": 175,
+        "startChar": 8,
+        "endLine": 175,
+        "endChar": 19
+      },
+      "revId": "c1c7a1cdfda75bf00bc81ac251c6b4bcd4bcc03d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }
