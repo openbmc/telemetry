@@ -73,6 +73,30 @@
     },
     {
       "key": {
+        "uuid": "dda52ddd_b8ea5884",
+        "filename": "src/details/collection_function.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2021-09-07T10:40:32Z",
+      "side": 1,
+      "message": "Unresolving, please comment if you intend to keep it without changing.",
+      "parentUuid": "bf68a3f8_d0aca209",
+      "range": {
+        "startLine": 79,
+        "startChar": 24,
+        "endLine": 79,
+        "endChar": 27
+      },
+      "revId": "c1c7a1cdfda75bf00bc81ac251c6b4bcd4bcc03d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "2f32739b_1f643a40",
         "filename": "src/metric.cpp",
         "patchSetId": 16
