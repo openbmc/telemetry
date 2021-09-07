@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "bf68a3f8_d0aca209",
+        "filename": "src/details/collection_function.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2021-09-07T09:51:55Z",
+      "side": 1,
+      "message": "No code update at this point here yet.",
+      "parentUuid": "607cb50c_ead48a03",
+      "range": {
+        "startLine": 79,
+        "startChar": 24,
+        "endLine": 79,
+        "endChar": 27
+      },
+      "revId": "c1c7a1cdfda75bf00bc81ac251c6b4bcd4bcc03d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2f32739b_1f643a40",
         "filename": "src/metric.cpp",
         "patchSetId": 16
@@ -140,6 +164,30 @@
       "revId": "c1c7a1cdfda75bf00bc81ac251c6b4bcd4bcc03d",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ae2e224a_40a03e0c",
+        "filename": "src/metric.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2021-09-07T09:51:55Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "b6ed7ec8_7011cde4",
+      "range": {
+        "startLine": 135,
+        "startChar": 0,
+        "endLine": 135,
+        "endChar": 28
+      },
+      "revId": "c1c7a1cdfda75bf00bc81ac251c6b4bcd4bcc03d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     },
     {
       "key": {
