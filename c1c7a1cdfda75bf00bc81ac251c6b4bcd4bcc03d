@@ -97,6 +97,30 @@
     },
     {
       "key": {
+        "uuid": "ff05b721_62c189eb",
+        "filename": "src/details/collection_function.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-09-08T08:27:04Z",
+      "side": 1,
+      "message": "My bad, I forgot to git add this change.\n\nDone.",
+      "parentUuid": "dda52ddd_b8ea5884",
+      "range": {
+        "startLine": 79,
+        "startChar": 24,
+        "endLine": 79,
+        "endChar": 27
+      },
+      "revId": "c1c7a1cdfda75bf00bc81ac251c6b4bcd4bcc03d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2f32739b_1f643a40",
         "filename": "src/metric.cpp",
         "patchSetId": 16
