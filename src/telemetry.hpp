@@ -1,5 +1,6 @@
 #pragma once
 
+#include "metric_definition_manager.hpp"
 #include "persistent_json_storage.hpp"
 #include "report_factory.hpp"
 #include "report_manager.hpp"
@@ -28,12 +29,14 @@ class Telemetry
                        std::make_unique<PersistentJsonStorage>(
                            interfaces::JsonStorage::DirectoryPath(
                                "/var/lib/telemetry/Triggers")),
-                       objServer)
+                       objServer),
+        metricDefinitionManager(bus, objServer)
     {}
 
   private:
     std::shared_ptr<sdbusplus::asio::object_server> objServer;
-    mutable SensorCache sensorCache;
+    SensorCache sensorCache;
     ReportManager reportManager;
     TriggerManager triggerManager;
+    MetricDefinitionManager metricDefinitionManager;
 };

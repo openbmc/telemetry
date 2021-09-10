@@ -4,7 +4,7 @@ project(
     meson_version: '>=0.54.3',
     default_options: [
         'buildtype=debugoptimized',
-        'cpp_std=c++17',
+        'cpp_std=c++20',
         # TODO: Without RTTI telemetry does not build using Boost 1.74.0
         # https://github.com/chriskohlhoff/asio/issues/533
         #'cpp_rtti=false',
@@ -80,6 +80,7 @@ executable(
         'src/discrete_threshold.cpp',
         'src/main.cpp',
         'src/metric.cpp',
+        'src/metric_definition_manager.cpp',
         'src/numeric_threshold.cpp',
         'src/on_change_threshold.cpp',
         'src/persistent_json_storage.cpp',
