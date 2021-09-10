@@ -80,6 +80,7 @@ executable(
         'src/discrete_threshold.cpp',
         'src/main.cpp',
         'src/metric.cpp',
+        'src/metric_definition_manager.cpp',
         'src/numeric_threshold.cpp',
         'src/on_change_threshold.cpp',
         'src/persistent_json_storage.cpp',
