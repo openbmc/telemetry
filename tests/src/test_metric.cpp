@@ -63,6 +63,18 @@ TEST_F(TestMetric, subscribesForSensorDuringInitialization)
     sut->initialize();
 }
 
+TEST_F(TestMetric, unsubscribesForSensorDuringDeinitialization)
+{
+    sut = makeSut(params);
+
+    EXPECT_CALL(*sensorMocks.front(),
+                unregisterFromUpdates(Truly([sut = sut.get()](const auto& a0) {
+                    return a0.lock().get() == sut;
+                })));
+
+    sut->deinitialize();
+}
+
 TEST_F(TestMetric, containsEmptyReadingAfterCreated)
 {
     sut = makeSut(params);
@@ -177,8 +189,7 @@ class TestMetricCalculationFunctions :
   public:
     void SetUp() override
     {
-        clockFakePtr->set(0ms);
-
+        clockFake.reset();
         sut = makeSut(params.operationType(GetParam().operationType())
                           .collectionTimeScope(GetParam().collectionTimeScope())
                           .collectionDuration(GetParam().collectionDuration()));

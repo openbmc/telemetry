@@ -141,10 +141,17 @@ void Metric::initialize()
     }
 }
 
+void Metric::deinitialize()
+{
+    for (const auto& sensor : sensors)
+    {
+        sensor->unregisterFromUpdates(weak_from_this());
+    }
+}
+
 std::vector<MetricValue> Metric::getReadings() const
 {
     const auto timestamp = clock->timestamp();
-
     auto resultReadings = readings;
 
     for (size_t i = 0; i < resultReadings.size(); ++i)

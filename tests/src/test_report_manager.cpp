@@ -352,6 +352,7 @@ class TestReportManagerStorage : public TestReportManager
     }
 
     nlohmann::json data = nlohmann::json{
+        {"Enabled", reportParams.enabled()},
         {"Version", Report::reportVersion},
         {"Name", reportParams.reportName()},
         {"ReportingType", reportParams.reportingType()},

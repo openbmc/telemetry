@@ -34,6 +34,13 @@ class TestSensor : public Test
         DbusEnvironment::synchronizeIoc();
     }
 
+    void unregisterFromUpdates(
+        std::shared_ptr<interfaces::SensorListener> listener)
+    {
+        sut->unregisterFromUpdates(listener);
+        DbusEnvironment::synchronizeIoc();
+    }
+
     static std::unique_ptr<stubs::DbusSensorObject> makeSensorObject()
     {
         return std::make_unique<stubs::DbusSensorObject>(
@@ -151,6 +158,22 @@ TEST_F(TestSensorNotification, notifiesWithValueDuringRegister)
     EXPECT_CALL(*listenerMock2, sensorUpdated(Ref(*sut), Ge(timestamp), 0.));
 
     registerForUpdates(listenerMock2);
+}
+
+TEST_F(TestSensorNotification, notNotifiesWithValueWhenUnregistered)
+{
+    EXPECT_CALL(*listenerMock2, sensorUpdated(Ref(*sut), Ge(timestamp), 0.));
+    EXPECT_CALL(*listenerMock, sensorUpdated(Ref(*sut), Ge(timestamp), 42.7))
+        .Times(0);
+    EXPECT_CALL(*listenerMock2, sensorUpdated(Ref(*sut), Ge(timestamp), 42.7))
+        .WillOnce(InvokeWithoutArgs(DbusEnvironment::setPromise("notify")));
+
+    registerForUpdates(listenerMock2);
+    unregisterFromUpdates(listenerMock);
+
+    sensorObject->setValue(42.7);
+
+    ASSERT_TRUE(DbusEnvironment::waitForFuture("notify"));
 }
 
 TEST_F(TestSensorNotification,

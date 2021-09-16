@@ -56,12 +56,14 @@ ReportManager::ReportManager(
                                     const bool logToMetricReportsCollection,
                                     const uint64_t interval,
                                     ReadingParametersPastVersion metricParams) {
+                    constexpr auto enabledDefault = true;
                     return addReport(yield, reportName, reportingType,
                                      emitsReadingsUpdate,
                                      logToMetricReportsCollection,
                                      Milliseconds(interval),
                                      convertToReadingParameters(
-                                         std::move(metricParams)))
+                                         std::move(metricParams)),
+                                     enabledDefault)
                         .getPath();
                 });
 
@@ -74,11 +76,12 @@ ReportManager::ReportManager(
                        const bool logToMetricReportsCollection,
                        const uint64_t interval,
                        ReadingParameters metricParams) {
+                    constexpr auto enabledDefault = true;
                     return addReport(yield, reportName, reportingType,
                                      emitsReadingsUpdate,
                                      logToMetricReportsCollection,
                                      Milliseconds(interval),
-                                     std::move(metricParams))
+                                     std::move(metricParams), enabledDefault)
                         .getPath();
                 });
         });
@@ -169,28 +172,29 @@ interfaces::Report& ReportManager::addReport(
     boost::asio::yield_context& yield, const std::string& reportName,
     const std::string& reportingType, const bool emitsReadingsUpdate,
     const bool logToMetricReportsCollection, Milliseconds interval,
-    ReadingParameters metricParams)
+    ReadingParameters metricParams, const bool enabled)
 {
     auto labeledMetricParams =
         reportFactory->convertMetricParams(yield, metricParams);
 
     return addReport(reportName, reportingType, emitsReadingsUpdate,
                      logToMetricReportsCollection, interval,
-                     std::move(labeledMetricParams));
+                     std::move(labeledMetricParams), enabled);
 }
 
 interfaces::Report& ReportManager::addReport(
     const std::string& reportName, const std::string& reportingType,
     const bool emitsReadingsUpdate, const bool logToMetricReportsCollection,
     Milliseconds interval,
-    std::vector<LabeledMetricParameters> labeledMetricParams)
+    std::vector<LabeledMetricParameters> labeledMetricParams,
+    const bool enabled)
 {
     verifyAddReport(reportName, reportingType, interval, labeledMetricParams);
 
     reports.emplace_back(
         reportFactory->make(reportName, reportingType, emitsReadingsUpdate,
                             logToMetricReportsCollection, interval, *this,
-                            *reportStorage, labeledMetricParams));
+                            *reportStorage, labeledMetricParams, enabled));
     return *reports.back();
 }
 
@@ -204,6 +208,7 @@ void ReportManager::loadFromPersistent()
         std::optional<nlohmann::json> data = reportStorage->load(path);
         try
         {
+            bool enabled = data->at("Enabled").get<bool>();
             size_t version = data->at("Version").get<size_t>();
             if (version != Report::reportVersion)
             {
@@ -223,7 +228,7 @@ void ReportManager::loadFromPersistent()
 
             addReport(name, reportingType, emitsReadingsSignal,
                       logToMetricReportsCollection, Milliseconds(interval),
-                      std::move(readingParameters));
+                      std::move(readingParameters), enabled);
         }
         catch (const std::exception& e)
         {

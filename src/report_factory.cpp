@@ -21,7 +21,8 @@ std::unique_ptr<interfaces::Report> ReportFactory::make(
     bool emitsReadingsSignal, bool logToMetricReportsCollection,
     Milliseconds period, interfaces::ReportManager& reportManager,
     interfaces::JsonStorage& reportStorage,
-    std::vector<LabeledMetricParameters> labeledMetricParams) const
+    std::vector<LabeledMetricParameters> labeledMetricParams,
+    bool enabled) const
 {
     std::vector<std::shared_ptr<interfaces::Metric>> metrics = utils::transform(
         labeledMetricParams,
@@ -41,7 +42,7 @@ std::unique_ptr<interfaces::Report> ReportFactory::make(
     return std::make_unique<Report>(
         bus->get_io_context(), objServer, name, reportingType,
         emitsReadingsSignal, logToMetricReportsCollection, period,
-        reportManager, reportStorage, std::move(metrics));
+        reportManager, reportStorage, std::move(metrics), enabled);
 }
 
 Sensors ReportFactory::getSensors(

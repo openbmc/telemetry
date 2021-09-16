@@ -28,6 +28,8 @@ class Sensor final :
     Id id() const override;
     void registerForUpdates(
         const std::weak_ptr<interfaces::SensorListener>& weakListener) override;
+    void unregisterFromUpdates(
+        const std::weak_ptr<interfaces::SensorListener>& weakListener) override;
 
   private:
     static std::optional<double> readValue(const ValueVariant& v);

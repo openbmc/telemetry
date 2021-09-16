@@ -64,6 +64,17 @@ class ReportParams final
         return intervalProperty;
     }
 
+    ReportParams& enabled(bool val)
+    {
+        enabledProperty = val;
+        return *this;
+    }
+
+    bool enabled() const
+    {
+        return enabledProperty;
+    }
+
     ReportParams& metricParameters(std::vector<LabeledMetricParameters> val)
     {
         metricParametersProperty = std::move(val);
@@ -98,4 +109,5 @@ class ReportParams final
              "Metadata2",
              CollectionTimeScope::point,
              CollectionDuration(Milliseconds(0u))}}};
+    bool enabledProperty = true;
 };

@@ -43,18 +43,16 @@ class ReportManager : public interfaces::ReportManager
         const std::string& reportName, const std::string& reportingType,
         Milliseconds interval,
         const std::vector<LabeledMetricParameters>& readingParams);
-    interfaces::Report& addReport(boost::asio::yield_context& yield,
-                                  const std::string& reportName,
-                                  const std::string& reportingType,
-                                  const bool emitsReadingsUpdate,
-                                  const bool logToMetricReportsCollection,
-                                  Milliseconds interval,
-                                  ReadingParameters metricParams);
+    interfaces::Report& addReport(
+        boost::asio::yield_context& yield, const std::string& reportName,
+        const std::string& reportingType, const bool emitsReadingsUpdate,
+        const bool logToMetricReportsCollection, Milliseconds interval,
+        ReadingParameters metricParams, const bool enabled);
     interfaces::Report& addReport(
         const std::string& reportName, const std::string& reportingType,
         const bool emitsReadingsUpdate, const bool logToMetricReportsCollection,
         Milliseconds interval,
-        std::vector<LabeledMetricParameters> metricParams);
+        std::vector<LabeledMetricParameters> metricParams, const bool enabled);
     void loadFromPersistent();
 
   public:
