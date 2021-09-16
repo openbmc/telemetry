@@ -23,7 +23,8 @@ class Report : public interfaces::Report
            const bool logToMetricReportsCollection, const Milliseconds period,
            interfaces::ReportManager& reportManager,
            interfaces::JsonStorage& reportStorage,
-           std::vector<std::shared_ptr<interfaces::Metric>> metrics);
+           std::vector<std::shared_ptr<interfaces::Metric>> metrics,
+           bool enabled);
     ~Report() = default;
 
     Report(const Report&) = delete;
@@ -68,6 +69,7 @@ class Report : public interfaces::Report
 
     interfaces::JsonStorage::FilePath fileName;
     interfaces::JsonStorage& reportStorage;
+    bool enabled;
 
   public:
     static constexpr const char* reportIfaceName =

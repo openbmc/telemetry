@@ -19,4 +19,5 @@ class MetricMock : public interfaces::Metric
     MOCK_METHOD(std::vector<MetricValue>, getReadings, (), (const, override));
     MOCK_METHOD(LabeledMetricParameters, dumpConfiguration, (),
                 (const, override));
+    MOCK_METHOD(void, enableUpdates, (bool), (override));
 };

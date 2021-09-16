@@ -177,8 +177,7 @@ class TestMetricCalculationFunctions :
   public:
     void SetUp() override
     {
-        clockFakePtr->set(0ms);
-
+        clockFake.reset();
         sut = makeSut(params.operationType(GetParam().operationType())
                           .collectionTimeScope(GetParam().collectionTimeScope())
                           .collectionDuration(GetParam().collectionDuration()));
@@ -351,4 +350,29 @@ TEST_P(TestMetricCalculationFunctions,
     EXPECT_THAT(readings, ElementsAre(MetricValue{
                               "id", "metadata", expectedReading,
                               ClockFake::toTimestamp(expectedTimestamp)}));
+}
+
+TEST_P(TestMetricCalculationFunctions,
+       calculatedReadingValueWhenMetricDisabledEnabled)
+{
+    std::vector<bool> updatesEnabled = {false, true, false};
+    for (const auto state : updatesEnabled)
+    {
+        clockFake.reset();
+        sut->enableUpdates(state);
+        for (auto [timestamp, reading] : GetParam().readings())
+        {
+            sut->sensorUpdated(*sensorMocks.front(), clockFake.timestamp(),
+                               reading);
+            clockFake.advance(timestamp);
+        }
+
+        const auto [expectedTimestamp, expectedValue] =
+            state ? GetParam().expectedReading() : GetParam().disabledReading();
+        const auto readings = sut->getReadings();
+
+        EXPECT_THAT(readings, ElementsAre(MetricValue{
+                                  "id", "metadata", expectedValue,
+                                  ClockFake::toTimestamp(expectedTimestamp)}));
+    }
 }

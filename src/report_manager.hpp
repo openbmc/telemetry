@@ -49,12 +49,12 @@ class ReportManager : public interfaces::ReportManager
                                   const bool emitsReadingsUpdate,
                                   const bool logToMetricReportsCollection,
                                   Milliseconds interval,
-                                  ReadingParameters metricParams);
+                                  ReadingParameters metricParams, bool enabled);
     interfaces::Report& addReport(
         const std::string& reportName, const std::string& reportingType,
         const bool emitsReadingsUpdate, const bool logToMetricReportsCollection,
         Milliseconds interval,
-        std::vector<LabeledMetricParameters> metricParams);
+        std::vector<LabeledMetricParameters> metricParams, bool enabled);
     void loadFromPersistent();
 
   public:

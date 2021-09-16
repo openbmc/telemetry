@@ -141,30 +141,49 @@ void Metric::initialize()
     }
 }
 
+void Metric::enableUpdates(bool state)
+{
+    enabled = state;
+}
+
 std::vector<MetricValue> Metric::getReadings() const
 {
-    const auto timestamp = clock->timestamp();
-
     auto resultReadings = readings;
-
-    for (size_t i = 0; i < resultReadings.size(); ++i)
+    if (enabled)
     {
-        std::tie(resultReadings[i].timestamp, resultReadings[i].value) =
-            collectionAlgorithms[i]->update(timestamp);
+        const auto timestamp = clock->timestamp();
+        for (size_t i = 0; i < resultReadings.size(); ++i)
+        {
+            std::tie(resultReadings[i].timestamp, resultReadings[i].value) =
+                collectionAlgorithms[i]->update(timestamp);
+        }
     }
-
+    else
+    {
+        for (size_t i = 0; i < resultReadings.size(); ++i)
+        {
+            std::tie(resultReadings[i].timestamp, resultReadings[i].value) =
+                details::ReadingItem{0, 0.0};
+        }
+    }
     return resultReadings;
 }
 
 void Metric::sensorUpdated(interfaces::Sensor& notifier, uint64_t timestamp)
 {
-    findAssociatedData(notifier).update(timestamp);
+    if (enabled)
+    {
+        findAssociatedData(notifier).update(timestamp);
+    }
 }
 
 void Metric::sensorUpdated(interfaces::Sensor& notifier, uint64_t timestamp,
                            double value)
 {
-    findAssociatedData(notifier).update(timestamp, value);
+    if (enabled)
+    {
+        findAssociatedData(notifier).update(timestamp, value);
+    }
 }
 
 Metric::CollectionData&

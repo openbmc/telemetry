@@ -21,6 +21,7 @@ class Metric :
     void sensorUpdated(interfaces::Sensor&, uint64_t) override;
     void sensorUpdated(interfaces::Sensor&, uint64_t, double value) override;
     LabeledMetricParameters dumpConfiguration() const override;
+    void enableUpdates(bool) override;
 
   private:
     class CollectionData;
@@ -44,4 +45,5 @@ class Metric :
     CollectionDuration collectionDuration;
     std::vector<std::unique_ptr<CollectionData>> collectionAlgorithms;
     std::unique_ptr<interfaces::Clock> clock;
+    bool enabled = true;
 };

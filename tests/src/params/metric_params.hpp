@@ -90,6 +90,11 @@ class MetricParams final
         return expectedReadingProperty;
     }
 
+    const std::pair<Milliseconds, double> disabledReading() const
+    {
+        return std::make_pair(Milliseconds(0), 0.0);
+    }
+
   private:
     OperationType operationTypeProperty = {};
     std::string idProperty = "MetricId";
