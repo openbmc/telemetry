@@ -135,16 +135,36 @@ Metric::~Metric() = default;
 
 void Metric::initialize()
 {
+    deinitialize();
     for (const auto& sensor : sensors)
     {
         sensor->registerForUpdates(weak_from_this());
     }
 }
 
+void Metric::deinitialize()
+{
+    for (const auto& sensor : sensors)
+    {
+        sensor->unregisterFromUpdates(weak_from_this());
+    }
+}
+
+void Metric::setUpdates(bool state)
+{
+    if (state)
+    {
+        initialize();
+    }
+    else
+    {
+        deinitialize();
+    }
+}
+
 std::vector<MetricValue> Metric::getReadings() const
 {
     const auto timestamp = clock->timestamp();
-
     auto resultReadings = readings;
 
     for (size_t i = 0; i < resultReadings.size(); ++i)

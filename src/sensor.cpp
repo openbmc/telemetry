@@ -75,6 +75,22 @@ void Sensor::registerForUpdates(
     }
 }
 
+void Sensor::unregisterFromUpdates(
+    const std::weak_ptr<interfaces::SensorListener>& weakListener)
+{
+    if (auto listener = weakListener.lock())
+    {
+        listeners.erase(
+            std::remove_if(
+                listeners.begin(), listeners.end(),
+                [listenerToUnregister = listener.get()](const auto& listener) {
+                    return (listener.expired() ||
+                            listener.lock().get() == listenerToUnregister);
+                }),
+            listeners.end());
+    }
+}
+
 void Sensor::updateValue(double newValue)
 {
     timestamp = std::time(0);

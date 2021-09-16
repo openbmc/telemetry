@@ -24,8 +24,8 @@ class ReportFactory : public interfaces::ReportFactory
              bool emitsReadingsSignal, bool logToMetricReportsCollection,
              Milliseconds period, interfaces::ReportManager& reportManager,
              interfaces::JsonStorage& reportStorage,
-             std::vector<LabeledMetricParameters> labeledMetricParams)
-            const override;
+             std::vector<LabeledMetricParameters> labeledMetricParams,
+             bool enabled) const override;
 
   private:
     Sensors getSensors(

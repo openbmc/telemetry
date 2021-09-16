@@ -17,10 +17,12 @@ class Metric :
     ~Metric();
 
     void initialize() override;
+    void deinitialize() override;
     std::vector<MetricValue> getReadings() const override;
     void sensorUpdated(interfaces::Sensor&, uint64_t) override;
     void sensorUpdated(interfaces::Sensor&, uint64_t, double value) override;
     LabeledMetricParameters dumpConfiguration() const override;
+    void setUpdates(bool) override;
 
   private:
     class CollectionData;

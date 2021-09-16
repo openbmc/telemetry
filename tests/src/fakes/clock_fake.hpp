@@ -27,6 +27,11 @@ class ClockFake : public interfaces::Clock
         timePoint = time_point{timeSinceEpoch};
     }
 
+    void reset(void) noexcept
+    {
+        set(Milliseconds(0));
+    }
+
     static uint64_t toTimestamp(Milliseconds time)
     {
         return time.count();

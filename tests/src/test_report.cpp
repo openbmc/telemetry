@@ -73,7 +73,8 @@ class TestReport : public Test
             params.emitReadingUpdate(), params.logToMetricReportCollection(),
             params.interval(), *reportManagerMock, storageMock,
             utils::convContainer<std::shared_ptr<interfaces::Metric>>(
-                metricMocks));
+                metricMocks),
+            params.enabled());
     }
 
     template <class T>
@@ -138,6 +139,8 @@ class TestReport : public Test
 
 TEST_F(TestReport, verifyIfPropertiesHaveValidValue)
 {
+    EXPECT_THAT(getProperty<bool>(sut->getPath(), "Enabled"),
+                Eq(defaultParams.enabled()));
     EXPECT_THAT(getProperty<uint64_t>(sut->getPath(), "Interval"),
                 Eq(defaultParams.interval().count()));
     EXPECT_THAT(getProperty<bool>(sut->getPath(), "Persistency"), Eq(true));
@@ -155,6 +158,14 @@ TEST_F(TestReport, readingsAreInitialyEmpty)
 {
     EXPECT_THAT(getProperty<Readings>(sut->getPath(), "Readings"),
                 Eq(Readings{}));
+}
+
+TEST_F(TestReport, setEnabledWithNewValue)
+{
+    bool newValue = !defaultParams.enabled();
+    EXPECT_THAT(setProperty(sut->getPath(), "Enabled", newValue).value(),
+                Eq(boost::system::errc::success));
+    EXPECT_THAT(getProperty<bool>(sut->getPath(), "Enabled"), Eq(newValue));
 }
 
 TEST_F(TestReport, setIntervalWithValidValue)
@@ -240,7 +251,8 @@ class TestReportStore :
 
 INSTANTIATE_TEST_SUITE_P(
     _, TestReportStore,
-    Values(std::make_pair("Version"s, nlohmann::json(4)),
+    Values(std::make_pair("Enabled"s, nlohmann::json(ReportParams().enabled())),
+           std::make_pair("Version"s, nlohmann::json(4)),
            std::make_pair("Name"s, nlohmann::json(ReportParams().reportName())),
            std::make_pair("ReportingType",
                           nlohmann::json(ReportParams().reportingType())),
@@ -379,15 +391,28 @@ TEST_P(TestReportAllReportTypes, returnPropertValueOfReportType)
                 Eq(GetParam().reportingType()));
 }
 
-TEST_P(TestReportAllReportTypes, updateReadingsCallUpdateReadingsProperty)
+TEST_P(TestReportAllReportTypes, updateReadingsCallEnabledPropertyOff)
+{
+    const uint64_t expectedTime = std::time(0);
+
+    setProperty(sut->getPath(), "Enabled", false);
+    sut->updateReadings();
+    const auto [timestamp, readings] =
+        getProperty<Readings>(sut->getPath(), "Readings");
+
+    EXPECT_THAT(getProperty<bool>(sut->getPath(), "Enabled"), Eq(false));
+    EXPECT_THAT(timestamp, Lt(expectedTime));
+}
+
+TEST_P(TestReportAllReportTypes, updateReadingsCallEnabledPropertyOn)
 {
     const uint64_t expectedTime = std::time(0);
 
     sut->updateReadings();
-
     const auto [timestamp, readings] =
         getProperty<Readings>(sut->getPath(), "Readings");
 
+    EXPECT_THAT(getProperty<bool>(sut->getPath(), "Enabled"), Eq(true));
     EXPECT_THAT(timestamp, Ge(expectedTime));
 }
 

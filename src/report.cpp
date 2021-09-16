@@ -17,14 +17,15 @@ Report::Report(boost::asio::io_context& ioc,
                const Milliseconds intervalIn,
                interfaces::ReportManager& reportManager,
                interfaces::JsonStorage& reportStorageIn,
-               std::vector<std::shared_ptr<interfaces::Metric>> metricsIn) :
+               std::vector<std::shared_ptr<interfaces::Metric>> metricsIn,
+               bool enabledIn) :
     name(reportName),
     path(reportDir + name), reportingType(reportingTypeIn),
     interval(intervalIn), emitsReadingsUpdate(emitsReadingsUpdateIn),
     logToMetricReportsCollection(logToMetricReportsCollectionIn),
     objServer(objServer), metrics(std::move(metricsIn)), timer(ioc),
     fileName(std::to_string(std::hash<std::string>{}(name))),
-    reportStorage(reportStorageIn)
+    reportStorage(reportStorageIn), enabled(enabledIn)
 {
     readingParameters =
         toReadingParameters(utils::transform(metrics, [](const auto& metric) {
@@ -69,16 +70,39 @@ std::unique_ptr<sdbusplus::asio::dbus_interface> Report::makeReportInterface()
 {
     auto dbusIface = objServer->add_unique_interface(path, reportIfaceName);
     dbusIface->register_property_rw(
+        "Enabled", enabled, sdbusplus::vtable::property_::emits_change,
+        [this](bool newVal, const auto&) {
+            if (newVal != enabled)
+            {
+                if (true == newVal && "Periodic" == reportingType)
+                {
+                    scheduleTimer(interval);
+                }
+                for (auto& metric : metrics)
+                {
+                    metric->setUpdates(newVal);
+                }
+                enabled = newVal;
+                persistency = storeConfiguration();
+            }
+            return true;
+        },
+        [this](const auto&) { return enabled; });
+    dbusIface->register_property_rw(
         "Interval", interval.count(),
         sdbusplus::vtable::property_::emits_change,
         [this](uint64_t newVal, auto&) {
-            Milliseconds newValT(newVal);
-            if (newValT < ReportManager::minInterval)
+            if (Milliseconds newValT{newVal};
+                newValT >= ReportManager::minInterval)
             {
-                return false;
+                if (newValT != interval)
+                {
+                    interval = newValT;
+                    persistency = storeConfiguration();
+                }
+                return true;
             }
-            interval = newValT;
-            return true;
+            return false;
         },
         [this](const auto&) { return interval.count(); });
     dbusIface->register_property_rw(
@@ -158,25 +182,25 @@ void Report::scheduleTimer(Milliseconds timerInterval)
 
 void Report::updateReadings()
 {
-    using ReadingsValue = std::tuple_element_t<1, Readings>;
-    std::get<ReadingsValue>(cachedReadings).clear();
-
-    for (const auto& metric : metrics)
+    if (enabled)
     {
-        for (const auto& reading : metric->getReadings())
+        using ReadingsTimestamp = std::tuple_element_t<0, Readings>;
+        using ReadingsValue = std::tuple_element_t<1, Readings>;
+
+        std::get<ReadingsValue>(cachedReadings).clear();
+        for (const auto& metric : metrics)
         {
-            std::get<1>(cachedReadings)
-                .emplace_back(reading.id, reading.metadata, reading.value,
-                              reading.timestamp);
+            for (const auto& [id, meta, val, timestamp] : metric->getReadings())
+            {
+                std::get<ReadingsValue>(cachedReadings)
+                    .emplace_back(id, meta, val, timestamp);
+            }
         }
+        std::get<ReadingsTimestamp>(cachedReadings) = std::time(0);
+        std::swap(readings, cachedReadings);
+
+        reportIface->signal_property("Readings");
     }
-
-    using ReadingsTimestamp = std::tuple_element_t<0, Readings>;
-    std::get<ReadingsTimestamp>(cachedReadings) = std::time(0);
-
-    std::swap(readings, cachedReadings);
-
-    reportIface->signal_property("Readings");
 }
 
 bool Report::storeConfiguration() const
@@ -185,6 +209,7 @@ bool Report::storeConfiguration() const
     {
         nlohmann::json data;
 
+        data["Enabled"] = enabled;
         data["Version"] = reportVersion;
         data["Name"] = name;
         data["ReportingType"] = reportingType;
