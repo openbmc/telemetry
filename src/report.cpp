@@ -6,15 +6,17 @@
 #include <phosphor-logging/log.hpp>
 #include <sdbusplus/vtable.hpp>
 
+#include <limits>
 #include <numeric>
 
 Report::Report(boost::asio::io_context& ioc,
                const std::shared_ptr<sdbusplus::asio::object_server>& objServer,
                const std::string& reportName,
-               const std::string& reportingTypeIn,
+               const ReportingType reportingTypeIn,
                const bool emitsReadingsUpdateIn,
                const bool logToMetricReportsCollectionIn,
-               const Milliseconds intervalIn,
+               const Milliseconds intervalIn, const uint64_t appendLimitIn,
+               const ReportUpdates reportUpdatesIn,
                interfaces::ReportManager& reportManager,
                interfaces::JsonStorage& reportStorageIn,
                std::vector<std::shared_ptr<interfaces::Metric>> metricsIn,
@@ -23,6 +25,10 @@ Report::Report(boost::asio::io_context& ioc,
     path(reportDir + name), reportingType(reportingTypeIn),
     interval(intervalIn), emitsReadingsUpdate(emitsReadingsUpdateIn),
     logToMetricReportsCollection(logToMetricReportsCollectionIn),
+    sensorCount(getSensorCount(metricsIn)),
+    appendLimit(deduceAppendLimit(appendLimitIn)),
+    reportUpdates(reportUpdatesIn),
+    readingsBuffer(deduceBufferSize(reportUpdates, reportingType)),
     objServer(objServer), metrics(std::move(metricsIn)), timer(ioc),
     fileName(std::to_string(std::hash<std::string>{}(name))),
     reportStorage(reportStorageIn), enabled(enabledIn)
@@ -55,7 +61,7 @@ Report::Report(boost::asio::io_context& ioc,
     persistency = storeConfiguration();
     reportIface = makeReportInterface();
 
-    if (reportingType == "Periodic")
+    if (reportingType == ReportingType::Periodic)
     {
         scheduleTimer(interval);
     }
@@ -69,6 +75,58 @@ Report::Report(boost::asio::io_context& ioc,
     }
 }
 
+uint64_t Report::getSensorCount(
+    std::vector<std::shared_ptr<interfaces::Metric>>& metrics)
+{
+    uint64_t sensorCount = 0;
+    for (auto& metric : metrics)
+    {
+        sensorCount += metric->sensorCount();
+    }
+    return sensorCount;
+}
+
+uint64_t Report::deduceAppendLimit(const uint64_t appendLimitIn) const
+{
+    if (appendLimitIn == std::numeric_limits<uint64_t>::max())
+    {
+        return sensorCount;
+    }
+    else
+    {
+        return appendLimitIn;
+    }
+}
+
+uint64_t Report::deduceBufferSize(const ReportUpdates reportUpdatesIn,
+                                  const ReportingType reportingTypeIn) const
+{
+    if (reportUpdatesIn == ReportUpdates::Overwrite ||
+        reportingTypeIn == ReportingType::OnRequest)
+    {
+        return sensorCount;
+    }
+    else
+    {
+        return appendLimit;
+    }
+}
+
+void Report::setReportUpdates(const ReportUpdates newReportUpdates)
+{
+    if (reportUpdates != newReportUpdates)
+    {
+        if (reportingType != ReportingType::OnRequest &&
+            (reportUpdates == ReportUpdates::Overwrite ||
+             newReportUpdates == ReportUpdates::Overwrite))
+        {
+            readingsBuffer.clearAndResize(
+                deduceBufferSize(newReportUpdates, reportingType));
+        }
+        reportUpdates = newReportUpdates;
+    }
+}
+
 std::unique_ptr<sdbusplus::asio::dbus_interface> Report::makeReportInterface()
 {
     auto dbusIface = objServer->add_unique_interface(path, reportIfaceName);
@@ -77,7 +135,7 @@ std::unique_ptr<sdbusplus::asio::dbus_interface> Report::makeReportInterface()
         [this](bool newVal, const auto&) {
             if (newVal != enabled)
             {
-                if (true == newVal && "Periodic" == reportingType)
+                if (true == newVal && ReportingType::Periodic == reportingType)
                 {
                     scheduleTimer(interval);
                 }
@@ -147,8 +205,8 @@ std::unique_ptr<sdbusplus::asio::dbus_interface> Report::makeReportInterface()
     dbusIface->register_property_r("Readings", readings, readingsFlag,
                                    [this](const auto&) { return readings; });
     dbusIface->register_property_r(
-        "ReportingType", reportingType, sdbusplus::vtable::property_::const_,
-        [this](const auto&) { return reportingType; });
+        "ReportingType", std::string(), sdbusplus::vtable::property_::const_,
+        [this](const auto&) { return reportingTypeToString(reportingType); });
     dbusIface->register_property_r(
         "ReadingParameters", readingParametersPastVersion,
         sdbusplus::vtable::property_::const_,
@@ -165,8 +223,21 @@ std::unique_ptr<sdbusplus::asio::dbus_interface> Report::makeReportInterface()
         "LogToMetricReportsCollection", logToMetricReportsCollection,
         sdbusplus::vtable::property_::const_,
         [this](const auto&) { return logToMetricReportsCollection; });
+    dbusIface->register_property_r("AppendLimit", appendLimit,
+                                   sdbusplus::vtable::property_::emits_change,
+                                   [this](const auto&) { return appendLimit; });
+    dbusIface->register_property_rw(
+        "ReportUpdates", std::string(),
+        sdbusplus::vtable::property_::emits_change,
+        [this](auto newVal, auto& oldVal) {
+            ReportManager::verifyReportUpdates(newVal);
+            setReportUpdates(stringToReportUpdates(newVal));
+            oldVal = newVal;
+            return true;
+        },
+        [this](const auto&) { return reportUpdatesToString(reportUpdates); });
     dbusIface->register_method("Update", [this] {
-        if (reportingType == "OnRequest")
+        if (reportingType == ReportingType::OnRequest)
         {
             updateReadings();
         }
@@ -201,20 +272,33 @@ void Report::updateReadings()
         return;
     }
 
-    using ReadingsTimestamp = std::tuple_element_t<0, Readings>;
-    using ReadingsValue = std::tuple_element_t<1, Readings>;
+    if (reportUpdates == ReportUpdates::Overwrite ||
+        reportingType == ReportingType::OnRequest)
+    {
+        readingsBuffer.clear();
+    }
 
-    std::get<ReadingsValue>(cachedReadings).clear();
     for (const auto& metric : metrics)
     {
-        for (const auto& [id, meta, val, timestamp] : metric->getReadings())
+        for (const auto& [id, metadata, value, timestamp] :
+             metric->getReadings())
         {
-            std::get<ReadingsValue>(cachedReadings)
-                .emplace_back(id, meta, val, timestamp);
+            if (reportUpdates == ReportUpdates::AppendStopsWhenFull &&
+                readingsBuffer.isFull())
+            {
+                enabled = false;
+                for (auto& metric : metrics)
+                {
+                    metric->deinitialize();
+                }
+                break;
+            }
+            readingsBuffer.emplace(id, metadata, value, timestamp);
         }
     }
-    std::get<ReadingsTimestamp>(cachedReadings) = std::time(0);
-    std::swap(readings, cachedReadings);
+
+    readings = {std::time(0), std::vector<ReadingData>(readingsBuffer.begin(),
+                                                       readingsBuffer.end())};
 
     reportIface->signal_property("Readings");
 }
@@ -228,10 +312,12 @@ bool Report::storeConfiguration() const
         data["Enabled"] = enabled;
         data["Version"] = reportVersion;
         data["Name"] = name;
-        data["ReportingType"] = reportingType;
+        data["ReportingType"] = reportingTypeToString(reportingType);
         data["EmitsReadingsUpdate"] = emitsReadingsUpdate;
         data["LogToMetricReportsCollection"] = logToMetricReportsCollection;
         data["Interval"] = interval.count();
+        data["AppendLimit"] = appendLimit;
+        data["ReportUpdates"] = reportUpdatesToString(reportUpdates);
         data["ReadingParameters"] =
             utils::transform(metrics, [](const auto& metric) {
                 return metric->dumpConfiguration();
