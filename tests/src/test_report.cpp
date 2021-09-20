@@ -69,9 +69,11 @@ class TestReport : public Test
 
         return std::make_unique<Report>(
             DbusEnvironment::getIoc(), DbusEnvironment::getObjServer(),
-            params.reportName(), params.reportingType(),
+            params.reportName(), stringToReportingType(params.reportingType()),
             params.emitReadingUpdate(), params.logToMetricReportCollection(),
-            params.interval(), *reportManagerMock, storageMock,
+            params.interval(), params.appendLimit(),
+            stringToReportUpdates(params.reportUpdates()), *reportManagerMock,
+            storageMock,
             utils::convContainer<std::shared_ptr<interfaces::Metric>>(
                 metricMocks),
             params.enabled());
@@ -146,6 +148,10 @@ TEST_F(TestReport, verifyIfPropertiesHaveValidValue)
     EXPECT_THAT(getProperty<bool>(sut->getPath(), "Persistency"), Eq(true));
     EXPECT_THAT(getProperty<bool>(sut->getPath(), "EmitsReadingsUpdate"),
                 Eq(defaultParams.emitReadingUpdate()));
+    EXPECT_THAT(getProperty<uint64_t>(sut->getPath(), "AppendLimit"),
+                Eq(defaultParams.appendLimit()));
+    EXPECT_THAT(getProperty<std::string>(sut->getPath(), "ReportUpdates"),
+                Eq(defaultParams.reportUpdates()));
     EXPECT_THAT(
         getProperty<bool>(sut->getPath(), "LogToMetricReportsCollection"),
         Eq(defaultParams.logToMetricReportCollection()));
@@ -236,6 +242,15 @@ TEST_F(TestReport, deleteReportExpectThatFileIsRemoveFromStorage)
     EXPECT_CALL(storageMock, remove(to_file_path(sut->getName())));
     auto ec = deleteReport(sut->getPath());
     EXPECT_THAT(ec, Eq(boost::system::errc::success));
+}
+
+TEST_F(TestReport, appendLimitDeducedProperly)
+{
+    sut = makeReport(ReportParams()
+                         .appendLimit(std::numeric_limits<uint64_t>::max())
+                         .reportName("AppendLimitDeduction"));
+    auto appendLimit = getProperty<uint64_t>(sut->getPath(), "AppendLimit");
+    EXPECT_EQ(appendLimit, 2ull);
 }
 
 class TestReportStore :
@@ -522,6 +537,113 @@ TEST_F(TestReportPeriodicReport, readingsAreUpdatedAfterIntervalExpires)
     EXPECT_THAT(readings,
                 ElementsAre(std::make_tuple("a"s, "b"s, 17.1, 114u),
                             std::make_tuple("aa"s, "bb"s, 42.0, 74u)));
+}
+
+struct ReportUpdatesReportParams
+{
+    ReportParams reportParams;
+    std::vector<ReadingData> expectedReadings;
+    bool expectedEnabled;
+};
+
+class TestReportWithReportUpdatesAndLimit :
+    public TestReport,
+    public WithParamInterface<ReportUpdatesReportParams>
+{
+    void SetUp() override
+    {
+        sut = makeReport(ReportParams(GetParam().reportParams)
+                             .reportingType("Periodic")
+                             .interval(std::chrono::hours(1000)));
+    }
+};
+
+INSTANTIATE_TEST_SUITE_P(
+    _, TestReportWithReportUpdatesAndLimit,
+    Values(
+        ReportUpdatesReportParams{
+            ReportParams().reportUpdates("AppendWrapsWhenFull").appendLimit(5),
+            std::vector<ReadingData>{{std::make_tuple("aa"s, "bb"s, 42.0, 74u),
+                                      std::make_tuple("a"s, "b"s, 17.1, 114u),
+                                      std::make_tuple("aa"s, "bb"s, 42.0, 74u),
+                                      std::make_tuple("aa"s, "bb"s, 42.0, 74u),
+                                      std::make_tuple("a"s, "b"s, 17.1, 114u)}},
+            true},
+        ReportUpdatesReportParams{
+            ReportParams().reportUpdates("AppendWrapsWhenFull").appendLimit(4),
+            std::vector<ReadingData>{
+                {std::make_tuple("a"s, "b"s, 17.1, 114u),
+                 std::make_tuple("aa"s, "bb"s, 42.0, 74u),
+                 std::make_tuple("a"s, "b"s, 17.1, 114u),
+                 std::make_tuple("aa"s, "bb"s, 42.0, 74u)}},
+            true},
+        ReportUpdatesReportParams{
+            ReportParams().reportUpdates("AppendWrapsWhenFull").appendLimit(0),
+            std::vector<ReadingData>{}, true},
+        ReportUpdatesReportParams{
+            ReportParams().reportUpdates("AppendStopsWhenFull").appendLimit(10),
+            std::vector<ReadingData>{
+                {std::make_tuple("a"s, "b"s, 17.1, 114u),
+                 std::make_tuple("aa"s, "bb"s, 42.0, 74u),
+                 std::make_tuple("a"s, "b"s, 17.1, 114u),
+                 std::make_tuple("aa"s, "bb"s, 42.0, 74u),
+                 std::make_tuple("a"s, "b"s, 17.1, 114u),
+                 std::make_tuple("aa"s, "bb"s, 42.0, 74u),
+                 std::make_tuple("a"s, "b"s, 17.1, 114u),
+                 std::make_tuple("aa"s, "bb"s, 42.0, 74u)}},
+            true},
+        ReportUpdatesReportParams{
+            ReportParams().reportUpdates("AppendStopsWhenFull").appendLimit(5),
+            std::vector<ReadingData>{{std::make_tuple("a"s, "b"s, 17.1, 114u),
+                                      std::make_tuple("aa"s, "bb"s, 42.0, 74u),
+                                      std::make_tuple("a"s, "b"s, 17.1, 114u),
+                                      std::make_tuple("aa"s, "bb"s, 42.0, 74u),
+                                      std::make_tuple("a"s, "b"s, 17.1, 114u)}},
+            false},
+        ReportUpdatesReportParams{
+            ReportParams().reportUpdates("AppendStopsWhenFull").appendLimit(4),
+            std::vector<ReadingData>{
+                {std::make_tuple("a"s, "b"s, 17.1, 114u),
+                 std::make_tuple("aa"s, "bb"s, 42.0, 74u),
+                 std::make_tuple("a"s, "b"s, 17.1, 114u),
+                 std::make_tuple("aa"s, "bb"s, 42.0, 74u)}},
+            false},
+        ReportUpdatesReportParams{
+            ReportParams().reportUpdates("AppendStopsWhenFull").appendLimit(0),
+            std::vector<ReadingData>{}, false},
+        ReportUpdatesReportParams{
+            ReportParams().reportUpdates("Overwrite").appendLimit(500),
+            std::vector<ReadingData>{
+                {std::make_tuple("a"s, "b"s, 17.1, 114u),
+                 std::make_tuple("aa"s, "bb"s, 42.0, 74u)}},
+            true},
+        ReportUpdatesReportParams{
+            ReportParams().reportUpdates("Overwrite").appendLimit(1),
+            std::vector<ReadingData>{
+                {std::make_tuple("a"s, "b"s, 17.1, 114u),
+                 std::make_tuple("aa"s, "bb"s, 42.0, 74u)}},
+            true},
+        ReportUpdatesReportParams{
+            ReportParams().reportUpdates("Overwrite").appendLimit(0),
+            std::vector<ReadingData>{
+                {std::make_tuple("a"s, "b"s, 17.1, 114u),
+                 std::make_tuple("aa"s, "bb"s, 42.0, 74u)}},
+            true}));
+
+TEST_P(TestReportWithReportUpdatesAndLimit,
+       readingsAreUpdatedAfterIntervalExpires)
+{
+    for (int i = 0; i < 4; i++)
+    {
+        sut->updateReadings();
+    }
+
+    const auto [timestamp, readings] =
+        getProperty<Readings>(sut->getPath(), "Readings");
+    const auto enabled = getProperty<bool>(sut->getPath(), "Enabled");
+
+    EXPECT_THAT(readings, ElementsAreArray(GetParam().expectedReadings));
+    EXPECT_EQ(enabled, GetParam().expectedEnabled);
 }
 
 class TestReportInitialization : public TestReport

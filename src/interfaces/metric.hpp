@@ -19,6 +19,7 @@ class Metric
     virtual void deinitialize() = 0;
     virtual std::vector<MetricValue> getReadings() const = 0;
     virtual LabeledMetricParameters dumpConfiguration() const = 0;
+    virtual uint64_t sensorCount() const = 0;
 };
 
 } // namespace interfaces
