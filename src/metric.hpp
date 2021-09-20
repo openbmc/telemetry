@@ -21,6 +21,7 @@ class Metric :
     void sensorUpdated(interfaces::Sensor&, uint64_t) override;
     void sensorUpdated(interfaces::Sensor&, uint64_t, double value) override;
     LabeledMetricParameters dumpConfiguration() const override;
+    uint64_t sensorCount() const override;
 
   private:
     class CollectionData;

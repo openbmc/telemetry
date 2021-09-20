@@ -41,19 +41,21 @@ class ReportManager : public interfaces::ReportManager
     void verifyReportNameLength(const std::string& reportName);
     void verifyAddReport(
         const std::string& reportName, const std::string& reportingType,
-        Milliseconds interval,
+        Milliseconds interval, const std::string& reportUpdates,
         const std::vector<LabeledMetricParameters>& readingParams);
     interfaces::Report& addReport(boost::asio::yield_context& yield,
                                   const std::string& reportName,
                                   const std::string& reportingType,
                                   const bool emitsReadingsUpdate,
                                   const bool logToMetricReportsCollection,
-                                  Milliseconds interval,
+                                  Milliseconds interval, uint64_t appendLimit,
+                                  const std::string& reportUpdates,
                                   ReadingParameters metricParams);
     interfaces::Report& addReport(
         const std::string& reportName, const std::string& reportingType,
         const bool emitsReadingsUpdate, const bool logToMetricReportsCollection,
-        Milliseconds interval,
+        Milliseconds interval, uint64_t appendLimit,
+        const std::string& reportUpdates,
         std::vector<LabeledMetricParameters> metricParams);
     void loadFromPersistent();
 
@@ -69,4 +71,8 @@ class ReportManager : public interfaces::ReportManager
         "/xyz/openbmc_project/Telemetry/Reports";
     static constexpr std::array<std::string_view, 2> supportedReportingType = {
         "Periodic", "OnRequest"};
+    static constexpr std::array<std::string_view, 4> supportedReportUpdates = {
+        "Overwrite", "AppendStopWhenFull", "AppendWrapWhenFull", "Default"};
+
+    static void verifyReportUpdates(const std::string& reportUpdates);
 };
