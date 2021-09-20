@@ -227,6 +227,11 @@ std::vector<std::unique_ptr<Metric::CollectionData>>
     return result;
 }
 
+uint64_t Metric::sensorCount() const
+{
+    return sensors.size();
+}
+
 void Metric::attemptUnpackJsonMetadata()
 {
     using MetricMetadata =
