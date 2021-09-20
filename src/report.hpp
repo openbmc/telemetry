@@ -5,6 +5,7 @@
 #include "interfaces/report.hpp"
 #include "interfaces/report_manager.hpp"
 #include "types/report_types.hpp"
+#include "utils/circular_vector.hpp"
 
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/steady_timer.hpp>
@@ -18,9 +19,10 @@ class Report : public interfaces::Report
   public:
     Report(boost::asio::io_context& ioc,
            const std::shared_ptr<sdbusplus::asio::object_server>& objServer,
-           const std::string& reportName, const std::string& reportingType,
+           const std::string& reportName, const ReportingType reportingType,
            const bool emitsReadingsSignal,
            const bool logToMetricReportsCollection, const Milliseconds period,
+           uint64_t appendLimitIn, const ReportUpdates reportUpdatesIn,
            interfaces::ReportManager& reportManager,
            interfaces::JsonStorage& reportStorage,
            std::vector<std::shared_ptr<interfaces::Metric>> metrics);
@@ -48,18 +50,28 @@ class Report : public interfaces::Report
     std::unique_ptr<sdbusplus::asio::dbus_interface> makeReportInterface();
     static void timerProc(boost::system::error_code, Report& self);
     void scheduleTimer(Milliseconds interval);
+    uint64_t deduceAppendLimit(
+        const uint64_t appendLimitIn, const ReportUpdates reportUpdatesIn,
+        const ReportingType reportingTypeIn,
+        const std::vector<std::shared_ptr<interfaces::Metric>>& metricsIn)
+        const;
+    ReportUpdates
+        deduceReportUpdates(const ReportUpdates reportUpdatesIn,
+                            const ReportingType reportingTypeIn) const;
 
     const std::string name;
     const std::string path;
-    std::string reportingType;
+    ReportingType reportingType;
     Milliseconds interval;
     bool emitsReadingsUpdate;
     bool logToMetricReportsCollection;
     ReadingParametersPastVersion readingParametersPastVersion;
     ReadingParameters readingParameters;
     bool persistency = false;
-    Readings cachedReadings = {};
+    uint64_t appendLimit;
+    CircularVector<ReadingData> readingsBuffer;
     Readings readings = {};
+    ReportUpdates reportUpdates;
     std::shared_ptr<sdbusplus::asio::object_server> objServer;
     std::unique_ptr<sdbusplus::asio::dbus_interface> reportIface;
     std::unique_ptr<sdbusplus::asio::dbus_interface> deleteIface;

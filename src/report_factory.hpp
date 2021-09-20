@@ -22,7 +22,9 @@ class ReportFactory : public interfaces::ReportFactory
     std::unique_ptr<interfaces::Report>
         make(const std::string& name, const std::string& reportingType,
              bool emitsReadingsSignal, bool logToMetricReportsCollection,
-             Milliseconds period, interfaces::ReportManager& reportManager,
+             Milliseconds period, uint64_t appendLimitIn,
+             const std::string& reportUpdatesIn,
+             interfaces::ReportManager& reportManager,
              interfaces::JsonStorage& reportStorage,
              std::vector<LabeledMetricParameters> labeledMetricParams)
             const override;

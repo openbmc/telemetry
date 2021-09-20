@@ -26,7 +26,8 @@ class ReportFactory
     virtual std::unique_ptr<interfaces::Report> make(
         const std::string& name, const std::string& reportingType,
         bool emitsReadingsSignal, bool logToMetricReportsCollection,
-        Milliseconds period, ReportManager& reportManager,
+        Milliseconds period, uint64_t appendLimit,
+        const std::string& reportUpdates, ReportManager& reportManager,
         JsonStorage& reportStorage,
         std::vector<LabeledMetricParameters> labeledMetricParams) const = 0;
 };
