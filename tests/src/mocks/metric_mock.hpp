@@ -19,4 +19,9 @@ class MetricMock : public interfaces::Metric
     MOCK_METHOD(std::vector<MetricValue>, getReadings, (), (const, override));
     MOCK_METHOD(LabeledMetricParameters, dumpConfiguration, (),
                 (const, override));
+
+    uint64_t sensorCount() const override
+    {
+        return getReadings().size();
+    }
 };

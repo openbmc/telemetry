@@ -64,6 +64,28 @@ class ReportParams final
         return intervalProperty;
     }
 
+    ReportParams& appendLimit(uint64_t val)
+    {
+        appendLimitProperty = val;
+        return *this;
+    }
+
+    uint64_t appendLimit() const
+    {
+        return appendLimitProperty;
+    }
+
+    ReportParams& reportUpdates(std::string val)
+    {
+        reportUpdatesProperty = val;
+        return *this;
+    }
+
+    std::string reportUpdates() const
+    {
+        return reportUpdatesProperty;
+    }
+
     ReportParams& metricParameters(std::vector<LabeledMetricParameters> val)
     {
         metricParametersProperty = std::move(val);
@@ -81,6 +103,8 @@ class ReportParams final
     bool emitReadingUpdateProperty = true;
     bool logToMetricReportCollectionProperty = true;
     Milliseconds intervalProperty = ReportManager::minInterval;
+    uint64_t appendLimitProperty = 0;
+    std::string reportUpdatesProperty = "Default";
     std::vector<LabeledMetricParameters> metricParametersProperty{
         {LabeledMetricParameters{
              {LabeledSensorParameters{"Service",
