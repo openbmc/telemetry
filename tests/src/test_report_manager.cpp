@@ -60,9 +60,9 @@ class TestReportManager : public Test
             },
             DbusEnvironment::serviceName(), ReportManager::reportManagerPath,
             ReportManager::reportManagerIfaceName, "AddReportFutureVersion",
-            params.reportName(), params.reportingType(),
-            params.emitReadingUpdate(), params.logToMetricReportCollection(),
-            params.interval().count(),
+            params.reportName(), params.reportingType(), params.reportUpdates(),
+            params.appendLimit(), params.emitReadingUpdate(),
+            params.logToMetricReportCollection(), params.interval().count(),
             toReadingParameters(params.metricParameters()));
         return DbusEnvironment::waitForFuture(addReportPromise.get_future());
     }
@@ -336,6 +336,8 @@ class TestReportManagerStorage : public TestReportManager
         {"LogToMetricReportsCollection",
          reportParams.logToMetricReportCollection()},
         {"Interval", reportParams.interval().count()},
+        {"ReportUpdates", reportParams.reportUpdates()},
+        {"AppendLimit", reportParams.appendLimit()},
         {"ReadingParameters", reportParams.metricParameters()}};
 };
 
