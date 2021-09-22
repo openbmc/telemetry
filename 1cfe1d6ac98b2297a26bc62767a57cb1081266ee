@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b1b34ddc_77a942cf",
+        "filename": "src/metric.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 142,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-09-22T09:24:35Z",
+      "side": 1,
+      "message": "It could be renamed to registerForSensorEvents, and it should be called conditionally when report is enabled.",
+      "range": {
+        "startLine": 136,
+        "startChar": 0,
+        "endLine": 142,
+        "endChar": 1
+      },
+      "revId": "1cfe1d6ac98b2297a26bc62767a57cb1081266ee",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "76267b9c_9de7f8d1",
+        "filename": "src/metric.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-09-22T09:24:35Z",
+      "side": 1,
+      "message": "Instead we can add unregisterFromUpdates method to sensor.",
+      "range": {
+        "startLine": 143,
+        "startChar": 0,
+        "endLine": 148,
+        "endChar": 0
+      },
+      "revId": "1cfe1d6ac98b2297a26bc62767a57cb1081266ee",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5b0ef471_bd9ae83b",
+        "filename": "src/metric.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 168,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-09-22T09:24:35Z",
+      "side": 1,
+      "message": "Instead we should ensure that getReading is not called when report is dissabled.",
+      "range": {
+        "startLine": 151,
+        "startChar": 4,
+        "endLine": 168,
+        "endChar": 5
+      },
+      "revId": "1cfe1d6ac98b2297a26bc62767a57cb1081266ee",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cc31a9e2_f32e8f06",
+        "filename": "src/metric.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-09-22T09:24:35Z",
+      "side": 1,
+      "message": "If unregister/register method approach is done, we can get rid of this flag.",
+      "range": {
+        "startLine": 174,
+        "startChar": 4,
+        "endLine": 174,
+        "endChar": 16
+      },
+      "revId": "1cfe1d6ac98b2297a26bc62767a57cb1081266ee",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
