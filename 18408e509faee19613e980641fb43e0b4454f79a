@@ -1,0 +1,136 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7d76669b_d6cabe90",
+        "filename": "src/report.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-09-22T11:13:31Z",
+      "side": 1,
+      "message": "nit: you can introduce helper method isOnRequest",
+      "range": {
+        "startLine": 77,
+        "startChar": 8,
+        "endLine": 78,
+        "endChar": 51
+      },
+      "revId": "18408e509faee19613e980641fb43e0b4454f79a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4717d9a3_76d50fe6",
+        "filename": "src/report.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-09-22T11:13:31Z",
+      "side": 1,
+      "message": "Reverse condition so it\u0027s same as above, it will help with reading and comparing differences between functions.",
+      "range": {
+        "startLine": 93,
+        "startChar": 8,
+        "endLine": 94,
+        "endChar": 51
+      },
+      "revId": "18408e509faee19613e980641fb43e0b4454f79a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6d81271a_0cf80d6f",
+        "filename": "src/report.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 177,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-09-22T11:13:31Z",
+      "side": 1,
+      "message": "To make sure that signal is send correctly we need to update variable used in dbus. Also let\u0027s avoid making copy of newVal.\n\n(const auto\u0026 newVal, auto\u0026 oldVal) {\n   *oldVal \u003d newVal; // thanks to that sdbusplus known that value has changed and signal needs to be send\n}",
+      "range": {
+        "startLine": 177,
+        "startChar": 15,
+        "endLine": 177,
+        "endChar": 46
+      },
+      "revId": "18408e509faee19613e980641fb43e0b4454f79a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "dd113a27_463b35ac",
+        "filename": "src/report.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 240,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-09-22T11:13:31Z",
+      "side": 1,
+      "message": "note: as you already pointer out in offline discussion here will be interaction with \u0027enabled\u0027 feature",
+      "revId": "18408e509faee19613e980641fb43e0b4454f79a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0091acf0_e9d8492d",
+        "filename": "src/utils/circular_vector.hpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-09-22T11:13:31Z",
+      "side": 1,
+      "message": "clear/resize doesn\u0027t change size of internal storage (capacity stays the same) so reserve is not needed after clear. If you get rid of this if you can remove member variable reserve. There will be only one reserve in constructor.\n\nIf you wish to delete allocated memory shrink_to_fit needs to be called.",
+      "range": {
+        "startLine": 35,
+        "startChar": 0,
+        "endLine": 38,
+        "endChar": 9
+      },
+      "revId": "18408e509faee19613e980641fb43e0b4454f79a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "409a2b6a_b00ca784",
+        "filename": "src/utils/conversion.hpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-09-22T11:13:31Z",
+      "side": 1,
+      "message": "This may have significant impact on binary size, if we want to use it we must verify how it affects binary size.\n\nTo keep it simple I would restore it to previous version.",
+      "range": {
+        "startLine": 21,
+        "startChar": 32,
+        "endLine": 21,
+        "endChar": 76
+      },
+      "revId": "18408e509faee19613e980641fb43e0b4454f79a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
