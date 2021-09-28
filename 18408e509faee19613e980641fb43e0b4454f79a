@@ -88,6 +88,52 @@
     },
     {
       "key": {
+        "uuid": "c45a8b27_9b280394",
+        "filename": "src/types/report_types.hpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2021-09-28T07:02:24Z",
+      "side": 1,
+      "message": "AppendStopsWhenFull\nhttp://redfish.dmtf.org/schemas/v1/MetricReportDefinition.v1_4_1.json",
+      "range": {
+        "startLine": 46,
+        "startChar": 4,
+        "endLine": 46,
+        "endChar": 22
+      },
+      "revId": "18408e509faee19613e980641fb43e0b4454f79a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "60741f7f_65e695f7",
+        "filename": "src/types/report_types.hpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2021-09-28T07:02:24Z",
+      "side": 1,
+      "message": "AppendWrapsWhenFull\nhttp://redfish.dmtf.org/schemas/v1/MetricReportDefinition.v1_4_1.json",
+      "range": {
+        "startLine": 47,
+        "startChar": 4,
+        "endLine": 47,
+        "endChar": 22
+      },
+      "revId": "18408e509faee19613e980641fb43e0b4454f79a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "0091acf0_e9d8492d",
         "filename": "src/utils/circular_vector.hpp",
         "patchSetId": 7
