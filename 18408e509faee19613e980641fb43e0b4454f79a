@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "a740650a_01bdd214",
+        "filename": "src/report.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2021-10-01T16:21:54Z",
+      "side": 1,
+      "message": "This function will be most likely refactored, due to concerns related to \"Default\" value.",
+      "parentUuid": "7d76669b_d6cabe90",
+      "range": {
+        "startLine": 77,
+        "startChar": 8,
+        "endLine": 78,
+        "endChar": 51
+      },
+      "revId": "18408e509faee19613e980641fb43e0b4454f79a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "4717d9a3_76d50fe6",
         "filename": "src/report.cpp",
         "patchSetId": 7
@@ -36,6 +60,30 @@
       "writtenOn": "2021-09-22T11:13:31Z",
       "side": 1,
       "message": "Reverse condition so it\u0027s same as above, it will help with reading and comparing differences between functions.",
+      "range": {
+        "startLine": 93,
+        "startChar": 8,
+        "endLine": 94,
+        "endChar": 51
+      },
+      "revId": "18408e509faee19613e980641fb43e0b4454f79a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c41ab57a_c856d4d8",
+        "filename": "src/report.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2021-10-01T16:21:54Z",
+      "side": 1,
+      "message": "This function will be most likely refactored, due to concerns related to \"Default\" value.",
+      "parentUuid": "4717d9a3_76d50fe6",
       "range": {
         "startLine": 93,
         "startChar": 8,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "69a31b6a_20ec3952",
+        "filename": "src/report.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 177,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2021-10-01T16:21:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6d81271a_0cf80d6f",
+      "range": {
+        "startLine": 177,
+        "startChar": 15,
+        "endLine": 177,
+        "endChar": 46
+      },
+      "revId": "18408e509faee19613e980641fb43e0b4454f79a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "dd113a27_463b35ac",
         "filename": "src/report.cpp",
         "patchSetId": 7
@@ -82,6 +154,24 @@
       "writtenOn": "2021-09-22T11:13:31Z",
       "side": 1,
       "message": "note: as you already pointer out in offline discussion here will be interaction with \u0027enabled\u0027 feature",
+      "revId": "18408e509faee19613e980641fb43e0b4454f79a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "565c1980_0108b193",
+        "filename": "src/report.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 240,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2021-10-01T16:21:54Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "dd113a27_463b35ac",
       "revId": "18408e509faee19613e980641fb43e0b4454f79a",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
@@ -111,6 +201,30 @@
     },
     {
       "key": {
+        "uuid": "9aa4ec16_2586164b",
+        "filename": "src/types/report_types.hpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2021-10-01T16:21:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c45a8b27_9b280394",
+      "range": {
+        "startLine": 46,
+        "startChar": 4,
+        "endLine": 46,
+        "endChar": 22
+      },
+      "revId": "18408e509faee19613e980641fb43e0b4454f79a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "60741f7f_65e695f7",
         "filename": "src/types/report_types.hpp",
         "patchSetId": 7
@@ -131,6 +245,30 @@
       "revId": "18408e509faee19613e980641fb43e0b4454f79a",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8725ab34_2b3744f1",
+        "filename": "src/types/report_types.hpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2021-10-01T16:21:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "60741f7f_65e695f7",
+      "range": {
+        "startLine": 47,
+        "startChar": 4,
+        "endLine": 47,
+        "endChar": 22
+      },
+      "revId": "18408e509faee19613e980641fb43e0b4454f79a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     },
     {
       "key": {
@@ -157,6 +295,30 @@
     },
     {
       "key": {
+        "uuid": "746806b0_acf28cad",
+        "filename": "src/utils/circular_vector.hpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2021-10-01T16:21:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0091acf0_e9d8492d",
+      "range": {
+        "startLine": 35,
+        "startChar": 0,
+        "endLine": 38,
+        "endChar": 9
+      },
+      "revId": "18408e509faee19613e980641fb43e0b4454f79a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "409a2b6a_b00ca784",
         "filename": "src/utils/conversion.hpp",
         "patchSetId": 7
@@ -177,6 +339,30 @@
       "revId": "18408e509faee19613e980641fb43e0b4454f79a",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "aca0e19b_60b1e01f",
+        "filename": "src/utils/conversion.hpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2021-10-01T16:21:54Z",
+      "side": 1,
+      "message": "With this modification: 26,248,704 bytes\nWithout this modification: 26,192,240 bytes\n\nYou are right, this verbosity is not required on release binary, although it helped me few times during development 😊",
+      "parentUuid": "409a2b6a_b00ca784",
+      "range": {
+        "startLine": 21,
+        "startChar": 32,
+        "endLine": 21,
+        "endChar": 76
+      },
+      "revId": "18408e509faee19613e980641fb43e0b4454f79a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }
