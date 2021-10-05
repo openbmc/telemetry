@@ -1,0 +1,159 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "allOf": [
+        {
+            "$ref": "https://json-schema.org/draft/2020-12/schema"
+        },
+        {
+            "if": {
+                "allOf": [
+                    {
+                        "properties": {
+                            "type": {
+                                "const": "object"
+                            }
+                        }
+                    },
+                    {
+                        "properties": {
+                            "oneOf": {
+                                "maxItems": 0
+                            }
+                        }
+                    }
+                ]
+            },
+            "then": {
+                "required": [
+                    "cpp_type",
+                    "cpp_fields"
+                ]
+            }
+        },
+        {
+            "if": {
+                "properties": {
+                    "type": {
+                        "const": "array"
+                    }
+                }
+            },
+            "then": {
+                "allOf": [
+                    {
+                        "required": [
+                            "items"
+                        ]
+                    },
+                    {
+                        "if": {
+                            "properties": {
+                                "items": {
+                                    "const": false
+                                }
+                            }
+                        },
+                        "then": {
+                            "required": [
+                                "prefixItems"
+                            ]
+                        },
+                        "else": {
+                            "not": {
+                                "required": [
+                                    "prefixItems"
+                                ]
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "if": {
+                "not": {
+                    "properties": {
+                        "type": {
+                            "const": "string"
+                        }
+                    }
+                }
+            },
+            "then": {
+                "not": {
+                    "required": [
+                        "enum"
+                    ]
+                }
+            }
+        }
+    ],
+    "required": [
+        "type"
+    ],
+    "dependentRequired": {
+        "enum": [
+            "cpp_type"
+        ]
+    },
+    "properties": {
+        "cpp_type": {
+            "type": "string",
+            "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$"
+        },
+        "cpp_fields": {
+            "anyOf": [
+                {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$"
+                    },
+                    "uniqueItems": true
+                },
+                {
+                    "const": false
+                }
+            ]
+        },
+        "properties": {
+            "type": "object",
+            "additionalProperties": {
+                "$ref": "#"
+            },
+            "default": {}
+        },
+        "items": {
+            "anyOf": [
+                {
+                    "$ref": "#"
+                },
+                {
+                    "type": "boolean",
+                    "const": false
+                }
+            ]
+        },
+        "enum": {
+            "type": "array",
+            "items": {
+                "type": "string",
+                "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$"
+            },
+            "uniqueItems": true
+        },
+        "prefixItems": {
+            "type": "array",
+            "items": {
+                "$ref": "#"
+            }
+        },
+        "oneOf": {
+            "type": "array",
+            "items": {
+                "$ref": "#"
+            },
+            "minItems": 1
+        }
+    }
+}

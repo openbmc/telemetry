@@ -1,0 +1,25 @@
+{
+    "reportName": "Report1",
+    "reportingType": "Periodic",
+    "reportUpdates": "Overwrite",
+    "appendLimit": 256,
+    "emitsReadingsUpdate": true,
+    "logToMetricReportsCollection": false,
+    "interval": 100,
+    "metricParameters": [
+        {
+            "sensorPaths": [
+                "sensor1",
+                "sensor2"
+            ],
+            "operationType": "max",
+            "id": "ParamWithoutDefaults",
+            "metadata": "my metadata",
+            "collectionTimescope": "interval",
+            "collectionDuration": 2000
+        },
+        {
+            "id": "ParamWithDefaults"
+        }
+    ]
+}

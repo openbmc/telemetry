@@ -26,6 +26,24 @@ class ReportFactoryMock : public interfaces::ReportFactory
         });
     }
 
+    // static std::vector<LabeledMetricParameters> convertToLabeled(
+    //     const std::vector<generated::MetricParams>& readingParams)
+    // {
+    //     return utils::transform(readingParams, [](const auto& params) {
+    //         return LabeledMetricParameters(
+    //             utils::transform(params.sensorPaths,
+    //                              [](const auto& sensorPath) {
+    //                                  return
+    //                                  LabeledSensorParameters("Service",
+    //                                                                 sensorPath);
+    //                              }),
+    //             static_cast<OperationType>(params.operationType), params.id,
+    //             params.metadata,
+    //             static_cast<CollectionTimeScope>(params.collectionTimescope),
+    //             CollectionDuration(Milliseconds(params.collectionDuration)));
+    //     });
+    // }
+
   public:
     ReportFactoryMock()
     {
@@ -43,6 +61,11 @@ class ReportFactoryMock : public interfaces::ReportFactory
 
     MOCK_METHOD(std::vector<LabeledMetricParameters>, convertMetricParams,
                 (boost::asio::yield_context&, const ReadingParameters&),
+                (const, override));
+
+    MOCK_METHOD(std::vector<LabeledMetricParameters>, convertMetricParams2,
+                (boost::asio::yield_context&,
+                 const std::vector<generated::MetricParams>& metricParams),
                 (const, override));
 
     MOCK_METHOD(std::unique_ptr<interfaces::Report>, make,

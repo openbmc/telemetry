@@ -1,3 +1,7 @@
+#DEMO
+scripts/json_to_cpp/DEMO/*.o
+scripts/json_to_cpp/DEMO/example
+
 build/
 xyz.openbmc_project.Telemetry.service
 telemetry

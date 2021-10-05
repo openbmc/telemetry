@@ -1,0 +1,22 @@
+{
+    "type_map": {
+        "integer": "int64_t",
+        "number": "double",
+        "string": "std::string",
+        "boolean": "bool",
+        "array": "std::vector",
+        "tuple": "std::tuple",
+        "variant": "std::variant"
+    },
+    "include_map": {
+        "std::string": "<string>",
+        "std::vector": "<vector>",
+        "std::tuple": "<tuple>",
+        "std::variant": "<variant>"
+    },
+    "formatter_cmd": [
+        "clang-format",
+        "-i",
+        "%file%"
+    ]
+}

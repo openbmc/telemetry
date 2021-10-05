@@ -3,6 +3,7 @@
 #include "interfaces/json_storage.hpp"
 #include "interfaces/report.hpp"
 #include "interfaces/report_manager.hpp"
+#include "types/generated/add_report_params.hpp"
 #include "types/report_types.hpp"
 
 #include <boost/asio/spawn.hpp>
@@ -22,6 +23,10 @@ class ReportFactory
     virtual std::vector<LabeledMetricParameters>
         convertMetricParams(boost::asio::yield_context& yield,
                             const ReadingParameters& metricParams) const = 0;
+
+    virtual std::vector<LabeledMetricParameters> convertMetricParams2(
+        boost::asio::yield_context& yield,
+        const std::vector<generated::MetricParams>& metricParams) const = 0;
 
     virtual std::unique_ptr<interfaces::Report>
         make(const std::string& name, const std::string& reportingType,

@@ -19,6 +19,11 @@ class ReportFactory : public interfaces::ReportFactory
         boost::asio::yield_context& yield,
         const ReadingParameters& metricParams) const override;
 
+    std::vector<LabeledMetricParameters>
+        convertMetricParams2(boost::asio::yield_context& yield,
+                             const std::vector<generated::MetricParams>&
+                                 metricParams) const override;
+
     std::unique_ptr<interfaces::Report>
         make(const std::string& name, const std::string& reportingType,
              bool emitsReadingsSignal, bool logToMetricReportsCollection,

@@ -1,0 +1,121 @@
+{
+    "$schema": "../meta_schema/cpp_json_schema.json",
+    "type": "object",
+    "cpp_type": "AddReportParams",
+    "cpp_fields": [
+        "reportName",
+        "reportingType",
+        "reportUpdates",
+        "appendLimit",
+        "emitsReadingsUpdate",
+        "logToMetricReportsCollection",
+        "interval",
+        "metricParameters"
+    ],
+    "properties": {
+        "reportName": {
+            "type": "string"
+        },
+        "reportingType": {
+            "type": "string",
+            "cpp_type": "ReportingType",
+            "enum": [
+                "OnChange",
+                "OnRequest",
+                "Periodic"
+            ]
+        },
+        "reportUpdates": {
+            "type": "string",
+            "cpp_type": "ReportingUpdates",
+            "enum": [
+                "Overwrite",
+                "AppendStopsWhenFull",
+                "AppendWrapsWhenFull",
+                "NewReport",
+                "Default"
+            ],
+            "default": "Overwrite"
+        },
+        "appendLimit": {
+            "type": "integer",
+            "cpp_type": "uint64_t",
+            "default": 255
+        },
+        "emitsReadingsUpdate": {
+            "type": "boolean",
+            "default": false
+        },
+        "logToMetricReportsCollection": {
+            "type": "boolean",
+            "default": false
+        },
+        "interval": {
+            "type": "integer",
+            "cpp_type": "uint64_t"
+        },
+        "metricParameters": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "cpp_type": "MetricParams",
+                "cpp_fields": [
+                    "sensorPaths",
+                    "operationType",
+                    "id",
+                    "metadata",
+                    "collectionTimescope",
+                    "collectionDuration"
+                ],
+                "properties": {
+                    "sensorPaths": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "default": []
+                    },
+                    "operationType": {
+                        "type": "string",
+                        "cpp_type": "OperationType",
+                        "enum": [
+                            "single",
+                            "max",
+                            "min",
+                            "avg",
+                            "sum"
+                        ],
+                        "default": "single"
+                    },
+                    "id": {
+                        "type": "string"
+                    },
+                    "metadata": {
+                        "type": "string",
+                        "default": ""
+                    },
+                    "collectionTimescope": {
+                        "type": "string",
+                        "cpp_type": "CollectionTimescope",
+                        "enum": [
+                            "point",
+                            "interval",
+                            "startup"
+                        ],
+                        "default": "point"
+                    },
+                    "collectionDuration": {
+                        "type": "integer",
+                        "cpp_type": "uint64_t",
+                        "default": 123
+                    }
+                },
+                "default": {}
+            }
+        }
+    },
+    "required": [
+        "test",
+        "test2"
+    ]
+}
