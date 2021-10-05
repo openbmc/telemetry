@@ -55,6 +55,9 @@ class ReportManager : public interfaces::ReportManager
         const bool emitsReadingsUpdate, const bool logToMetricReportsCollection,
         Milliseconds interval,
         std::vector<LabeledMetricParameters> metricParams);
+
+    interfaces::Report& addReport(boost::asio::yield_context& yield,
+                                  const std::string& jsonData);
     void loadFromPersistent();
 
   public:

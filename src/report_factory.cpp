@@ -98,3 +98,43 @@ std::vector<LabeledMetricParameters> ReportFactory::convertMetricParams(
             CollectionDuration(Milliseconds(collectionDuration)));
     });
 }
+
+std::vector<LabeledMetricParameters> ReportFactory::convertMetricParams2(
+    boost::asio::yield_context& yield,
+    const std::vector<generated::MetricParams>& metricParams) const
+{
+    auto tree = utils::getSubTreeSensors(yield, bus);
+
+    return utils::transform(
+        metricParams, [&tree](const generated::MetricParams& item) {
+            std::vector<LabeledSensorParameters> sensorParameters;
+
+            for (const auto& sensorPath : item.sensorPaths)
+            {
+                auto it = std::find_if(tree.begin(), tree.end(),
+                                       [&sensorPath](const auto& v) {
+                                           return v.first == sensorPath;
+                                       });
+
+                if (it != tree.end() && it->second.size() == 1)
+                {
+                    const auto& [service, ifaces] = it->second.front();
+                    sensorParameters.emplace_back(service, sensorPath);
+                }
+            }
+
+            if (sensorParameters.size() != item.sensorPaths.size())
+            {
+                throw sdbusplus::exception::SdBusError(
+                    static_cast<int>(std::errc::invalid_argument),
+                    "Could not find service for provided sensors");
+            }
+
+            return LabeledMetricParameters(
+                std::move(sensorParameters),
+                static_cast<OperationType>(item.operationType), item.id,
+                item.metadata,
+                static_cast<CollectionTimeScope>(item.collectionTimescope),
+                CollectionDuration(Milliseconds(item.collectionDuration)));
+        });
+}

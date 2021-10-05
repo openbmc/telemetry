@@ -1,6 +1,7 @@
 #include "report_manager.hpp"
 
 #include "report.hpp"
+#include "types/generated.hpp"
 #include "types/report_types.hpp"
 #include "utils/conversion.hpp"
 #include "utils/transform.hpp"
@@ -8,6 +9,7 @@
 #include <phosphor-logging/log.hpp>
 #include <sdbusplus/exception.hpp>
 
+#include <iostream>
 #include <stdexcept>
 #include <system_error>
 
@@ -80,6 +82,20 @@ ReportManager::ReportManager(
                                      Milliseconds(interval),
                                      std::move(metricParams))
                         .getPath();
+                });
+
+            dbusIface.register_method(
+                "AddReportJson", [this](boost::asio::yield_context& yield,
+                                        const std::string& jsonStr) {
+                    try
+                    {
+                        return addReport(yield, jsonStr).getPath();
+                    }
+                    catch (const std::exception& e)
+                    {
+                        std::cout << e.what() << std::endl;
+                        return std::string(e.what());
+                    }
                 });
         });
 }
@@ -173,6 +189,30 @@ interfaces::Report& ReportManager::addReport(
 {
     auto labeledMetricParams =
         reportFactory->convertMetricParams(yield, metricParams);
+
+    return addReport(reportName, reportingType, emitsReadingsUpdate,
+                     logToMetricReportsCollection, interval,
+                     std::move(labeledMetricParams));
+}
+
+interfaces::Report& ReportManager::addReport(boost::asio::yield_context& yield,
+                                             const std::string& jsonStr)
+{
+    auto jsonData = nlohmann::json::parse(jsonStr);
+    auto addReportArgs = jsonData.get<generated::AddReportParams>();
+
+    // The whole addReport needs to be refactored, following lines are just
+    // quick compatibility patch. In the final version it should be look more
+    // like "addReport(yield, addReportArgs)":
+    auto reportName = addReportArgs.reportName;
+    auto reportingType =
+        generated::reportingTypeToString(addReportArgs.reportingType);
+    auto emitsReadingsUpdate = addReportArgs.emitsReadingsUpdate;
+    auto logToMetricReportsCollection =
+        addReportArgs.logToMetricReportsCollection;
+    auto interval = Milliseconds(addReportArgs.interval);
+    auto labeledMetricParams = reportFactory->convertMetricParams2(
+        yield, addReportArgs.metricParameters);
 
     return addReport(reportName, reportingType, emitsReadingsUpdate,
                      logToMetricReportsCollection, interval,
