@@ -1,10 +1,10 @@
 project(
     'Telemetry',
     'cpp',
-    meson_version: '>=0.54.3',
+    meson_version: '>=0.57.0',
     default_options: [
         'buildtype=debugoptimized',
-        'cpp_std=c++17',
+        'cpp_std=c++20',
         # TODO: Without RTTI telemetry does not build using Boost 1.74.0
         # https://github.com/chriskohlhoff/asio/issues/533
         #'cpp_rtti=false',
