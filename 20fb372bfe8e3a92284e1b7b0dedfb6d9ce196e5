@@ -22,6 +22,30 @@
       "revId": "20fb372bfe8e3a92284e1b7b0dedfb6d9ce196e5",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a8aa8ead_79c5f4c3",
+        "filename": "src/trigger_factory.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2021-10-08T09:58:14Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0f67edc3_617e9e1c",
+      "range": {
+        "startLine": 35,
+        "startChar": 49,
+        "endLine": 35,
+        "endChar": 62
+      },
+      "revId": "20fb372bfe8e3a92284e1b7b0dedfb6d9ce196e5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }
