@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8354898f_56364558",
+        "filename": "src/metric.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2021-10-13T09:43:32Z",
+      "side": 1,
+      "message": "I know that you have just removed \u0027enabled\u0027 field from this class, but I think that it could have some usage here. This way you could check the field without calling looping over each sensor and calling unregister and register.",
+      "range": {
+        "startLine": 138,
+        "startChar": 4,
+        "endLine": 138,
+        "endChar": 19
+      },
+      "revId": "329b193376dae0ae336ec3367f2033cacae7fdb8",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5e55cdab_ae6f4570",
+        "filename": "src/metric.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 162,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2021-10-13T09:43:32Z",
+      "side": 1,
+      "message": "Same as above, if you kept \u0027enabled\u0027, you could just check if enabled !\u003d state, without unnecessary calls.",
+      "range": {
+        "startLine": 155,
+        "startChar": 0,
+        "endLine": 162,
+        "endChar": 5
+      },
+      "revId": "329b193376dae0ae336ec3367f2033cacae7fdb8",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "082fcd6e_3354b72d",
+        "filename": "src/report.hpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2021-10-13T09:43:32Z",
+      "side": 1,
+      "message": "this could be const",
+      "range": {
+        "startLine": 27,
+        "startChar": 11,
+        "endLine": 27,
+        "endChar": 16
+      },
+      "revId": "329b193376dae0ae336ec3367f2033cacae7fdb8",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9111a8f6_75398f5f",
+        "filename": "src/report_manager.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2021-10-13T09:43:32Z",
+      "side": 1,
+      "message": "nit: enabledDefault?",
+      "range": {
+        "startLine": 59,
+        "startChar": 35,
+        "endLine": 59,
+        "endChar": 43
+      },
+      "revId": "329b193376dae0ae336ec3367f2033cacae7fdb8",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6cc89b28_6bfd6ade",
+        "filename": "src/report_manager.hpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2021-10-13T09:43:32Z",
+      "side": 1,
+      "message": "this could be const",
+      "range": {
+        "startLine": 52,
+        "startChar": 66,
+        "endLine": 52,
+        "endChar": 71
+      },
+      "revId": "329b193376dae0ae336ec3367f2033cacae7fdb8",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
