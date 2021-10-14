@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "a2d13619_81e4a8a5",
+        "filename": "src/metric.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-10-14T13:00:22Z",
+      "side": 1,
+      "message": "There can be two possible approaches.\n\nFirst, we can make sure that metric::initialize is not called on already initialized metric. Report is aware of enabled status and can call proper method. We will unit test it and won\u0027t allow it to happen in code.\n\nSecond, make initialize and deinitialize private. Change sensor::registerForUpdates to prevent adding already registered listener. \n\nFirst approach will keep whole logic enabled feature in report class we will avoid any unnecessary operations.\nSecond approach will be bulletproof but each registerForUpdates will have additional overhead.",
+      "parentUuid": "8354898f_56364558",
+      "range": {
+        "startLine": 138,
+        "startChar": 4,
+        "endLine": 138,
+        "endChar": 19
+      },
+      "revId": "329b193376dae0ae336ec3367f2033cacae7fdb8",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "5e55cdab_ae6f4570",
         "filename": "src/metric.cpp",
         "patchSetId": 2
@@ -41,6 +65,52 @@
         "startChar": 0,
         "endLine": 162,
         "endChar": 5
+      },
+      "revId": "329b193376dae0ae336ec3367f2033cacae7fdb8",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cf5a45ea_c5e842eb",
+        "filename": "src/report.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-10-14T13:00:22Z",
+      "side": 1,
+      "message": "What if enabled is set to false when creating report? It seem possible when we are creating report from configuration file.",
+      "range": {
+        "startLine": 65,
+        "startChar": 8,
+        "endLine": 65,
+        "endChar": 29
+      },
+      "revId": "329b193376dae0ae336ec3367f2033cacae7fdb8",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "84327a6d_8ad67197",
+        "filename": "src/report.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 185,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-10-14T13:00:22Z",
+      "side": 1,
+      "message": "nit: if (!enabled) {\n  return;\n}\n\nit will reduce code indentation and improve formatting",
+      "range": {
+        "startLine": 185,
+        "startChar": 4,
+        "endLine": 185,
+        "endChar": 16
       },
       "revId": "329b193376dae0ae336ec3367f2033cacae7fdb8",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
@@ -110,6 +180,53 @@
         "startChar": 66,
         "endLine": 52,
         "endChar": 71
+      },
+      "revId": "329b193376dae0ae336ec3367f2033cacae7fdb8",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f1623bb0_07722849",
+        "filename": "src/report_manager.hpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-10-14T13:00:22Z",
+      "side": 1,
+      "message": "nit: I would prefer removing const from other parameters which doesn\u0027t need that instead of adding const to parameter passed by copy.\n\nIt\u0027s rare to see that function parameters are const.",
+      "parentUuid": "6cc89b28_6bfd6ade",
+      "range": {
+        "startLine": 52,
+        "startChar": 66,
+        "endLine": 52,
+        "endChar": 71
+      },
+      "revId": "329b193376dae0ae336ec3367f2033cacae7fdb8",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "53d1ea33_a2bf67b4",
+        "filename": "tests/src/test_sensor.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-10-14T13:00:22Z",
+      "side": 1,
+      "message": "Why? DbusEnvironment::sleepFor is executing events while sleeping, with this if you wont execute any events already in queue. It also looks like dead code, one sleep you are using uses 100ms as parameter",
+      "range": {
+        "startLine": 115,
+        "startChar": 8,
+        "endLine": 115,
+        "endChar": 28
       },
       "revId": "329b193376dae0ae336ec3367f2033cacae7fdb8",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
