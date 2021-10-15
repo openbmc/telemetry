@@ -2,6 +2,98 @@
   "comments": [
     {
       "key": {
+        "uuid": "77b84676_680ef9df",
+        "filename": "src/report.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2021-10-15T15:44:50Z",
+      "side": 1,
+      "message": "Maybe ternary operator can be a good alternative here? By using it you can put all this code in single line only.",
+      "range": {
+        "startLine": 75,
+        "startChar": 0,
+        "endLine": 82,
+        "endChar": 5
+      },
+      "revId": "c6ade6f258d2538e0b3fe4ecd6f457f7f8d62a99",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3915159c_a6e7b369",
+        "filename": "src/report.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2021-10-15T15:44:50Z",
+      "side": 1,
+      "message": "nit: deduce word seems not to be best naming match in this context, maybe you could change it for \u0027obtain\u0027, \u0027fetch\u0027 or simply \u0027get\u0027?",
+      "range": {
+        "startLine": 96,
+        "startChar": 17,
+        "endLine": 96,
+        "endChar": 23
+      },
+      "revId": "c6ade6f258d2538e0b3fe4ecd6f457f7f8d62a99",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d625725e_91a93964",
+        "filename": "src/report.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2021-10-15T15:44:50Z",
+      "side": 1,
+      "message": "I would vote for reversing order of if conditions, so:\n\n  if (reportingTypeIn \u003d\u003d ReportingType::OnRequest ||\n        reportUpdatesIn \u003d\u003d ReportUpdates::Overwrite)\n    return sensorCount;\n  else ...",
+      "range": {
+        "startLine": 99,
+        "startChar": 0,
+        "endLine": 100,
+        "endChar": 52
+      },
+      "revId": "c6ade6f258d2538e0b3fe4ecd6f457f7f8d62a99",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ac73654f_1f73e223",
+        "filename": "src/report.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 192,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2021-10-15T15:44:50Z",
+      "side": 1,
+      "message": "Should this be \u0027auto\u0027 if you explicitly specified return value as \u0027std::string()\u0027?",
+      "range": {
+        "startLine": 192,
+        "startChar": 35,
+        "endLine": 192,
+        "endChar": 39
+      },
+      "revId": "c6ade6f258d2538e0b3fe4ecd6f457f7f8d62a99",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "86c2da6f_4a37c3a0",
         "filename": "src/report.cpp",
         "patchSetId": 10
@@ -18,6 +110,75 @@
         "startChar": 68,
         "endLine": 249,
         "endChar": 58
+      },
+      "revId": "c6ade6f258d2538e0b3fe4ecd6f457f7f8d62a99",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c33805c9_e0d1734d",
+        "filename": "src/report.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 251,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2021-10-15T15:44:50Z",
+      "side": 1,
+      "message": "This condition is partly redundant to what is in lines 238-239, is that intentional, can this redundancy be omitted?",
+      "range": {
+        "startLine": 248,
+        "startChar": 0,
+        "endLine": 251,
+        "endChar": 13
+      },
+      "revId": "c6ade6f258d2538e0b3fe4ecd6f457f7f8d62a99",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e3d9eb5f_f90aee19",
+        "filename": "src/report.hpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2021-10-15T15:44:50Z",
+      "side": 1,
+      "message": "Based on our discussion, simple types should contain \u0027const\u0027 qualifier.",
+      "range": {
+        "startLine": 25,
+        "startChar": 11,
+        "endLine": 25,
+        "endChar": 19
+      },
+      "revId": "c6ade6f258d2538e0b3fe4ecd6f457f7f8d62a99",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "faae5f1c_de86320c",
+        "filename": "src/report_factory.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2021-10-15T15:44:50Z",
+      "side": 1,
+      "message": "Shouldn\u0027t these variables be both const qualified?",
+      "range": {
+        "startLine": 42,
+        "startChar": 0,
+        "endLine": 44,
+        "endChar": 65
       },
       "revId": "c6ade6f258d2538e0b3fe4ecd6f457f7f8d62a99",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
@@ -48,6 +209,75 @@
     },
     {
       "key": {
+        "uuid": "af5a4299_71c1e9e9",
+        "filename": "src/report_manager.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 179,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2021-10-15T15:44:50Z",
+      "side": 1,
+      "message": "As above: based on our discussion, simple types should contain \u0027const\u0027 qualifier.",
+      "range": {
+        "startLine": 179,
+        "startChar": 4,
+        "endLine": 179,
+        "endChar": 24
+      },
+      "revId": "c6ade6f258d2538e0b3fe4ecd6f457f7f8d62a99",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2e64851f_d5f95443",
+        "filename": "src/report_manager.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 193,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2021-10-15T15:44:50Z",
+      "side": 1,
+      "message": "As above: based on our discussion, simple types should contain \u0027const\u0027 qualifier.",
+      "range": {
+        "startLine": 193,
+        "startChar": 27,
+        "endLine": 193,
+        "endChar": 47
+      },
+      "revId": "c6ade6f258d2538e0b3fe4ecd6f457f7f8d62a99",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b3bdb2fc_81b66012",
+        "filename": "src/utils/circular_vector.hpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2021-10-15T15:44:50Z",
+      "side": 1,
+      "message": "Maybe you could add here also vector capacity reservation? It will eliminate reallocations overhead on the run.",
+      "range": {
+        "startLine": 8,
+        "startChar": 4,
+        "endLine": 8,
+        "endChar": 5
+      },
+      "revId": "c6ade6f258d2538e0b3fe4ecd6f457f7f8d62a99",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "742097ed_d57cdb09",
         "filename": "src/utils/circular_vector.hpp",
         "patchSetId": 10
@@ -64,6 +294,52 @@
         "startChar": 8,
         "endLine": 9,
         "endChar": 16
+      },
+      "revId": "c6ade6f258d2538e0b3fe4ecd6f457f7f8d62a99",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "50799c7e_ea2fc518",
+        "filename": "src/utils/circular_vector.hpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2021-10-15T15:44:50Z",
+      "side": 1,
+      "message": "nit: external brackets are not needed here. Within condition of ternary: \u0027idx + 1\u0027 is correct due to operator precedence, but maybe you consider putting it into brackets \u0027(idx + 1)\u0027 for better code clarity?",
+      "range": {
+        "startLine": 27,
+        "startChar": 14,
+        "endLine": 27,
+        "endChar": 15
+      },
+      "revId": "c6ade6f258d2538e0b3fe4ecd6f457f7f8d62a99",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "444a09a3_0fdb94aa",
+        "filename": "src/utils/circular_vector.hpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2021-10-15T15:44:50Z",
+      "side": 1,
+      "message": "I vote for using default member initialization for all basic data types or none of them.",
+      "range": {
+        "startLine": 58,
+        "startChar": 11,
+        "endLine": 58,
+        "endChar": 18
       },
       "revId": "c6ade6f258d2538e0b3fe4ecd6f457f7f8d62a99",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
