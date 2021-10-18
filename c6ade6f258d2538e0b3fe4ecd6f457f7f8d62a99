@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "b4d8c7e8_7a4f0559",
+        "filename": "src/report.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-10-18T07:10:58Z",
+      "side": 1,
+      "message": "It doesn\u0027t matter. If you inline it you will loose meaningful name (\u0027deduceReportUpdates\u0027). Whatever you put if here or ternary operator doesn\u0027t change much.\n\nIn my opinion it\u0027s better to have meaningful name. Anyway it\u0027s a minor thing that should not have much impact on readability.",
+      "parentUuid": "77b84676_680ef9df",
+      "range": {
+        "startLine": 75,
+        "startChar": 0,
+        "endLine": 82,
+        "endChar": 5
+      },
+      "revId": "c6ade6f258d2538e0b3fe4ecd6f457f7f8d62a99",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "3915159c_a6e7b369",
         "filename": "src/report.cpp",
         "patchSetId": 10
@@ -36,6 +60,30 @@
       "writtenOn": "2021-10-15T15:44:50Z",
       "side": 1,
       "message": "nit: deduce word seems not to be best naming match in this context, maybe you could change it for \u0027obtain\u0027, \u0027fetch\u0027 or simply \u0027get\u0027?",
+      "range": {
+        "startLine": 96,
+        "startChar": 17,
+        "endLine": 96,
+        "endChar": 23
+      },
+      "revId": "c6ade6f258d2538e0b3fe4ecd6f457f7f8d62a99",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1788a817_b7b01206",
+        "filename": "src/report.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-10-18T07:10:58Z",
+      "side": 1,
+      "message": "Obtain, fetch, get assume that it\u0027s already determined. Deduce means that implementation calculates proper bufferSize.",
+      "parentUuid": "3915159c_a6e7b369",
       "range": {
         "startLine": 96,
         "startChar": 17,
@@ -82,6 +130,30 @@
       "writtenOn": "2021-10-15T15:44:50Z",
       "side": 1,
       "message": "Should this be \u0027auto\u0027 if you explicitly specified return value as \u0027std::string()\u0027?",
+      "range": {
+        "startLine": 192,
+        "startChar": 35,
+        "endLine": 192,
+        "endChar": 39
+      },
+      "revId": "c6ade6f258d2538e0b3fe4ecd6f457f7f8d62a99",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "845e0852_95565760",
+        "filename": "src/report.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 192,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-10-18T07:10:58Z",
+      "side": 1,
+      "message": "Actually It would be nice if we followed follower rule to almost always use auto.\n\nDo in this case we should change std::string newVal to auto newVal.\nAlso to properly send signal we should change oldVal, sdbusplus is using oldValue as a reference to determine whatever value changed.\n\nhttps://github.com/openbmc/sdbusplus/blob/b466765473ac442b8f482b0a8f4356b330437bcc/include/sdbusplus/asio/object_server.hpp:319",
+      "parentUuid": "ac73654f_1f73e223",
       "range": {
         "startLine": 192,
         "startChar": 35,
@@ -266,6 +338,30 @@
       "writtenOn": "2021-10-15T15:44:50Z",
       "side": 1,
       "message": "Maybe you could add here also vector capacity reservation? It will eliminate reallocations overhead on the run.",
+      "range": {
+        "startLine": 8,
+        "startChar": 4,
+        "endLine": 8,
+        "endChar": 5
+      },
+      "revId": "c6ade6f258d2538e0b3fe4ecd6f457f7f8d62a99",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "50d5adb4_d25e76e8",
+        "filename": "src/utils/circular_vector.hpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-10-18T07:10:58Z",
+      "side": 1,
+      "message": "I think we could do this before emplace. This way memory will be lazy initialized and reports that are never triggered will consume no memory.\n\nvec.reserve(maxSize);\nvec.emplace_back(...);",
+      "parentUuid": "b3bdb2fc_81b66012",
       "range": {
         "startLine": 8,
         "startChar": 4,
