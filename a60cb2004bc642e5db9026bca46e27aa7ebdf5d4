@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2ff24d37_177dd504",
+        "filename": "tests/src/test_report.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 254,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2021-10-21T16:15:12Z",
+      "side": 1,
+      "message": "Just noticed that TestReportInitialization is better place to put this test...",
+      "range": {
+        "startLine": 247,
+        "startChar": 0,
+        "endLine": 254,
+        "endChar": 1
+      },
+      "revId": "a60cb2004bc642e5db9026bca46e27aa7ebdf5d4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
