@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "594c4ab9_92ed47be",
+        "filename": "src/report.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2021-10-21T16:05:43Z",
+      "side": 1,
+      "message": "I deleted this function - the functionality is not needed.",
+      "parentUuid": "b4d8c7e8_7a4f0559",
+      "range": {
+        "startLine": 75,
+        "startChar": 0,
+        "endLine": 82,
+        "endChar": 5
+      },
+      "revId": "c6ade6f258d2538e0b3fe4ecd6f457f7f8d62a99",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3915159c_a6e7b369",
         "filename": "src/report.cpp",
         "patchSetId": 10
@@ -96,6 +120,30 @@
     },
     {
       "key": {
+        "uuid": "38916278_f9b03fcb",
+        "filename": "src/report.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2021-10-21T16:05:43Z",
+      "side": 1,
+      "message": "I agree with Krzysztof, as that was exactly my intention here.",
+      "parentUuid": "1788a817_b7b01206",
+      "range": {
+        "startLine": 96,
+        "startChar": 17,
+        "endLine": 96,
+        "endChar": 23
+      },
+      "revId": "c6ade6f258d2538e0b3fe4ecd6f457f7f8d62a99",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d625725e_91a93964",
         "filename": "src/report.cpp",
         "patchSetId": 10
@@ -116,6 +164,30 @@
       "revId": "c6ade6f258d2538e0b3fe4ecd6f457f7f8d62a99",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ed77dfcf_7aaeb5d1",
+        "filename": "src/report.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2021-10-21T16:05:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d625725e_91a93964",
+      "range": {
+        "startLine": 99,
+        "startChar": 0,
+        "endLine": 100,
+        "endChar": 52
+      },
+      "revId": "c6ade6f258d2538e0b3fe4ecd6f457f7f8d62a99",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     },
     {
       "key": {
@@ -166,6 +238,30 @@
     },
     {
       "key": {
+        "uuid": "70700181_e87625d1",
+        "filename": "src/report.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 192,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2021-10-21T16:05:43Z",
+      "side": 1,
+      "message": "Lukasz - As far as I understand, the second parameter of register_property_rw is only used to deduce the type, not value - for value the getter is called. So to not call the conversion twice I passed an empty string.\n\nKrzysztof - I changed std::string newVal to auto newVal. What did you mean by \u0027almost always\u0027? Are there any use cases when it wouldn\u0027t work?",
+      "parentUuid": "845e0852_95565760",
+      "range": {
+        "startLine": 192,
+        "startChar": 35,
+        "endLine": 192,
+        "endChar": 39
+      },
+      "revId": "c6ade6f258d2538e0b3fe4ecd6f457f7f8d62a99",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "86c2da6f_4a37c3a0",
         "filename": "src/report.cpp",
         "patchSetId": 10
@@ -186,6 +282,30 @@
       "revId": "c6ade6f258d2538e0b3fe4ecd6f457f7f8d62a99",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "48f7f3c3_a21b31a2",
+        "filename": "src/report.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 249,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2021-10-21T16:05:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "86c2da6f_4a37c3a0",
+      "range": {
+        "startLine": 248,
+        "startChar": 68,
+        "endLine": 249,
+        "endChar": 58
+      },
+      "revId": "c6ade6f258d2538e0b3fe4ecd6f457f7f8d62a99",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     },
     {
       "key": {
@@ -212,6 +332,30 @@
     },
     {
       "key": {
+        "uuid": "78209ea0_d23b2ba1",
+        "filename": "src/report.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 251,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2021-10-21T16:05:43Z",
+      "side": 1,
+      "message": "Thanks to your implementation of \u0027Enabled\u0027 property the 238-239 is now redundant 😊",
+      "parentUuid": "c33805c9_e0d1734d",
+      "range": {
+        "startLine": 248,
+        "startChar": 0,
+        "endLine": 251,
+        "endChar": 13
+      },
+      "revId": "c6ade6f258d2538e0b3fe4ecd6f457f7f8d62a99",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e3d9eb5f_f90aee19",
         "filename": "src/report.hpp",
         "patchSetId": 10
@@ -232,6 +376,30 @@
       "revId": "c6ade6f258d2538e0b3fe4ecd6f457f7f8d62a99",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e05c5232_b46d7191",
+        "filename": "src/report.hpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2021-10-21T16:05:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e3d9eb5f_f90aee19",
+      "range": {
+        "startLine": 25,
+        "startChar": 11,
+        "endLine": 25,
+        "endChar": 19
+      },
+      "revId": "c6ade6f258d2538e0b3fe4ecd6f457f7f8d62a99",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     },
     {
       "key": {
@@ -258,6 +426,30 @@
     },
     {
       "key": {
+        "uuid": "f86f4247_837b7c37",
+        "filename": "src/report_factory.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2021-10-21T16:05:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "faae5f1c_de86320c",
+      "range": {
+        "startLine": 42,
+        "startChar": 0,
+        "endLine": 44,
+        "endChar": 65
+      },
+      "revId": "c6ade6f258d2538e0b3fe4ecd6f457f7f8d62a99",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "bb765a89_b55be0f7",
         "filename": "src/report_factory.cpp",
         "patchSetId": 10
@@ -278,6 +470,30 @@
       "revId": "c6ade6f258d2538e0b3fe4ecd6f457f7f8d62a99",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "714ef5f3_db4d531c",
+        "filename": "src/report_factory.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2021-10-21T16:05:43Z",
+      "side": 1,
+      "message": "It is an enum type, so I don\u0027t think it is need here. But I will change auto to proper type, as this might improve readability.",
+      "parentUuid": "bb765a89_b55be0f7",
+      "range": {
+        "startLine": 47,
+        "startChar": 48,
+        "endLine": 47,
+        "endChar": 61
+      },
+      "revId": "c6ade6f258d2538e0b3fe4ecd6f457f7f8d62a99",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     },
     {
       "key": {
@@ -304,6 +520,30 @@
     },
     {
       "key": {
+        "uuid": "29e1383b_0e5832c5",
+        "filename": "src/report_manager.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 179,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2021-10-21T16:05:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "af5a4299_71c1e9e9",
+      "range": {
+        "startLine": 179,
+        "startChar": 4,
+        "endLine": 179,
+        "endChar": 24
+      },
+      "revId": "c6ade6f258d2538e0b3fe4ecd6f457f7f8d62a99",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2e64851f_d5f95443",
         "filename": "src/report_manager.cpp",
         "patchSetId": 10
@@ -324,6 +564,30 @@
       "revId": "c6ade6f258d2538e0b3fe4ecd6f457f7f8d62a99",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "09f1bddd_bf790414",
+        "filename": "src/report_manager.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 193,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2021-10-21T16:05:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2e64851f_d5f95443",
+      "range": {
+        "startLine": 193,
+        "startChar": 27,
+        "endLine": 193,
+        "endChar": 47
+      },
+      "revId": "c6ade6f258d2538e0b3fe4ecd6f457f7f8d62a99",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     },
     {
       "key": {
@@ -374,6 +638,30 @@
     },
     {
       "key": {
+        "uuid": "cad43fe0_93921f0d",
+        "filename": "src/utils/circular_vector.hpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2021-10-21T16:05:43Z",
+      "side": 1,
+      "message": "While this would be a good practice if this container would be used outside of TS, we have to consider that it was only created for single use case - Readings in Report. Here it is better to not reserve.",
+      "parentUuid": "50d5adb4_d25e76e8",
+      "range": {
+        "startLine": 8,
+        "startChar": 4,
+        "endLine": 8,
+        "endChar": 5
+      },
+      "revId": "c6ade6f258d2538e0b3fe4ecd6f457f7f8d62a99",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "742097ed_d57cdb09",
         "filename": "src/utils/circular_vector.hpp",
         "patchSetId": 10
@@ -394,6 +682,30 @@
       "revId": "c6ade6f258d2538e0b3fe4ecd6f457f7f8d62a99",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ba42d008_a7f1474e",
+        "filename": "src/utils/circular_vector.hpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2021-10-21T16:05:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "742097ed_d57cdb09",
+      "range": {
+        "startLine": 9,
+        "startChar": 8,
+        "endLine": 9,
+        "endChar": 16
+      },
+      "revId": "c6ade6f258d2538e0b3fe4ecd6f457f7f8d62a99",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     },
     {
       "key": {
@@ -420,6 +732,30 @@
     },
     {
       "key": {
+        "uuid": "f72dd016_be0bcb01",
+        "filename": "src/utils/circular_vector.hpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2021-10-21T16:05:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "50799c7e_ea2fc518",
+      "range": {
+        "startLine": 27,
+        "startChar": 14,
+        "endLine": 27,
+        "endChar": 15
+      },
+      "revId": "c6ade6f258d2538e0b3fe4ecd6f457f7f8d62a99",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "444a09a3_0fdb94aa",
         "filename": "src/utils/circular_vector.hpp",
         "patchSetId": 10
@@ -440,6 +776,30 @@
       "revId": "c6ade6f258d2538e0b3fe4ecd6f457f7f8d62a99",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c445c2ce_72dcb2c5",
+        "filename": "src/utils/circular_vector.hpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2021-10-21T16:05:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "444a09a3_0fdb94aa",
+      "range": {
+        "startLine": 58,
+        "startChar": 11,
+        "endLine": 58,
+        "endChar": 18
+      },
+      "revId": "c6ade6f258d2538e0b3fe4ecd6f457f7f8d62a99",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }
