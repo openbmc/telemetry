@@ -20,7 +20,8 @@ class TriggerFactory
     virtual ~TriggerFactory() = default;
 
     virtual std::unique_ptr<interfaces::Trigger> make(
-        const std::string& name, const std::vector<std::string>& triggerActions,
+        const std::string& id, const std::string& name,
+        const std::vector<std::string>& triggerActions,
         const std::vector<std::string>& reportNames,
         interfaces::TriggerManager& triggerManager,
         interfaces::JsonStorage& triggerStorage,

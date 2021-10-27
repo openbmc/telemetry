@@ -21,7 +21,8 @@ TriggerFactory::TriggerFactory(
 {}
 
 std::unique_ptr<interfaces::Trigger> TriggerFactory::make(
-    const std::string& name, const std::vector<std::string>& triggerActionsIn,
+    const std::string& id, const std::string& name,
+    const std::vector<std::string>& triggerActionsIn,
     const std::vector<std::string>& reportNames,
     interfaces::TriggerManager& triggerManager,
     interfaces::JsonStorage& triggerStorage,
@@ -100,9 +101,9 @@ std::unique_ptr<interfaces::Trigger> TriggerFactory::make(
     }
 
     return std::make_unique<Trigger>(
-        bus->get_io_context(), objServer, name, triggerActionsIn, reportNames,
-        labeledSensorsInfo, labeledThresholdParams, std::move(thresholds),
-        triggerManager, triggerStorage);
+        bus->get_io_context(), objServer, id, name, triggerActionsIn,
+        reportNames, labeledSensorsInfo, labeledThresholdParams,
+        std::move(thresholds), triggerManager, triggerStorage);
 }
 
 std::pair<Sensors, std::vector<std::string>> TriggerFactory::getSensors(
