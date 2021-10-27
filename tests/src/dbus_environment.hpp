@@ -1,6 +1,7 @@
 #pragma once
 
 #include "types/duration_type.hpp"
+#include "utils/set_exception.hpp"
 
 #include <sdbusplus/asio/object_server.hpp>
 #include <sdbusplus/asio/property.hpp>
@@ -91,6 +92,44 @@ class DbusEnvironment : public ::testing::Environment
 
     static bool waitForFutures(std::string_view name,
                                Milliseconds timeout = std::chrono::seconds(10));
+
+    template <class T>
+    static T getProperty(const std::string& path,
+                         const std::string& interfaceName,
+                         const std::string& property)
+    {
+        auto propertyPromise = std::promise<T>();
+        auto propertyFuture = propertyPromise.get_future();
+        sdbusplus::asio::getProperty<T>(
+            *DbusEnvironment::getBus(), DbusEnvironment::serviceName(), path,
+            interfaceName, property,
+            [&propertyPromise](const boost::system::error_code& ec, T t) {
+                if (ec)
+                {
+                    utils::setException(propertyPromise, "GetProperty failed");
+                    return;
+                }
+                propertyPromise.set_value(t);
+            });
+        return DbusEnvironment::waitForFuture(std::move(propertyFuture));
+    }
+
+    template <class T>
+    static boost::system::error_code
+        setProperty(const std::string& path, const std::string& interfaceName,
+                    const std::string& property, const T& newValue)
+    {
+        auto setPromise = std::promise<boost::system::error_code>();
+        auto future = setPromise.get_future();
+        sdbusplus::asio::setProperty(
+            *DbusEnvironment::getBus(), DbusEnvironment::serviceName(), path,
+            interfaceName, property, std::move(newValue),
+            [setPromise =
+                 std::move(setPromise)](boost::system::error_code ec) mutable {
+                setPromise.set_value(ec);
+            });
+        return DbusEnvironment::waitForFuture(std::move(future));
+    }
 
   private:
     static std::future<bool> getFuture(std::string_view name);

@@ -1,5 +1,6 @@
 #include "trigger.hpp"
 
+#include "trigger_manager.hpp"
 #include "types/report_types.hpp"
 #include "types/trigger_types.hpp"
 #include "utils/conversion_trigger.hpp"
@@ -10,19 +11,21 @@
 Trigger::Trigger(
     boost::asio::io_context& ioc,
     const std::shared_ptr<sdbusplus::asio::object_server>& objServer,
-    const std::string& nameIn, const std::vector<std::string>& triggerActionsIn,
+    const std::string& idIn, const std::string& nameIn,
+    const std::vector<std::string>& triggerActionsIn,
     const std::vector<std::string>& reportNamesIn,
     const std::vector<LabeledSensorInfo>& LabeledSensorsInfoIn,
     const LabeledTriggerThresholdParams& labeledThresholdParamsIn,
     std::vector<std::shared_ptr<interfaces::Threshold>>&& thresholdsIn,
     interfaces::TriggerManager& triggerManager,
     interfaces::JsonStorage& triggerStorageIn) :
-    name(nameIn),
-    triggerActions(std::move(triggerActionsIn)), path(triggerDir + name),
-    reportNames(reportNamesIn), labeledSensorsInfo(LabeledSensorsInfoIn),
+    id(idIn),
+    name(nameIn), triggerActions(std::move(triggerActionsIn)),
+    path(triggerDir + id), reportNames(reportNamesIn),
+    labeledSensorsInfo(LabeledSensorsInfoIn),
     labeledThresholdParams(labeledThresholdParamsIn),
     thresholds(std::move(thresholdsIn)),
-    fileName(std::to_string(std::hash<std::string>{}(name))),
+    fileName(std::to_string(std::hash<std::string>{}(id))),
     triggerStorage(triggerStorageIn)
 {
     deleteIface = objServer->add_unique_interface(
@@ -89,6 +92,16 @@ Trigger::Trigger(
                     return isTriggerThresholdDiscrete(labeledThresholdParams);
                 });
 
+            dbusIface.register_property_rw(
+                "Name", std::string(),
+                sdbusplus::vtable::property_::emits_change,
+                [this](auto newVal, auto& oldVal) {
+                    TriggerManager::verifyTriggerNameLength(newVal);
+                    name = oldVal = newVal;
+                    return true;
+                },
+                [this](const auto&) { return name; });
+
             dbusIface.register_property_r("TriggerActions", triggerActions,
                                           sdbusplus::vtable::property_::const_,
                                           [this](const auto& x) { return x; });
@@ -107,6 +120,7 @@ bool Trigger::storeConfiguration() const
         nlohmann::json data;
 
         data["Version"] = triggerVersion;
+        data["Id"] = id;
         data["Name"] = name;
         data["ThresholdParamsDiscriminator"] = labeledThresholdParams.index();
         data["TriggerActions"] = triggerActions;

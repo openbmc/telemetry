@@ -11,6 +11,17 @@
 class TriggerParams
 {
   public:
+    TriggerParams& id(std::string val)
+    {
+        idProperty = std::move(val);
+        return *this;
+    }
+
+    const std::string& id() const
+    {
+        return idProperty;
+    }
+
     TriggerParams& name(std::string val)
     {
         nameProperty = std::move(val);
@@ -55,7 +66,8 @@ class TriggerParams
     }
 
   private:
-    std::string nameProperty = "Trigger1";
+    std::string idProperty = "Trigger1";
+    std::string nameProperty = "Trigger 1";
     std::vector<std::string> triggerActionsProperty = {"UpdateReport"};
 
     std::vector<LabeledSensorInfo> labeledSensorsProperty = {

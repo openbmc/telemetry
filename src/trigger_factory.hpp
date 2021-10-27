@@ -16,7 +16,7 @@ class TriggerFactory : public interfaces::TriggerFactory
                    interfaces::ReportManager& reportManager);
 
     std::unique_ptr<interfaces::Trigger>
-        make(const std::string& name,
+        make(const std::string& id, const std::string& name,
              const std::vector<std::string>& triggerActions,
              const std::vector<std::string>& reportNames,
              interfaces::TriggerManager& triggerManager,

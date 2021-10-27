@@ -7,7 +7,6 @@
 #include "report.hpp"
 #include "report_manager.hpp"
 #include "utils/conv_container.hpp"
-#include "utils/set_exception.hpp"
 #include "utils/tstring.hpp"
 
 #include <sdbusplus/exception.hpp>
@@ -80,20 +79,17 @@ class TestReport : public Test
     template <class T>
     static T getProperty(const std::string& path, const std::string& property)
     {
-        auto propertyPromise = std::promise<T>();
-        auto propertyFuture = propertyPromise.get_future();
-        sdbusplus::asio::getProperty<T>(
-            *DbusEnvironment::getBus(), DbusEnvironment::serviceName(), path,
-            Report::reportIfaceName, property,
-            [&propertyPromise](const boost::system::error_code& ec, T t) {
-                if (ec)
-                {
-                    utils::setException(propertyPromise, "GetProperty failed");
-                    return;
-                }
-                propertyPromise.set_value(t);
-            });
-        return DbusEnvironment::waitForFuture(std::move(propertyFuture));
+        return DbusEnvironment::getProperty<T>(path, Report::reportIfaceName,
+                                               property);
+    }
+
+    template <class T>
+    static boost::system::error_code setProperty(const std::string& path,
+                                                 const std::string& property,
+                                                 const T& newValue)
+    {
+        return DbusEnvironment::setProperty<T>(path, Report::reportIfaceName,
+                                               property, newValue);
     }
 
     boost::system::error_code call(const std::string& path,
@@ -112,23 +108,6 @@ class TestReport : public Test
     boost::system::error_code update(const std::string& path)
     {
         return call(path, Report::reportIfaceName, "Update");
-    }
-
-    template <class T>
-    static boost::system::error_code setProperty(const std::string& path,
-                                                 const std::string& property,
-                                                 const T& newValue)
-    {
-        auto setPromise = std::promise<boost::system::error_code>();
-        auto future = setPromise.get_future();
-        sdbusplus::asio::setProperty(
-            *DbusEnvironment::getBus(), DbusEnvironment::serviceName(), path,
-            Report::reportIfaceName, property, std::move(newValue),
-            [setPromise =
-                 std::move(setPromise)](boost::system::error_code ec) mutable {
-                setPromise.set_value(ec);
-            });
-        return DbusEnvironment::waitForFuture(std::move(future));
     }
 
     boost::system::error_code deleteReport(const std::string& path)

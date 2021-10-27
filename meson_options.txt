@@ -9,3 +9,5 @@ option('max-triggers', type: 'integer', min: 1, value: 10,
        description: 'Max number of Triggers')
 option('max-report-name-length', type: 'integer', min: 1, value: 4095,
        description: 'Max length of Report name')
+option('max-trigger-name-and-id-length', type: 'integer', min: 1, value: 4095,
+       description: 'Max length of Trigger name and id')

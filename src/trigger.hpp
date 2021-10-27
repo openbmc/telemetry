@@ -16,7 +16,7 @@ class Trigger : public interfaces::Trigger
   public:
     Trigger(boost::asio::io_context& ioc,
             const std::shared_ptr<sdbusplus::asio::object_server>& objServer,
-            const std::string& name,
+            const std::string& id, const std::string& name,
             const std::vector<std::string>& triggerActions,
             const std::vector<std::string>& reportNames,
             const std::vector<LabeledSensorInfo>& LabeledSensorsInfoIn,
@@ -30,9 +30,9 @@ class Trigger : public interfaces::Trigger
     Trigger& operator=(const Trigger&) = delete;
     Trigger& operator=(Trigger&&) = delete;
 
-    std::string getName() const override
+    std::string getId() const override
     {
-        return name;
+        return id;
     }
 
     std::string getPath() const override
@@ -43,7 +43,8 @@ class Trigger : public interfaces::Trigger
     bool storeConfiguration() const;
 
   private:
-    const std::string name;
+    const std::string id;
+    std::string name;
     std::vector<std::string> triggerActions;
     const std::string path;
     bool persistent = false;

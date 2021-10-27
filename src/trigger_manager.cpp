@@ -20,7 +20,7 @@ TriggerManager::TriggerManager(
         triggerManagerPath, triggerManagerIfaceName, [this](auto& iface) {
             iface.register_method(
                 "AddTrigger",
-                [this](boost::asio::yield_context& yield,
+                [this](boost::asio::yield_context& yield, const std::string& id,
                        const std::string& name,
                        const std::vector<std::string>& triggerActions,
                        const SensorsInfo& sensors,
@@ -34,8 +34,8 @@ TriggerManager::TriggerManager(
                     std::vector<LabeledSensorInfo> labeledSensorsInfo =
                         triggerFactory->getLabeledSensorsInfo(yield, sensors);
 
-                    return addTrigger(name, triggerActions, labeledSensorsInfo,
-                                      reportNames,
+                    return addTrigger(id, name, triggerActions,
+                                      labeledSensorsInfo, reportNames,
                                       labeledTriggerThresholdParams)
                         .getPath();
                 });
@@ -50,7 +50,8 @@ void TriggerManager::removeTrigger(const interfaces::Trigger* trigger)
         triggers.end());
 }
 
-void TriggerManager::verifyAddTrigger(const std::string& triggerName)
+void TriggerManager::verifyAddTrigger(const std::string& triggerId,
+                                      const std::string& triggerName) const
 {
     if (triggers.size() >= maxTriggers)
     {
@@ -59,9 +60,19 @@ void TriggerManager::verifyAddTrigger(const std::string& triggerName)
             "Reached maximal trigger count");
     }
 
+    verifyTriggerIdLength(triggerId);
+    verifyTriggerNameLength(triggerName);
+
+    if (triggerId.find_first_not_of(allowedCharactersInId) != std::string::npos)
+    {
+        throw sdbusplus::exception::SdBusError(
+            static_cast<int>(std::errc::invalid_argument),
+            "Invalid character in trigger id");
+    }
+
     for (const auto& trigger : triggers)
     {
-        if (trigger->getName() == triggerName)
+        if (trigger->getId() == triggerId)
         {
             throw sdbusplus::exception::SdBusError(
                 static_cast<int>(std::errc::file_exists), "Duplicate trigger");
@@ -69,18 +80,76 @@ void TriggerManager::verifyAddTrigger(const std::string& triggerName)
     }
 }
 
+void TriggerManager::verifyTriggerNameLength(const std::string& triggerName)
+{
+    if (triggerName.length() > maxTriggerNameAndIdLength)
+    {
+        throw sdbusplus::exception::SdBusError(
+            static_cast<int>(std::errc::invalid_argument),
+            "Trigger name exceed maximum length");
+    }
+}
+
+void TriggerManager::verifyTriggerIdLength(const std::string& triggerId)
+{
+    if (triggerId.length() > maxTriggerNameAndIdLength)
+    {
+        throw sdbusplus::exception::SdBusError(
+            static_cast<int>(std::errc::invalid_argument),
+            "Trigger id exceed maximum length");
+    }
+}
+
+std::string TriggerManager::generateId(const std::string& triggerName) const
+{
+    std::string strippedId = triggerName;
+    strippedId.erase(std::remove_if(strippedId.begin(), strippedId.end(),
+                                    [](char c) {
+                                        return allowedCharactersInId.find(c) ==
+                                               std::string_view::npos;
+                                    }),
+                     strippedId.end());
+
+    strippedId = strippedId.substr(
+        0, TriggerManager::maxTriggerNameAndIdLength -
+               std::to_string(TriggerManager::maxTriggers - 1).length());
+
+    size_t idx = 0;
+    std::string tmpId(strippedId);
+    while (std::find_if(triggers.begin(), triggers.end(),
+                        [&tmpId](const auto& trigger) {
+                            return trigger->getId() == tmpId;
+                        }) != triggers.end())
+    {
+        tmpId = strippedId + std::to_string(idx++);
+    }
+    return tmpId;
+}
+
 interfaces::Trigger& TriggerManager::addTrigger(
-    const std::string& triggerName,
+    const std::string& triggerIdIn, const std::string& triggerNameIn,
     const std::vector<std::string>& triggerActions,
     const std::vector<LabeledSensorInfo>& labeledSensorsInfo,
     const std::vector<std::string>& reportNames,
     const LabeledTriggerThresholdParams& labeledThresholdParams)
 {
-    verifyAddTrigger(triggerName);
+    std::string triggerName = triggerNameIn;
+    if (triggerName.empty())
+    {
+        triggerName = triggerNameDefault;
+    }
+
+    std::string triggerId = triggerIdIn;
+    if (triggerId.empty())
+    {
+        triggerId = generateId(triggerName);
+    }
+
+    verifyAddTrigger(triggerId, triggerName);
 
     triggers.emplace_back(triggerFactory->make(
-        triggerName, triggerActions, reportNames, *this, *triggerStorage,
-        labeledThresholdParams, labeledSensorsInfo));
+        triggerId, triggerName, triggerActions, reportNames, *this,
+        *triggerStorage, labeledThresholdParams, labeledSensorsInfo));
 
     return *triggers.back();
 }
@@ -104,6 +173,7 @@ void TriggerManager::loadFromPersistent()
             {
                 throw std::runtime_error("Invalid version");
             }
+            const std::string& id = data->at("Id").get_ref<std::string&>();
             const std::string& name = data->at("Name").get_ref<std::string&>();
             int thresholdParamsDiscriminator =
                 data->at("ThresholdParamsDiscriminator").get<int>();
@@ -130,8 +200,8 @@ void TriggerManager::loadFromPersistent()
             auto labeledSensorsInfo =
                 data->at("Sensors").get<std::vector<LabeledSensorInfo>>();
 
-            addTrigger(name, triggerActions, labeledSensorsInfo, reportNames,
-                       labeledThresholdParams);
+            addTrigger(id, name, triggerActions, labeledSensorsInfo,
+                       reportNames, labeledThresholdParams);
         }
         catch (const std::exception& e)
         {

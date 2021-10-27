@@ -28,7 +28,7 @@ class TestTriggerManager : public Test
                 addTriggerPromise.set_value({ec, path});
             },
             DbusEnvironment::serviceName(), TriggerManager::triggerManagerPath,
-            TriggerManager::triggerManagerIfaceName, "AddTrigger",
+            TriggerManager::triggerManagerIfaceName, "AddTrigger", params.id(),
             params.name(), params.triggerActions(), sensorInfos,
             params.reportNames(),
             std::visit(utils::FromLabeledThresholdParamConversion(),
@@ -55,7 +55,7 @@ class TestTriggerManager : public Test
         std::make_unique<NiceMock<TriggerFactoryMock>>();
     TriggerFactoryMock& triggerFactoryMock = *triggerFactoryMockPtr;
     std::unique_ptr<TriggerMock> triggerMockPtr =
-        std::make_unique<NiceMock<TriggerMock>>(TriggerParams().name());
+        std::make_unique<NiceMock<TriggerMock>>(TriggerParams().id());
     TriggerMock& triggerMock = *triggerMockPtr;
     std::unique_ptr<TriggerManager> sut;
     MockFunction<void(std::string)> checkPoint;
@@ -110,6 +110,110 @@ TEST_F(TestTriggerManager, DISABLED_failToAddTriggerTwice)
     EXPECT_THAT(path, Eq(std::string()));
 }
 
+TEST_F(TestTriggerManager, DISABLED_failToAddTriggerWithInvalidId)
+{
+    triggerFactoryMock.expectMake(std::nullopt, Ref(*sut), Ref(storageMock))
+        .Times(0);
+
+    auto [ec, path] = addTrigger(TriggerParams().id("not valid?"));
+    EXPECT_THAT(ec.value(), Eq(boost::system::errc::invalid_argument));
+    EXPECT_THAT(path, Eq(std::string()));
+}
+
+TEST_F(TestTriggerManager, addTriggerWithoutIdAndName)
+{
+    triggerFactoryMock
+        .expectMake(TriggerParams()
+                        .id(TriggerManager::triggerNameDefault)
+                        .name(TriggerManager::triggerNameDefault),
+                    Ref(*sut), Ref(storageMock))
+        .WillOnce(Return(ByMove(std::move(triggerMockPtr))));
+
+    auto [ec, path] = addTrigger(TriggerParams().id("").name(""));
+    EXPECT_THAT(ec.value(), Eq(boost::system::errc::success));
+    EXPECT_THAT(path, Not(Eq("")));
+}
+
+TEST_F(TestTriggerManager, addTriggerWithoutIdTwice)
+{
+    addTrigger(TriggerParams().id(""));
+
+    auto [ec, path] = addTrigger(TriggerParams().id(""));
+    EXPECT_THAT(ec.value(), Eq(boost::system::errc::success));
+    EXPECT_THAT(path, Not(Eq("")));
+}
+
+TEST_F(TestTriggerManager, addTriggerWithMaxLengthName)
+{
+    auto triggerName =
+        std::string(TriggerManager::maxTriggerNameAndIdLength, 'z');
+    auto triggerParams = TriggerParams().name(triggerName);
+
+    triggerFactoryMock.expectMake(triggerParams, Ref(*sut), Ref(storageMock))
+        .WillOnce(Return(ByMove(std::move(triggerMockPtr))));
+
+    auto [ec, path] = addTrigger(triggerParams);
+
+    EXPECT_THAT(ec.value(), Eq(boost::system::errc::success));
+    EXPECT_THAT(path, Eq(triggerMock.getPath()));
+}
+
+TEST_F(TestTriggerManager, DISABLED_failToAddTriggerWithTooLongName)
+{
+    auto triggerName =
+        std::string(TriggerManager::maxTriggerNameAndIdLength + 1, 'z');
+    auto triggerParams = TriggerParams().name(triggerName);
+
+    triggerFactoryMock.expectMake(std::nullopt, Ref(*sut), Ref(storageMock))
+        .Times(0);
+
+    auto [ec, path] = addTrigger(triggerParams);
+
+    EXPECT_THAT(ec.value(), Eq(boost::system::errc::invalid_argument));
+    EXPECT_THAT(path, Eq(std::string()));
+}
+
+TEST_F(TestTriggerManager, addTriggerWithoutIdAndMaxLengthNameTwice)
+{
+    addTrigger(TriggerParams().id("").name(
+        std::string(TriggerManager::maxTriggerNameAndIdLength, 'z')));
+
+    auto [ec, path] = addTrigger(TriggerParams().id("").name(
+        std::string(TriggerManager::maxTriggerNameAndIdLength, 'z')));
+    EXPECT_THAT(ec.value(), Eq(boost::system::errc::success));
+    EXPECT_THAT(path, Not(Eq("")));
+}
+
+TEST_F(TestTriggerManager, addTriggerWithMaxLengthId)
+{
+    auto triggerId =
+        std::string(TriggerManager::maxTriggerNameAndIdLength, 'z');
+    auto triggerParams = TriggerParams().id(triggerId);
+
+    triggerFactoryMock.expectMake(triggerParams, Ref(*sut), Ref(storageMock))
+        .WillOnce(Return(ByMove(std::move(triggerMockPtr))));
+
+    auto [ec, path] = addTrigger(triggerParams);
+
+    EXPECT_THAT(ec.value(), Eq(boost::system::errc::success));
+    EXPECT_THAT(path, Eq(triggerMock.getPath()));
+}
+
+TEST_F(TestTriggerManager, DISABLED_failToAddTriggerWithTooLongId)
+{
+    auto triggerId =
+        std::string(TriggerManager::maxTriggerNameAndIdLength + 1, 'z');
+    auto triggerParams = TriggerParams().id(triggerId);
+
+    triggerFactoryMock.expectMake(std::nullopt, Ref(*sut), Ref(storageMock))
+        .Times(0);
+
+    auto [ec, path] = addTrigger(triggerParams);
+
+    EXPECT_THAT(ec.value(), Eq(boost::system::errc::invalid_argument));
+    EXPECT_THAT(path, Eq(std::string()));
+}
+
 TEST_F(TestTriggerManager, DISABLED_failToAddTriggerWhenMaxTriggerIsReached)
 {
     auto triggerParams = TriggerParams();
@@ -119,14 +223,14 @@ TEST_F(TestTriggerManager, DISABLED_failToAddTriggerWhenMaxTriggerIsReached)
 
     for (size_t i = 0; i < TriggerManager::maxTriggers; i++)
     {
-        triggerParams.name(TriggerParams().name() + std::to_string(i));
+        triggerParams.id(TriggerParams().id() + std::to_string(i));
 
         auto [ec, path] = addTrigger(triggerParams);
         EXPECT_THAT(ec.value(), Eq(boost::system::errc::success));
     }
 
-    triggerParams.name(TriggerParams().name() +
-                       std::to_string(TriggerManager::maxTriggers));
+    triggerParams.id(TriggerParams().id() +
+                     std::to_string(TriggerManager::maxTriggers));
     auto [ec, path] = addTrigger(triggerParams);
     EXPECT_THAT(ec.value(), Eq(boost::system::errc::too_many_files_open));
     EXPECT_THAT(path, Eq(std::string()));
@@ -192,13 +296,15 @@ class TestTriggerManagerStorage : public TestTriggerManager
         ON_CALL(storageMock, load(FilePath("trigger1")))
             .WillByDefault(InvokeWithoutArgs([this] { return data1; }));
 
-        data2["Name"] = "Trigger2";
+        data2["Id"] = "Trigger2";
+        data2["Name"] = "Trigger 2";
         ON_CALL(storageMock, load(FilePath("trigger2")))
             .WillByDefault(InvokeWithoutArgs([this] { return data2; }));
     }
 
     nlohmann::json data1 = nlohmann::json{
         {"Version", Trigger::triggerVersion},
+        {"Id", TriggerParams().id()},
         {"Name", TriggerParams().name()},
         {"ThresholdParamsDiscriminator",
          TriggerParams().thresholdParams().index()},
@@ -214,8 +320,8 @@ class TestTriggerManagerStorage : public TestTriggerManager
 TEST_F(TestTriggerManagerStorage, triggerManagerCtorAddTriggerFromStorage)
 {
     triggerFactoryMock.expectMake(TriggerParams(), _, Ref(storageMock));
-    triggerFactoryMock.expectMake(TriggerParams().name("Trigger2"), _,
-                                  Ref(storageMock));
+    triggerFactoryMock.expectMake(
+        TriggerParams().id("Trigger2").name("Trigger 2"), _, Ref(storageMock));
     EXPECT_CALL(storageMock, remove(_)).Times(0);
 
     sut = makeTriggerManager();
@@ -254,8 +360,8 @@ TEST_F(TestTriggerManagerStorage,
 {
     data1["Version"] = Trigger::triggerVersion - 1;
 
-    triggerFactoryMock.expectMake(TriggerParams().name("Trigger2"), _,
-                                  Ref(storageMock));
+    triggerFactoryMock.expectMake(
+        TriggerParams().id("Trigger2").name("Trigger 2"), _, Ref(storageMock));
     EXPECT_CALL(storageMock, remove(FilePath("trigger1")));
 
     sut = makeTriggerManager();

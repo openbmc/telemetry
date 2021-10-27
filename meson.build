@@ -70,6 +70,8 @@ add_project_arguments(
     '-DTELEMETRY_MAX_TRIGGERS=' + get_option('max-triggers').to_string(),
     '-DTELEMETRY_MAX_REPORT_NAME_LENGTH=' +
         get_option('max-report-name-length').to_string(),
+    '-DTELEMETRY_MAX_TRIGGER_NAME_AND_ID_LENGTH=' +
+        get_option('max-trigger-name-and-id-length').to_string(),
     language: 'cpp'
 )
 
