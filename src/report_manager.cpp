@@ -101,7 +101,7 @@ void ReportManager::verifyReportNameLength(const std::string& reportName)
     {
         throw sdbusplus::exception::SdBusError(
             static_cast<int>(std::errc::invalid_argument),
-            "Report name exceed maximum length");
+            "Report name exceeds maximum length");
     }
 }
 

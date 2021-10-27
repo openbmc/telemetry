@@ -3,6 +3,7 @@
 #include "interfaces/report_manager.hpp"
 #include "interfaces/trigger_factory.hpp"
 #include "interfaces/trigger_manager.hpp"
+#include "trigger.hpp"
 
 #include <sdbusplus/asio/object_server.hpp>
 
@@ -30,10 +31,15 @@ class TriggerManager : public interfaces::TriggerManager
     std::unique_ptr<sdbusplus::asio::dbus_interface> managerIface;
     std::vector<std::unique_ptr<interfaces::Trigger>> triggers;
 
-    void verifyAddTrigger(const std::string& triggerName);
+    void verifyAddTrigger(const std::string& triggerId,
+                          const std::string& triggerName) const;
+    std::string generateId(const std::string& prefix,
+                           const std::string& triggerName) const;
+    static void verifyTriggerIdLength(const std::string& triggerId);
+    static void verifyIdCharacters(const std::string& triggerId);
 
     interfaces::Trigger&
-        addTrigger(const std::string& triggerName,
+        addTrigger(const std::string& triggerId, const std::string& triggerName,
                    const std::vector<std::string>& triggerActions,
                    const std::vector<LabeledSensorInfo>& labeledSensors,
                    const std::vector<std::string>& reportNames,
@@ -42,8 +48,15 @@ class TriggerManager : public interfaces::TriggerManager
 
   public:
     static constexpr size_t maxTriggers{TELEMETRY_MAX_TRIGGERS};
+    static constexpr size_t maxTriggerIdLength{
+        TELEMETRY_MAX_DBUS_PATH_LENGTH -
+        std::string_view(Trigger::triggerDir).length()};
     static constexpr const char* triggerManagerIfaceName =
         "xyz.openbmc_project.Telemetry.TriggerManager";
     static constexpr const char* triggerManagerPath =
         "/xyz/openbmc_project/Telemetry/Triggers";
+
+    static constexpr std::string_view allowedCharactersInId =
+        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_/";
+    static constexpr const char* triggerNameDefault = "Trigger";
 };

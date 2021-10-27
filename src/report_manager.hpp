@@ -4,6 +4,7 @@
 #include "interfaces/report.hpp"
 #include "interfaces/report_factory.hpp"
 #include "interfaces/report_manager.hpp"
+#include "report.hpp"
 
 #include <systemd/sd-bus-protocol.h>
 
@@ -59,7 +60,8 @@ class ReportManager : public interfaces::ReportManager
     static constexpr size_t maxReports{TELEMETRY_MAX_REPORTS};
     static constexpr size_t maxReadingParams{TELEMETRY_MAX_READING_PARAMS};
     static constexpr size_t maxReportNameLength{
-        TELEMETRY_MAX_REPORT_NAME_LENGTH};
+        TELEMETRY_MAX_DBUS_PATH_LENGTH -
+        std::string_view(Report::reportDir).length()};
     static constexpr Milliseconds minInterval{TELEMETRY_MIN_INTERVAL};
     static constexpr const char* reportManagerIfaceName =
         "xyz.openbmc_project.Telemetry.ReportManager";

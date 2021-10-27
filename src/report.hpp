@@ -50,8 +50,8 @@ class Report : public interfaces::Report
     static void timerProc(boost::system::error_code, Report& self);
     void scheduleTimer(Milliseconds interval);
 
-    const std::string name;
-    const std::string path;
+    std::string name;
+    std::string path;
     std::string reportingType;
     Milliseconds interval;
     bool emitsReadingsUpdate;

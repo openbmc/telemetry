@@ -4,8 +4,8 @@
 #include "mocks/trigger_manager_mock.hpp"
 #include "params/trigger_params.hpp"
 #include "trigger.hpp"
+#include "trigger_manager.hpp"
 #include "utils/conversion_trigger.hpp"
-#include "utils/set_exception.hpp"
 #include "utils/transform.hpp"
 #include "utils/tstring.hpp"
 
@@ -22,7 +22,8 @@ class TestTrigger : public Test
     TriggerParams triggerParams;
     TriggerParams triggerDiscreteParams =
         TriggerParams()
-            .name("Trigger2")
+            .id("DiscreteTrigger")
+            .name("My Discrete Trigger")
             .thresholdParams(std::vector<discrete::LabeledThresholdParam>{
                 discrete::LabeledThresholdParam{
                     "userId", discrete::Severity::warning,
@@ -55,8 +56,8 @@ class TestTrigger : public Test
     {
         return std::make_unique<Trigger>(
             DbusEnvironment::getIoc(), DbusEnvironment::getObjServer(),
-            params.name(), params.triggerActions(), params.reportNames(),
-            params.sensors(), params.thresholdParams(),
+            params.id(), params.name(), params.triggerActions(),
+            params.reportNames(), params.sensors(), params.thresholdParams(),
             std::vector<std::shared_ptr<interfaces::Threshold>>{},
             *triggerManagerMockPtr, storageMock);
     }
@@ -70,20 +71,8 @@ class TestTrigger : public Test
     template <class T>
     static T getProperty(const std::string& path, const std::string& property)
     {
-        auto propertyPromise = std::promise<T>();
-        auto propertyFuture = propertyPromise.get_future();
-        sdbusplus::asio::getProperty<T>(
-            *DbusEnvironment::getBus(), DbusEnvironment::serviceName(), path,
-            Trigger::triggerIfaceName, property,
-            [&propertyPromise](const boost::system::error_code& ec, T t) {
-                if (ec)
-                {
-                    utils::setException(propertyPromise, "GetProperty failed");
-                    return;
-                }
-                propertyPromise.set_value(t);
-            });
-        return DbusEnvironment::waitForFuture(std::move(propertyFuture));
+        return DbusEnvironment::getProperty<T>(path, Trigger::triggerIfaceName,
+                                               property);
     }
 
     template <class T>
@@ -91,17 +80,8 @@ class TestTrigger : public Test
                                                  const std::string& property,
                                                  const T& newValue)
     {
-        auto setPromise = std::promise<boost::system::error_code>();
-        auto setFuture = setPromise.get_future();
-
-        sdbusplus::asio::setProperty(
-            *DbusEnvironment::getBus(), DbusEnvironment::serviceName(), path,
-            Trigger::triggerIfaceName, property, std::move(newValue),
-            [setPromise =
-                 std::move(setPromise)](boost::system::error_code ec) mutable {
-                setPromise.set_value(ec);
-            });
-        return DbusEnvironment::waitForFuture(std::move(setFuture));
+        return DbusEnvironment::setProperty<T>(path, Trigger::triggerIfaceName,
+                                               property, newValue);
     }
 
     boost::system::error_code deleteTrigger(const std::string& path)
@@ -119,6 +99,8 @@ class TestTrigger : public Test
 
 TEST_F(TestTrigger, checkIfPropertiesAreSet)
 {
+    EXPECT_THAT(getProperty<std::string>(sut->getPath(), "Name"),
+                Eq(triggerParams.name()));
     EXPECT_THAT(getProperty<bool>(sut->getPath(), "Persistent"), Eq(true));
     EXPECT_THAT(
         getProperty<std::vector<std::string>>(sut->getPath(), "TriggerActions"),
@@ -132,6 +114,14 @@ TEST_F(TestTrigger, checkIfPropertiesAreSet)
         getProperty<TriggerThresholdParams>(sut->getPath(), "Thresholds"),
         Eq(std::visit(utils::FromLabeledThresholdParamConversion(),
                       triggerParams.thresholdParams())));
+}
+
+TEST_F(TestTrigger, setPropertyNameToCorrectValue)
+{
+    std::string name = "custom name 1234 %^#5";
+    EXPECT_THAT(setProperty(sut->getPath(), "Name", name),
+                Eq(boost::system::errc::success));
+    EXPECT_THAT(getProperty<std::string>(sut->getPath(), "Name"), Eq(name));
 }
 
 TEST_F(TestTrigger, checkIfNumericCoversionsAreGood)
@@ -188,7 +178,7 @@ TEST_F(TestTrigger, checkIfDiscreteCoversionsAreGood)
 
 TEST_F(TestTrigger, deleteTrigger)
 {
-    EXPECT_CALL(storageMock, remove(to_file_path(sut->getName())));
+    EXPECT_CALL(storageMock, remove(to_file_path(sut->getId())));
     EXPECT_CALL(*triggerManagerMockPtr, removeTrigger(sut.get()));
     auto ec = deleteTrigger(sut->getPath());
     EXPECT_THAT(ec, Eq(boost::system::errc::success));
@@ -202,7 +192,7 @@ TEST_F(TestTrigger, deletingNonExistingTriggerReturnInvalidRequestDescriptor)
 
 TEST_F(TestTrigger, settingPersistencyToFalseRemovesTriggerFromStorage)
 {
-    EXPECT_CALL(storageMock, remove(to_file_path(sut->getName())));
+    EXPECT_CALL(storageMock, remove(to_file_path(sut->getId())));
 
     bool persistent = false;
     EXPECT_THAT(setProperty(sut->getPath(), "Persistent", persistent),
@@ -230,11 +220,11 @@ TEST_F(TestTriggerErrors, exceptionDuringTriggerStoreDisablesPersistency)
     EXPECT_THAT(getProperty<bool>(sut->getPath(), "Persistent"), Eq(false));
 }
 
-TEST_F(TestTriggerErrors, creatingTriggerThrowsExceptionWhenNameIsInvalid)
+TEST_F(TestTriggerErrors, creatingTriggerThrowsExceptionWhenIdIsInvalid)
 {
     EXPECT_CALL(storageMock, store(_, _)).Times(0);
 
-    EXPECT_THROW(makeTrigger(triggerParams.name("inv?lidName")),
+    EXPECT_THROW(makeTrigger(triggerParams.id("inv?lidId")),
                  sdbusplus::exception::SdBusError);
 }
 
@@ -260,6 +250,11 @@ class TestTriggerStore : public TestTrigger
 TEST_F(TestTriggerStore, settingPersistencyToTrueStoresTriggerVersion)
 {
     ASSERT_THAT(storedConfiguration.at("Version"), Eq(expectedTriggerVersion));
+}
+
+TEST_F(TestTriggerStore, settingPersistencyToTrueStoresTriggerId)
+{
+    ASSERT_THAT(storedConfiguration.at("Id"), Eq(triggerParams.id()));
 }
 
 TEST_F(TestTriggerStore, settingPersistencyToTrueStoresTriggerName)
