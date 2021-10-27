@@ -6,7 +6,6 @@
 #include "report.hpp"
 #include "report_manager.hpp"
 #include "utils/conversion.hpp"
-#include "utils/set_exception.hpp"
 #include "utils/transform.hpp"
 
 using namespace testing;
@@ -69,33 +68,11 @@ class TestReportManager : public Test
     }
 
     template <class T>
-    static T getProperty(std::string property)
+    static T getProperty(const std::string& property)
     {
-        auto propertyPromise = std::promise<T>();
-        auto propertyFuture = propertyPromise.get_future();
-        sdbusplus::asio::getProperty<T>(
-            *DbusEnvironment::getBus(), DbusEnvironment::serviceName(),
+        return DbusEnvironment::getProperty<T>(
             ReportManager::reportManagerPath,
-            ReportManager::reportManagerIfaceName, property,
-            [&propertyPromise](const boost::system::error_code& ec, T t) {
-                if (ec)
-                {
-                    utils::setException(propertyPromise, "Get property failed");
-                    return;
-                }
-                propertyPromise.set_value(t);
-            });
-        return DbusEnvironment::waitForFuture(std::move(propertyFuture));
-    }
-
-    static std::string prepareReportNameWithLength(size_t length)
-    {
-        std::stringstream reportNameStream;
-        for (size_t i = 0; i < length; ++i)
-        {
-            reportNameStream << "z";
-        }
-        return reportNameStream.str();
+            ReportManager::reportManagerIfaceName, property);
     }
 };
 
@@ -124,8 +101,7 @@ TEST_F(TestReportManager, addReport)
 
 TEST_F(TestReportManager, addReportWithMaxLengthName)
 {
-    std::string reportName =
-        prepareReportNameWithLength(ReportManager::maxReportNameLength);
+    std::string reportName(ReportManager::maxReportNameLength, 'z');
     reportParams.reportName(reportName);
     reportFactoryMock.expectMake(reportParams, Ref(*sut), Ref(storageMock));
 
@@ -141,7 +117,7 @@ TEST_F(TestReportManager, DISABLED_failToAddReportWithTooLongName)
         .Times(0);
 
     reportParams.reportName(
-        prepareReportNameWithLength(ReportManager::maxReportNameLength + 1));
+        std::string(ReportManager::maxReportNameLength + 1, 'z'));
 
     auto [ec, path] = addReport(reportParams);
 

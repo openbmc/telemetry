@@ -10,7 +10,7 @@ class Trigger
   public:
     virtual ~Trigger() = default;
 
-    virtual std::string getName() const = 0;
+    virtual std::string getId() const = 0;
     virtual std::string getPath() const = 0;
 };
 
