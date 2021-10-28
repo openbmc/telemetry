@@ -1,0 +1,165 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "77ae82cb_20ab01c3",
+        "filename": "src/trigger_manager.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2021-10-28T16:58:36Z",
+      "side": 1,
+      "message": "nit: please use \u0027exceeds\u0027 or \u0027exceeded\u0027.",
+      "range": {
+        "startLine": 82,
+        "startChar": 24,
+        "endLine": 82,
+        "endChar": 30
+      },
+      "revId": "4eacd470b5ee9dae8e2f33a0f9d13732154a7be2",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6edd1974_6ccfead4",
+        "filename": "src/trigger_manager.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 139,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2021-10-28T16:58:36Z",
+      "side": 1,
+      "message": "What if \u0027name\u0027 is changed by user by dbusIface.register_property_rw? Shouldn\u0027t the triggerId be updated to somehow align with the new name?",
+      "range": {
+        "startLine": 139,
+        "startChar": 20,
+        "endLine": 139,
+        "endChar": 55
+      },
+      "revId": "4eacd470b5ee9dae8e2f33a0f9d13732154a7be2",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7fde56a4_30edba9e",
+        "filename": "tests/src/params/trigger_params.hpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2021-10-28T16:58:36Z",
+      "side": 1,
+      "message": "[*] As I understand, at this point id property should be different than name property but this form (by putting space in \u0027Trigger 1\u0027) looks strange, maybe you could set by default \u0027TriggerId1\u0027 and \u0027TriggerName1\u0027 for these properties instead?",
+      "range": {
+        "startLine": 69,
+        "startChar": 0,
+        "endLine": 70,
+        "endChar": 43
+      },
+      "revId": "4eacd470b5ee9dae8e2f33a0f9d13732154a7be2",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d5bb3a9b_381c4b74",
+        "filename": "tests/src/test_trigger.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2021-10-28T16:58:36Z",
+      "side": 1,
+      "message": "Same as above in [*], can you consider changing to something like \u0027TriggerId2/TriggerName2\u0027?",
+      "range": {
+        "startLine": 25,
+        "startChar": 0,
+        "endLine": 26,
+        "endChar": 30
+      },
+      "revId": "4eacd470b5ee9dae8e2f33a0f9d13732154a7be2",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "65a9e97a_a1d3dc7f",
+        "filename": "tests/src/test_trigger_manager.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 280,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2021-10-28T16:58:36Z",
+      "side": 1,
+      "message": "As above in [*]",
+      "range": {
+        "startLine": 279,
+        "startChar": 0,
+        "endLine": 280,
+        "endChar": 36
+      },
+      "revId": "4eacd470b5ee9dae8e2f33a0f9d13732154a7be2",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c29b969f_64d3e8dd",
+        "filename": "tests/src/test_trigger_manager.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 304,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2021-10-28T16:58:36Z",
+      "side": 1,
+      "message": "As above in [*]",
+      "range": {
+        "startLine": 304,
+        "startChar": 8,
+        "endLine": 304,
+        "endChar": 56
+      },
+      "revId": "4eacd470b5ee9dae8e2f33a0f9d13732154a7be2",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c559bacf_c0383348",
+        "filename": "tests/src/test_trigger_manager.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 344,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2021-10-28T16:58:36Z",
+      "side": 1,
+      "message": "As above in [*]",
+      "range": {
+        "startLine": 344,
+        "startChar": 8,
+        "endLine": 344,
+        "endChar": 56
+      },
+      "revId": "4eacd470b5ee9dae8e2f33a0f9d13732154a7be2",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
