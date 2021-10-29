@@ -48,6 +48,30 @@
     },
     {
       "key": {
+        "uuid": "4909bce2_30eb9671",
+        "filename": "src/trigger_manager.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 139,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-10-29T06:51:36Z",
+      "side": 1,
+      "message": "Name and Id are independent.",
+      "parentUuid": "6edd1974_6ccfead4",
+      "range": {
+        "startLine": 139,
+        "startChar": 20,
+        "endLine": 139,
+        "endChar": 55
+      },
+      "revId": "4eacd470b5ee9dae8e2f33a0f9d13732154a7be2",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "7fde56a4_30edba9e",
         "filename": "tests/src/params/trigger_params.hpp",
         "patchSetId": 2
@@ -59,6 +83,30 @@
       "writtenOn": "2021-10-28T16:58:36Z",
       "side": 1,
       "message": "[*] As I understand, at this point id property should be different than name property but this form (by putting space in \u0027Trigger 1\u0027) looks strange, maybe you could set by default \u0027TriggerId1\u0027 and \u0027TriggerName1\u0027 for these properties instead?",
+      "range": {
+        "startLine": 69,
+        "startChar": 0,
+        "endLine": 70,
+        "endChar": 43
+      },
+      "revId": "4eacd470b5ee9dae8e2f33a0f9d13732154a7be2",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7b067412_5f8951d2",
+        "filename": "tests/src/params/trigger_params.hpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-10-29T06:51:36Z",
+      "side": 1,
+      "message": "No they don\u0027t have to be different. There is a rule in tests when there are two fields it\u0027s better to use different value for them otherwise you don\u0027t know if you code uses for example id field where name is needed. This way you can tell the difference by values passed to other methods.",
+      "parentUuid": "7fde56a4_30edba9e",
       "range": {
         "startLine": 69,
         "startChar": 0,
