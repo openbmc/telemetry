@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "2d000dd5_d3c86f3d",
+        "filename": "src/trigger_manager.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2021-10-29T11:26:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "77ae82cb_20ab01c3",
+      "range": {
+        "startLine": 82,
+        "startChar": 24,
+        "endLine": 82,
+        "endChar": 30
+      },
+      "revId": "4eacd470b5ee9dae8e2f33a0f9d13732154a7be2",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6edd1974_6ccfead4",
         "filename": "src/trigger_manager.cpp",
         "patchSetId": 2
@@ -69,6 +93,30 @@
       "revId": "4eacd470b5ee9dae8e2f33a0f9d13732154a7be2",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ad6a5972_0f60b8f4",
+        "filename": "src/trigger_manager.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 139,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2021-10-29T11:26:35Z",
+      "side": 1,
+      "message": "Name is used only once to generate Id, then it is independent from it.",
+      "parentUuid": "4909bce2_30eb9671",
+      "range": {
+        "startLine": 139,
+        "startChar": 20,
+        "endLine": 139,
+        "endChar": 55
+      },
+      "revId": "4eacd470b5ee9dae8e2f33a0f9d13732154a7be2",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     },
     {
       "key": {
@@ -119,6 +167,30 @@
     },
     {
       "key": {
+        "uuid": "7e99194f_482efd99",
+        "filename": "tests/src/params/trigger_params.hpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2021-10-29T11:26:35Z",
+      "side": 1,
+      "message": "Exactly what Krzysztof said, additionally, my intention was to show that this can be any possible string - even with spaces. To avoid possible misunderstandings, I will change the name to something like \"My Numeric Trigger\".",
+      "parentUuid": "7b067412_5f8951d2",
+      "range": {
+        "startLine": 69,
+        "startChar": 0,
+        "endLine": 70,
+        "endChar": 43
+      },
+      "revId": "4eacd470b5ee9dae8e2f33a0f9d13732154a7be2",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d5bb3a9b_381c4b74",
         "filename": "tests/src/test_trigger.cpp",
         "patchSetId": 2
@@ -139,6 +211,30 @@
       "revId": "4eacd470b5ee9dae8e2f33a0f9d13732154a7be2",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5aa9c6cc_4a6e8ccc",
+        "filename": "tests/src/test_trigger.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2021-10-29T11:26:35Z",
+      "side": 1,
+      "message": "See my previous comment, but I will change it to be \u0027human readable\u0027 name.",
+      "parentUuid": "d5bb3a9b_381c4b74",
+      "range": {
+        "startLine": 25,
+        "startChar": 0,
+        "endLine": 26,
+        "endChar": 30
+      },
+      "revId": "4eacd470b5ee9dae8e2f33a0f9d13732154a7be2",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     },
     {
       "key": {
@@ -165,6 +261,30 @@
     },
     {
       "key": {
+        "uuid": "fcba2b79_f84ec9df",
+        "filename": "tests/src/test_trigger_manager.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 280,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2021-10-29T11:26:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "65a9e97a_a1d3dc7f",
+      "range": {
+        "startLine": 279,
+        "startChar": 0,
+        "endLine": 280,
+        "endChar": 36
+      },
+      "revId": "4eacd470b5ee9dae8e2f33a0f9d13732154a7be2",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c29b969f_64d3e8dd",
         "filename": "tests/src/test_trigger_manager.cpp",
         "patchSetId": 2
@@ -188,6 +308,30 @@
     },
     {
       "key": {
+        "uuid": "c3190cac_f4d7a7f7",
+        "filename": "tests/src/test_trigger_manager.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 304,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2021-10-29T11:26:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c29b969f_64d3e8dd",
+      "range": {
+        "startLine": 304,
+        "startChar": 8,
+        "endLine": 304,
+        "endChar": 56
+      },
+      "revId": "4eacd470b5ee9dae8e2f33a0f9d13732154a7be2",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c559bacf_c0383348",
         "filename": "tests/src/test_trigger_manager.cpp",
         "patchSetId": 2
@@ -208,6 +352,30 @@
       "revId": "4eacd470b5ee9dae8e2f33a0f9d13732154a7be2",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cf0ec83f_9a62b4a0",
+        "filename": "tests/src/test_trigger_manager.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 344,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2021-10-29T11:26:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c559bacf_c0383348",
+      "range": {
+        "startLine": 344,
+        "startChar": 8,
+        "endLine": 344,
+        "endChar": 56
+      },
+      "revId": "4eacd470b5ee9dae8e2f33a0f9d13732154a7be2",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }
