@@ -5,6 +5,8 @@
 #include "interfaces/report.hpp"
 #include "interfaces/report_manager.hpp"
 #include "types/report_types.hpp"
+#include "types/report_updates.hpp"
+#include "types/reporting_type.hpp"
 #include "utils/circular_vector.hpp"
 
 #include <boost/asio/io_context.hpp>

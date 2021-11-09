@@ -20,13 +20,13 @@ class ReportParams final
         return reportNameProperty;
     }
 
-    ReportParams& reportingType(std::string val)
+    ReportParams& reportingType(const ReportingType val)
     {
-        reportingTypeProperty = std::move(val);
+        reportingTypeProperty = val;
         return *this;
     }
 
-    const std::string& reportingType() const
+    ReportingType reportingType() const
     {
         return reportingTypeProperty;
     }
@@ -86,13 +86,13 @@ class ReportParams final
         return appendLimitProperty;
     }
 
-    ReportParams& reportUpdates(std::string val)
+    ReportParams& reportUpdates(ReportUpdates val)
     {
         reportUpdatesProperty = val;
         return *this;
     }
 
-    std::string reportUpdates() const
+    ReportUpdates reportUpdates() const
     {
         return reportUpdatesProperty;
     }
@@ -110,12 +110,12 @@ class ReportParams final
 
   private:
     std::string reportNameProperty = "TestReport";
-    std::string reportingTypeProperty = "OnRequest";
+    ReportingType reportingTypeProperty = ReportingType::onRequest;
     bool emitReadingUpdateProperty = true;
     bool logToMetricReportCollectionProperty = true;
     Milliseconds intervalProperty = ReportManager::minInterval;
     uint64_t appendLimitProperty = 123;
-    std::string reportUpdatesProperty = "Overwrite";
+    ReportUpdates reportUpdatesProperty = ReportUpdates::overwrite;
     std::vector<LabeledMetricParameters> metricParametersProperty{
         {LabeledMetricParameters{
              {LabeledSensorParameters{"Service",

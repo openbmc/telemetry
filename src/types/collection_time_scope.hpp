@@ -29,13 +29,14 @@ constexpr std::array<std::pair<std::string_view, CollectionTimeScope>, 3>
 inline CollectionTimeScope
     toCollectionTimeScope(std::underlying_type_t<CollectionTimeScope> value)
 {
-    return toEnum<CollectionTimeScope, CollectionTimeScope::point,
-                  CollectionTimeScope::startup>(value);
+    return toEnum<CollectionTimeScope,
+                  minEnumValue(convDataCollectionTimeScope),
+                  maxEnumValue(convDataCollectionTimeScope)>(value);
 }
 
-inline CollectionTimeScope stringToCollectionTimeScope(const std::string& value)
+inline CollectionTimeScope toCollectionTimeScope(const std::string& value)
 {
-    return stringToEnum(convDataCollectionTimeScope, value);
+    return toEnum(convDataCollectionTimeScope, value);
 }
 
 inline std::string enumToString(CollectionTimeScope value)
