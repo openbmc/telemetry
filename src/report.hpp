@@ -5,6 +5,8 @@
 #include "interfaces/report.hpp"
 #include "interfaces/report_manager.hpp"
 #include "types/report_types.hpp"
+#include "types/report_updates.hpp"
+#include "types/reporting_type.hpp"
 #include "utils/circular_vector.hpp"
 
 #include <boost/asio/io_context.hpp>
@@ -89,5 +91,5 @@ class Report : public interfaces::Report
         "/xyz/openbmc_project/Telemetry/Reports/";
     static constexpr const char* deleteIfaceName =
         "xyz.openbmc_project.Object.Delete";
-    static constexpr size_t reportVersion = 4;
+    static constexpr size_t reportVersion = 5;
 };

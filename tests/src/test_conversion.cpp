@@ -16,12 +16,13 @@ class TestConversion : public Test
 
     Enum toEnum(int x)
     {
-        return utils::toEnum<Enum, Enum::zero, Enum::two>(x);
+        return utils::toEnum<Enum, utils::minEnumValue(convDataEnum),
+                             utils::maxEnumValue(convDataEnum)>(x);
     }
 
-    Enum stringToEnum(const std::string& value)
+    Enum toEnum(const std::string& value)
     {
-        return utils::stringToEnum(convDataEnum, value);
+        return utils::toEnum(convDataEnum, value);
     }
 
     std::string enumToString(Enum value)
@@ -64,9 +65,9 @@ TEST_F(TestConversion, convertsEnumToString)
 
 TEST_F(TestConversion, convertsStringToEnum)
 {
-    EXPECT_THAT(stringToEnum("one"), Eq(Enum::one));
-    EXPECT_THAT(stringToEnum("two"), Eq(Enum::two));
-    EXPECT_THAT(stringToEnum("zero"), Eq(Enum::zero));
+    EXPECT_THAT(toEnum("one"), Eq(Enum::one));
+    EXPECT_THAT(toEnum("two"), Eq(Enum::two));
+    EXPECT_THAT(toEnum("zero"), Eq(Enum::zero));
 }
 
 TEST_F(TestConversion, enumToStringThrowsWhenUknownEnumPassed)
@@ -74,7 +75,7 @@ TEST_F(TestConversion, enumToStringThrowsWhenUknownEnumPassed)
     EXPECT_THROW(enumToString(static_cast<Enum>(77)), std::out_of_range);
 }
 
-TEST_F(TestConversion, stringToEnumThrowsWhenUknownStringPassed)
+TEST_F(TestConversion, toEnumThrowsWhenUknownStringPassed)
 {
-    EXPECT_THROW(stringToEnum("four"), std::out_of_range);
+    EXPECT_THROW(toEnum("four"), std::out_of_range);
 }

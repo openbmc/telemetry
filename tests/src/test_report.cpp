@@ -68,11 +68,10 @@ class TestReport : public Test
 
         return std::make_unique<Report>(
             DbusEnvironment::getIoc(), DbusEnvironment::getObjServer(),
-            params.reportName(), stringToReportingType(params.reportingType()),
+            params.reportName(), params.reportingType(),
             params.emitReadingUpdate(), params.logToMetricReportCollection(),
-            params.interval(), params.appendLimit(),
-            stringToReportUpdates(params.reportUpdates()), *reportManagerMock,
-            storageMock,
+            params.interval(), params.appendLimit(), params.reportUpdates(),
+            *reportManagerMock, storageMock,
             utils::convContainer<std::shared_ptr<interfaces::Metric>>(
                 metricMocks),
             params.enabled());
@@ -129,8 +128,10 @@ TEST_F(TestReport, verifyIfPropertiesHaveValidValue)
                 Eq(defaultParams.emitReadingUpdate()));
     EXPECT_THAT(getProperty<uint64_t>(sut->getPath(), "AppendLimit"),
                 Eq(defaultParams.appendLimit()));
+    EXPECT_THAT(getProperty<std::string>(sut->getPath(), "ReportingType"),
+                Eq(utils::enumToString(defaultParams.reportingType())));
     EXPECT_THAT(getProperty<std::string>(sut->getPath(), "ReportUpdates"),
-                Eq(defaultParams.reportUpdates()));
+                Eq(utils::enumToString(defaultParams.reportUpdates())));
     EXPECT_THAT(
         getProperty<bool>(sut->getPath(), "LogToMetricReportsCollection"),
         Eq(defaultParams.logToMetricReportCollection()));
@@ -237,7 +238,7 @@ class TestReportStore :
 INSTANTIATE_TEST_SUITE_P(
     _, TestReportStore,
     Values(std::make_pair("Enabled"s, nlohmann::json(ReportParams().enabled())),
-           std::make_pair("Version"s, nlohmann::json(4)),
+           std::make_pair("Version"s, nlohmann::json(5)),
            std::make_pair("Name"s, nlohmann::json(ReportParams().reportName())),
            std::make_pair("ReportingType",
                           nlohmann::json(ReportParams().reportingType())),
@@ -365,14 +366,16 @@ class TestReportAllReportTypes :
     }
 };
 
-INSTANTIATE_TEST_SUITE_P(_, TestReportAllReportTypes,
-                         Values(ReportParams().reportingType("OnRequest"),
-                                ReportParams().reportingType("OnChange"),
-                                ReportParams().reportingType("Periodic")));
+INSTANTIATE_TEST_SUITE_P(
+    _, TestReportAllReportTypes,
+    Values(ReportParams().reportingType(ReportingType::onRequest),
+           ReportParams().reportingType(ReportingType::onChange),
+           ReportParams().reportingType(ReportingType::periodic)));
 
 TEST_P(TestReportAllReportTypes, returnPropertValueOfReportType)
 {
-    EXPECT_THAT(getProperty<std::string>(sut->getPath(), "ReportingType"),
+    EXPECT_THAT(utils::toReportingType(
+                    getProperty<std::string>(sut->getPath(), "ReportingType")),
                 Eq(GetParam().reportingType()));
 }
 
@@ -405,7 +408,8 @@ class TestReportOnRequestType : public TestReport
 {
     void SetUp() override
     {
-        sut = makeReport(ReportParams().reportingType("OnRequest"));
+        sut =
+            makeReport(ReportParams().reportingType(ReportingType::onRequest));
     }
 };
 
@@ -443,9 +447,10 @@ class TestReportNonOnRequestType :
     }
 };
 
-INSTANTIATE_TEST_SUITE_P(_, TestReportNonOnRequestType,
-                         Values(ReportParams().reportingType("Periodic"),
-                                ReportParams().reportingType("OnChange")));
+INSTANTIATE_TEST_SUITE_P(
+    _, TestReportNonOnRequestType,
+    Values(ReportParams().reportingType(ReportingType::periodic),
+           ReportParams().reportingType(ReportingType::onChange)));
 
 TEST_P(TestReportNonOnRequestType, readingsAreNotUpdateOnUpdateCall)
 {
@@ -466,9 +471,10 @@ class TestReportNonPeriodicReport :
     }
 };
 
-INSTANTIATE_TEST_SUITE_P(_, TestReportNonPeriodicReport,
-                         Values(ReportParams().reportingType("OnRequest"),
-                                ReportParams().reportingType("OnChange")));
+INSTANTIATE_TEST_SUITE_P(
+    _, TestReportNonPeriodicReport,
+    Values(ReportParams().reportingType(ReportingType::onRequest),
+           ReportParams().reportingType(ReportingType::onChange)));
 
 TEST_P(TestReportNonPeriodicReport, readingsAreNotUpdatedAfterIntervalExpires)
 {
@@ -482,7 +488,7 @@ class TestReportPeriodicReport : public TestReport
 {
     void SetUp() override
     {
-        sut = makeReport(ReportParams().reportingType("Periodic"));
+        sut = makeReport(ReportParams().reportingType(ReportingType::periodic));
     }
 };
 
@@ -523,7 +529,7 @@ class TestReportWithReportUpdatesAndLimit :
     void SetUp() override
     {
         sut = makeReport(ReportParams(GetParam().reportParams)
-                             .reportingType("Periodic")
+                             .reportingType(ReportingType::periodic)
                              .interval(std::chrono::hours(1000)));
     }
 };
@@ -532,7 +538,9 @@ INSTANTIATE_TEST_SUITE_P(
     _, TestReportWithReportUpdatesAndLimit,
     Values(
         ReportUpdatesReportParams{
-            ReportParams().reportUpdates("AppendWrapsWhenFull").appendLimit(5),
+            ReportParams()
+                .reportUpdates(ReportUpdates::appendWrapsWhenFull)
+                .appendLimit(5),
             std::vector<ReadingData>{{std::make_tuple("aa"s, "bb"s, 42.0, 74u),
                                       std::make_tuple("a"s, "b"s, 17.1, 114u),
                                       std::make_tuple("aa"s, "bb"s, 42.0, 74u),
@@ -540,7 +548,9 @@ INSTANTIATE_TEST_SUITE_P(
                                       std::make_tuple("a"s, "b"s, 17.1, 114u)}},
             true},
         ReportUpdatesReportParams{
-            ReportParams().reportUpdates("AppendWrapsWhenFull").appendLimit(4),
+            ReportParams()
+                .reportUpdates(ReportUpdates::appendWrapsWhenFull)
+                .appendLimit(4),
             std::vector<ReadingData>{
                 {std::make_tuple("a"s, "b"s, 17.1, 114u),
                  std::make_tuple("aa"s, "bb"s, 42.0, 74u),
@@ -548,10 +558,14 @@ INSTANTIATE_TEST_SUITE_P(
                  std::make_tuple("aa"s, "bb"s, 42.0, 74u)}},
             true},
         ReportUpdatesReportParams{
-            ReportParams().reportUpdates("AppendWrapsWhenFull").appendLimit(0),
+            ReportParams()
+                .reportUpdates(ReportUpdates::appendWrapsWhenFull)
+                .appendLimit(0),
             std::vector<ReadingData>{}, true},
         ReportUpdatesReportParams{
-            ReportParams().reportUpdates("AppendStopsWhenFull").appendLimit(10),
+            ReportParams()
+                .reportUpdates(ReportUpdates::appendStopsWhenFull)
+                .appendLimit(10),
             std::vector<ReadingData>{
                 {std::make_tuple("a"s, "b"s, 17.1, 114u),
                  std::make_tuple("aa"s, "bb"s, 42.0, 74u),
@@ -563,7 +577,9 @@ INSTANTIATE_TEST_SUITE_P(
                  std::make_tuple("aa"s, "bb"s, 42.0, 74u)}},
             true},
         ReportUpdatesReportParams{
-            ReportParams().reportUpdates("AppendStopsWhenFull").appendLimit(5),
+            ReportParams()
+                .reportUpdates(ReportUpdates::appendStopsWhenFull)
+                .appendLimit(5),
             std::vector<ReadingData>{{std::make_tuple("a"s, "b"s, 17.1, 114u),
                                       std::make_tuple("aa"s, "bb"s, 42.0, 74u),
                                       std::make_tuple("a"s, "b"s, 17.1, 114u),
@@ -571,7 +587,9 @@ INSTANTIATE_TEST_SUITE_P(
                                       std::make_tuple("a"s, "b"s, 17.1, 114u)}},
             false},
         ReportUpdatesReportParams{
-            ReportParams().reportUpdates("AppendStopsWhenFull").appendLimit(4),
+            ReportParams()
+                .reportUpdates(ReportUpdates::appendStopsWhenFull)
+                .appendLimit(4),
             std::vector<ReadingData>{
                 {std::make_tuple("a"s, "b"s, 17.1, 114u),
                  std::make_tuple("aa"s, "bb"s, 42.0, 74u),
@@ -579,22 +597,30 @@ INSTANTIATE_TEST_SUITE_P(
                  std::make_tuple("aa"s, "bb"s, 42.0, 74u)}},
             false},
         ReportUpdatesReportParams{
-            ReportParams().reportUpdates("AppendStopsWhenFull").appendLimit(0),
+            ReportParams()
+                .reportUpdates(ReportUpdates::appendStopsWhenFull)
+                .appendLimit(0),
             std::vector<ReadingData>{}, false},
         ReportUpdatesReportParams{
-            ReportParams().reportUpdates("Overwrite").appendLimit(500),
+            ReportParams()
+                .reportUpdates(ReportUpdates::overwrite)
+                .appendLimit(500),
             std::vector<ReadingData>{
                 {std::make_tuple("a"s, "b"s, 17.1, 114u),
                  std::make_tuple("aa"s, "bb"s, 42.0, 74u)}},
             true},
         ReportUpdatesReportParams{
-            ReportParams().reportUpdates("Overwrite").appendLimit(1),
+            ReportParams()
+                .reportUpdates(ReportUpdates::overwrite)
+                .appendLimit(1),
             std::vector<ReadingData>{
                 {std::make_tuple("a"s, "b"s, 17.1, 114u),
                  std::make_tuple("aa"s, "bb"s, 42.0, 74u)}},
             true},
         ReportUpdatesReportParams{
-            ReportParams().reportUpdates("Overwrite").appendLimit(0),
+            ReportParams()
+                .reportUpdates(ReportUpdates::overwrite)
+                .appendLimit(0),
             std::vector<ReadingData>{
                 {std::make_tuple("a"s, "b"s, 17.1, 114u),
                  std::make_tuple("aa"s, "bb"s, 42.0, 74u)}},
@@ -686,8 +712,8 @@ TEST_F(TestReportInitialization,
             InvokeWithoutArgs(DbusEnvironment::setPromise("readingsUpdated")));
 
     const auto elapsed = DbusEnvironment::measureTime([this] {
-        sut = makeReport(
-            defaultParams.reportingType("Periodic").emitReadingUpdate(true));
+        sut = makeReport(defaultParams.reportingType(ReportingType::periodic)
+                             .emitReadingUpdate(true));
         makeMonitor();
         EXPECT_TRUE(DbusEnvironment::waitForFuture("readingsUpdated"));
     });
@@ -701,8 +727,8 @@ TEST_F(TestReportInitialization,
 {
     EXPECT_CALL(readingsUpdated, Call()).Times(0);
 
-    sut = makeReport(
-        defaultParams.reportingType("Periodic").emitReadingUpdate(false));
+    sut = makeReport(defaultParams.reportingType(ReportingType::periodic)
+                         .emitReadingUpdate(false));
     makeMonitor();
     DbusEnvironment::sleepFor(defaultParams.interval() * 2);
 }

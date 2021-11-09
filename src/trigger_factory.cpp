@@ -34,7 +34,7 @@ std::unique_ptr<interfaces::Trigger> TriggerFactory::make(
     std::transform(triggerActionsIn.begin(), triggerActionsIn.end(),
                    std::back_inserter(triggerActions),
                    [](auto& triggerActionStr) {
-                       return stringToTriggerAction(triggerActionStr);
+                       return toTriggerAction(triggerActionStr);
                    });
     std::vector<std::shared_ptr<interfaces::Threshold>> thresholds;
 

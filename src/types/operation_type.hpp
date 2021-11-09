@@ -34,13 +34,13 @@ constexpr std::array<std::pair<std::string_view, OperationType>, 5>
 inline OperationType
     toOperationType(std::underlying_type_t<OperationType> value)
 {
-    return toEnum<OperationType, OperationType::single, OperationType::sum>(
-        value);
+    return toEnum<OperationType, minEnumValue(convDataOperationType),
+                  maxEnumValue(convDataOperationType)>(value);
 }
 
-inline OperationType stringToOperationType(const std::string& value)
+inline OperationType toOperationType(const std::string& value)
 {
-    return stringToEnum(convDataOperationType, value);
+    return toEnum(convDataOperationType, value);
 }
 
 inline std::string enumToString(OperationType value)
