@@ -19,9 +19,9 @@ class ReportFactoryMock : public interfaces::ReportFactory
                                      return LabeledSensorParameters("Service",
                                                                     sensorPath);
                                  }),
-                utils::stringToOperationType(std::get<1>(params)),
+                utils::toOperationType(std::get<1>(params)),
                 std::get<2>(params), std::get<3>(params),
-                utils::stringToCollectionTimeScope(std::get<4>(params)),
+                utils::toCollectionTimeScope(std::get<4>(params)),
                 CollectionDuration(Milliseconds(std::get<5>(params))));
         });
     }
@@ -35,8 +35,7 @@ class ReportFactoryMock : public interfaces::ReportFactory
             .WillByDefault(
                 WithArgs<1>(Invoke(&ReportFactoryMock::convertToLabeled)));
 
-        ON_CALL(*this,
-                make(A<const std::string&>(), _, _, _, _, _, _, _, _, _, _))
+        ON_CALL(*this, make(A<const std::string&>(), _, _, _, _, _, _, _, _, _))
             .WillByDefault(WithArgs<0>(Invoke([](const std::string& name) {
                 return std::make_unique<NiceMock<ReportMock>>(name);
             })));
@@ -47,10 +46,11 @@ class ReportFactoryMock : public interfaces::ReportFactory
                 (const, override));
 
     MOCK_METHOD(std::unique_ptr<interfaces::Report>, make,
-                (const std::string&, const std::string&, bool, bool,
-                 Milliseconds, uint64_t, const std::string&,
-                 interfaces::ReportManager&, interfaces::JsonStorage&,
-                 std::vector<LabeledMetricParameters>, bool),
+                (const std::string&, const ReportingType,
+                 const std::vector<ReportAction>&, Milliseconds, uint64_t,
+                 const ReportUpdates, interfaces::ReportManager&,
+                 interfaces::JsonStorage&, std::vector<LabeledMetricParameters>,
+                 bool),
                 (const, override));
 
     auto& expectMake(
@@ -62,17 +62,15 @@ class ReportFactoryMock : public interfaces::ReportFactory
         {
             const ReportParams& params = *paramsRef;
             return EXPECT_CALL(
-                *this,
-                make(params.reportName(), params.reportingType(),
-                     params.emitReadingUpdate(),
-                     params.logToMetricReportCollection(), params.interval(),
-                     params.appendLimit(), params.reportUpdates(), rm, js,
-                     params.metricParameters(), params.enabled()));
+                *this, make(params.reportName(), params.reportingType(),
+                            params.reportActions(), params.interval(),
+                            params.appendLimit(), params.reportUpdates(), rm,
+                            js, params.metricParameters(), params.enabled()));
         }
         else
         {
             using testing::_;
-            return EXPECT_CALL(*this, make(_, _, _, _, _, _, _, rm, js, _, _));
+            return EXPECT_CALL(*this, make(_, _, _, _, _, _, rm, js, _, _));
         }
     }
 };

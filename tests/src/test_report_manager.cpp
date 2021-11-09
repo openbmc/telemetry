@@ -48,8 +48,10 @@ class TestReportManager : public Test
         DbusEnvironment::synchronizeIoc();
     }
 
-    std::pair<boost::system::error_code, std::string>
-        addReport(const ReportParams& params)
+    template <class... Args>
+    requires(sizeof...(Args) > 1)
+        std::pair<boost::system::error_code, std::string> addReport(
+            Args&&... args)
     {
         std::promise<std::pair<boost::system::error_code, std::string>>
             addReportPromise;
@@ -60,11 +62,20 @@ class TestReportManager : public Test
             },
             DbusEnvironment::serviceName(), ReportManager::reportManagerPath,
             ReportManager::reportManagerIfaceName, "AddReportFutureVersion",
-            params.reportName(), params.reportingType(), params.reportUpdates(),
-            params.appendLimit(), params.emitReadingUpdate(),
-            params.logToMetricReportCollection(), params.interval().count(),
-            toReadingParameters(params.metricParameters()));
+            std::forward<Args>(args)...);
         return DbusEnvironment::waitForFuture(addReportPromise.get_future());
+    }
+
+    auto addReport(const ReportParams& params)
+    {
+        return addReport(
+            params.reportName(), utils::enumToString(params.reportingType()),
+            utils::enumToString(params.reportUpdates()), params.appendLimit(),
+            utils::transform(
+                params.reportActions(),
+                [](const auto v) { return utils::enumToString(v); }),
+            params.interval().count(),
+            toReadingParameters(params.metricParameters()));
     }
 
     template <class T>
@@ -143,7 +154,7 @@ TEST_F(TestReportManager, DISABLED_failToAddReportWithInvalidInterval)
     reportFactoryMock.expectMake(std::nullopt, Ref(*sut), Ref(storageMock))
         .Times(0);
 
-    reportParams.reportingType("Periodic");
+    reportParams.reportingType(ReportingType::periodic);
     reportParams.interval(reportParams.interval() - 1ms);
 
     auto [ec, path] = addReport(reportParams);
@@ -157,9 +168,12 @@ TEST_F(TestReportManager, DISABLED_failToAddReportWithInvalidReportingType)
     reportFactoryMock.expectMake(std::nullopt, Ref(*sut), Ref(storageMock))
         .Times(0);
 
-    reportParams.reportingType("Invalid");
-
-    auto [ec, path] = addReport(reportParams);
+    auto [ec, path] = addReport(
+        reportParams.reportName(), "InvalidReportingType",
+        utils::transform(reportParams.reportActions(),
+                         [](const auto v) { return utils::enumToString(v); }),
+        reportParams.interval().count(),
+        toReadingParameters(reportParams.metricParameters()));
 
     EXPECT_THAT(ec.value(), Eq(boost::system::errc::invalid_argument));
     EXPECT_THAT(path, Eq(std::string()));
@@ -331,12 +345,10 @@ class TestReportManagerStorage : public TestReportManager
         {"Enabled", reportParams.enabled()},
         {"Version", Report::reportVersion},
         {"Name", reportParams.reportName()},
-        {"ReportingType", reportParams.reportingType()},
-        {"EmitsReadingsUpdate", reportParams.emitReadingUpdate()},
-        {"LogToMetricReportsCollection",
-         reportParams.logToMetricReportCollection()},
+        {"ReportingType", utils::toUnderlying(reportParams.reportingType())},
+        {"ReportActions", reportParams.reportActions()},
         {"Interval", reportParams.interval().count()},
-        {"ReportUpdates", reportParams.reportUpdates()},
+        {"ReportUpdates", utils::toUnderlying(reportParams.reportUpdates())},
         {"AppendLimit", reportParams.appendLimit()},
         {"ReadingParameters", reportParams.metricParameters()}};
 };

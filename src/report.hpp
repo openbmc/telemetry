@@ -4,7 +4,10 @@
 #include "interfaces/metric.hpp"
 #include "interfaces/report.hpp"
 #include "interfaces/report_manager.hpp"
+#include "types/report_action.hpp"
 #include "types/report_types.hpp"
+#include "types/report_updates.hpp"
+#include "types/reporting_type.hpp"
 #include "utils/circular_vector.hpp"
 
 #include <boost/asio/io_context.hpp>
@@ -20,8 +23,7 @@ class Report : public interfaces::Report
     Report(boost::asio::io_context& ioc,
            const std::shared_ptr<sdbusplus::asio::object_server>& objServer,
            const std::string& reportName, const ReportingType reportingType,
-           const bool emitsReadingsSignal,
-           const bool logToMetricReportsCollection, const Milliseconds period,
+           std::vector<ReportAction> reportActions, const Milliseconds period,
            const uint64_t appendLimitIn, const ReportUpdates reportUpdatesIn,
            interfaces::ReportManager& reportManager,
            interfaces::JsonStorage& reportStorage,
@@ -62,8 +64,7 @@ class Report : public interfaces::Report
     std::string path;
     ReportingType reportingType;
     Milliseconds interval;
-    bool emitsReadingsUpdate;
-    bool logToMetricReportsCollection;
+    std::vector<ReportAction> reportActions;
     ReadingParametersPastVersion readingParametersPastVersion;
     ReadingParameters readingParameters;
     bool persistency = false;
@@ -89,5 +90,5 @@ class Report : public interfaces::Report
         "/xyz/openbmc_project/Telemetry/Reports/";
     static constexpr const char* deleteIfaceName =
         "xyz.openbmc_project.Object.Delete";
-    static constexpr size_t reportVersion = 4;
+    static constexpr size_t reportVersion = 6;
 };

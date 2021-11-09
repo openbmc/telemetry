@@ -7,6 +7,7 @@
 
 #include <boost/asio/high_resolution_timer.hpp>
 #include <sdbusplus/asio/connection.hpp>
+#include <sdbusplus/bus/match.hpp>
 
 #include <memory>
 

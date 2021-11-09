@@ -17,10 +17,9 @@ ReportFactory::ReportFactory(
 {}
 
 std::unique_ptr<interfaces::Report> ReportFactory::make(
-    const std::string& name, const std::string& reportingTypeStr,
-    bool emitsReadingsSignal, bool logToMetricReportsCollection,
-    Milliseconds period, uint64_t appendLimit,
-    const std::string& reportUpdatesStr,
+    const std::string& name, const ReportingType reportingType,
+    const std::vector<ReportAction>& reportActions, Milliseconds period,
+    uint64_t appendLimit, const ReportUpdates reportUpdates,
     interfaces::ReportManager& reportManager,
     interfaces::JsonStorage& reportStorage,
     std::vector<LabeledMetricParameters> labeledMetricParams,
@@ -41,12 +40,8 @@ std::unique_ptr<interfaces::Report> ReportFactory::make(
                 std::make_unique<Clock>());
         });
 
-    const ReportingType reportingType = stringToReportingType(reportingTypeStr);
-    const ReportUpdates reportUpdates = stringToReportUpdates(reportUpdatesStr);
-
     return std::make_unique<Report>(bus->get_io_context(), objServer, name,
-                                    reportingType, emitsReadingsSignal,
-                                    logToMetricReportsCollection, period,
+                                    reportingType, reportActions, period,
                                     appendLimit, reportUpdates, reportManager,
                                     reportStorage, std::move(metrics), enabled);
 }
@@ -99,9 +94,8 @@ std::vector<LabeledMetricParameters> ReportFactory::convertMetricParams(
         }
 
         return LabeledMetricParameters(
-            std::move(sensorParameters),
-            utils::stringToOperationType(operationType), id, metadata,
-            utils::stringToCollectionTimeScope(collectionTimeScope),
+            std::move(sensorParameters), utils::toOperationType(operationType),
+            id, metadata, utils::toCollectionTimeScope(collectionTimeScope),
             CollectionDuration(Milliseconds(collectionDuration)));
     });
 }
