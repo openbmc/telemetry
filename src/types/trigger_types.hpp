@@ -26,9 +26,9 @@ constexpr std::array<std::pair<std::string_view, TriggerAction>, 3>
         std::make_pair("UpdateReport", TriggerAction::UpdateReport)};
 }
 
-inline TriggerAction stringToTriggerAction(const std::string& str)
+inline TriggerAction toTriggerAction(const std::string& str)
 {
-    return utils::stringToEnum(details::convDataTriggerAction, str);
+    return utils::toEnum(details::convDataTriggerAction, str);
 }
 
 namespace discrete
@@ -50,9 +50,9 @@ constexpr std::array<std::pair<std::string_view, Severity>, 3>
 
 } // namespace details
 
-inline Severity stringToSeverity(const std::string& str)
+inline Severity toSeverity(const std::string& str)
 {
-    return utils::stringToEnum(details::convDataSeverity, str);
+    return utils::toEnum(details::convDataSeverity, str);
 }
 
 inline std::string severityToString(Severity v)
@@ -103,9 +103,9 @@ constexpr std::array<std::pair<std::string_view, Direction>, 3>
 
 } // namespace details
 
-inline Type stringToType(const std::string& str)
+inline Type toType(const std::string& str)
 {
-    return utils::stringToEnum(details::convDataType, str);
+    return utils::toEnum(details::convDataType, str);
 }
 
 inline std::string typeToString(Type v)
@@ -113,9 +113,9 @@ inline std::string typeToString(Type v)
     return std::string(utils::enumToString(details::convDataType, v));
 }
 
-inline Direction stringToDirection(const std::string& str)
+inline Direction toDirection(const std::string& str)
 {
-    return utils::stringToEnum(details::convDataDirection, str);
+    return utils::toEnum(details::convDataDirection, str);
 }
 
 inline std::string directionToString(Direction v)

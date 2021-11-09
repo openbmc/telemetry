@@ -48,8 +48,10 @@ class TestReportManager : public Test
         DbusEnvironment::synchronizeIoc();
     }
 
-    std::pair<boost::system::error_code, std::string>
-        addReport(const ReportParams& params)
+    template <class... Args>
+    requires(sizeof...(Args) > 1)
+        std::pair<boost::system::error_code, std::string> addReport(
+            Args&&... args)
     {
         std::promise<std::pair<boost::system::error_code, std::string>>
             addReportPromise;
@@ -60,11 +62,17 @@ class TestReportManager : public Test
             },
             DbusEnvironment::serviceName(), ReportManager::reportManagerPath,
             ReportManager::reportManagerIfaceName, "AddReportFutureVersion",
-            params.reportName(), params.reportingType(),
+            std::forward<Args>(args)...);
+        return DbusEnvironment::waitForFuture(addReportPromise.get_future());
+    }
+
+    auto addReport(const ReportParams& params)
+    {
+        return addReport(
+            params.reportName(), utils::enumToString(params.reportingType()),
             params.emitReadingUpdate(), params.logToMetricReportCollection(),
             params.interval().count(),
             toReadingParameters(params.metricParameters()));
-        return DbusEnvironment::waitForFuture(addReportPromise.get_future());
     }
 
     template <class T>
@@ -143,7 +151,7 @@ TEST_F(TestReportManager, DISABLED_failToAddReportWithInvalidInterval)
     reportFactoryMock.expectMake(std::nullopt, Ref(*sut), Ref(storageMock))
         .Times(0);
 
-    reportParams.reportingType("Periodic");
+    reportParams.reportingType(ReportingType::periodic);
     reportParams.interval(reportParams.interval() - 1ms);
 
     auto [ec, path] = addReport(reportParams);
@@ -157,9 +165,12 @@ TEST_F(TestReportManager, DISABLED_failToAddReportWithInvalidReportingType)
     reportFactoryMock.expectMake(std::nullopt, Ref(*sut), Ref(storageMock))
         .Times(0);
 
-    reportParams.reportingType("Invalid");
-
-    auto [ec, path] = addReport(reportParams);
+    auto [ec, path] =
+        addReport(reportParams.reportName(), "InvalidReportingType",
+                  reportParams.emitReadingUpdate(),
+                  reportParams.logToMetricReportCollection(),
+                  reportParams.interval().count(),
+                  toReadingParameters(reportParams.metricParameters()));
 
     EXPECT_THAT(ec.value(), Eq(boost::system::errc::invalid_argument));
     EXPECT_THAT(path, Eq(std::string()));

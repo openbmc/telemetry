@@ -20,7 +20,7 @@ class ReportFactory : public interfaces::ReportFactory
         const ReadingParameters& metricParams) const override;
 
     std::unique_ptr<interfaces::Report>
-        make(const std::string& name, const std::string& reportingType,
+        make(const std::string& name, const ReportingType reportingType,
              bool emitsReadingsSignal, bool logToMetricReportsCollection,
              Milliseconds period, interfaces::ReportManager& reportManager,
              interfaces::JsonStorage& reportStorage,

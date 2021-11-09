@@ -11,7 +11,7 @@
 Report::Report(boost::asio::io_context& ioc,
                const std::shared_ptr<sdbusplus::asio::object_server>& objServer,
                const std::string& reportName,
-               const std::string& reportingTypeIn,
+               const ReportingType reportingTypeIn,
                const bool emitsReadingsUpdateIn,
                const bool logToMetricReportsCollectionIn,
                const Milliseconds intervalIn,
@@ -55,7 +55,7 @@ Report::Report(boost::asio::io_context& ioc,
     persistency = storeConfiguration();
     reportIface = makeReportInterface();
 
-    if (reportingType == "Periodic")
+    if (reportingType == ReportingType::periodic)
     {
         scheduleTimer(interval);
     }
@@ -77,7 +77,7 @@ std::unique_ptr<sdbusplus::asio::dbus_interface> Report::makeReportInterface()
         [this](bool newVal, const auto&) {
             if (newVal != enabled)
             {
-                if (true == newVal && "Periodic" == reportingType)
+                if (true == newVal && ReportingType::periodic == reportingType)
                 {
                     scheduleTimer(interval);
                 }
@@ -147,8 +147,9 @@ std::unique_ptr<sdbusplus::asio::dbus_interface> Report::makeReportInterface()
     dbusIface->register_property_r("Readings", readings, readingsFlag,
                                    [this](const auto&) { return readings; });
     dbusIface->register_property_r(
-        "ReportingType", reportingType, sdbusplus::vtable::property_::const_,
-        [this](const auto&) { return reportingType; });
+        "ReportingType", utils::enumToString(reportingType),
+        sdbusplus::vtable::property_::const_,
+        [this](const auto&) { return utils::enumToString(reportingType); });
     dbusIface->register_property_r(
         "ReadingParameters", readingParametersPastVersion,
         sdbusplus::vtable::property_::const_,
@@ -166,7 +167,7 @@ std::unique_ptr<sdbusplus::asio::dbus_interface> Report::makeReportInterface()
         sdbusplus::vtable::property_::const_,
         [this](const auto&) { return logToMetricReportsCollection; });
     dbusIface->register_method("Update", [this] {
-        if (reportingType == "OnRequest")
+        if (reportingType == ReportingType::onRequest)
         {
             updateReadings();
         }
@@ -228,7 +229,7 @@ bool Report::storeConfiguration() const
         data["Enabled"] = enabled;
         data["Version"] = reportVersion;
         data["Name"] = name;
-        data["ReportingType"] = reportingType;
+        data["ReportingType"] = utils::toUnderlying(reportingType);
         data["EmitsReadingsUpdate"] = emitsReadingsUpdate;
         data["LogToMetricReportsCollection"] = logToMetricReportsCollection;
         data["Interval"] = interval.count();
