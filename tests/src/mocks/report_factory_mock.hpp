@@ -19,9 +19,9 @@ class ReportFactoryMock : public interfaces::ReportFactory
                                      return LabeledSensorParameters("Service",
                                                                     sensorPath);
                                  }),
-                utils::stringToOperationType(std::get<1>(params)),
+                utils::toOperationType(std::get<1>(params)),
                 std::get<2>(params), std::get<3>(params),
-                utils::stringToCollectionTimeScope(std::get<4>(params)),
+                utils::toCollectionTimeScope(std::get<4>(params)),
                 CollectionDuration(Milliseconds(std::get<5>(params))));
         });
     }
@@ -47,8 +47,8 @@ class ReportFactoryMock : public interfaces::ReportFactory
                 (const, override));
 
     MOCK_METHOD(std::unique_ptr<interfaces::Report>, make,
-                (const std::string&, const std::string&, bool, bool,
-                 Milliseconds, uint64_t, const std::string&,
+                (const std::string&, const ReportingType, bool, bool,
+                 Milliseconds, uint64_t, const ReportUpdates,
                  interfaces::ReportManager&, interfaces::JsonStorage&,
                  std::vector<LabeledMetricParameters>, bool),
                 (const, override));

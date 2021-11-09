@@ -41,20 +41,20 @@ class ReportManager : public interfaces::ReportManager
 
     void verifyReportNameLength(const std::string& reportName);
     void verifyAddReport(
-        const std::string& reportName, const std::string& reportingType,
-        Milliseconds interval, const std::string& reportUpdates,
+        const std::string& reportName, const ReportingType reportingType,
+        Milliseconds interval, const ReportUpdates reportUpdates,
         const std::vector<LabeledMetricParameters>& readingParams);
     interfaces::Report& addReport(
         boost::asio::yield_context& yield, const std::string& reportName,
-        const std::string& reportingType, const bool emitsReadingsUpdate,
+        const ReportingType reportingType, const bool emitsReadingsUpdate,
         const bool logToMetricReportsCollection, Milliseconds interval,
-        const uint64_t appendLimit, const std::string& reportUpdates,
+        const uint64_t appendLimit, const ReportUpdates reportUpdates,
         ReadingParameters metricParams, const bool enabled);
     interfaces::Report& addReport(
-        const std::string& reportName, const std::string& reportingType,
+        const std::string& reportName, const ReportingType reportingType,
         const bool emitsReadingsUpdate, const bool logToMetricReportsCollection,
         Milliseconds interval, const uint64_t appendLimit,
-        const std::string& reportUpdates,
+        const ReportUpdates reportUpdates,
         std::vector<LabeledMetricParameters> metricParams, const bool enabled);
     void loadFromPersistent();
 
@@ -69,10 +69,9 @@ class ReportManager : public interfaces::ReportManager
         "xyz.openbmc_project.Telemetry.ReportManager";
     static constexpr const char* reportManagerPath =
         "/xyz/openbmc_project/Telemetry/Reports";
-    static constexpr std::array<std::string_view, 2> supportedReportingType = {
-        "Periodic", "OnRequest"};
-    static constexpr std::array<std::string_view, 3> supportedReportUpdates = {
-        "Overwrite", "AppendStopsWhenFull", "AppendWrapsWhenFull"};
+    static constexpr std::array<ReportUpdates, 3> supportedReportUpdates = {
+        ReportUpdates::overwrite, ReportUpdates::appendStopsWhenFull,
+        ReportUpdates::appendWrapsWhenFull};
 
-    static void verifyReportUpdates(const std::string& reportUpdates);
+    static void verifyReportUpdates(const ReportUpdates reportUpdates);
 };

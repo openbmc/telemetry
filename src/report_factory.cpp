@@ -17,11 +17,10 @@ ReportFactory::ReportFactory(
 {}
 
 std::unique_ptr<interfaces::Report> ReportFactory::make(
-    const std::string& name, const std::string& reportingTypeStr,
+    const std::string& name, const ReportingType reportingType,
     bool emitsReadingsSignal, bool logToMetricReportsCollection,
     Milliseconds period, uint64_t appendLimit,
-    const std::string& reportUpdatesStr,
-    interfaces::ReportManager& reportManager,
+    const ReportUpdates reportUpdates, interfaces::ReportManager& reportManager,
     interfaces::JsonStorage& reportStorage,
     std::vector<LabeledMetricParameters> labeledMetricParams,
     bool enabled) const
@@ -40,9 +39,6 @@ std::unique_ptr<interfaces::Report> ReportFactory::make(
                 param.at_label<ts::CollectionDuration>(),
                 std::make_unique<Clock>());
         });
-
-    const ReportingType reportingType = stringToReportingType(reportingTypeStr);
-    const ReportUpdates reportUpdates = stringToReportUpdates(reportUpdatesStr);
 
     return std::make_unique<Report>(bus->get_io_context(), objServer, name,
                                     reportingType, emitsReadingsSignal,
@@ -99,9 +95,8 @@ std::vector<LabeledMetricParameters> ReportFactory::convertMetricParams(
         }
 
         return LabeledMetricParameters(
-            std::move(sensorParameters),
-            utils::stringToOperationType(operationType), id, metadata,
-            utils::stringToCollectionTimeScope(collectionTimeScope),
+            std::move(sensorParameters), utils::toOperationType(operationType),
+            id, metadata, utils::toCollectionTimeScope(collectionTimeScope),
             CollectionDuration(Milliseconds(collectionDuration)));
     });
 }

@@ -59,22 +59,21 @@ ReportManager::ReportManager(
                     constexpr auto enabledDefault = true;
                     constexpr uint64_t appendLimitDefault = 0;
                     constexpr ReportUpdates reportUpdatesDefault =
-                        ReportUpdates::Overwrite;
-                    return addReport(
-                               yield, reportName, reportingType,
-                               emitsReadingsUpdate,
-                               logToMetricReportsCollection,
-                               Milliseconds(interval), appendLimitDefault,
-                               reportUpdatesToString(reportUpdatesDefault),
-                               convertToReadingParameters(
-                                   std::move(metricParams)),
-                               enabledDefault)
+                        ReportUpdates::overwrite;
+                    return addReport(yield, reportName,
+                                     utils::toReportingType(reportingType),
+                                     emitsReadingsUpdate,
+                                     logToMetricReportsCollection,
+                                     Milliseconds(interval), appendLimitDefault,
+                                     reportUpdatesDefault,
+                                     convertToReadingParameters(
+                                         std::move(metricParams)),
+                                     enabledDefault)
                         .getPath();
                 });
 
             dbusIface.register_method(
                 "AddReportFutureVersion",
-
                 [this](
                     boost::asio::yield_context& yield,
                     const std::string& reportName,
@@ -84,12 +83,13 @@ ReportManager::ReportManager(
                     const bool logToMetricReportsCollection,
                     const uint64_t interval, ReadingParameters metricParams) {
                     constexpr auto enabledDefault = true;
-                    return addReport(yield, reportName, reportingType,
+                    return addReport(yield, reportName,
+                                     utils::toReportingType(reportingType),
                                      emitsReadingsUpdate,
                                      logToMetricReportsCollection,
                                      Milliseconds(interval), appendLimit,
-                                     reportUpdates, std::move(metricParams),
-                                     enabledDefault)
+                                     utils::toReportUpdates(reportUpdates),
+                                     std::move(metricParams), enabledDefault)
                         .getPath();
                 });
         });
@@ -114,10 +114,17 @@ void ReportManager::verifyReportNameLength(const std::string& reportName)
 }
 
 void ReportManager::verifyAddReport(
-    const std::string& reportName, const std::string& reportingType,
-    Milliseconds interval, const std::string& reportUpdates,
+    const std::string& reportName, const ReportingType reportingType,
+    Milliseconds interval, const ReportUpdates reportUpdates,
     const std::vector<LabeledMetricParameters>& readingParams)
 {
+    if (reportingType == ReportingType::onChange)
+    {
+        throw sdbusplus::exception::SdBusError(
+            static_cast<int>(std::errc::invalid_argument),
+            "Invalid reportingType");
+    }
+
     if (reports.size() >= maxReports)
     {
         throw sdbusplus::exception::SdBusError(
@@ -136,17 +143,9 @@ void ReportManager::verifyAddReport(
         }
     }
 
-    if (std::find(supportedReportingType.begin(), supportedReportingType.end(),
-                  reportingType) == supportedReportingType.end())
-    {
-        throw sdbusplus::exception::SdBusError(
-            static_cast<int>(std::errc::invalid_argument),
-            "Invalid reportingType");
-    }
-
     verifyReportUpdates(reportUpdates);
 
-    if (reportingType == "Periodic" && interval < minInterval)
+    if (reportingType == ReportingType::periodic && interval < minInterval)
     {
         throw sdbusplus::exception::SdBusError(
             static_cast<int>(std::errc::invalid_argument), "Invalid interval");
@@ -179,9 +178,9 @@ void ReportManager::verifyAddReport(
 
 interfaces::Report& ReportManager::addReport(
     boost::asio::yield_context& yield, const std::string& reportName,
-    const std::string& reportingType, const bool emitsReadingsUpdate,
+    const ReportingType reportingType, const bool emitsReadingsUpdate,
     const bool logToMetricReportsCollection, Milliseconds interval,
-    const uint64_t appendLimit, const std::string& reportUpdates,
+    const uint64_t appendLimit, const ReportUpdates reportUpdates,
     ReadingParameters metricParams, const bool enabled)
 {
     auto labeledMetricParams =
@@ -193,10 +192,10 @@ interfaces::Report& ReportManager::addReport(
 }
 
 interfaces::Report& ReportManager::addReport(
-    const std::string& reportName, const std::string& reportingType,
+    const std::string& reportName, const ReportingType reportingType,
     const bool emitsReadingsUpdate, const bool logToMetricReportsCollection,
     Milliseconds interval, const uint64_t appendLimit,
-    const std::string& reportUpdates,
+    const ReportUpdates reportUpdates,
     std::vector<LabeledMetricParameters> labeledMetricParams,
     const bool enabled)
 {
@@ -227,24 +226,24 @@ void ReportManager::loadFromPersistent()
                 throw std::logic_error("Invalid version");
             }
             std::string& name = data->at("Name").get_ref<std::string&>();
-            std::string& reportingType =
-                data->at("ReportingType").get_ref<std::string&>();
+
+            uint32_t reportingType = data->at("ReportingType").get<uint32_t>();
             bool emitsReadingsSignal =
                 data->at("EmitsReadingsUpdate").get<bool>();
             bool logToMetricReportsCollection =
                 data->at("LogToMetricReportsCollection").get<bool>();
             uint64_t interval = data->at("Interval").get<uint64_t>();
             uint64_t appendLimit = data->at("AppendLimit").get<uint64_t>();
-            std::string reportUpdates =
-                data->at("ReportUpdates").get<std::string>();
+            uint32_t reportUpdates = data->at("ReportUpdates").get<uint32_t>();
             auto readingParameters =
                 data->at("ReadingParameters")
                     .get<std::vector<LabeledMetricParameters>>();
 
-            addReport(name, reportingType, emitsReadingsSignal,
-                      logToMetricReportsCollection, Milliseconds(interval),
-                      appendLimit, reportUpdates, std::move(readingParameters),
-                      enabled);
+            addReport(name, utils::toReportingType(reportingType),
+                      emitsReadingsSignal, logToMetricReportsCollection,
+                      Milliseconds(interval), appendLimit,
+                      utils::toReportUpdates(reportUpdates),
+                      std::move(readingParameters), enabled);
         }
         catch (const std::exception& e)
         {
@@ -271,7 +270,7 @@ void ReportManager::updateReport(const std::string& name)
     }
 }
 
-void ReportManager::verifyReportUpdates(const std::string& reportUpdates)
+void ReportManager::verifyReportUpdates(const ReportUpdates reportUpdates)
 {
     if (std::find(supportedReportUpdates.begin(), supportedReportUpdates.end(),
                   reportUpdates) == supportedReportUpdates.end())
