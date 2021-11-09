@@ -262,6 +262,30 @@
     },
     {
       "key": {
+        "uuid": "f61d694c_39b0f758",
+        "filename": "src/report.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 192,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-11-09T09:17:24Z",
+      "side": 1,
+      "message": "Yes, there are few cases where you cannot or don\u0027t want to use auto.\n\nYou cannot use auto in some usecases with templates, for example in async_method_call you cannot use auto as lambda parameters because these parameters are used to deduce type of dbus interface.\n\nYou may don\u0027t want to use auto in case of conversions for example:\n    const auto text \u003d std::vector\u003cstd::string\u003e({\"line1\", \"line2\"});\n    for (std::string_view item : text) {\n        std::cout \u003c\u003c item \u003c\u003c std::endl;\n    }",
+      "parentUuid": "70700181_e87625d1",
+      "range": {
+        "startLine": 192,
+        "startChar": 35,
+        "endLine": 192,
+        "endChar": 39
+      },
+      "revId": "c6ade6f258d2538e0b3fe4ecd6f457f7f8d62a99",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "86c2da6f_4a37c3a0",
         "filename": "src/report.cpp",
         "patchSetId": 10
