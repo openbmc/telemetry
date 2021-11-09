@@ -41,16 +41,16 @@ class ReportManager : public interfaces::ReportManager
 
     void verifyReportNameLength(const std::string& reportName);
     void verifyAddReport(
-        const std::string& reportName, const std::string& reportingType,
+        const std::string& reportName, const ReportingType reportingType,
         Milliseconds interval,
         const std::vector<LabeledMetricParameters>& readingParams);
     interfaces::Report& addReport(
         boost::asio::yield_context& yield, const std::string& reportName,
-        const std::string& reportingType, const bool emitsReadingsUpdate,
+        const ReportingType reportingType, const bool emitsReadingsUpdate,
         const bool logToMetricReportsCollection, Milliseconds interval,
         ReadingParameters metricParams, const bool enabled);
     interfaces::Report& addReport(
-        const std::string& reportName, const std::string& reportingType,
+        const std::string& reportName, const ReportingType reportingType,
         const bool emitsReadingsUpdate, const bool logToMetricReportsCollection,
         Milliseconds interval,
         std::vector<LabeledMetricParameters> metricParams, const bool enabled);
@@ -67,6 +67,4 @@ class ReportManager : public interfaces::ReportManager
         "xyz.openbmc_project.Telemetry.ReportManager";
     static constexpr const char* reportManagerPath =
         "/xyz/openbmc_project/Telemetry/Reports";
-    static constexpr std::array<std::string_view, 2> supportedReportingType = {
-        "Periodic", "OnRequest"};
 };

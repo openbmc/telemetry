@@ -4,6 +4,7 @@
 #include "interfaces/report.hpp"
 #include "interfaces/report_manager.hpp"
 #include "types/report_types.hpp"
+#include "types/reporting_type.hpp"
 
 #include <boost/asio/spawn.hpp>
 
@@ -24,7 +25,7 @@ class ReportFactory
                             const ReadingParameters& metricParams) const = 0;
 
     virtual std::unique_ptr<interfaces::Report>
-        make(const std::string& name, const std::string& reportingType,
+        make(const std::string& name, const ReportingType reportingType,
              bool emitsReadingsSignal, bool logToMetricReportsCollection,
              Milliseconds period, ReportManager& reportManager,
              JsonStorage& reportStorage,

@@ -359,14 +359,16 @@ class TestReportAllReportTypes :
     }
 };
 
-INSTANTIATE_TEST_SUITE_P(_, TestReportAllReportTypes,
-                         Values(ReportParams().reportingType("OnRequest"),
-                                ReportParams().reportingType("OnChange"),
-                                ReportParams().reportingType("Periodic")));
+INSTANTIATE_TEST_SUITE_P(
+    _, TestReportAllReportTypes,
+    Values(ReportParams().reportingType(ReportingType::onRequest),
+           ReportParams().reportingType(ReportingType::onChange),
+           ReportParams().reportingType(ReportingType::periodic)));
 
 TEST_P(TestReportAllReportTypes, returnPropertValueOfReportType)
 {
-    EXPECT_THAT(getProperty<std::string>(sut->getPath(), "ReportingType"),
+    EXPECT_THAT(utils::toReportingType(
+                    getProperty<std::string>(sut->getPath(), "ReportingType")),
                 Eq(GetParam().reportingType()));
 }
 
@@ -399,7 +401,8 @@ class TestReportOnRequestType : public TestReport
 {
     void SetUp() override
     {
-        sut = makeReport(ReportParams().reportingType("OnRequest"));
+        sut =
+            makeReport(ReportParams().reportingType(ReportingType::onRequest));
     }
 };
 
@@ -437,9 +440,10 @@ class TestReportNonOnRequestType :
     }
 };
 
-INSTANTIATE_TEST_SUITE_P(_, TestReportNonOnRequestType,
-                         Values(ReportParams().reportingType("Periodic"),
-                                ReportParams().reportingType("OnChange")));
+INSTANTIATE_TEST_SUITE_P(
+    _, TestReportNonOnRequestType,
+    Values(ReportParams().reportingType(ReportingType::periodic),
+           ReportParams().reportingType(ReportingType::onChange)));
 
 TEST_P(TestReportNonOnRequestType, readingsAreNotUpdateOnUpdateCall)
 {
@@ -460,9 +464,10 @@ class TestReportNonPeriodicReport :
     }
 };
 
-INSTANTIATE_TEST_SUITE_P(_, TestReportNonPeriodicReport,
-                         Values(ReportParams().reportingType("OnRequest"),
-                                ReportParams().reportingType("OnChange")));
+INSTANTIATE_TEST_SUITE_P(
+    _, TestReportNonPeriodicReport,
+    Values(ReportParams().reportingType(ReportingType::onRequest),
+           ReportParams().reportingType(ReportingType::onChange)));
 
 TEST_P(TestReportNonPeriodicReport, readingsAreNotUpdatedAfterIntervalExpires)
 {
@@ -476,7 +481,7 @@ class TestReportPeriodicReport : public TestReport
 {
     void SetUp() override
     {
-        sut = makeReport(ReportParams().reportingType("Periodic"));
+        sut = makeReport(ReportParams().reportingType(ReportingType::periodic));
     }
 };
 
@@ -573,8 +578,8 @@ TEST_F(TestReportInitialization,
             InvokeWithoutArgs(DbusEnvironment::setPromise("readingsUpdated")));
 
     const auto elapsed = DbusEnvironment::measureTime([this] {
-        sut = makeReport(
-            defaultParams.reportingType("Periodic").emitReadingUpdate(true));
+        sut = makeReport(defaultParams.reportingType(ReportingType::periodic)
+                             .emitReadingUpdate(true));
         makeMonitor();
         EXPECT_TRUE(DbusEnvironment::waitForFuture("readingsUpdated"));
     });
@@ -588,8 +593,8 @@ TEST_F(TestReportInitialization,
 {
     EXPECT_CALL(readingsUpdated, Call()).Times(0);
 
-    sut = makeReport(
-        defaultParams.reportingType("Periodic").emitReadingUpdate(false));
+    sut = makeReport(defaultParams.reportingType(ReportingType::periodic)
+                         .emitReadingUpdate(false));
     makeMonitor();
     DbusEnvironment::sleepFor(defaultParams.interval() * 2);
 }

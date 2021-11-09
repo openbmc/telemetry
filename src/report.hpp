@@ -5,6 +5,7 @@
 #include "interfaces/report.hpp"
 #include "interfaces/report_manager.hpp"
 #include "types/report_types.hpp"
+#include "types/reporting_type.hpp"
 
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/steady_timer.hpp>
@@ -18,7 +19,7 @@ class Report : public interfaces::Report
   public:
     Report(boost::asio::io_context& ioc,
            const std::shared_ptr<sdbusplus::asio::object_server>& objServer,
-           const std::string& reportName, const std::string& reportingType,
+           const std::string& reportName, const ReportingType reportingType,
            const bool emitsReadingsSignal,
            const bool logToMetricReportsCollection, const Milliseconds period,
            interfaces::ReportManager& reportManager,
@@ -52,7 +53,7 @@ class Report : public interfaces::Report
 
     std::string name;
     std::string path;
-    std::string reportingType;
+    ReportingType reportingType;
     Milliseconds interval;
     bool emitsReadingsUpdate;
     bool logToMetricReportsCollection;

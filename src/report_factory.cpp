@@ -17,7 +17,7 @@ ReportFactory::ReportFactory(
 {}
 
 std::unique_ptr<interfaces::Report> ReportFactory::make(
-    const std::string& name, const std::string& reportingType,
+    const std::string& name, const ReportingType reportingType,
     bool emitsReadingsSignal, bool logToMetricReportsCollection,
     Milliseconds period, interfaces::ReportManager& reportManager,
     interfaces::JsonStorage& reportStorage,
@@ -93,9 +93,8 @@ std::vector<LabeledMetricParameters> ReportFactory::convertMetricParams(
         }
 
         return LabeledMetricParameters(
-            std::move(sensorParameters),
-            utils::stringToOperationType(operationType), id, metadata,
-            utils::stringToCollectionTimeScope(collectionTimeScope),
+            std::move(sensorParameters), utils::toOperationType(operationType),
+            id, metadata, utils::toCollectionTimeScope(collectionTimeScope),
             CollectionDuration(Milliseconds(collectionDuration)));
     });
 }
