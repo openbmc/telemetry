@@ -3,7 +3,6 @@
 #include <boost/container/flat_map.hpp>
 #include <phosphor-logging/log.hpp>
 #include <sdbusplus/asio/property.hpp>
-#include <sdbusplus/bus/match.hpp>
 
 #include <functional>
 

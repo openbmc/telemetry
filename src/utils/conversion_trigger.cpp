@@ -22,9 +22,9 @@ LabeledTriggerThresholdParams ToLabeledThresholdParamConversion::operator()(
     return utils::transform(arg, [](const auto& thresholdParam) {
         const auto& [type, dwellTime, direction, thresholdValue] =
             thresholdParam;
-        return numeric::LabeledThresholdParam(
-            numeric::stringToType(type), dwellTime,
-            numeric::stringToDirection(direction), thresholdValue);
+        return numeric::LabeledThresholdParam(numeric::toType(type), dwellTime,
+                                              numeric::toDirection(direction),
+                                              thresholdValue);
     });
 }
 
@@ -35,8 +35,7 @@ LabeledTriggerThresholdParams ToLabeledThresholdParamConversion::operator()(
         const auto& [userId, severity, dwellTime, thresholdValue] =
             thresholdParam;
         return discrete::LabeledThresholdParam(
-            userId, discrete::stringToSeverity(severity), dwellTime,
-            thresholdValue);
+            userId, discrete::toSeverity(severity), dwellTime, thresholdValue);
     });
 }
 

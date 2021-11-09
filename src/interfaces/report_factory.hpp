@@ -3,7 +3,10 @@
 #include "interfaces/json_storage.hpp"
 #include "interfaces/report.hpp"
 #include "interfaces/report_manager.hpp"
+#include "types/report_action.hpp"
 #include "types/report_types.hpp"
+#include "types/report_updates.hpp"
+#include "types/reporting_type.hpp"
 
 #include <boost/asio/spawn.hpp>
 
@@ -24,10 +27,10 @@ class ReportFactory
                             const ReadingParameters& metricParams) const = 0;
 
     virtual std::unique_ptr<interfaces::Report>
-        make(const std::string& name, const std::string& reportingType,
-             bool emitsReadingsSignal, bool logToMetricReportsCollection,
+        make(const std::string& name, const ReportingType reportingType,
+             const std::vector<ReportAction>& reportActions,
              Milliseconds period, uint64_t appendLimit,
-             const std::string& reportUpdates, ReportManager& reportManager,
+             const ReportUpdates reportUpdates, ReportManager& reportManager,
              JsonStorage& reportStorage,
              std::vector<LabeledMetricParameters> labeledMetricParams,
              bool enabled) const = 0;
