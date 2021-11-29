@@ -18,7 +18,7 @@ class Trigger : public interfaces::Trigger
             const std::shared_ptr<sdbusplus::asio::object_server>& objServer,
             const std::string& id, const std::string& name,
             const std::vector<std::string>& triggerActions,
-            const std::vector<std::string>& reportNames,
+            const std::vector<std::string>& reportIds,
             const std::vector<LabeledSensorInfo>& LabeledSensorsInfoIn,
             const LabeledTriggerThresholdParams& labeledThresholdParamsIn,
             std::vector<std::shared_ptr<interfaces::Threshold>>&& thresholds,
@@ -48,7 +48,7 @@ class Trigger : public interfaces::Trigger
     std::vector<std::string> triggerActions;
     std::string path;
     bool persistent = false;
-    std::vector<std::string> reportNames;
+    std::vector<std::string> reportIds;
     std::vector<LabeledSensorInfo> labeledSensorsInfo;
     LabeledTriggerThresholdParams labeledThresholdParams;
     std::unique_ptr<sdbusplus::asio::dbus_interface> deleteIface;

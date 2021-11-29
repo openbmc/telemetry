@@ -167,6 +167,8 @@ struct LabeledTuple<std::tuple<Args...>, Labels...>
         }
         else
         {
+            static_assert(Idx + 1 < sizeof...(Args),
+                          "Label not found in LabeledTuple");
             return find_item<Idx + 1, Label>(self);
         }
     }

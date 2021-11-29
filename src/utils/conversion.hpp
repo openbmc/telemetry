@@ -1,5 +1,7 @@
 #pragma once
 
+#include <sdbusplus/exception.hpp>
+
 #include <algorithm>
 #include <array>
 #include <stdexcept>
@@ -13,7 +15,9 @@ struct EnumTraits
 {
     [[noreturn]] static void throwConversionError()
     {
-        throw std::out_of_range("Value is not in range of enum");
+        throw sdbusplus::exception::SdBusError(
+            static_cast<int>(std::errc::invalid_argument),
+            "Invalid enum value");
     }
 };
 

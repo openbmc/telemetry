@@ -3,6 +3,7 @@
 #include "trigger.hpp"
 #include "types/trigger_types.hpp"
 #include "utils/conversion_trigger.hpp"
+#include "utils/generate_id.hpp"
 #include "utils/transform.hpp"
 
 #include <phosphor-logging/log.hpp>
@@ -24,7 +25,7 @@ TriggerManager::TriggerManager(
                        const std::string& name,
                        const std::vector<std::string>& triggerActions,
                        const SensorsInfo& sensors,
-                       const std::vector<std::string>& reportNames,
+                       const std::vector<std::string>& reportIds,
                        const TriggerThresholdParamsExt& thresholds) {
                     LabeledTriggerThresholdParams
                         labeledTriggerThresholdParams = std::visit(
@@ -35,7 +36,7 @@ TriggerManager::TriggerManager(
                         triggerFactory->getLabeledSensorsInfo(yield, sensors);
 
                     return addTrigger(id, name, triggerActions,
-                                      labeledSensorsInfo, reportNames,
+                                      labeledSensorsInfo, reportIds,
                                       labeledTriggerThresholdParams)
                         .getPath();
                 });
@@ -61,7 +62,7 @@ void TriggerManager::verifyAddTrigger(const std::string& triggerId,
     }
 
     verifyTriggerIdLength(triggerId);
-    verifyIdCharacters(triggerId);
+    utils::verifyIdCharacters(triggerId);
 
     for (const auto& trigger : triggers)
     {
@@ -83,50 +84,21 @@ void TriggerManager::verifyTriggerIdLength(const std::string& triggerId)
     }
 }
 
-void TriggerManager::verifyIdCharacters(const std::string& triggerId)
-{
-    if (triggerId.find_first_not_of(allowedCharactersInId) != std::string::npos)
-    {
-        throw sdbusplus::exception::SdBusError(
-            static_cast<int>(std::errc::invalid_argument),
-            "Invalid character in trigger id");
-    }
-}
-
 std::string TriggerManager::generateId(const std::string& prefix,
                                        const std::string& triggerName) const
 {
-    verifyIdCharacters(prefix);
-    std::string strippedId(triggerName);
-    strippedId.erase(std::remove_if(strippedId.begin(), strippedId.end(),
-                                    [](char c) {
-                                        return c == '/' ||
-                                               allowedCharactersInId.find(c) ==
-                                                   std::string_view::npos;
-                                    }),
-                     strippedId.end());
+    const auto existingTriggerIds = utils::transform(
+        triggers, [](const auto& trigger) { return trigger->getId(); });
 
-    strippedId = prefix + strippedId;
-    strippedId = strippedId.substr(
-        0, maxTriggerIdLength - std::to_string(maxTriggers - 1).length());
-
-    size_t idx = 0;
-    std::string tmpId(strippedId);
-    while (std::find_if(triggers.begin(), triggers.end(),
-                        [&tmpId](const auto& trigger) {
-                            return trigger->getId() == tmpId;
-                        }) != triggers.end())
-    {
-        tmpId = strippedId + std::to_string(idx++);
-    }
-    return tmpId;
+    return utils::generateId(prefix, triggerName, existingTriggerIds,
+                             maxTriggerIdLength);
 }
 
 interfaces::Trigger& TriggerManager::addTrigger(
     const std::string& triggerIdIn, const std::string& triggerNameIn,
     const std::vector<std::string>& triggerActions,
     const std::vector<LabeledSensorInfo>& labeledSensorsInfo,
-    const std::vector<std::string>& reportNames,
+    const std::vector<std::string>& reportIds,
     const LabeledTriggerThresholdParams& labeledThresholdParams)
 {
     std::string triggerName = triggerNameIn;
@@ -135,16 +107,12 @@ interfaces::Trigger& TriggerManager::addTrigger(
         triggerName = triggerNameDefault;
     }
 
-    std::string triggerId = triggerIdIn;
-    if (triggerId.empty() || triggerId.ends_with('/'))
-    {
-        triggerId = generateId(triggerId, triggerName);
-    }
+    std::string triggerId = generateId(triggerIdIn, triggerName);
 
     verifyAddTrigger(triggerId, triggerName);
 
     triggers.emplace_back(triggerFactory->make(
-        triggerId, triggerName, triggerActions, reportNames, *this,
+        triggerId, triggerName, triggerActions, reportIds, *this,
         *triggerStorage, labeledThresholdParams, labeledSensorsInfo));
 
     return *triggers.back();
@@ -190,14 +158,14 @@ void TriggerManager::loadFromPersistent()
                         .get<std::vector<discrete::LabeledThresholdParam>>();
             }
 
-            auto reportNames =
-                data->at("ReportNames").get<std::vector<std::string>>();
+            auto reportIds =
+                data->at("ReportIds").get<std::vector<std::string>>();
 
             auto labeledSensorsInfo =
                 data->at("Sensors").get<std::vector<LabeledSensorInfo>>();
 
-            addTrigger(id, name, triggerActions, labeledSensorsInfo,
-                       reportNames, labeledThresholdParams);
+            addTrigger(id, name, triggerActions, labeledSensorsInfo, reportIds,
+                       labeledThresholdParams);
         }
         catch (const std::exception& e)
         {

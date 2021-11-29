@@ -11,7 +11,7 @@ class ReportManager
     virtual ~ReportManager() = default;
 
     virtual void removeReport(const interfaces::Report* report) = 0;
-    virtual void updateReport(const std::string& name) = 0;
+    virtual void updateReport(const std::string& id) = 0;
 };
 
 } // namespace interfaces

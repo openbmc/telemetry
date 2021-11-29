@@ -4,6 +4,7 @@
 #include "sensor.hpp"
 #include "sensor_cache.hpp"
 #include "stubs/dbus_sensor_object.hpp"
+#include "utils/clock.hpp"
 
 #include <sdbusplus/asio/property.hpp>
 
@@ -51,9 +52,9 @@ class TestSensor : public Test
     std::unique_ptr<stubs::DbusSensorObject> sensorObject = makeSensorObject();
 
     SensorCache sensorCache;
-    uint64_t timestamp = std::time(0);
+    uint64_t timestamp = Clock().timestamp();
     std::shared_ptr<Sensor> sut = sensorCache.makeSensor<Sensor>(
-        DbusEnvironment::serviceName(), sensorObject->path(),
+        DbusEnvironment::serviceName(), sensorObject->path(), "metadata",
         DbusEnvironment::getIoc(), DbusEnvironment::getBus());
     std::shared_ptr<SensorListenerMock> listenerMock =
         std::make_shared<StrictMock<SensorListenerMock>>();

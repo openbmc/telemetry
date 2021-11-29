@@ -24,7 +24,7 @@ class TriggerFactoryMock : public interfaces::TriggerFactory
     MOCK_METHOD(std::unique_ptr<interfaces::Trigger>, make,
                 (const std::string& id, const std::string& name,
                  const std::vector<std::string>& triggerActions,
-                 const std::vector<std::string>& reportNames,
+                 const std::vector<std::string>& reportIds,
                  interfaces::TriggerManager& triggerManager,
                  interfaces::JsonStorage& triggerStorage,
                  const LabeledTriggerThresholdParams& labeledThresholdParams,
@@ -54,7 +54,7 @@ class TriggerFactoryMock : public interfaces::TriggerFactory
 
             return EXPECT_CALL(
                 *this, make(params.id(), params.name(), params.triggerActions(),
-                            params.reportNames(), tm, triggerStorage,
+                            params.reportIds(), tm, triggerStorage,
                             params.thresholdParams(), params.sensors()));
         }
         else

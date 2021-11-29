@@ -10,7 +10,7 @@ class Report
   public:
     virtual ~Report() = default;
 
-    virtual std::string getName() const = 0;
+    virtual std::string getId() const = 0;
     virtual std::string getPath() const = 0;
     virtual void updateReadings() = 0;
 };

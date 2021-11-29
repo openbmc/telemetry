@@ -94,8 +94,3 @@ void DiscreteThreshold::commit(const std::string& sensorName,
         action->commit(sensorName, timestamp, value);
     }
 }
-
-const char* DiscreteThreshold::getName() const
-{
-    return name.c_str();
-}

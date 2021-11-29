@@ -22,7 +22,8 @@ class Report : public interfaces::Report
   public:
     Report(boost::asio::io_context& ioc,
            const std::shared_ptr<sdbusplus::asio::object_server>& objServer,
-           const std::string& reportName, const ReportingType reportingType,
+           const std::string& reportId, const std::string& reportName,
+           const ReportingType reportingType,
            std::vector<ReportAction> reportActions, const Milliseconds period,
            const uint64_t appendLimitIn, const ReportUpdates reportUpdatesIn,
            interfaces::ReportManager& reportManager,
@@ -36,14 +37,14 @@ class Report : public interfaces::Report
     Report& operator=(const Report&) = delete;
     Report& operator=(Report&&) = delete;
 
-    std::string getName() const override
+    std::string getId() const override
     {
-        return name;
+        return id;
     }
 
     std::string getPath() const override
     {
-        return path;
+        return reportDir + id;
     }
 
     void updateReadings() override;
@@ -59,9 +60,10 @@ class Report : public interfaces::Report
     void setReportUpdates(const ReportUpdates newReportUpdates);
     static uint64_t getSensorCount(
         std::vector<std::shared_ptr<interfaces::Metric>>& metrics);
+    interfaces::JsonStorage::FilePath fileName() const;
 
+    std::string id;
     std::string name;
-    std::string path;
     ReportingType reportingType;
     Milliseconds interval;
     std::vector<ReportAction> reportActions;
@@ -79,7 +81,6 @@ class Report : public interfaces::Report
     std::vector<std::shared_ptr<interfaces::Metric>> metrics;
     boost::asio::steady_timer timer;
 
-    interfaces::JsonStorage::FilePath fileName;
     interfaces::JsonStorage& reportStorage;
     bool enabled;
 

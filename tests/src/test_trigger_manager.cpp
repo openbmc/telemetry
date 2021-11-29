@@ -30,7 +30,7 @@ class TestTriggerManager : public Test
             DbusEnvironment::serviceName(), TriggerManager::triggerManagerPath,
             TriggerManager::triggerManagerIfaceName, "AddTrigger", params.id(),
             params.name(), params.triggerActions(), sensorInfos,
-            params.reportNames(),
+            params.reportIds(),
             std::visit(utils::FromLabeledThresholdParamConversion(),
                        params.thresholdParams()));
         return DbusEnvironment::waitForFuture(addTriggerPromise.get_future());
@@ -294,7 +294,7 @@ class TestTriggerManagerStorage : public TestTriggerManager
         {"TriggerActions", TriggerParams().triggerActions()},
         {"ThresholdParams", utils::labeledThresholdParamsToJson(
                                 TriggerParams().thresholdParams())},
-        {"ReportNames", TriggerParams().reportNames()},
+        {"ReportIds", TriggerParams().reportIds()},
         {"Sensors", TriggerParams().sensors()}};
 
     nlohmann::json data2 = data1;

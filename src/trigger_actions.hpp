@@ -45,7 +45,7 @@ void fillActions(
     std::vector<std::unique_ptr<interfaces::TriggerAction>>& actionsIf,
     const std::vector<TriggerAction>& ActionsEnum, ::numeric::Type type,
     double thresholdValue, interfaces::ReportManager& reportManager,
-    const std::vector<std::string>& reportNames);
+    const std::vector<std::string>& reportIds);
 } // namespace numeric
 
 namespace discrete
@@ -84,7 +84,7 @@ void fillActions(
     std::vector<std::unique_ptr<interfaces::TriggerAction>>& actionsIf,
     const std::vector<TriggerAction>& ActionsEnum,
     ::discrete::Severity severity, interfaces::ReportManager& reportManager,
-    const std::vector<std::string>& reportNames);
+    const std::vector<std::string>& reportIds);
 
 namespace onChange
 {
@@ -112,7 +112,7 @@ void fillActions(
     std::vector<std::unique_ptr<interfaces::TriggerAction>>& actionsIf,
     const std::vector<TriggerAction>& ActionsEnum,
     interfaces::ReportManager& reportManager,
-    const std::vector<std::string>& reportNames);
+    const std::vector<std::string>& reportIds);
 } // namespace onChange
 
 } // namespace discrete
@@ -121,9 +121,9 @@ class UpdateReport : public interfaces::TriggerAction
 {
   public:
     UpdateReport(interfaces::ReportManager& reportManager,
-                 std::vector<std::string> names) :
+                 std::vector<std::string> ids) :
         reportManager(reportManager),
-        reportNames(std::move(names))
+        reportIds(std::move(ids))
     {}
 
     void commit(const std::string& id, uint64_t timestamp,
@@ -131,6 +131,6 @@ class UpdateReport : public interfaces::TriggerAction
 
   private:
     interfaces::ReportManager& reportManager;
-    std::vector<std::string> reportNames;
+    std::vector<std::string> reportIds;
 };
 } // namespace action

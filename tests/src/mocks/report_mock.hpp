@@ -7,12 +7,12 @@
 class ReportMock : public interfaces::Report
 {
   public:
-    ReportMock(std::string name)
+    ReportMock(const std::string& id)
     {
         using namespace testing;
 
-        ON_CALL(*this, getName).WillByDefault([name] { return name; });
-        ON_CALL(*this, getPath).WillByDefault([name] { return "/" + name; });
+        ON_CALL(*this, getId).WillByDefault([id] { return id; });
+        ON_CALL(*this, getPath).WillByDefault([id] { return "/" + id; });
         EXPECT_CALL(*this, Die).Times(AnyNumber());
     }
 
@@ -21,7 +21,7 @@ class ReportMock : public interfaces::Report
         Die();
     }
 
-    MOCK_METHOD(std::string, getName, (), (override, const));
+    MOCK_METHOD(std::string, getId, (), (override, const));
     MOCK_METHOD(std::string, getPath, (), (override, const));
     MOCK_METHOD(void, updateReadings, (), (override));
     MOCK_METHOD(void, Die, ());

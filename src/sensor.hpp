@@ -18,7 +18,8 @@ class Sensor final :
     using ValueVariant = std::variant<std::monostate, double>;
 
   public:
-    Sensor(interfaces::Sensor::Id sensorId, boost::asio::io_context& ioc,
+    Sensor(interfaces::Sensor::Id sensorId, const std::string& sensorMetadata,
+           boost::asio::io_context& ioc,
            const std::shared_ptr<sdbusplus::asio::connection>& bus);
 
     Sensor(const Sensor&) = delete;
@@ -27,6 +28,7 @@ class Sensor final :
     static Id makeId(std::string_view service, std::string_view path);
 
     Id id() const override;
+    std::string metadata() const override;
     void registerForUpdates(
         const std::weak_ptr<interfaces::SensorListener>& weakListener) override;
     void unregisterFromUpdates(
@@ -43,6 +45,7 @@ class Sensor final :
     void updateValue(double);
 
     interfaces::Sensor::Id sensorId;
+    std::string sensorMetadata;
     boost::asio::io_context& ioc;
     std::shared_ptr<sdbusplus::asio::connection> bus;
     Milliseconds timerInterval = Milliseconds(0);
