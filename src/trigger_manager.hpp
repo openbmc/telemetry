@@ -36,13 +36,12 @@ class TriggerManager : public interfaces::TriggerManager
     std::string generateId(const std::string& prefix,
                            const std::string& triggerName) const;
     static void verifyTriggerIdLength(const std::string& triggerId);
-    static void verifyIdCharacters(const std::string& triggerId);
 
     interfaces::Trigger&
         addTrigger(const std::string& triggerId, const std::string& triggerName,
                    const std::vector<std::string>& triggerActions,
                    const std::vector<LabeledSensorInfo>& labeledSensors,
-                   const std::vector<std::string>& reportNames,
+                   const std::vector<std::string>& reportIds,
                    const LabeledTriggerThresholdParams& labeledThresholdParams);
     void loadFromPersistent();
 
@@ -55,8 +54,5 @@ class TriggerManager : public interfaces::TriggerManager
         "xyz.openbmc_project.Telemetry.TriggerManager";
     static constexpr const char* triggerManagerPath =
         "/xyz/openbmc_project/Telemetry/Triggers";
-
-    static constexpr std::string_view allowedCharactersInId =
-        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_/";
     static constexpr const char* triggerNameDefault = "Trigger";
 };

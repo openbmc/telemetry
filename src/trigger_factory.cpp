@@ -23,7 +23,7 @@ TriggerFactory::TriggerFactory(
 std::unique_ptr<interfaces::Trigger> TriggerFactory::make(
     const std::string& id, const std::string& name,
     const std::vector<std::string>& triggerActionsIn,
-    const std::vector<std::string>& reportNames,
+    const std::vector<std::string>& reportIds,
     interfaces::TriggerManager& triggerManager,
     interfaces::JsonStorage& triggerStorage,
     const LabeledTriggerThresholdParams& labeledThresholdParams,
@@ -57,7 +57,7 @@ std::unique_ptr<interfaces::Trigger> TriggerFactory::make(
                 labeledThresholdParam.at_label<ts::ThresholdValue>();
 
             action::discrete::fillActions(actions, triggerActions, severity,
-                                          reportManager, reportNames);
+                                          reportManager, reportIds);
 
             thresholds.emplace_back(std::make_shared<DiscreteThreshold>(
                 bus->get_io_context(), sensors, sensorNames, std::move(actions),
@@ -68,7 +68,7 @@ std::unique_ptr<interfaces::Trigger> TriggerFactory::make(
         {
             std::vector<std::unique_ptr<interfaces::TriggerAction>> actions;
             action::discrete::onChange::fillActions(actions, triggerActions,
-                                                    reportManager, reportNames);
+                                                    reportManager, reportIds);
 
             thresholds.emplace_back(std::make_shared<OnChangeThreshold>(
                 sensors, sensorNames, std::move(actions)));
@@ -92,7 +92,7 @@ std::unique_ptr<interfaces::Trigger> TriggerFactory::make(
 
             action::numeric::fillActions(actions, triggerActions, type,
                                          thresholdValue, reportManager,
-                                         reportNames);
+                                         reportIds);
 
             thresholds.emplace_back(std::make_shared<NumericThreshold>(
                 bus->get_io_context(), sensors, sensorNames, std::move(actions),
@@ -101,9 +101,9 @@ std::unique_ptr<interfaces::Trigger> TriggerFactory::make(
     }
 
     return std::make_unique<Trigger>(
-        bus->get_io_context(), objServer, id, name, triggerActionsIn,
-        reportNames, labeledSensorsInfo, labeledThresholdParams,
-        std::move(thresholds), triggerManager, triggerStorage);
+        bus->get_io_context(), objServer, id, name, triggerActionsIn, reportIds,
+        labeledSensorsInfo, labeledThresholdParams, std::move(thresholds),
+        triggerManager, triggerStorage);
 }
 
 std::pair<Sensors, std::vector<std::string>> TriggerFactory::getSensors(
@@ -116,10 +116,10 @@ std::pair<Sensors, std::vector<std::string>> TriggerFactory::getSensors(
     {
         const auto& service = labeledSensorInfo.at_label<ts::Service>();
         const auto& sensorPath = labeledSensorInfo.at_label<ts::SensorPath>();
-        const auto& metadata = labeledSensorInfo.at_label<ts::SensorMetadata>();
+        const auto& metadata = labeledSensorInfo.at_label<ts::Metadata>();
 
         sensors.emplace_back(sensorCache.makeSensor<Sensor>(
-            service, sensorPath, bus->get_io_context(), bus));
+            service, sensorPath, metadata, bus->get_io_context(), bus));
 
         if (metadata.empty())
         {

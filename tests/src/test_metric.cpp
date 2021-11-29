@@ -25,7 +25,9 @@ class TestMetric : public Test
         std::vector<std::shared_ptr<SensorMock>> result;
         for (size_t i = 0; i < amount; ++i)
         {
-            result.emplace_back(std::make_shared<NiceMock<SensorMock>>());
+            auto& metricMock =
+                result.emplace_back(std::make_shared<NiceMock<SensorMock>>());
+            ON_CALL(*metricMock, metadata()).WillByDefault(Return("metadata"));
         }
         return result;
     }
@@ -35,13 +37,12 @@ class TestMetric : public Test
         return std::make_shared<Metric>(
             utils::convContainer<std::shared_ptr<interfaces::Sensor>>(
                 sensorMocks),
-            p.operationType(), p.id(), p.metadata(), p.collectionTimeScope(),
+            p.operationType(), p.id(), p.collectionTimeScope(),
             p.collectionDuration(), std::move(clockFakePtr));
     }
 
     MetricParams params = MetricParams()
                               .id("id")
-                              .metadata("metadata")
                               .operationType(OperationType::avg)
                               .collectionTimeScope(CollectionTimeScope::point)
                               .collectionDuration(CollectionDuration(0ms));
@@ -83,51 +84,6 @@ TEST_F(TestMetric, containsEmptyReadingAfterCreated)
                 ElementsAre(MetricValue({"id", "metadata", 0., 0u})));
 }
 
-TEST_F(TestMetric, parsesSensorMetadata)
-{
-    using ReadingMetadata =
-        utils::LabeledTuple<std::tuple<std::string, std::string>,
-                            utils::tstring::SensorDbusPath,
-                            utils::tstring::SensorRedfishUri>;
-
-    nlohmann::json metadata;
-    metadata["MetricProperties"] = {"sensor1", "sensor2"};
-
-    sensorMocks = makeSensorMocks(2);
-    sut = makeSut(params.metadata(metadata.dump()));
-
-    EXPECT_THAT(
-        sut->getReadings(),
-        ElementsAre(
-            MetricValue{"id", ReadingMetadata("", "sensor1").dump(), 0., 0u},
-            MetricValue{"id", ReadingMetadata("", "sensor2").dump(), 0., 0u}));
-}
-
-TEST_F(TestMetric, parsesSensorMetadataWhenMoreMetadataThanSensors)
-{
-    nlohmann::json metadata;
-    metadata["MetricProperties"] = {"sensor1", "sensor2"};
-
-    sensorMocks = makeSensorMocks(1);
-    sut = makeSut(params.metadata(metadata.dump()));
-
-    EXPECT_THAT(sut->getReadings(),
-                ElementsAre(MetricValue{"id", metadata.dump(), 0., 0u}));
-}
-
-TEST_F(TestMetric, parsesSensorMetadataWhenMoreSensorsThanMetadata)
-{
-    nlohmann::json metadata;
-    metadata["MetricProperties"] = {"sensor1"};
-
-    sensorMocks = makeSensorMocks(2);
-    sut = makeSut(params.metadata(metadata.dump()));
-
-    EXPECT_THAT(sut->getReadings(),
-                ElementsAre(MetricValue{"id", metadata.dump(), 0., 0u},
-                            MetricValue{"id", metadata.dump(), 0., 0u}));
-}
-
 class TestMetricAfterInitialization : public TestMetric
 {
   public:
@@ -167,17 +123,18 @@ TEST_F(TestMetricAfterInitialization, dumpsConfiguration)
 
     ON_CALL(*sensorMocks.front(), id())
         .WillByDefault(Return(SensorMock::makeId("service1", "path1")));
+    ON_CALL(*sensorMocks.front(), metadata())
+        .WillByDefault(Return("metadata1"));
 
     const auto conf = sut->dumpConfiguration();
 
     LabeledMetricParameters expected = {};
     expected.at_label<ts::Id>() = params.id();
-    expected.at_label<ts::MetricMetadata>() = params.metadata();
     expected.at_label<ts::OperationType>() = params.operationType();
     expected.at_label<ts::CollectionTimeScope>() = params.collectionTimeScope();
     expected.at_label<ts::CollectionDuration>() = params.collectionDuration();
     expected.at_label<ts::SensorPath>() = {
-        LabeledSensorParameters("service1", "path1")};
+        LabeledSensorParameters("service1", "path1", "metadata1")};
 
     EXPECT_THAT(conf, Eq(expected));
 }

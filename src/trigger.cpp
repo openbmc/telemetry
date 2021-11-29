@@ -13,7 +13,7 @@ Trigger::Trigger(
     const std::shared_ptr<sdbusplus::asio::object_server>& objServer,
     const std::string& idIn, const std::string& nameIn,
     const std::vector<std::string>& triggerActionsIn,
-    const std::vector<std::string>& reportNamesIn,
+    const std::vector<std::string>& reportIdsIn,
     const std::vector<LabeledSensorInfo>& LabeledSensorsInfoIn,
     const LabeledTriggerThresholdParams& labeledThresholdParamsIn,
     std::vector<std::shared_ptr<interfaces::Threshold>>&& thresholdsIn,
@@ -21,7 +21,7 @@ Trigger::Trigger(
     interfaces::JsonStorage& triggerStorageIn) :
     id(idIn),
     name(nameIn), triggerActions(std::move(triggerActionsIn)),
-    path(triggerDir + id), reportNames(reportNamesIn),
+    path(triggerDir + id), reportIds(reportIdsIn),
     labeledSensorsInfo(LabeledSensorsInfoIn),
     labeledThresholdParams(labeledThresholdParamsIn),
     thresholds(std::move(thresholdsIn)),
@@ -82,7 +82,7 @@ Trigger::Trigger(
                 });
 
             dbusIface.register_property_r(
-                "ReportNames", reportNames,
+                "ReportNames", reportIds,
                 sdbusplus::vtable::property_::emits_change,
                 [](const auto& x) { return x; });
 
@@ -125,7 +125,7 @@ bool Trigger::storeConfiguration() const
         data["TriggerActions"] = triggerActions;
         data["ThresholdParams"] =
             utils::labeledThresholdParamsToJson(labeledThresholdParams);
-        data["ReportNames"] = reportNames;
+        data["ReportIds"] = reportIds;
         data["Sensors"] = labeledSensorsInfo;
 
         triggerStorage.store(fileName, data);

@@ -138,7 +138,7 @@ using SensorsInfo =
 using LabeledSensorInfo =
     utils::LabeledTuple<std::tuple<std::string, std::string, std::string>,
                         utils::tstring::Service, utils::tstring::SensorPath,
-                        utils::tstring::SensorMetadata>;
+                        utils::tstring::Metadata>;
 
 using TriggerThresholdParamsExt =
     std::variant<std::monostate, std::vector<numeric::ThresholdParam>,

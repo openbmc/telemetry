@@ -32,7 +32,6 @@ class DiscreteThreshold :
     void initialize() override;
     void sensorUpdated(interfaces::Sensor&, uint64_t) override;
     void sensorUpdated(interfaces::Sensor&, uint64_t, double) override;
-    const char* getName() const;
 
   private:
     boost::asio::io_context& ioc;

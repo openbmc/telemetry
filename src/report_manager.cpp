@@ -3,6 +3,7 @@
 #include "report.hpp"
 #include "types/report_types.hpp"
 #include "utils/conversion.hpp"
+#include "utils/generate_id.hpp"
 #include "utils/transform.hpp"
 
 #include <phosphor-logging/log.hpp>
@@ -18,8 +19,10 @@ ReadingParameters
         using namespace std::chrono_literals;
 
         return ReadingParameters::value_type(
-            std::vector{{std::get<0>(param)}}, std::get<1>(param),
-            std::get<2>(param), std::get<3>(param),
+            std::vector<
+                std::tuple<sdbusplus::message::object_path, std::string>>{
+                {std::get<0>(param), std::get<3>(param)}},
+            std::get<1>(param), std::get<2>(param),
             utils::enumToString(CollectionTimeScope::point), 0u);
     });
 }
@@ -41,9 +44,9 @@ ReportManager::ReportManager(
                 "MaxReports", size_t{}, sdbusplus::vtable::property_::const_,
                 [](const auto&) { return maxReports; });
             dbusIface.register_property_r(
-                "MaxReportNameLength", size_t{},
+                "MaxReportIdLength", size_t{},
                 sdbusplus::vtable::property_::const_,
-                [](const auto&) { return maxReportNameLength; });
+                [](const auto&) { return maxReportIdLength; });
             dbusIface.register_property_r(
                 "MinInterval", uint64_t{}, sdbusplus::vtable::property_::const_,
                 [](const auto&) -> uint64_t { return minInterval.count(); });
@@ -74,7 +77,7 @@ ReportManager::ReportManager(
                             ReportAction::logToMetricReportsCollection);
                     }
 
-                    return addReport(yield, reportName,
+                    return addReport(yield, "", reportName,
                                      utils::toReportingType(reportingType),
                                      reportActions, Milliseconds(interval),
                                      appendLimitDefault, reportUpdatesDefault,
@@ -86,16 +89,16 @@ ReportManager::ReportManager(
 
             dbusIface.register_method(
                 "AddReportFutureVersion",
-                [this](boost::asio::yield_context& yield,
-                       const std::string& reportName,
-                       const std::string& reportingType,
-                       const std::string& reportUpdates,
-                       const uint64_t appendLimit,
-                       const std::vector<std::string>& reportActions,
-                       const uint64_t interval,
-                       ReadingParameters metricParams) {
+                [this](
+                    boost::asio::yield_context& yield,
+                    const std::string& reportId, const std::string& reportName,
+                    const std::string& reportingType,
+                    const std::string& reportUpdates,
+                    const uint64_t appendLimit,
+                    const std::vector<std::string>& reportActions,
+                    const uint64_t interval, ReadingParameters metricParams) {
                     constexpr auto enabledDefault = true;
-                    return addReport(yield, reportName,
+                    return addReport(yield, reportId, reportName,
                                      utils::toReportingType(reportingType),
                                      utils::transform(
                                          reportActions,
@@ -119,19 +122,20 @@ void ReportManager::removeReport(const interfaces::Report* report)
         reports.end());
 }
 
-void ReportManager::verifyReportNameLength(const std::string& reportName)
+void ReportManager::verifyReportIdLength(const std::string& reportId)
 {
-    if (reportName.length() > maxReportNameLength)
+    if (reportId.length() > maxReportIdLength)
     {
         throw sdbusplus::exception::SdBusError(
             static_cast<int>(std::errc::invalid_argument),
-            "Report name exceeds maximum length");
+            "Report id exceeds maximum length");
     }
 }
 
 void ReportManager::verifyAddReport(
-    const std::string& reportName, const ReportingType reportingType,
-    Milliseconds interval, const ReportUpdates reportUpdates,
+    const std::string& reportId, const std::string& reportName,
+    const ReportingType reportingType, Milliseconds interval,
+    const ReportUpdates reportUpdates,
     const std::vector<LabeledMetricParameters>& readingParams)
 {
     if (reportingType == ReportingType::onChange)
@@ -148,11 +152,11 @@ void ReportManager::verifyAddReport(
             "Reached maximal report count");
     }
 
-    verifyReportNameLength(reportName);
+    verifyReportIdLength(reportId);
 
     for (const auto& report : reports)
     {
-        if (report->getName() == reportName)
+        if (report->getId() == reportId)
         {
             throw sdbusplus::exception::SdBusError(
                 static_cast<int>(std::errc::file_exists), "Duplicate report");
@@ -193,8 +197,8 @@ void ReportManager::verifyAddReport(
 }
 
 interfaces::Report& ReportManager::addReport(
-    boost::asio::yield_context& yield, const std::string& reportName,
-    const ReportingType reportingType,
+    boost::asio::yield_context& yield, const std::string& reportId,
+    const std::string& reportName, const ReportingType reportingType,
     const std::vector<ReportAction>& reportActions, Milliseconds interval,
     const uint64_t appendLimit, const ReportUpdates reportUpdates,
     ReadingParameters metricParams, const bool enabled)
@@ -202,23 +206,36 @@ interfaces::Report& ReportManager::addReport(
     auto labeledMetricParams =
         reportFactory->convertMetricParams(yield, metricParams);
 
-    return addReport(reportName, reportingType, reportActions, interval,
-                     appendLimit, reportUpdates, std::move(labeledMetricParams),
-                     enabled);
+    return addReport(reportId, reportName, reportingType, reportActions,
+                     interval, appendLimit, reportUpdates,
+                     std::move(labeledMetricParams), enabled);
 }
 
 interfaces::Report& ReportManager::addReport(
-    const std::string& reportName, const ReportingType reportingType,
+    const std::string& reportId, const std::string& reportName,
+    const ReportingType reportingType,
     const std::vector<ReportAction>& reportActions, Milliseconds interval,
     const uint64_t appendLimit, const ReportUpdates reportUpdates,
     std::vector<LabeledMetricParameters> labeledMetricParams,
     const bool enabled)
 {
-    verifyAddReport(reportName, reportingType, interval, reportUpdates,
+    std::string name = reportName;
+    if (name.empty())
+    {
+        name = "Report";
+    }
+
+    const auto existingReportIds = utils::transform(
+        reports, [](const auto& report) { return report->getId(); });
+
+    std::string id =
+        utils::generateId(reportId, name, existingReportIds, maxReportIdLength);
+
+    verifyAddReport(id, name, reportingType, interval, reportUpdates,
                     labeledMetricParams);
 
     reports.emplace_back(reportFactory->make(
-        reportName, reportingType, reportActions, interval, appendLimit,
+        id, name, reportingType, reportActions, interval, appendLimit,
         reportUpdates, *this, *reportStorage, labeledMetricParams, enabled));
     return *reports.back();
 }
@@ -233,12 +250,13 @@ void ReportManager::loadFromPersistent()
         std::optional<nlohmann::json> data = reportStorage->load(path);
         try
         {
-            bool enabled = data->at("Enabled").get<bool>();
             size_t version = data->at("Version").get<size_t>();
             if (version != Report::reportVersion)
             {
                 throw std::logic_error("Invalid version");
             }
+            bool enabled = data->at("Enabled").get<bool>();
+            std::string& id = data->at("Id").get_ref<std::string&>();
             std::string& name = data->at("Name").get_ref<std::string&>();
 
             uint32_t reportingType = data->at("ReportingType").get<uint32_t>();
@@ -254,7 +272,7 @@ void ReportManager::loadFromPersistent()
                 data->at("ReadingParameters")
                     .get<std::vector<LabeledMetricParameters>>();
 
-            addReport(name, utils::toReportingType(reportingType),
+            addReport(id, name, utils::toReportingType(reportingType),
                       reportActions, Milliseconds(interval), appendLimit,
                       utils::toReportUpdates(reportUpdates),
                       std::move(readingParameters), enabled);
@@ -272,11 +290,11 @@ void ReportManager::loadFromPersistent()
     }
 }
 
-void ReportManager::updateReport(const std::string& name)
+void ReportManager::updateReport(const std::string& id)
 {
     for (auto& report : reports)
     {
-        if (report->getName() == name)
+        if (report->getId() == id)
         {
             report->updateReadings();
             return;

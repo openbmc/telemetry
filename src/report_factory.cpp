@@ -17,7 +17,8 @@ ReportFactory::ReportFactory(
 {}
 
 std::unique_ptr<interfaces::Report> ReportFactory::make(
-    const std::string& name, const ReportingType reportingType,
+    const std::string& id, const std::string& name,
+    const ReportingType reportingType,
     const std::vector<ReportAction>& reportActions, Milliseconds period,
     uint64_t appendLimit, const ReportUpdates reportUpdates,
     interfaces::ReportManager& reportManager,
@@ -34,13 +35,12 @@ std::unique_ptr<interfaces::Report> ReportFactory::make(
             return std::make_shared<Metric>(
                 getSensors(param.at_label<ts::SensorPath>()),
                 param.at_label<ts::OperationType>(), param.at_label<ts::Id>(),
-                param.at_label<ts::MetricMetadata>(),
                 param.at_label<ts::CollectionTimeScope>(),
                 param.at_label<ts::CollectionDuration>(),
                 std::make_unique<Clock>());
         });
 
-    return std::make_unique<Report>(bus->get_io_context(), objServer, name,
+    return std::make_unique<Report>(bus->get_io_context(), objServer, id, name,
                                     reportingType, reportActions, period,
                                     appendLimit, reportUpdates, reportManager,
                                     reportStorage, std::move(metrics), enabled);
@@ -51,14 +51,14 @@ Sensors ReportFactory::getSensors(
 {
     using namespace utils::tstring;
 
-    return utils::transform(sensorPaths,
-                            [this](const LabeledSensorParameters& sensorPath)
-                                -> std::shared_ptr<interfaces::Sensor> {
-                                return sensorCache.makeSensor<Sensor>(
-                                    sensorPath.at_label<Service>(),
-                                    sensorPath.at_label<Path>(),
-                                    bus->get_io_context(), bus);
-                            });
+    return utils::transform(
+        sensorPaths,
+        [this](const LabeledSensorParameters& sensorPath)
+            -> std::shared_ptr<interfaces::Sensor> {
+            return sensorCache.makeSensor<Sensor>(
+                sensorPath.at_label<Service>(), sensorPath.at_label<Path>(),
+                sensorPath.at_label<Metadata>(), bus->get_io_context(), bus);
+        });
 }
 
 std::vector<LabeledMetricParameters> ReportFactory::convertMetricParams(
@@ -68,12 +68,12 @@ std::vector<LabeledMetricParameters> ReportFactory::convertMetricParams(
     auto tree = utils::getSubTreeSensors(yield, bus);
 
     return utils::transform(metricParams, [&tree](const auto& item) {
-        const auto& [sensorPaths, operationType, id, metadata,
-                     collectionTimeScope, collectionDuration] = item;
+        auto [sensorPaths, operationType, id, collectionTimeScope,
+              collectionDuration] = item;
 
         std::vector<LabeledSensorParameters> sensorParameters;
 
-        for (const auto& sensorPath : sensorPaths)
+        for (const auto& [sensorPath, metadata] : sensorPaths)
         {
             auto it = std::find_if(
                 tree.begin(), tree.end(),
@@ -82,7 +82,7 @@ std::vector<LabeledMetricParameters> ReportFactory::convertMetricParams(
             if (it != tree.end() && it->second.size() == 1)
             {
                 const auto& [service, ifaces] = it->second.front();
-                sensorParameters.emplace_back(service, sensorPath);
+                sensorParameters.emplace_back(service, sensorPath, metadata);
             }
         }
 
@@ -93,9 +93,20 @@ std::vector<LabeledMetricParameters> ReportFactory::convertMetricParams(
                 "Could not find service for provided sensors");
         }
 
+        if (operationType.empty())
+        {
+            operationType = utils::enumToString(OperationType::min);
+        }
+
+        if (collectionTimeScope.empty())
+        {
+            collectionTimeScope =
+                utils::enumToString(CollectionTimeScope::point);
+        }
+
         return LabeledMetricParameters(
             std::move(sensorParameters), utils::toOperationType(operationType),
-            id, metadata, utils::toCollectionTimeScope(collectionTimeScope),
+            id, utils::toCollectionTimeScope(collectionTimeScope),
             CollectionDuration(Milliseconds(collectionDuration)));
     });
 }

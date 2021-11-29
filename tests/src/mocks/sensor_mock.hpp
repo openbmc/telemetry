@@ -24,6 +24,7 @@ class SensorMock : public interfaces::Sensor
     }
 
     MOCK_METHOD(Id, id, (), (const, override));
+    MOCK_METHOD(std::string, metadata, (), (const, override));
     MOCK_METHOD(void, registerForUpdates,
                 (const std::weak_ptr<interfaces::SensorListener>&), (override));
     MOCK_METHOD(void, unregisterFromUpdates,

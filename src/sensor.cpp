@@ -1,5 +1,7 @@
 #include "sensor.hpp"
 
+#include "utils/clock.hpp"
+
 #include <boost/container/flat_map.hpp>
 #include <phosphor-logging/log.hpp>
 #include <sdbusplus/asio/property.hpp>
@@ -7,10 +9,11 @@
 
 #include <functional>
 
-Sensor::Sensor(interfaces::Sensor::Id sensorId, boost::asio::io_context& ioc,
+Sensor::Sensor(interfaces::Sensor::Id sensorId,
+               const std::string& sensorMetadata, boost::asio::io_context& ioc,
                const std::shared_ptr<sdbusplus::asio::connection>& bus) :
     sensorId(std::move(sensorId)),
-    ioc(ioc), bus(bus)
+    sensorMetadata(sensorMetadata), ioc(ioc), bus(bus)
 {}
 
 Sensor::Id Sensor::makeId(std::string_view service, std::string_view path)
@@ -21,6 +24,11 @@ Sensor::Id Sensor::makeId(std::string_view service, std::string_view path)
 Sensor::Id Sensor::id() const
 {
     return sensorId;
+}
+
+std::string Sensor::metadata() const
+{
+    return sensorMetadata;
 }
 
 void Sensor::async_read()
@@ -93,7 +101,7 @@ void Sensor::unregisterFromUpdates(
 
 void Sensor::updateValue(double newValue)
 {
-    timestamp = std::time(0);
+    timestamp = Clock().timestamp();
 
     if (value == newValue)
     {

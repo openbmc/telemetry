@@ -5,6 +5,8 @@
 #include "utils/labeled_tuple.hpp"
 #include "utils/transform.hpp"
 
+#include <sdbusplus/exception.hpp>
+
 #include <algorithm>
 
 class Metric::CollectionData
@@ -45,7 +47,14 @@ class Metric::DataInterval : public Metric::CollectionData
                  CollectionDuration duration) :
         function(std::move(function)),
         duration(duration)
-    {}
+    {
+        if (duration.t.count() == 0)
+        {
+            throw sdbusplus::exception::SdBusError(
+                static_cast<int>(std::errc::invalid_argument),
+                "Invalid CollectionDuration");
+        }
+    }
 
     ReadingItem update(uint64_t timestamp) override
     {
@@ -113,14 +122,10 @@ class Metric::DataStartup : public Metric::CollectionData
 };
 
 Metric::Metric(Sensors sensorsIn, OperationType operationTypeIn,
-               std::string idIn, std::string metadataIn,
-               CollectionTimeScope timeScopeIn,
+               std::string idIn, CollectionTimeScope timeScopeIn,
                CollectionDuration collectionDurationIn,
                std::unique_ptr<interfaces::Clock> clockIn) :
-    id(idIn),
-    metadata(metadataIn),
-    readings(sensorsIn.size(),
-             MetricValue{std::move(idIn), std::move(metadataIn), 0.0, 0u}),
+    id(std::move(idIn)),
     sensors(std::move(sensorsIn)), operationType(operationTypeIn),
     collectionTimeScope(timeScopeIn), collectionDuration(collectionDurationIn),
     collectionAlgorithms(makeCollectionData(sensors.size(), operationType,
@@ -128,7 +133,9 @@ Metric::Metric(Sensors sensorsIn, OperationType operationTypeIn,
                                             collectionDuration)),
     clock(std::move(clockIn))
 {
-    attemptUnpackJsonMetadata();
+    readings = utils::transform(sensors, [this](const auto& sensor) {
+        return MetricValue{id, sensor->metadata(), 0.0, 0u};
+    });
 }
 
 Metric::~Metric() = default;
@@ -187,12 +194,12 @@ Metric::CollectionData&
 LabeledMetricParameters Metric::dumpConfiguration() const
 {
     auto sensorPath = utils::transform(sensors, [this](const auto& sensor) {
-        return LabeledSensorParameters(sensor->id().service, sensor->id().path);
+        return LabeledSensorParameters(sensor->id().service, sensor->id().path,
+                                       sensor->metadata());
     });
 
     return LabeledMetricParameters(std::move(sensorPath), operationType, id,
-                                   metadata, collectionTimeScope,
-                                   collectionDuration);
+                                   collectionTimeScope, collectionDuration);
 }
 
 std::vector<std::unique_ptr<Metric::CollectionData>>
@@ -237,33 +244,4 @@ std::vector<std::unique_ptr<Metric::CollectionData>>
 uint64_t Metric::sensorCount() const
 {
     return sensors.size();
-}
-
-void Metric::attemptUnpackJsonMetadata()
-{
-    using MetricMetadata =
-        utils::LabeledTuple<std::tuple<std::vector<std::string>>,
-                            utils::tstring::MetricProperties>;
-
-    using ReadingMetadata =
-        utils::LabeledTuple<std::tuple<std::string, std::string>,
-                            utils::tstring::SensorDbusPath,
-                            utils::tstring::SensorRedfishUri>;
-    try
-    {
-        const MetricMetadata parsedMetadata =
-            nlohmann::json::parse(metadata).get<MetricMetadata>();
-
-        if (readings.size() == parsedMetadata.at_index<0>().size())
-        {
-            for (size_t i = 0; i < readings.size(); ++i)
-            {
-                ReadingMetadata readingMetadata{
-                    sensors[i]->id().path, parsedMetadata.at_index<0>()[i]};
-                readings[i].metadata = readingMetadata.dump();
-            }
-        }
-    }
-    catch (const nlohmann::json::exception&)
-    {}
 }
