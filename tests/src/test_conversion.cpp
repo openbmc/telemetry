@@ -43,10 +43,10 @@ TEST_F(TestConversion, passValueInRangeExpectToGetValidOutput)
     EXPECT_EQ(toEnum(2), Enum::two);
 }
 
-TEST_F(TestConversion, passInvalidValueExpectToThrowOutOfRangeException)
+TEST_F(TestConversion, passInvalidValueExpectToThrowException)
 {
-    EXPECT_THROW(toEnum(-1), std::out_of_range);
-    EXPECT_THROW(toEnum(3), std::out_of_range);
+    EXPECT_THROW(toEnum(-1), sdbusplus::exception::SdBusError);
+    EXPECT_THROW(toEnum(3), sdbusplus::exception::SdBusError);
 }
 
 TEST_F(TestConversion, convertsToUnderlyingType)
@@ -72,10 +72,11 @@ TEST_F(TestConversion, convertsStringToEnum)
 
 TEST_F(TestConversion, enumToStringThrowsWhenUknownEnumPassed)
 {
-    EXPECT_THROW(enumToString(static_cast<Enum>(77)), std::out_of_range);
+    EXPECT_THROW(enumToString(static_cast<Enum>(77)),
+                 sdbusplus::exception::SdBusError);
 }
 
 TEST_F(TestConversion, toEnumThrowsWhenUknownStringPassed)
 {
-    EXPECT_THROW(toEnum("four"), std::out_of_range);
+    EXPECT_THROW(toEnum("four"), sdbusplus::exception::SdBusError);
 }

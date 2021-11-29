@@ -24,11 +24,11 @@ struct SensorPath
     }
 };
 
-struct SensorMetadata
+struct Metadata
 {
     static std::string str()
     {
-        return "sensorMetadata";
+        return "metadata";
     }
 };
 
@@ -37,14 +37,6 @@ struct OperationType
     static std::string str()
     {
         return "operationType";
-    }
-};
-
-struct MetricMetadata
-{
-    static std::string str()
-    {
-        return "metricMetadata";
     }
 };
 

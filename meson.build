@@ -91,6 +91,7 @@ executable(
         'src/trigger_manager.cpp',
         'src/types/report_types.cpp',
         'src/utils/conversion_trigger.cpp',
+        'src/utils/generate_id.cpp',
     ],
     dependencies: [
         boost,

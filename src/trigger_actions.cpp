@@ -99,7 +99,7 @@ void fillActions(
     std::vector<std::unique_ptr<interfaces::TriggerAction>>& actionsIf,
     const std::vector<TriggerAction>& ActionsEnum, ::numeric::Type type,
     double thresholdValue, interfaces::ReportManager& reportManager,
-    const std::vector<std::string>& reportNames)
+    const std::vector<std::string>& reportIds)
 {
     actionsIf.reserve(ActionsEnum.size());
     for (auto actionType : ActionsEnum)
@@ -121,7 +121,7 @@ void fillActions(
             case TriggerAction::UpdateReport:
             {
                 actionsIf.emplace_back(
-                    std::make_unique<UpdateReport>(reportManager, reportNames));
+                    std::make_unique<UpdateReport>(reportManager, reportIds));
                 break;
             }
         }
@@ -185,7 +185,7 @@ void fillActions(
     std::vector<std::unique_ptr<interfaces::TriggerAction>>& actionsIf,
     const std::vector<TriggerAction>& ActionsEnum,
     ::discrete::Severity severity, interfaces::ReportManager& reportManager,
-    const std::vector<std::string>& reportNames)
+    const std::vector<std::string>& reportIds)
 {
     actionsIf.reserve(ActionsEnum.size());
     for (auto actionType : ActionsEnum)
@@ -207,7 +207,7 @@ void fillActions(
             case TriggerAction::UpdateReport:
             {
                 actionsIf.emplace_back(
-                    std::make_unique<UpdateReport>(reportManager, reportNames));
+                    std::make_unique<UpdateReport>(reportManager, reportIds));
                 break;
             }
         }
@@ -241,7 +241,7 @@ void fillActions(
     std::vector<std::unique_ptr<interfaces::TriggerAction>>& actionsIf,
     const std::vector<TriggerAction>& ActionsEnum,
     interfaces::ReportManager& reportManager,
-    const std::vector<std::string>& reportNames)
+    const std::vector<std::string>& reportIds)
 {
     actionsIf.reserve(ActionsEnum.size());
     for (auto actionType : ActionsEnum)
@@ -261,7 +261,7 @@ void fillActions(
             case TriggerAction::UpdateReport:
             {
                 actionsIf.emplace_back(
-                    std::make_unique<UpdateReport>(reportManager, reportNames));
+                    std::make_unique<UpdateReport>(reportManager, reportIds));
                 break;
             }
         }
@@ -272,7 +272,7 @@ void fillActions(
 
 void UpdateReport::commit(const std::string&, uint64_t, double)
 {
-    for (const auto& name : reportNames)
+    for (const auto& name : reportIds)
     {
         reportManager.updateReport(name);
     }

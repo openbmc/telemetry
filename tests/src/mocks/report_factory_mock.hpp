@@ -15,14 +15,15 @@ class ReportFactoryMock : public interfaces::ReportFactory
         return utils::transform(readingParams, [](const auto& params) {
             return LabeledMetricParameters(
                 utils::transform(std::get<0>(params),
-                                 [](const auto& sensorPath) {
-                                     return LabeledSensorParameters("Service",
-                                                                    sensorPath);
+                                 [](const auto& sensorData) {
+                                     return LabeledSensorParameters(
+                                         "Service", std::get<0>(sensorData),
+                                         std::get<1>(sensorData));
                                  }),
                 utils::toOperationType(std::get<1>(params)),
-                std::get<2>(params), std::get<3>(params),
-                utils::toCollectionTimeScope(std::get<4>(params)),
-                CollectionDuration(Milliseconds(std::get<5>(params))));
+                std::get<2>(params),
+                utils::toCollectionTimeScope(std::get<3>(params)),
+                CollectionDuration(Milliseconds(std::get<4>(params))));
         });
     }
 
@@ -35,9 +36,10 @@ class ReportFactoryMock : public interfaces::ReportFactory
             .WillByDefault(
                 WithArgs<1>(Invoke(&ReportFactoryMock::convertToLabeled)));
 
-        ON_CALL(*this, make(A<const std::string&>(), _, _, _, _, _, _, _, _, _))
-            .WillByDefault(WithArgs<0>(Invoke([](const std::string& name) {
-                return std::make_unique<NiceMock<ReportMock>>(name);
+        ON_CALL(*this,
+                make(A<const std::string&>(), _, _, _, _, _, _, _, _, _, _))
+            .WillByDefault(WithArgs<0>(Invoke([](const std::string& id) {
+                return std::make_unique<NiceMock<ReportMock>>(id);
             })));
     }
 
@@ -46,7 +48,7 @@ class ReportFactoryMock : public interfaces::ReportFactory
                 (const, override));
 
     MOCK_METHOD(std::unique_ptr<interfaces::Report>, make,
-                (const std::string&, const ReportingType,
+                (const std::string&, const std::string&, const ReportingType,
                  const std::vector<ReportAction>&, Milliseconds, uint64_t,
                  const ReportUpdates, interfaces::ReportManager&,
                  interfaces::JsonStorage&, std::vector<LabeledMetricParameters>,
@@ -62,15 +64,16 @@ class ReportFactoryMock : public interfaces::ReportFactory
         {
             const ReportParams& params = *paramsRef;
             return EXPECT_CALL(
-                *this, make(params.reportName(), params.reportingType(),
-                            params.reportActions(), params.interval(),
-                            params.appendLimit(), params.reportUpdates(), rm,
-                            js, params.metricParameters(), params.enabled()));
+                *this, make(params.reportId(), params.reportName(),
+                            params.reportingType(), params.reportActions(),
+                            params.interval(), params.appendLimit(),
+                            params.reportUpdates(), rm, js,
+                            params.metricParameters(), params.enabled()));
         }
         else
         {
             using testing::_;
-            return EXPECT_CALL(*this, make(_, _, _, _, _, _, rm, js, _, _));
+            return EXPECT_CALL(*this, make(_, _, _, _, _, _, _, rm, js, _, _));
         }
     }
 };

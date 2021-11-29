@@ -9,6 +9,17 @@
 class ReportParams final
 {
   public:
+    ReportParams& reportId(std::string val)
+    {
+        reportIdProperty = std::move(val);
+        return *this;
+    }
+
+    const std::string& reportId() const
+    {
+        return reportIdProperty;
+    }
+
     ReportParams& reportName(std::string val)
     {
         reportNameProperty = std::move(val);
@@ -98,6 +109,7 @@ class ReportParams final
     }
 
   private:
+    std::string reportIdProperty = "TestId";
     std::string reportNameProperty = "TestReport";
     ReportingType reportingTypeProperty = ReportingType::onRequest;
     std::vector<ReportAction> reportActionsProperty;
@@ -107,18 +119,18 @@ class ReportParams final
     std::vector<LabeledMetricParameters> metricParametersProperty{
         {LabeledMetricParameters{
              {LabeledSensorParameters{"Service",
-                                      "/xyz/openbmc_project/sensors/power/p1"}},
+                                      "/xyz/openbmc_project/sensors/power/p1",
+                                      "metadata1"}},
              OperationType::single,
              "MetricId1",
-             "Metadata1",
              CollectionTimeScope::point,
              CollectionDuration(Milliseconds(0u))},
          LabeledMetricParameters{
              {LabeledSensorParameters{"Service",
-                                      "/xyz/openbmc_project/sensors/power/p2"}},
+                                      "/xyz/openbmc_project/sensors/power/p2",
+                                      "metadata2"}},
              OperationType::single,
              "MetricId2",
-             "Metadata2",
              CollectionTimeScope::point,
              CollectionDuration(Milliseconds(0u))}}};
     bool enabledProperty = true;

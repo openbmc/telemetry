@@ -30,7 +30,7 @@ class ReportManager : public interfaces::ReportManager
     ReportManager& operator=(ReportManager&&) = delete;
 
     void removeReport(const interfaces::Report* report) override;
-    void updateReport(const std::string& name) override;
+    void updateReport(const std::string& id) override;
 
   private:
     std::unique_ptr<interfaces::ReportFactory> reportFactory;
@@ -39,19 +39,21 @@ class ReportManager : public interfaces::ReportManager
     std::unique_ptr<sdbusplus::asio::dbus_interface> reportManagerIface;
     std::vector<std::unique_ptr<interfaces::Report>> reports;
 
-    void verifyReportNameLength(const std::string& reportName);
+    void verifyReportIdLength(const std::string& reportName);
     void verifyAddReport(
-        const std::string& reportName, const ReportingType reportingType,
-        Milliseconds interval, const ReportUpdates reportUpdates,
+        const std::string& reportId, const std::string& reportName,
+        const ReportingType reportingType, Milliseconds interval,
+        const ReportUpdates reportUpdates,
         const std::vector<LabeledMetricParameters>& readingParams);
     interfaces::Report& addReport(
-        boost::asio::yield_context& yield, const std::string& reportName,
-        const ReportingType reportingType,
+        boost::asio::yield_context& yield, const std::string& reportId,
+        const std::string& reportName, const ReportingType reportingType,
         const std::vector<ReportAction>& reportActions, Milliseconds interval,
         const uint64_t appendLimit, const ReportUpdates reportUpdates,
         ReadingParameters metricParams, const bool enabled);
     interfaces::Report& addReport(
-        const std::string& reportName, const ReportingType reportingType,
+        const std::string& reportId, const std::string& reportName,
+        const ReportingType reportingType,
         const std::vector<ReportAction>& reportActions, Milliseconds interval,
         const uint64_t appendLimit, const ReportUpdates reportUpdates,
         std::vector<LabeledMetricParameters> metricParams, const bool enabled);
@@ -60,7 +62,7 @@ class ReportManager : public interfaces::ReportManager
   public:
     static constexpr size_t maxReports{TELEMETRY_MAX_REPORTS};
     static constexpr size_t maxReadingParams{TELEMETRY_MAX_READING_PARAMS};
-    static constexpr size_t maxReportNameLength{
+    static constexpr size_t maxReportIdLength{
         TELEMETRY_MAX_DBUS_PATH_LENGTH -
         std::string_view(Report::reportDir).length()};
     static constexpr Milliseconds minInterval{TELEMETRY_MIN_INTERVAL};

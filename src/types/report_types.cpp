@@ -13,12 +13,13 @@ ReadingParameters
                 utils::transform(
                     metricParams.at_label<ts::SensorPath>(),
                     [](const LabeledSensorParameters& sensorParameters) {
-                        return sdbusplus::message::object_path(
-                            sensorParameters.at_label<ts::Path>());
+                        return std::tuple<sdbusplus::message::object_path,
+                                          std::string>(
+                            sensorParameters.at_label<ts::Path>(),
+                            sensorParameters.at_label<ts::Metadata>());
                     }),
                 utils::enumToString(metricParams.at_label<ts::OperationType>()),
                 metricParams.at_label<ts::Id>(),
-                metricParams.at_label<ts::MetricMetadata>(),
                 utils::enumToString(
                     metricParams.at_label<ts::CollectionTimeScope>()),
                 metricParams.at_label<ts::CollectionDuration>().t.count());

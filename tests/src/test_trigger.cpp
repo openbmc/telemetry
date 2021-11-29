@@ -57,7 +57,7 @@ class TestTrigger : public Test
         return std::make_unique<Trigger>(
             DbusEnvironment::getIoc(), DbusEnvironment::getObjServer(),
             params.id(), params.name(), params.triggerActions(),
-            params.reportNames(), params.sensors(), params.thresholdParams(),
+            params.reportIds(), params.sensors(), params.thresholdParams(),
             std::vector<std::shared_ptr<interfaces::Threshold>>{},
             *triggerManagerMockPtr, storageMock);
     }
@@ -109,7 +109,7 @@ TEST_F(TestTrigger, checkIfPropertiesAreSet)
                 Eq(utils::fromLabeledSensorsInfo(triggerParams.sensors())));
     EXPECT_THAT(
         getProperty<std::vector<std::string>>(sut->getPath(), "ReportNames"),
-        Eq(triggerParams.reportNames()));
+        Eq(triggerParams.reportIds()));
     EXPECT_THAT(
         getProperty<TriggerThresholdParams>(sut->getPath(), "Thresholds"),
         Eq(std::visit(utils::FromLabeledThresholdParamConversion(),
@@ -268,10 +268,10 @@ TEST_F(TestTriggerStore, settingPersistencyToTrueStoresTriggerTriggerActions)
                 Eq(triggerParams.triggerActions()));
 }
 
-TEST_F(TestTriggerStore, settingPersistencyToTrueStoresTriggerReportNames)
+TEST_F(TestTriggerStore, settingPersistencyToTrueStoresTriggerReportIds)
 {
-    ASSERT_THAT(storedConfiguration.at("ReportNames"),
-                Eq(triggerParams.reportNames()));
+    ASSERT_THAT(storedConfiguration.at("ReportIds"),
+                Eq(triggerParams.reportIds()));
 }
 
 TEST_F(TestTriggerStore, settingPersistencyToTrueStoresTriggerSensors)
@@ -280,7 +280,7 @@ TEST_F(TestTriggerStore, settingPersistencyToTrueStoresTriggerSensors)
     expectedItem["service"] = "service1";
     expectedItem["sensorPath"] =
         "/xyz/openbmc_project/sensors/temperature/BMC_Temp";
-    expectedItem["sensorMetadata"] = "metadata1";
+    expectedItem["metadata"] = "metadata1";
 
     ASSERT_THAT(storedConfiguration.at("Sensors"), ElementsAre(expectedItem));
 }

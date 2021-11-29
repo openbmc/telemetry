@@ -26,7 +26,7 @@ class TestReportManager : public Test
     StorageMock& storageMock = *storageMockPtr;
 
     std::unique_ptr<ReportMock> reportMockPtr =
-        std::make_unique<NiceMock<ReportMock>>(reportParams.reportName());
+        std::make_unique<NiceMock<ReportMock>>(reportParams.reportId());
     ReportMock& reportMock = *reportMockPtr;
 
     std::unique_ptr<ReportManager> sut;
@@ -68,14 +68,16 @@ class TestReportManager : public Test
 
     auto addReport(const ReportParams& params)
     {
-        return addReport(
-            params.reportName(), utils::enumToString(params.reportingType()),
-            utils::enumToString(params.reportUpdates()), params.appendLimit(),
-            utils::transform(
-                params.reportActions(),
-                [](const auto v) { return utils::enumToString(v); }),
-            params.interval().count(),
-            toReadingParameters(params.metricParameters()));
+        return addReport(params.reportId(), params.reportName(),
+                         utils::enumToString(params.reportingType()),
+                         utils::enumToString(params.reportUpdates()),
+                         params.appendLimit(),
+                         utils::transform(params.reportActions(),
+                                          [](const auto v) {
+                                              return utils::enumToString(v);
+                                          }),
+                         params.interval().count(),
+                         toReadingParameters(params.metricParameters()));
     }
 
     template <class T>
@@ -110,16 +112,42 @@ TEST_F(TestReportManager, addReport)
     EXPECT_THAT(path, Eq(reportMock.getPath()));
 }
 
-TEST_F(TestReportManager, addReportWithMaxLengthName)
+TEST_F(TestReportManager, nameIsUsedToGenerateIdWhenIdIsEmptyInAddReport)
 {
-    std::string reportName(ReportManager::maxReportNameLength, 'z');
-    reportParams.reportName(reportName);
+    reportParams.reportId("ReportName");
+    reportParams.reportName("ReportName");
+
+    reportFactoryMock.expectMake(reportParams, Ref(*sut), Ref(storageMock));
+
+    auto [ec, path] = addReport(reportParams.reportId(""));
+
+    EXPECT_THAT(ec.value(), Eq(boost::system::errc::success));
+    EXPECT_THAT(path, Eq("/ReportName"));
+}
+
+TEST_F(TestReportManager, nameIsUsedToGenerateIdWhenIdIsNamespace)
+{
+    reportParams.reportId("Prefix/ReportName");
+    reportParams.reportName("ReportName");
+
+    reportFactoryMock.expectMake(reportParams, Ref(*sut), Ref(storageMock));
+
+    auto [ec, path] = addReport(reportParams.reportId("Prefix/"));
+
+    EXPECT_THAT(ec.value(), Eq(boost::system::errc::success));
+    EXPECT_THAT(path, Eq("/Prefix/ReportName"));
+}
+
+TEST_F(TestReportManager, addReportWithMaxLengthId)
+{
+    std::string reportId(ReportManager::maxReportIdLength, 'z');
+    reportParams.reportId(reportId);
     reportFactoryMock.expectMake(reportParams, Ref(*sut), Ref(storageMock));
 
     auto [ec, path] = addReport(reportParams);
 
     EXPECT_THAT(ec.value(), Eq(boost::system::errc::success));
-    EXPECT_THAT(path, Eq("/"s + reportName));
+    EXPECT_THAT(path, Eq("/"s + reportId));
 }
 
 TEST_F(TestReportManager, DISABLED_failToAddReportWithTooLongName)
@@ -127,8 +155,8 @@ TEST_F(TestReportManager, DISABLED_failToAddReportWithTooLongName)
     reportFactoryMock.expectMake(std::nullopt, Ref(*sut), Ref(storageMock))
         .Times(0);
 
-    reportParams.reportName(
-        std::string(ReportManager::maxReportNameLength + 1, 'z'));
+    reportParams.reportId(
+        std::string(ReportManager::maxReportIdLength + 1, 'z'));
 
     auto [ec, path] = addReport(reportParams);
 
@@ -204,14 +232,14 @@ TEST_F(TestReportManager, DISABLED_failToAddReportWhenMaxReportIsReached)
 
     for (size_t i = 0; i < ReportManager::maxReports; i++)
     {
-        reportParams.reportName(reportParams.reportName() + std::to_string(i));
+        reportParams.reportId(reportParams.reportName() + std::to_string(i));
 
         auto [ec, path] = addReport(reportParams);
         EXPECT_THAT(ec.value(), Eq(boost::system::errc::success));
     }
 
-    reportParams.reportName(reportParams.reportName() +
-                            std::to_string(ReportManager::maxReports));
+    reportParams.reportId(reportParams.reportName() +
+                          std::to_string(ReportManager::maxReports));
     auto [ec, path] = addReport(reportParams);
 
     EXPECT_THAT(ec.value(), Eq(boost::system::errc::too_many_files_open));
@@ -270,7 +298,7 @@ TEST_F(TestReportManager, updateReportCallsUpdateReadingsForExistReport)
     EXPECT_CALL(reportMock, updateReadings());
 
     addReport(reportParams);
-    sut->updateReport(reportParams.reportName());
+    sut->updateReport(reportParams.reportId());
 }
 
 TEST_F(TestReportManager, updateReportDoNothingIfReportDoesNotExist)
@@ -302,10 +330,10 @@ TEST_P(TestReportManagerWithAggregationOperationType,
     reportParams.metricParameters(
         std::vector<LabeledMetricParameters>{{LabeledMetricParameters{
             {LabeledSensorParameters{"Service",
-                                     "/xyz/openbmc_project/sensors/power/p1"}},
+                                     "/xyz/openbmc_project/sensors/power/p1",
+                                     "Metadata1"}},
             operationType,
             "MetricId1",
-            "Metadata1",
             CollectionTimeScope::point,
             CollectionDuration(Milliseconds(0u))}}});
 
@@ -315,7 +343,7 @@ TEST_P(TestReportManagerWithAggregationOperationType,
     auto [ec, path] = addReport(reportParams);
 
     EXPECT_THAT(ec.value(), Eq(boost::system::errc::success));
-    EXPECT_THAT(path, Eq("/"s + reportParams.reportName()));
+    EXPECT_THAT(path, Eq("/"s + reportParams.reportId()));
 }
 
 class TestReportManagerStorage : public TestReportManager
@@ -344,6 +372,7 @@ class TestReportManagerStorage : public TestReportManager
     nlohmann::json data = nlohmann::json{
         {"Enabled", reportParams.enabled()},
         {"Version", Report::reportVersion},
+        {"Id", reportParams.reportId()},
         {"Name", reportParams.reportName()},
         {"ReportingType", utils::toUnderlying(reportParams.reportingType())},
         {"ReportActions", reportParams.reportActions()},

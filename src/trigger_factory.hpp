@@ -18,7 +18,7 @@ class TriggerFactory : public interfaces::TriggerFactory
     std::unique_ptr<interfaces::Trigger>
         make(const std::string& id, const std::string& name,
              const std::vector<std::string>& triggerActions,
-             const std::vector<std::string>& reportNames,
+             const std::vector<std::string>& reportIds,
              interfaces::TriggerManager& triggerManager,
              interfaces::JsonStorage& triggerStorage,
              const LabeledTriggerThresholdParams& labeledThresholdParams,

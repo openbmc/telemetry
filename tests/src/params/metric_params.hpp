@@ -35,17 +35,6 @@ class MetricParams final
         return idProperty;
     }
 
-    MetricParams& metadata(std::string val)
-    {
-        metadataProperty = std::move(val);
-        return *this;
-    }
-
-    const std::string& metadata() const
-    {
-        return metadataProperty;
-    }
-
     MetricParams& collectionTimeScope(CollectionTimeScope val)
     {
         collectionTimeScopeProperty = val;
@@ -93,7 +82,6 @@ class MetricParams final
   private:
     OperationType operationTypeProperty = {};
     std::string idProperty = "MetricId";
-    std::string metadataProperty = "MetricMetadata";
     CollectionTimeScope collectionTimeScopeProperty = {};
     CollectionDuration collectionDurationProperty =
         CollectionDuration(Milliseconds(0u));

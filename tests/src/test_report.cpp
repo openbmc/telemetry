@@ -6,6 +6,7 @@
 #include "params/report_params.hpp"
 #include "report.hpp"
 #include "report_manager.hpp"
+#include "utils/clock.hpp"
 #include "utils/contains.hpp"
 #include "utils/conv_container.hpp"
 #include "utils/transform.hpp"
@@ -58,10 +59,10 @@ class TestReport : public Test
         sut = makeReport(ReportParams());
     }
 
-    static interfaces::JsonStorage::FilePath to_file_path(std::string name)
+    static interfaces::JsonStorage::FilePath to_file_path(std::string id)
     {
         return interfaces::JsonStorage::FilePath(
-            std::to_string(std::hash<std::string>{}(name)));
+            std::to_string(std::hash<std::string>{}(id)));
     }
 
     std::unique_ptr<Report> makeReport(const ReportParams& params)
@@ -70,9 +71,9 @@ class TestReport : public Test
 
         return std::make_unique<Report>(
             DbusEnvironment::getIoc(), DbusEnvironment::getObjServer(),
-            params.reportName(), params.reportingType(), params.reportActions(),
-            params.interval(), params.appendLimit(), params.reportUpdates(),
-            *reportManagerMock, storageMock,
+            params.reportId(), params.reportName(), params.reportingType(),
+            params.reportActions(), params.interval(), params.appendLimit(),
+            params.reportUpdates(), *reportManagerMock, storageMock,
             utils::convContainer<std::shared_ptr<interfaces::Metric>>(
                 metricMocks),
             params.enabled());
@@ -118,6 +119,11 @@ class TestReport : public Test
     }
 };
 
+TEST_F(TestReport, returnsId)
+{
+    EXPECT_THAT(sut->getId(), Eq(defaultParams.reportId()));
+}
+
 TEST_F(TestReport, verifyIfPropertiesHaveValidValue)
 {
     EXPECT_THAT(getProperty<bool>(sut->getPath(), "Enabled"),
@@ -146,6 +152,8 @@ TEST_F(TestReport, verifyIfPropertiesHaveValidValue)
     EXPECT_THAT(getProperty<ReadingParameters>(
                     sut->getPath(), "ReadingParametersFutureVersion"),
                 Eq(toReadingParameters(defaultParams.metricParameters())));
+    EXPECT_THAT(getProperty<std::string>(sut->getPath(), "Name"),
+                Eq(defaultParams.reportName()));
 }
 
 TEST_F(TestReport, readingsAreInitialyEmpty)
@@ -204,7 +212,7 @@ TEST_F(TestReport, settingLogToMetricReportCollectionHaveNoEffect)
 
 TEST_F(TestReport, settingPersistencyToFalseRemovesReportFromStorage)
 {
-    EXPECT_CALL(storageMock, remove(to_file_path(sut->getName())));
+    EXPECT_CALL(storageMock, remove(to_file_path(sut->getId())));
 
     bool persistency = false;
     EXPECT_THAT(setProperty(sut->getPath(), "Persistency", persistency).value(),
@@ -228,7 +236,7 @@ TEST_F(TestReport, deletingNonExistingReportReturnInvalidRequestDescriptor)
 
 TEST_F(TestReport, deleteReportExpectThatFileIsRemoveFromStorage)
 {
-    EXPECT_CALL(storageMock, remove(to_file_path(sut->getName())));
+    EXPECT_CALL(storageMock, remove(to_file_path(sut->getId())));
     auto ec = deleteReport(sut->getPath());
     EXPECT_THAT(ec, Eq(boost::system::errc::success));
 }
@@ -248,6 +256,7 @@ INSTANTIATE_TEST_SUITE_P(
     _, TestReportStore,
     Values(std::make_pair("Enabled"s, nlohmann::json(ReportParams().enabled())),
            std::make_pair("Version"s, nlohmann::json(6)),
+           std::make_pair("Id"s, nlohmann::json(ReportParams().reportId())),
            std::make_pair("Name"s, nlohmann::json(ReportParams().reportName())),
            std::make_pair("ReportingType",
                           nlohmann::json(ReportParams().reportingType())),
@@ -265,20 +274,20 @@ INSTANTIATE_TEST_SUITE_P(
                    {{{tstring::SensorPath::str(),
                       {{{tstring::Service::str(), "Service"},
                         {tstring::Path::str(),
-                         "/xyz/openbmc_project/sensors/power/p1"}}}},
+                         "/xyz/openbmc_project/sensors/power/p1"},
+                        {tstring::Metadata::str(), "metadata1"}}}},
                      {tstring::OperationType::str(), OperationType::single},
                      {tstring::Id::str(), "MetricId1"},
-                     {tstring::MetricMetadata::str(), "Metadata1"},
                      {tstring::CollectionTimeScope::str(),
                       CollectionTimeScope::point},
                      {tstring::CollectionDuration::str(), 0}},
                     {{tstring::SensorPath::str(),
                       {{{tstring::Service::str(), "Service"},
                         {tstring::Path::str(),
-                         "/xyz/openbmc_project/sensors/power/p2"}}}},
+                         "/xyz/openbmc_project/sensors/power/p2"},
+                        {tstring::Metadata::str(), "metadata2"}}}},
                      {tstring::OperationType::str(), OperationType::single},
                      {tstring::Id::str(), "MetricId2"},
-                     {tstring::MetricMetadata::str(), "Metadata2"},
                      {tstring::CollectionTimeScope::str(),
                       CollectionTimeScope::point},
                      {tstring::CollectionDuration::str(), 0}}}))));
@@ -289,9 +298,9 @@ TEST_P(TestReportStore, settingPersistencyToTrueStoresReport)
 
     {
         InSequence seq;
-        EXPECT_CALL(storageMock, remove(to_file_path(sut->getName())));
+        EXPECT_CALL(storageMock, remove(to_file_path(sut->getId())));
         EXPECT_CALL(checkPoint, Call());
-        EXPECT_CALL(storageMock, store(to_file_path(sut->getName()), _))
+        EXPECT_CALL(storageMock, store(to_file_path(sut->getId()), _))
             .WillOnce(SaveArg<1>(&storedConfiguration));
     }
 
@@ -306,8 +315,7 @@ TEST_P(TestReportStore, settingPersistencyToTrueStoresReport)
 
 TEST_P(TestReportStore, reportIsSavedToStorageAfterCreated)
 {
-    EXPECT_CALL(storageMock,
-                store(to_file_path(ReportParams().reportName()), _))
+    EXPECT_CALL(storageMock, store(to_file_path(ReportParams().reportId()), _))
         .WillOnce(SaveArg<1>(&storedConfiguration));
 
     sut = makeReport(ReportParams());
@@ -337,7 +345,7 @@ TEST_P(TestReportValidNames, reportCtorDoesNotThrowOnValidName)
     EXPECT_NO_THROW(makeReport(GetParam()));
 }
 
-class TestReportInvalidNames :
+class TestReportInvalidIds :
     public TestReport,
     public WithParamInterface<ReportParams>
 {
@@ -346,23 +354,18 @@ class TestReportInvalidNames :
     {}
 };
 
-INSTANTIATE_TEST_SUITE_P(InvalidNames, TestReportInvalidNames,
-                         Values(ReportParams().reportName("/"),
-                                ReportParams().reportName("/Invalid"),
-                                ReportParams().reportName("Invalid/"),
-                                ReportParams().reportName("Invalid/Invalid/"),
-                                ReportParams().reportName("Invalid?")));
+INSTANTIATE_TEST_SUITE_P(InvalidNames, TestReportInvalidIds,
+                         Values(ReportParams().reportId("/"),
+                                ReportParams().reportId("/Invalid"),
+                                ReportParams().reportId("Invalid/"),
+                                ReportParams().reportId("Invalid/Invalid/"),
+                                ReportParams().reportId("Invalid?")));
 
-TEST_P(TestReportInvalidNames, reportCtorThrowOnInvalidName)
-{
-    EXPECT_THROW(makeReport(GetParam()), sdbusplus::exception::SdBusError);
-}
-
-TEST_F(TestReportInvalidNames, reportCtorThrowOnInvalidNameAndNoStoreIsCalled)
+TEST_P(TestReportInvalidIds, failsToCreateReportWithInvalidName)
 {
     EXPECT_CALL(storageMock, store).Times(0);
-    EXPECT_THROW(makeReport(ReportParams().reportName("/Invalid")),
-                 sdbusplus::exception::SdBusError);
+
+    EXPECT_THROW(makeReport(GetParam()), sdbusplus::exception::SdBusError);
 }
 
 class TestReportAllReportTypes :
@@ -391,7 +394,7 @@ TEST_P(TestReportAllReportTypes, returnPropertValueOfReportType)
 
 TEST_P(TestReportAllReportTypes, updateReadingsCallEnabledPropertyOff)
 {
-    const uint64_t expectedTime = std::time(0);
+    const uint64_t expectedTime = Clock().timestamp();
 
     setProperty(sut->getPath(), "Enabled", false);
     sut->updateReadings();
@@ -404,7 +407,7 @@ TEST_P(TestReportAllReportTypes, updateReadingsCallEnabledPropertyOff)
 
 TEST_P(TestReportAllReportTypes, updateReadingsCallEnabledPropertyOn)
 {
-    const uint64_t expectedTime = std::time(0);
+    const uint64_t expectedTime = Clock().timestamp();
 
     sut->updateReadings();
     const auto [timestamp, readings] =
@@ -425,7 +428,7 @@ class TestReportOnRequestType : public TestReport
 
 TEST_F(TestReportOnRequestType, updatesReadingTimestamp)
 {
-    const uint64_t expectedTime = std::time(0);
+    const uint64_t expectedTime = Clock().timestamp();
 
     ASSERT_THAT(update(sut->getPath()), Eq(boost::system::errc::success));
 
@@ -504,7 +507,7 @@ class TestReportPeriodicReport : public TestReport
 
 TEST_F(TestReportPeriodicReport, readingTimestampIsUpdatedAfterIntervalExpires)
 {
-    const uint64_t expectedTime = std::time(0);
+    const uint64_t expectedTime = Clock().timestamp();
     DbusEnvironment::sleepFor(ReportManager::minInterval + 1ms);
 
     const auto [timestamp, readings] =

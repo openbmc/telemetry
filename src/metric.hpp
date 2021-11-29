@@ -12,7 +12,7 @@ class Metric :
 {
   public:
     Metric(Sensors sensors, OperationType operationType, std::string id,
-           std::string metadata, CollectionTimeScope, CollectionDuration,
+           CollectionTimeScope, CollectionDuration,
            std::unique_ptr<interfaces::Clock>);
     ~Metric();
 
@@ -34,11 +34,9 @@ class Metric :
         makeCollectionData(size_t size, OperationType, CollectionTimeScope,
                            CollectionDuration);
 
-    void attemptUnpackJsonMetadata();
     CollectionData& findAssociatedData(const interfaces::Sensor& notifier);
 
     std::string id;
-    std::string metadata;
     std::vector<MetricValue> readings;
     Sensors sensors;
     OperationType operationType;

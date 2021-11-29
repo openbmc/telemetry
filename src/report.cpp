@@ -1,6 +1,7 @@
 #include "report.hpp"
 
 #include "report_manager.hpp"
+#include "utils/clock.hpp"
 #include "utils/contains.hpp"
 #include "utils/transform.hpp"
 
@@ -12,7 +13,7 @@
 
 Report::Report(boost::asio::io_context& ioc,
                const std::shared_ptr<sdbusplus::asio::object_server>& objServer,
-               const std::string& reportName,
+               const std::string& reportId, const std::string& reportName,
                const ReportingType reportingTypeIn,
                std::vector<ReportAction> reportActionsIn,
                const Milliseconds intervalIn, const uint64_t appendLimitIn,
@@ -21,15 +22,14 @@ Report::Report(boost::asio::io_context& ioc,
                interfaces::JsonStorage& reportStorageIn,
                std::vector<std::shared_ptr<interfaces::Metric>> metricsIn,
                const bool enabledIn) :
-    name(reportName),
-    path(reportDir + name), reportingType(reportingTypeIn),
-    interval(intervalIn), reportActions(std::move(reportActionsIn)),
+    id(reportId),
+    name(reportName), reportingType(reportingTypeIn), interval(intervalIn),
+    reportActions(std::move(reportActionsIn)),
     sensorCount(getSensorCount(metricsIn)),
     appendLimit(deduceAppendLimit(appendLimitIn)),
     reportUpdates(reportUpdatesIn),
     readingsBuffer(deduceBufferSize(reportUpdates, reportingType)),
     objServer(objServer), metrics(std::move(metricsIn)), timer(ioc),
-    fileName(std::to_string(std::hash<std::string>{}(name))),
     reportStorage(reportStorageIn), enabled(enabledIn)
 {
     readingParameters =
@@ -39,17 +39,21 @@ Report::Report(boost::asio::io_context& ioc,
 
     readingParametersPastVersion =
         utils::transform(readingParameters, [](const auto& item) {
+            const auto& [sensorData, operationType, id, collectionTimeScope,
+                         collectionDuration] = item;
+
             return ReadingParametersPastVersion::value_type(
-                std::get<0>(item).front(), std::get<1>(item), std::get<2>(item),
-                std::get<3>(item));
+                std::get<0>(sensorData.front()), operationType, id,
+                std::get<1>(sensorData.front()));
         });
 
     deleteIface = objServer->add_unique_interface(
-        path, deleteIfaceName, [this, &ioc, &reportManager](auto& dbusIface) {
+        getPath(), deleteIfaceName,
+        [this, &ioc, &reportManager](auto& dbusIface) {
             dbusIface.register_method("Delete", [this, &ioc, &reportManager] {
                 if (persistency)
                 {
-                    reportStorage.remove(fileName);
+                    reportStorage.remove(fileName());
                 }
                 boost::asio::post(ioc, [this, &reportManager] {
                     reportManager.removeReport(this);
@@ -128,7 +132,8 @@ void Report::setReportUpdates(const ReportUpdates newReportUpdates)
 
 std::unique_ptr<sdbusplus::asio::dbus_interface> Report::makeReportInterface()
 {
-    auto dbusIface = objServer->add_unique_interface(path, reportIfaceName);
+    auto dbusIface =
+        objServer->add_unique_interface(getPath(), reportIfaceName);
     dbusIface->register_property_rw(
         "Enabled", enabled, sdbusplus::vtable::property_::emits_change,
         [this](bool newVal, const auto&) {
@@ -189,7 +194,7 @@ std::unique_ptr<sdbusplus::asio::dbus_interface> Report::makeReportInterface()
             }
             else
             {
-                reportStorage.remove(fileName);
+                reportStorage.remove(fileName());
                 persistency = false;
             }
             return true;
@@ -220,6 +225,9 @@ std::unique_ptr<sdbusplus::asio::dbus_interface> Report::makeReportInterface()
             return utils::contains(reportActions,
                                    ReportAction::emitsReadingsUpdate);
         });
+    dbusIface->register_property_r("Name", std::string{},
+                                   sdbusplus::vtable::property_::const_,
+                                   [this](const auto&) { return name; });
     dbusIface->register_property_r(
         "LogToMetricReportsCollection", bool{},
         sdbusplus::vtable::property_::const_, [this](const auto&) {
@@ -307,8 +315,9 @@ void Report::updateReadings()
         }
     }
 
-    readings = {std::time(0), std::vector<ReadingData>(readingsBuffer.begin(),
-                                                       readingsBuffer.end())};
+    readings = {
+        Clock().timestamp(),
+        std::vector<ReadingData>(readingsBuffer.begin(), readingsBuffer.end())};
 
     reportIface->signal_property("Readings");
 }
@@ -321,6 +330,7 @@ bool Report::storeConfiguration() const
 
         data["Enabled"] = enabled;
         data["Version"] = reportVersion;
+        data["Id"] = id;
         data["Name"] = name;
         data["ReportingType"] = utils::toUnderlying(reportingType);
         data["ReportActions"] =
@@ -335,7 +345,7 @@ bool Report::storeConfiguration() const
                 return metric->dumpConfiguration();
             });
 
-        reportStorage.store(fileName, data);
+        reportStorage.store(fileName(), data);
     }
     catch (const std::exception& e)
     {
@@ -346,4 +356,9 @@ bool Report::storeConfiguration() const
     }
 
     return true;
+}
+interfaces::JsonStorage::FilePath Report::fileName() const
+{
+    return interfaces::JsonStorage::FilePath{
+        std::to_string(std::hash<std::string>{}(id))};
 }
