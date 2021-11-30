@@ -1,0 +1,142 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fc3bb50a_a9f6d1eb",
+        "filename": "src/report.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2021-11-30T16:56:04Z",
+      "side": 1,
+      "message": "This code is very hard to read and check, is it possible to use here structured binding with clear variable names? It will cost a little more code but IMO it will be much more readable.",
+      "range": {
+        "startLine": 43,
+        "startChar": 0,
+        "endLine": 44,
+        "endChar": 75
+      },
+      "revId": "9bf9f340712dfccde6326d730aaa48e53b68d4b4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a5767cd2_3e8f7209",
+        "filename": "src/report.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 227,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2021-11-30T16:56:04Z",
+      "side": 1,
+      "message": "Szymon has added dbusIface.register_property_rw for \u0027Name\u0027 in Triggers in Telemetry code, maybe we could discuss which approach for the dbus interface of this property is to prevail and will be consistent within Telemetry?",
+      "range": {
+        "startLine": 225,
+        "startChar": 0,
+        "endLine": 227,
+        "endChar": 73
+      },
+      "revId": "9bf9f340712dfccde6326d730aaa48e53b68d4b4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8d2d3fc7_2ce2868b",
+        "filename": "src/report.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 357,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2021-11-30T16:56:04Z",
+      "side": 1,
+      "message": "Will it be better for performance to use the previous method - by using fileName variable and call this hash calc only once? When one approach is accepted then I suggest to use it for both Reports and Triggers.",
+      "range": {
+        "startLine": 357,
+        "startChar": 34,
+        "endLine": 357,
+        "endChar": 50
+      },
+      "revId": "9bf9f340712dfccde6326d730aaa48e53b68d4b4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8c95cd88_1b5e3443",
+        "filename": "src/report_factory.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2021-11-30T16:56:04Z",
+      "side": 1,
+      "message": "Please double check this one, if I remember correctly Piotr had mentioned that the default operation type should be \u0027Average\u0027.",
+      "range": {
+        "startLine": 98,
+        "startChar": 12,
+        "endLine": 98,
+        "endChar": 68
+      },
+      "revId": "9bf9f340712dfccde6326d730aaa48e53b68d4b4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7d5942da_1fbf61ae",
+        "filename": "src/report_manager.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2021-11-30T16:56:04Z",
+      "side": 1,
+      "message": "It is difficult to understand this fragment without diving more into the code, maybe using clear variable names with structured binding could improve this a little?",
+      "range": {
+        "startLine": 24,
+        "startChar": 0,
+        "endLine": 25,
+        "endChar": 51
+      },
+      "revId": "9bf9f340712dfccde6326d730aaa48e53b68d4b4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1f925b49_d584084e",
+        "filename": "src/report_manager.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2021-11-30T16:56:04Z",
+      "side": 1,
+      "message": "Shouldn\u0027t be \u0027utils::verifyIdCharacters(reportId)\u0027 also here?",
+      "range": {
+        "startLine": 155,
+        "startChar": 4,
+        "endLine": 155,
+        "endChar": 35
+      },
+      "revId": "9bf9f340712dfccde6326d730aaa48e53b68d4b4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
