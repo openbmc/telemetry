@@ -22,6 +22,29 @@
       "revId": "d5838c82efcc83930ffec02f4f969dfedecd6087",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "be3828a1_ed144e53",
+        "filename": "src/utils/generate_id.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2021-12-01T11:15:09Z",
+      "side": 1,
+      "message": "nit: I know that it was my idea, but the longer I look at this, the more I feel regret that I didn\u0027t use some mathematical or lookup-table count_digits() solution 😭",
+      "range": {
+        "startLine": 57,
+        "startChar": 48,
+        "endLine": 57,
+        "endChar": 77
+      },
+      "revId": "d5838c82efcc83930ffec02f4f969dfedecd6087",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }
