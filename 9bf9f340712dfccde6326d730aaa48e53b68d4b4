@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "5209e79b_531b7606",
+        "filename": "src/report.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-12-01T09:51:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fc3bb50a_a9f6d1eb",
+      "range": {
+        "startLine": 43,
+        "startChar": 0,
+        "endLine": 44,
+        "endChar": 75
+      },
+      "revId": "9bf9f340712dfccde6326d730aaa48e53b68d4b4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a5767cd2_3e8f7209",
         "filename": "src/report.cpp",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2021-11-30T16:56:04Z",
       "side": 1,
       "message": "Szymon has added dbusIface.register_property_rw for \u0027Name\u0027 in Triggers in Telemetry code, maybe we could discuss which approach for the dbus interface of this property is to prevail and will be consistent within Telemetry?",
+      "range": {
+        "startLine": 225,
+        "startChar": 0,
+        "endLine": 227,
+        "endChar": 73
+      },
+      "revId": "9bf9f340712dfccde6326d730aaa48e53b68d4b4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c7e32247_184a45fc",
+        "filename": "src/report.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 227,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-12-01T09:51:03Z",
+      "side": 1,
+      "message": "I will change it in separate commit",
+      "parentUuid": "a5767cd2_3e8f7209",
       "range": {
         "startLine": 225,
         "startChar": 0,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "77d6bcab_1002de66",
+        "filename": "src/report.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 357,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-12-01T09:51:03Z",
+      "side": 1,
+      "message": "It\u0027s once, when report is created and stored. It should not affect performance, on the other hand we don\u0027t keep file name in memory.\n\nI will change it in Triggers as separate commit.",
+      "parentUuid": "8d2d3fc7_2ce2868b",
+      "range": {
+        "startLine": 357,
+        "startChar": 34,
+        "endLine": 357,
+        "endChar": 50
+      },
+      "revId": "9bf9f340712dfccde6326d730aaa48e53b68d4b4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "8c95cd88_1b5e3443",
         "filename": "src/report_factory.cpp",
         "patchSetId": 1
@@ -91,6 +163,30 @@
       "revId": "9bf9f340712dfccde6326d730aaa48e53b68d4b4",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "240e26c4_283bf736",
+        "filename": "src/report_factory.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-12-01T09:51:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8c95cd88_1b5e3443",
+      "range": {
+        "startLine": 98,
+        "startChar": 12,
+        "endLine": 98,
+        "endChar": 68
+      },
+      "revId": "9bf9f340712dfccde6326d730aaa48e53b68d4b4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     },
     {
       "key": {
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "0abeff1c_da05a576",
+        "filename": "src/report_manager.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-12-01T09:51:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7d5942da_1fbf61ae",
+      "range": {
+        "startLine": 24,
+        "startChar": 0,
+        "endLine": 25,
+        "endChar": 51
+      },
+      "revId": "9bf9f340712dfccde6326d730aaa48e53b68d4b4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1f925b49_d584084e",
         "filename": "src/report_manager.cpp",
         "patchSetId": 1
@@ -137,6 +257,30 @@
       "revId": "9bf9f340712dfccde6326d730aaa48e53b68d4b4",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c10df03c_dc5b2c55",
+        "filename": "src/report_manager.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-12-01T09:51:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1f925b49_d584084e",
+      "range": {
+        "startLine": 155,
+        "startChar": 4,
+        "endLine": 155,
+        "endChar": 35
+      },
+      "revId": "9bf9f340712dfccde6326d730aaa48e53b68d4b4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }
