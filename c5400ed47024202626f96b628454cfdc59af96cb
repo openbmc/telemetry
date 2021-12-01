@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f8aa0b3e_1f87bf52",
+        "filename": "src/report.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 228,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2021-12-01T11:07:48Z",
+      "side": 1,
+      "message": "Are these interfaces now redundant and to be removed? Same change made in Triggers produced new interface \u0027TriggerActions\u0027 and removed interfaces \u0027LogToJournal\u0027, \u0027LogToRedfish\u0027, \u0027UpdateReport\u0027. IMO we should have a consistent approach in Reports and Triggers at this point.",
+      "range": {
+        "startLine": 217,
+        "startChar": 0,
+        "endLine": 228,
+        "endChar": 11
+      },
+      "revId": "c5400ed47024202626f96b628454cfdc59af96cb",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
