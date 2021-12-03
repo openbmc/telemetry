@@ -44,13 +44,10 @@ assert(boost.found(),
        'environemt to point at boost build. To build a boost you can use ' +
        'script ./scripts/boost_build_1.74.0.sh')
 
-phosphor_logging = dependency('phosphor-logging', required: false)
-if not phosphor_logging.found()
-    subproject('phosphor-logging', required: false)
-    phosphor_logging = declare_dependency(
-        include_directories: 'subprojects/phosphor-logging'
-    )
-endif
+phosphor_logging = dependency(
+    'phosphor-logging',
+    fallback: ['phosphor-logging', 'phosphor_logging_dep'],
+)
 
 sdbusplus = dependency('sdbusplus', fallback: ['sdbusplus', 'sdbusplus_dep'])
 systemd = dependency('systemd')
