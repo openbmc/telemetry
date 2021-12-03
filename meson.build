@@ -114,7 +114,7 @@ configure_file(
         'bindir': get_option('prefix') / get_option('bindir'),
     },
     install: true,
-    install_dir: systemd.get_pkgconfig_variable('systemdsystemunitdir'),
+    install_dir: systemd.get_variable(pkgconfig: 'systemdsystemunitdir'),
 )
 
 if get_option('buildtest')
