@@ -7,6 +7,7 @@
 
 #include <boost/asio/high_resolution_timer.hpp>
 #include <sdbusplus/asio/connection.hpp>
+#include <sdbusplus/bus/match.hpp>
 
 #include <memory>
 
@@ -51,5 +52,5 @@ class Sensor final :
     std::vector<std::weak_ptr<interfaces::SensorListener>> listeners;
     uint64_t timestamp = 0;
     std::optional<double> value;
-    std::unique_ptr<sdbusplus::bus::match::match> signalMonitor;
+    std::unique_ptr<sdbusplus::bus::match_t> signalMonitor;
 };

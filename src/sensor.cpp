@@ -132,7 +132,7 @@ void Sensor::makeSignalMonitor()
                        sensorId.path +
                        "',arg0='xyz.openbmc_project.Sensor.Value'"s;
 
-    signalMonitor = std::make_unique<sdbusplus::bus::match::match>(
+    signalMonitor = std::make_unique<sdbusplus::bus::match_t>(
         *bus, param,
         [weakSelf = weak_from_this()](sdbusplus::message::message& message) {
             signalProc(weakSelf, message);
