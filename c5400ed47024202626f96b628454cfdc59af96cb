@@ -94,6 +94,30 @@
       "revId": "c5400ed47024202626f96b628454cfdc59af96cb",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ff9c1b65_1df7affa",
+        "filename": "src/report.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 228,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2021-12-06T14:44:16Z",
+      "side": 1,
+      "message": "It is impossible to remove it now. It will be removed in future patch after new API is integrated.",
+      "parentUuid": "48a758c8_b682a18a",
+      "range": {
+        "startLine": 217,
+        "startChar": 0,
+        "endLine": 228,
+        "endChar": 11
+      },
+      "revId": "c5400ed47024202626f96b628454cfdc59af96cb",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }
