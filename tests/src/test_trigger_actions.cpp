@@ -220,7 +220,9 @@ class TestUpdateReport : public Test
   public:
     void make(std::vector<std::string> names)
     {
-        sut = std::make_unique<UpdateReport>(reportManager, std::move(names));
+        sut = std::make_unique<UpdateReport>(
+            reportManager,
+            std::make_shared<std::vector<std::string>>(std::move(names)));
     }
 
     NiceMock<ReportManagerMock> reportManager;
