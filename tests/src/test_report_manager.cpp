@@ -215,9 +215,9 @@ TEST_F(TestReportManager,
 
     reportParams.metricParameters(
         std::vector<LabeledMetricParameters>{{LabeledMetricParameters{
-            {LabeledSensorParameters{"Service",
-                                     "/xyz/openbmc_project/sensors/power/p1",
-                                     "Metadata1"}},
+            {LabeledSensorInfo{"Service",
+                               "/xyz/openbmc_project/sensors/power/p1",
+                               "Metadata1"}},
             OperationType::single,
             "MetricId1",
             CollectionTimeScope::point,
@@ -229,7 +229,7 @@ TEST_F(TestReportManager,
 
     for (size_t i = 0; i < ReportManager::maxNumberMetrics; i++)
     {
-        metricParamsVec.emplace_back(LabeledSensorParameters{
+        metricParamsVec.emplace_back(LabeledSensorInfo{
             "Service", "/xyz/openbmc_project/sensors/power/p1", "Metadata1"});
     }
 
@@ -396,9 +396,9 @@ TEST_P(TestReportManagerWithAggregationOperationType,
 {
     reportParams.metricParameters(
         std::vector<LabeledMetricParameters>{{LabeledMetricParameters{
-            {LabeledSensorParameters{"Service",
-                                     "/xyz/openbmc_project/sensors/power/p1",
-                                     "Metadata1"}},
+            {LabeledSensorInfo{"Service",
+                               "/xyz/openbmc_project/sensors/power/p1",
+                               "Metadata1"}},
             operationType,
             "MetricId1",
             CollectionTimeScope::point,
