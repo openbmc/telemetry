@@ -29,8 +29,11 @@ class TestTriggerManager : public Test
             },
             DbusEnvironment::serviceName(), TriggerManager::triggerManagerPath,
             TriggerManager::triggerManagerIfaceName, "AddTrigger", params.id(),
-            params.name(), params.triggerActions(), sensorInfos,
-            params.reportIds(),
+            params.name(),
+            utils::transform(
+                params.triggerActions(),
+                [](const auto& action) { return actionToString(action); }),
+            sensorInfos, params.reportIds(),
             std::visit(utils::FromLabeledThresholdParamConversion(),
                        params.thresholdParams()));
         return DbusEnvironment::waitForFuture(addTriggerPromise.get_future());
@@ -291,7 +294,10 @@ class TestTriggerManagerStorage : public TestTriggerManager
         {"Name", TriggerParams().name()},
         {"ThresholdParamsDiscriminator",
          TriggerParams().thresholdParams().index()},
-        {"TriggerActions", TriggerParams().triggerActions()},
+        {"TriggerActions", utils::transform(TriggerParams().triggerActions(),
+                                            [](const auto& action) {
+                                                return actionToString(action);
+                                            })},
         {"ThresholdParams", utils::labeledThresholdParamsToJson(
                                 TriggerParams().thresholdParams())},
         {"ReportIds", TriggerParams().reportIds()},

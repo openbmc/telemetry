@@ -4,36 +4,39 @@
 
 DiscreteThreshold::DiscreteThreshold(
     boost::asio::io_context& ioc, Sensors sensorsIn,
-    std::vector<std::string> sensorNames,
     std::vector<std::unique_ptr<interfaces::TriggerAction>> actionsIn,
-    Milliseconds dwellTimeIn, double thresholdValueIn, std::string name) :
+    Milliseconds dwellTimeIn, double thresholdValueIn, std::string nameIn,
+    const discrete::Severity severityIn) :
     ioc(ioc),
-    sensors(std::move(sensorsIn)), actions(std::move(actionsIn)),
-    dwellTime(dwellTimeIn), thresholdValue(thresholdValueIn), name(name)
+    actions(std::move(actionsIn)), dwellTime(dwellTimeIn),
+    thresholdValue(thresholdValueIn), name(nameIn), severity(severityIn)
 {
-    details.reserve(sensors.size());
-    for (size_t i = 0; i < sensors.size(); i++)
+    for (const auto& sensor : sensorsIn)
     {
-        details.emplace_back(sensorNames[i], false, ioc);
+        sensorDetails.emplace(sensor, makeDetails(sensor->getName()));
     }
 }
 
 void DiscreteThreshold::initialize()
 {
-    for (auto& sensor : sensors)
-    {
-        sensor->registerForUpdates(weak_from_this());
-    }
+    ThresholdMixin().initialize(this);
+}
+
+void DiscreteThreshold::updateSensors(Sensors newSensors)
+{
+    ThresholdMixin().updateSensors(this, std::move(newSensors));
 }
 
 DiscreteThreshold::ThresholdDetail&
-    DiscreteThreshold::getDetails(interfaces::Sensor& sensor)
+    DiscreteThreshold::getDetails(const interfaces::Sensor& sensor)
 {
-    auto it =
-        std::find_if(sensors.begin(), sensors.end(),
-                     [&sensor](const auto& x) { return &sensor == x.get(); });
-    auto index = std::distance(sensors.begin(), it);
-    return details.at(index);
+    return ThresholdMixin().getDetails(this, sensor);
+}
+
+std::shared_ptr<DiscreteThreshold::ThresholdDetail>
+    DiscreteThreshold::makeDetails(const std::string& sensorName)
+{
+    return std::make_shared<ThresholdDetail>(sensorName, false, ioc);
 }
 
 void DiscreteThreshold::sensorUpdated(interfaces::Sensor& sensor,
@@ -43,7 +46,8 @@ void DiscreteThreshold::sensorUpdated(interfaces::Sensor& sensor,
 void DiscreteThreshold::sensorUpdated(interfaces::Sensor& sensor,
                                       uint64_t timestamp, double value)
 {
-    auto& [sensorName, dwell, timer] = getDetails(sensor);
+    auto& details = getDetails(sensor);
+    auto& [sensorName, dwell, timer] = details;
 
     if (thresholdValue)
     {
@@ -54,15 +58,15 @@ void DiscreteThreshold::sensorUpdated(interfaces::Sensor& sensor,
         }
         else if (value == thresholdValue)
         {
-            startTimer(sensor, timestamp, value);
+            startTimer(details, timestamp, value);
         }
     }
 }
 
-void DiscreteThreshold::startTimer(interfaces::Sensor& sensor,
+void DiscreteThreshold::startTimer(DiscreteThreshold::ThresholdDetail& details,
                                    uint64_t timestamp, double value)
 {
-    auto& [sensorName, dwell, timer] = getDetails(sensor);
+    auto& [sensorName, dwell, timer] = details;
     if (dwellTime == Milliseconds::zero())
     {
         commit(sensorName, timestamp, value);
@@ -71,7 +75,7 @@ void DiscreteThreshold::startTimer(interfaces::Sensor& sensor,
     {
         dwell = true;
         timer.expires_after(dwellTime);
-        timer.async_wait([this, &sensor, timestamp,
+        timer.async_wait([this, &sensorName, &dwell, timestamp,
                           value](const boost::system::error_code ec) {
             if (ec)
             {
@@ -79,7 +83,6 @@ void DiscreteThreshold::startTimer(interfaces::Sensor& sensor,
                     "Timer has been canceled");
                 return;
             }
-            auto& [sensorName, dwell, timer] = getDetails(sensor);
             commit(sensorName, timestamp, value);
             dwell = false;
         });
@@ -93,4 +96,10 @@ void DiscreteThreshold::commit(const std::string& sensorName,
     {
         action->commit(sensorName, timestamp, value);
     }
+}
+
+LabeledThresholdParam DiscreteThreshold::getThresholdParam() const
+{
+    return discrete::LabeledThresholdParam(name, severity, dwellTime.count(),
+                                           std::to_string(thresholdValue));
 }

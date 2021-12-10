@@ -27,6 +27,9 @@ class FromLabeledThresholdParamConversion
 
 SensorsInfo fromLabeledSensorsInfo(const std::vector<LabeledSensorInfo>& infos);
 
+TriggerThresholdParams
+    fromLabeledThresholdParam(const std::vector<LabeledThresholdParam>& params);
+
 nlohmann::json labeledThresholdParamsToJson(
     const LabeledTriggerThresholdParams& labeledThresholdParams);
 

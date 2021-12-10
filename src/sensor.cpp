@@ -30,6 +30,11 @@ std::string Sensor::metadata() const
     return sensorMetadata;
 }
 
+std::string Sensor::getName() const
+{
+    return sensorMetadata.empty() ? sensorId.path : sensorMetadata;
+}
+
 void Sensor::async_read()
 {
     uniqueCall([this](auto lock) { async_read(std::move(lock)); });
@@ -178,4 +183,9 @@ void Sensor::signalProc(const std::weak_ptr<Sensor>& weakSelf,
             }
         }
     }
+}
+
+LabeledSensorInfo Sensor::getLabeledSensorInfo() const
+{
+    return LabeledSensorInfo(sensorId.service, sensorId.path, sensorMetadata);
 }
