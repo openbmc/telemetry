@@ -1,6 +1,7 @@
 #include "utils/conversion_trigger.hpp"
 
 #include "utils/transform.hpp"
+#include "utils/tstring.hpp"
 
 #include <sdbusplus/exception.hpp>
 
@@ -72,9 +73,65 @@ SensorsInfo fromLabeledSensorsInfo(const std::vector<LabeledSensorInfo>& infos)
 {
     return utils::transform(infos, [](const LabeledSensorInfo& val) {
         return SensorsInfo::value_type(
-            sdbusplus::message::object_path(val.at_label<ts::SensorPath>()),
+            sdbusplus::message::object_path(val.at_label<ts::Path>()),
             val.at_label<ts::Metadata>());
     });
+}
+
+TriggerThresholdParams
+    fromLabeledThresholdParam(const std::vector<LabeledThresholdParam>& params)
+{
+    namespace ts = utils::tstring;
+    if (params.empty())
+    {
+        throw std::runtime_error("Threshold params cannot be empty");
+    }
+    if (params.size() == 1 &&
+        std::holds_alternative<std::monostate>(*params.begin()))
+    {
+        return std::vector<discrete::ThresholdParam>();
+    }
+
+    if (std::holds_alternative<discrete::LabeledThresholdParam>(
+            *params.begin()))
+    {
+        return utils::transform(params, [](const auto& param) {
+            const discrete::LabeledThresholdParam* paramUnpacked =
+                std::get_if<discrete::LabeledThresholdParam>(&param);
+            if (!paramUnpacked)
+            {
+                throw std::runtime_error(
+                    "Mixing threshold types is not allowed");
+            }
+            return discrete::ThresholdParam(
+                paramUnpacked->at_label<ts::UserId>(),
+                discrete::severityToString(
+                    paramUnpacked->at_label<ts::Severity>()),
+                paramUnpacked->at_label<ts::DwellTime>(),
+                paramUnpacked->at_label<ts::ThresholdValue>());
+        });
+    }
+    else if (std::holds_alternative<numeric::LabeledThresholdParam>(
+                 *params.begin()))
+    {
+        return utils::transform(params, [](const auto& param) {
+            const numeric::LabeledThresholdParam* paramUnpacked =
+                std::get_if<numeric::LabeledThresholdParam>(&param);
+            if (!paramUnpacked)
+            {
+                throw std::runtime_error(
+                    "Mixing threshold types is not allowed");
+            }
+            return numeric::ThresholdParam(
+                numeric::typeToString(paramUnpacked->at_label<ts::Type>()),
+                paramUnpacked->at_label<ts::DwellTime>(),
+                numeric::directionToString(
+                    paramUnpacked->at_label<ts::Direction>()),
+                paramUnpacked->at_label<ts::ThresholdValue>());
+        });
+    }
+
+    throw std::runtime_error("Incorrect threshold params");
 }
 
 nlohmann::json labeledThresholdParamsToJson(

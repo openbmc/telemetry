@@ -23,7 +23,8 @@ class TestNumericThreshold : public Test
     std::shared_ptr<NumericThreshold> sut;
 
     void makeThreshold(Milliseconds dwellTime, numeric::Direction direction,
-                       double thresholdValue)
+                       double thresholdValue,
+                       numeric::Type type = numeric::Type::lowerWarning)
     {
         std::vector<std::unique_ptr<interfaces::TriggerAction>> actions;
         actions.push_back(std::move(actionMockPtr));
@@ -32,13 +33,19 @@ class TestNumericThreshold : public Test
             DbusEnvironment::getIoc(),
             utils::convContainer<std::shared_ptr<interfaces::Sensor>>(
                 sensorMocks),
-            sensorNames, std::move(actions), dwellTime, direction,
-            thresholdValue);
+            std::move(actions), dwellTime, direction, thresholdValue, type);
     }
 
     void SetUp() override
     {
-        makeThreshold(0ms, numeric::Direction::increasing, 90.0);
+        for (size_t idx = 0; idx < sensorMocks.size(); idx++)
+        {
+            ON_CALL(*sensorMocks.at(idx), getName())
+                .WillByDefault(Return(sensorNames[idx]));
+        }
+
+        makeThreshold(0ms, numeric::Direction::increasing, 90.0,
+                      numeric::Type::upperCritical);
     }
 };
 
@@ -58,6 +65,13 @@ TEST_F(TestNumericThreshold, initializeThresholdExpectAllSensorsAreRegistered)
 TEST_F(TestNumericThreshold, thresholdIsNotInitializeExpectNoActionCommit)
 {
     EXPECT_CALL(actionMock, commit(_, _, _)).Times(0);
+}
+
+TEST_F(TestNumericThreshold, getLabeledParamsReturnsCorrectly)
+{
+    LabeledThresholdParam expected = numeric::LabeledThresholdParam(
+        numeric::Type::upperCritical, 0, numeric::Direction::increasing, 90.0);
+    EXPECT_EQ(sut->getThresholdParam(), expected);
 }
 
 struct NumericParams
@@ -112,6 +126,12 @@ class TestNumericThresholdNoDwellTime :
   public:
     void SetUp() override
     {
+        for (size_t idx = 0; idx < sensorMocks.size(); idx++)
+        {
+            ON_CALL(*sensorMocks.at(idx), getName())
+                .WillByDefault(Return(sensorNames[idx]));
+        }
+
         makeThreshold(0ms, GetParam().direction, 90.0);
     }
 };
@@ -186,6 +206,12 @@ class TestNumericThresholdWithDwellTime :
   public:
     void SetUp() override
     {
+        for (size_t idx = 0; idx < sensorMocks.size(); idx++)
+        {
+            ON_CALL(*sensorMocks.at(idx), getName())
+                .WillByDefault(Return(sensorNames[idx]));
+        }
+
         makeThreshold(2ms, GetParam().direction, 90.0);
     }
 
@@ -267,6 +293,12 @@ class TestNumericThresholdWithDwellTime2 :
   public:
     void SetUp() override
     {
+        for (size_t idx = 0; idx < sensorMocks.size(); idx++)
+        {
+            ON_CALL(*sensorMocks.at(idx), getName())
+                .WillByDefault(Return(sensorNames[idx]));
+        }
+
         makeThreshold(2ms, GetParam().direction, 90.0);
     }
 

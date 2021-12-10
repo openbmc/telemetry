@@ -23,8 +23,9 @@ class TestDiscreteThreshold : public Test
     TriggerActionMock& actionMock = *actionMockPtr;
     std::shared_ptr<DiscreteThreshold> sut;
 
-    std::shared_ptr<DiscreteThreshold> makeThreshold(Milliseconds dwellTime,
-                                                     double thresholdValue)
+    std::shared_ptr<DiscreteThreshold>
+        makeThreshold(Milliseconds dwellTime, double thresholdValue,
+                      discrete::Severity severity = discrete::Severity::ok)
     {
         std::vector<std::unique_ptr<interfaces::TriggerAction>> actions;
         actions.push_back(std::move(actionMockPtr));
@@ -33,13 +34,19 @@ class TestDiscreteThreshold : public Test
             DbusEnvironment::getIoc(),
             utils::convContainer<std::shared_ptr<interfaces::Sensor>>(
                 sensorMocks),
-            sensorNames, std::move(actions), dwellTime, thresholdValue,
-            "treshold_name");
+            std::move(actions), dwellTime, thresholdValue, "treshold name",
+            severity);
     }
 
     void SetUp() override
     {
-        sut = makeThreshold(0ms, 90.0);
+        for (size_t idx = 0; idx < sensorMocks.size(); idx++)
+        {
+            ON_CALL(*sensorMocks.at(idx), getName())
+                .WillByDefault(Return(sensorNames[idx]));
+        }
+
+        sut = makeThreshold(0ms, 90.0, discrete::Severity::critical);
     }
 };
 
@@ -59,6 +66,13 @@ TEST_F(TestDiscreteThreshold, initializeThresholdExpectAllSensorsAreRegistered)
 TEST_F(TestDiscreteThreshold, thresholdIsNotInitializeExpectNoActionCommit)
 {
     EXPECT_CALL(actionMock, commit(_, _, _)).Times(0);
+}
+
+TEST_F(TestDiscreteThreshold, getLabeledParamsReturnsCorrectly)
+{
+    LabeledThresholdParam expected = discrete::LabeledThresholdParam(
+        "treshold name", discrete::Severity::critical, 0, std::to_string(90.0));
+    EXPECT_EQ(sut->getThresholdParam(), expected);
 }
 
 struct DiscreteParams
@@ -200,6 +214,13 @@ class TestDiscreteThresholdNoDwellTime : public TestDiscreteThresholdCommon
   public:
     void SetUp() override
     {
+
+        for (size_t idx = 0; idx < sensorMocks.size(); idx++)
+        {
+            ON_CALL(*sensorMocks.at(idx), getName())
+                .WillByDefault(Return(sensorNames[idx]));
+        }
+
         sut = makeThreshold(0ms, GetParam().thresholdValue);
     }
 };
@@ -230,6 +251,12 @@ class TestDiscreteThresholdWithDwellTime : public TestDiscreteThresholdCommon
   public:
     void SetUp() override
     {
+        for (size_t idx = 0; idx < sensorMocks.size(); idx++)
+        {
+            ON_CALL(*sensorMocks.at(idx), getName())
+                .WillByDefault(Return(sensorNames[idx]));
+        }
+
         sut = makeThreshold(GetParam().dwellTime, GetParam().thresholdValue);
     }
 };

@@ -3,6 +3,7 @@
 #include "types/collection_duration.hpp"
 #include "types/collection_time_scope.hpp"
 #include "types/operation_type.hpp"
+#include "types/sensor_types.hpp"
 #include "utils/labeled_tuple.hpp"
 #include "utils/tstring.hpp"
 
@@ -22,13 +23,8 @@ using ReadingParameters = std::vector<std::tuple<
     std::vector<std::tuple<sdbusplus::message::object_path, std::string>>,
     std::string, std::string, std::string, uint64_t>>;
 
-using LabeledSensorParameters =
-    utils::LabeledTuple<std::tuple<std::string, std::string, std::string>,
-                        utils::tstring::Service, utils::tstring::Path,
-                        utils::tstring::Metadata>;
-
 using LabeledMetricParameters = utils::LabeledTuple<
-    std::tuple<std::vector<LabeledSensorParameters>, OperationType, std::string,
+    std::tuple<std::vector<LabeledSensorInfo>, OperationType, std::string,
                CollectionTimeScope, CollectionDuration>,
     utils::tstring::SensorPath, utils::tstring::OperationType,
     utils::tstring::Id, utils::tstring::CollectionTimeScope,
