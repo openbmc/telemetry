@@ -27,7 +27,32 @@ class FromLabeledThresholdParamConversion
 
 SensorsInfo fromLabeledSensorsInfo(const std::vector<LabeledSensorInfo>& infos);
 
+TriggerThresholdParams
+    fromLabeledThresholdParam(const std::vector<LabeledThresholdParam>& params);
+
 nlohmann::json labeledThresholdParamsToJson(
     const LabeledTriggerThresholdParams& labeledThresholdParams);
+
+template <typename T>
+struct is_variant : std::false_type
+{};
+
+template <typename... Args>
+struct is_variant<std::variant<Args...>> : std::true_type
+{};
+
+template <typename T>
+inline constexpr bool is_variant_v = is_variant<T>::value;
+
+template <typename AlternativeT, typename VariantT>
+requires is_variant_v<VariantT> bool
+    isFirstElementOfType(const std::vector<VariantT>& collection)
+{
+    if (collection.empty())
+    {
+        return false;
+    }
+    return std::holds_alternative<AlternativeT>(*collection.begin());
+}
 
 } // namespace utils

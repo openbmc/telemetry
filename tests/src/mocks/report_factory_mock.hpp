@@ -16,7 +16,7 @@ class ReportFactoryMock : public interfaces::ReportFactory
             return LabeledMetricParameters(
                 utils::transform(std::get<0>(params),
                                  [](const auto& sensorData) {
-                                     return LabeledSensorParameters(
+                                     return LabeledSensorInfo(
                                          "Service", std::get<0>(sensorData),
                                          std::get<1>(sensorData));
                                  }),

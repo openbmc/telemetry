@@ -8,25 +8,24 @@
 
 #include <phosphor-logging/log.hpp>
 
+#include <future>
+
 Trigger::Trigger(
     boost::asio::io_context& ioc,
     const std::shared_ptr<sdbusplus::asio::object_server>& objServer,
     const std::string& idIn, const std::string& nameIn,
-    const std::vector<std::string>& triggerActionsIn,
-    const std::vector<std::string>& reportIdsIn,
-    const std::vector<LabeledSensorInfo>& LabeledSensorsInfoIn,
-    const LabeledTriggerThresholdParams& labeledThresholdParamsIn,
+    const std::vector<TriggerAction>& triggerActionsIn,
+    const std::shared_ptr<std::vector<std::string>> reportIdsIn,
     std::vector<std::shared_ptr<interfaces::Threshold>>&& thresholdsIn,
     interfaces::TriggerManager& triggerManager,
-    interfaces::JsonStorage& triggerStorageIn) :
+    interfaces::JsonStorage& triggerStorageIn,
+    const interfaces::TriggerFactory& triggerFactory, Sensors sensorsIn) :
     id(idIn),
     name(nameIn), triggerActions(std::move(triggerActionsIn)),
-    path(triggerDir + id), reportIds(reportIdsIn),
-    labeledSensorsInfo(LabeledSensorsInfoIn),
-    labeledThresholdParams(labeledThresholdParamsIn),
+    path(triggerDir + id), reportIds(std::move(reportIdsIn)),
     thresholds(std::move(thresholdsIn)),
     fileName(std::to_string(std::hash<std::string>{}(id))),
-    triggerStorage(triggerStorageIn)
+    triggerStorage(triggerStorageIn), sensors(std::move(sensorsIn))
 {
     deleteIface = objServer->add_unique_interface(
         path, deleteIfaceName, [this, &ioc, &triggerManager](auto& dbusIface) {
@@ -42,7 +41,7 @@ Trigger::Trigger(
         });
 
     triggerIface = objServer->add_unique_interface(
-        path, triggerIfaceName, [this](auto& dbusIface) {
+        path, triggerIfaceName, [this, &triggerFactory](auto& dbusIface) {
             persistent = storeConfiguration();
             dbusIface.register_property_rw(
                 "Persistent", persistent,
@@ -65,31 +64,64 @@ Trigger::Trigger(
                 },
                 [this](const auto&) { return persistent; });
 
-            dbusIface.register_property_r(
+            dbusIface.register_property_rw(
                 "Thresholds", TriggerThresholdParams{},
                 sdbusplus::vtable::property_::emits_change,
+                [this, &triggerFactory](auto newVal, auto& oldVal) {
+                    auto newThresholdParams = std::visit(
+                        utils::ToLabeledThresholdParamConversion(), newVal);
+                    triggerFactory.updateThresholds(thresholds, triggerActions,
+                                                    reportIds, sensors,
+                                                    newThresholdParams);
+                    oldVal = std::move(newVal);
+                    return 1;
+                },
                 [this](const auto&) {
-                    return std::visit(
-                        utils::FromLabeledThresholdParamConversion(),
-                        labeledThresholdParams);
+                    return fromLabeledThresholdParam(
+                        utils::transform(thresholds, [](const auto& threshold) {
+                            return threshold->getThresholdParam();
+                        }));
                 });
 
-            dbusIface.register_property_r(
+            dbusIface.register_property_rw(
                 "Sensors", SensorsInfo{},
                 sdbusplus::vtable::property_::emits_change,
+                [this, &triggerFactory](auto newVal, auto& oldVal) {
+                    auto labeledSensorInfo =
+                        triggerFactory.getLabeledSensorsInfo(newVal);
+                    triggerFactory.updateSensors(sensors, labeledSensorInfo);
+                    for (const auto& threshold : thresholds)
+                    {
+                        threshold->updateSensors(sensors);
+                    }
+                    oldVal = std::move(newVal);
+                    return 1;
+                },
                 [this](const auto&) {
-                    return utils::fromLabeledSensorsInfo(labeledSensorsInfo);
+                    return utils::fromLabeledSensorsInfo(
+                        utils::transform(sensors, [](const auto& sensor) {
+                            return sensor->getLabeledSensorInfo();
+                        }));
                 });
 
-            dbusIface.register_property_r(
-                "ReportNames", reportIds,
+            dbusIface.register_property_rw(
+                "ReportNames", std::vector<std::string>{},
                 sdbusplus::vtable::property_::emits_change,
-                [](const auto& x) { return x; });
+                [this](auto newVal, auto& oldVal) {
+                    reportIds->clear();
+                    std::copy(newVal.begin(), newVal.end(),
+                              std::back_inserter(*reportIds));
+                    oldVal = newVal;
+                    return 1;
+                },
+                [this](const auto&) { return *reportIds; });
 
             dbusIface.register_property_r(
                 "Discrete", false, sdbusplus::vtable::property_::const_,
                 [this](const auto& x) {
-                    return isTriggerThresholdDiscrete(labeledThresholdParams);
+                    return !std::holds_alternative<
+                        numeric::LabeledThresholdParam>(
+                        thresholds.back()->getThresholdParam());
                 });
 
             dbusIface.register_property_rw(
@@ -101,9 +133,14 @@ Trigger::Trigger(
                 },
                 [this](const auto&) { return name; });
 
-            dbusIface.register_property_r("TriggerActions", triggerActions,
-                                          sdbusplus::vtable::property_::const_,
-                                          [this](const auto& x) { return x; });
+            dbusIface.register_property_r(
+                "TriggerActions", std::vector<std::string>(),
+                sdbusplus::vtable::property_::const_, [this](const auto&) {
+                    return utils::transform(triggerActions,
+                                            [](const auto& action) {
+                                                return actionToString(action);
+                                            });
+                });
         });
 
     for (const auto& threshold : thresholds)
@@ -118,15 +155,28 @@ bool Trigger::storeConfiguration() const
     {
         nlohmann::json data;
 
+        auto labeledThresholdParams =
+            std::visit(utils::ToLabeledThresholdParamConversion(),
+                       fromLabeledThresholdParam(utils::transform(
+                           thresholds, [](const auto& threshold) {
+                               return threshold->getThresholdParam();
+                           })));
+
         data["Version"] = triggerVersion;
         data["Id"] = id;
         data["Name"] = name;
         data["ThresholdParamsDiscriminator"] = labeledThresholdParams.index();
-        data["TriggerActions"] = triggerActions;
+        data["TriggerActions"] =
+            utils::transform(triggerActions, [](const auto& action) {
+                return actionToString(action);
+            });
+        ;
         data["ThresholdParams"] =
             utils::labeledThresholdParamsToJson(labeledThresholdParams);
-        data["ReportIds"] = reportIds;
-        data["Sensors"] = labeledSensorsInfo;
+        data["ReportIds"] = *reportIds;
+        data["Sensors"] = utils::transform(sensors, [](const auto& sensor) {
+            return sensor->getLabeledSensorInfo();
+        });
 
         triggerStorage.store(fileName, data);
     }
