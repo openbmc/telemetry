@@ -27,10 +27,16 @@ class TestOnChangeThreshold : public Test
         std::vector<std::unique_ptr<interfaces::TriggerAction>> actions;
         actions.push_back(std::move(actionMockPtr));
 
+        for (size_t idx = 0; idx < sensorMocks.size(); idx++)
+        {
+            ON_CALL(*sensorMocks.at(idx), getName())
+                .WillByDefault(Return(sensorNames[idx]));
+        }
+
         sut = std::make_shared<OnChangeThreshold>(
             utils::convContainer<std::shared_ptr<interfaces::Sensor>>(
                 sensorMocks),
-            sensorNames, std::move(actions));
+            std::move(actions));
     }
 };
 
@@ -50,6 +56,12 @@ TEST_F(TestOnChangeThreshold, initializeThresholdExpectAllSensorsAreRegistered)
 TEST_F(TestOnChangeThreshold, thresholdIsNotInitializeExpectNoActionCommit)
 {
     EXPECT_CALL(actionMock, commit(_, _, _)).Times(0);
+}
+
+TEST_F(TestOnChangeThreshold, getLabeledParamsReturnsCorrectly)
+{
+    LabeledThresholdParam expected = std::monostate();
+    EXPECT_EQ(sut->getThresholdParam(), expected);
 }
 
 struct OnChangeParams

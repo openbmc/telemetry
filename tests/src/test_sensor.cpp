@@ -97,6 +97,31 @@ TEST_F(TestSensor, notifiesOnceWithValueAfterRegister)
     ASSERT_TRUE(DbusEnvironment::waitForFuture("async_read2"));
 }
 
+TEST_F(TestSensor, getLabeledInfoReturnsCorrectly)
+{
+    auto expected = LabeledSensorInfo(DbusEnvironment::serviceName(),
+                                      sensorObject->path(), "metadata");
+    EXPECT_EQ(sut->getLabeledSensorInfo(), expected);
+}
+
+TEST_F(TestSensor, getNameReturnsPathWhenMetadataIsNotSet)
+{
+    static const char* path = "/telemetry/ut/DbusSensorObject2";
+    sut = sensorCache.makeSensor<Sensor>(DbusEnvironment::serviceName(), path,
+                                         "", DbusEnvironment::getIoc(),
+                                         DbusEnvironment::getBus());
+    EXPECT_EQ(sut->getName(), path);
+}
+
+TEST_F(TestSensor, getNameReturnsMetadataWhenMetadataIsSet)
+{
+    static const char* path = "/telemetry/ut/DbusSensorObject2";
+    sut = sensorCache.makeSensor<Sensor>(DbusEnvironment::serviceName(), path,
+                                         "metadata2", DbusEnvironment::getIoc(),
+                                         DbusEnvironment::getBus());
+    EXPECT_EQ(sut->getName(), "metadata2");
+}
+
 class TestSensorNotification : public TestSensor
 {
   public:

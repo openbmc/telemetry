@@ -6,10 +6,12 @@
 #include "interfaces/trigger_action.hpp"
 #include "types/milliseconds.hpp"
 #include "types/trigger_types.hpp"
+#include "utils/threshold_mixin.hpp"
 
 #include <boost/asio/steady_timer.hpp>
 
 #include <chrono>
+#include <map>
 #include <memory>
 #include <vector>
 
@@ -21,9 +23,9 @@ class DiscreteThreshold :
   public:
     DiscreteThreshold(
         boost::asio::io_context& ioc, Sensors sensors,
-        std::vector<std::string> sensorNames,
         std::vector<std::unique_ptr<interfaces::TriggerAction>> actions,
-        Milliseconds dwellTime, double thresholdValue, std::string name);
+        Milliseconds dwellTime, double thresholdValue, std::string name,
+        const discrete::Severity severity);
     DiscreteThreshold(const DiscreteThreshold&) = delete;
     DiscreteThreshold(DiscreteThreshold&&) = delete;
     ~DiscreteThreshold()
@@ -32,14 +34,17 @@ class DiscreteThreshold :
     void initialize() override;
     void sensorUpdated(interfaces::Sensor&, uint64_t) override;
     void sensorUpdated(interfaces::Sensor&, uint64_t, double) override;
+    LabeledThresholdParam getThresholdParam() const override;
+    void updateSensors(Sensors newSensors) override;
 
   private:
     boost::asio::io_context& ioc;
-    const Sensors sensors;
     const std::vector<std::unique_ptr<interfaces::TriggerAction>> actions;
     const Milliseconds dwellTime;
     const double thresholdValue;
     const std::string name;
+    const discrete::Severity severity;
+    bool initialized = false;
 
     struct ThresholdDetail
     {
@@ -53,9 +58,14 @@ class DiscreteThreshold :
             dwell(dwell), timer(ioc)
         {}
     };
-    std::vector<ThresholdDetail> details;
+    using SensorDetails = std::map<std::shared_ptr<interfaces::Sensor>,
+                                   std::shared_ptr<ThresholdDetail>>;
+    SensorDetails sensorDetails;
 
-    void startTimer(interfaces::Sensor&, uint64_t, double);
+    friend ThresholdMixin;
+
+    void startTimer(ThresholdDetail&, uint64_t, double);
     void commit(const std::string&, uint64_t, double);
-    ThresholdDetail& getDetails(interfaces::Sensor& sensor);
+    ThresholdDetail& getDetails(const interfaces::Sensor& sensor);
+    std::shared_ptr<ThresholdDetail> makeDetails(const std::string& sensorName);
 };

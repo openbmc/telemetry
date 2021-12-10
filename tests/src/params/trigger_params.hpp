@@ -33,13 +33,13 @@ class TriggerParams
         return nameProperty;
     }
 
-    TriggerParams& triggerActions(const std::vector<std::string>& val)
+    TriggerParams& triggerActions(const std::vector<TriggerAction>& val)
     {
         triggerActionsProperty = val;
         return *this;
     }
 
-    const std::vector<std::string>& triggerActions() const
+    const std::vector<TriggerAction>& triggerActions() const
     {
         return triggerActionsProperty;
     }
@@ -68,8 +68,8 @@ class TriggerParams
   private:
     std::string idProperty = "Trigger1";
     std::string nameProperty = "My Numeric Trigger";
-    std::vector<std::string> triggerActionsProperty = {"UpdateReport"};
-
+    std::vector<TriggerAction> triggerActionsProperty = {
+        TriggerAction::UpdateReport};
     std::vector<LabeledSensorInfo> labeledSensorsProperty = {
         {"service1", "/xyz/openbmc_project/sensors/temperature/BMC_Temp",
          "metadata1"}};
