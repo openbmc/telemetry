@@ -29,10 +29,13 @@ class Sensor final :
 
     Id id() const override;
     std::string metadata() const override;
+    std::string getName() const override;
     void registerForUpdates(
         const std::weak_ptr<interfaces::SensorListener>& weakListener) override;
     void unregisterFromUpdates(
         const std::weak_ptr<interfaces::SensorListener>& weakListener) override;
+
+    LabeledSensorInfo getLabeledSensorInfo() const override;
 
   private:
     static std::optional<double> readValue(const ValueVariant& v);
