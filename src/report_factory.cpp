@@ -47,13 +47,13 @@ std::unique_ptr<interfaces::Report> ReportFactory::make(
 }
 
 Sensors ReportFactory::getSensors(
-    const std::vector<LabeledSensorParameters>& sensorPaths) const
+    const std::vector<LabeledSensorInfo>& sensorPaths) const
 {
     using namespace utils::tstring;
 
     return utils::transform(
         sensorPaths,
-        [this](const LabeledSensorParameters& sensorPath)
+        [this](const LabeledSensorInfo& sensorPath)
             -> std::shared_ptr<interfaces::Sensor> {
             return sensorCache.makeSensor<Sensor>(
                 sensorPath.at_label<Service>(), sensorPath.at_label<Path>(),
@@ -71,7 +71,7 @@ std::vector<LabeledMetricParameters> ReportFactory::convertMetricParams(
         auto [sensorPaths, operationType, id, collectionTimeScope,
               collectionDuration] = item;
 
-        std::vector<LabeledSensorParameters> sensorParameters;
+        std::vector<LabeledSensorInfo> sensorParameters;
 
         for (const auto& [sensorPath, metadata] : sensorPaths)
         {
