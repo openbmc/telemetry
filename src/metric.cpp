@@ -2,6 +2,7 @@
 
 #include "details/collection_function.hpp"
 #include "types/report_types.hpp"
+#include "types/sensor_types.hpp"
 #include "utils/labeled_tuple.hpp"
 #include "utils/transform.hpp"
 
@@ -213,8 +214,8 @@ Metric::CollectionData&
 LabeledMetricParameters Metric::dumpConfiguration() const
 {
     auto sensorPath = utils::transform(sensors, [this](const auto& sensor) {
-        return LabeledSensorParameters(sensor->id().service, sensor->id().path,
-                                       sensor->metadata());
+        return LabeledSensorInfo(sensor->id().service, sensor->id().path,
+                                 sensor->metadata());
     });
 
     return LabeledMetricParameters(std::move(sensorPath), operationType, id,

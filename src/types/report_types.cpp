@@ -12,7 +12,7 @@ ReadingParameters
             return ReadingParameters::value_type(
                 utils::transform(
                     metricParams.at_label<ts::SensorPath>(),
-                    [](const LabeledSensorParameters& sensorParameters) {
+                    [](const LabeledSensorInfo& sensorParameters) {
                         return std::tuple<sdbusplus::message::object_path,
                                           std::string>(
                             sensorParameters.at_label<ts::Path>(),

@@ -3,6 +3,7 @@
 #include "interfaces/report_factory.hpp"
 #include "interfaces/sensor.hpp"
 #include "sensor_cache.hpp"
+#include "types/sensor_types.hpp"
 
 #include <boost/asio/io_context.hpp>
 #include <sdbusplus/asio/object_server.hpp>
@@ -31,8 +32,7 @@ class ReportFactory : public interfaces::ReportFactory
              bool enabled) const override;
 
   private:
-    Sensors getSensors(
-        const std::vector<LabeledSensorParameters>& sensorPaths) const;
+    Sensors getSensors(const std::vector<LabeledSensorInfo>& sensorPaths) const;
 
     std::shared_ptr<sdbusplus::asio::connection> bus;
     std::shared_ptr<sdbusplus::asio::object_server> objServer;

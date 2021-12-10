@@ -118,17 +118,17 @@ class ReportParams final
     ReportUpdates reportUpdatesProperty = ReportUpdates::overwrite;
     std::vector<LabeledMetricParameters> metricParametersProperty{
         {LabeledMetricParameters{
-             {LabeledSensorParameters{"Service",
-                                      "/xyz/openbmc_project/sensors/power/p1",
-                                      "metadata1"}},
+             {LabeledSensorInfo{"Service",
+                                "/xyz/openbmc_project/sensors/power/p1",
+                                "metadata1"}},
              OperationType::single,
              "MetricId1",
              CollectionTimeScope::point,
              CollectionDuration(Milliseconds(0u))},
          LabeledMetricParameters{
-             {LabeledSensorParameters{"Service",
-                                      "/xyz/openbmc_project/sensors/power/p2",
-                                      "metadata2"}},
+             {LabeledSensorInfo{"Service",
+                                "/xyz/openbmc_project/sensors/power/p2",
+                                "metadata2"}},
              OperationType::single,
              "MetricId2",
              CollectionTimeScope::point,

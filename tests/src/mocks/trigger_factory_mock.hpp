@@ -5,6 +5,7 @@
 #include "params/trigger_params.hpp"
 #include "trigger.hpp"
 #include "utils/conversion_trigger.hpp"
+#include "utils/transform.hpp"
 
 #include <gmock/gmock.h>
 
@@ -35,6 +36,23 @@ class TriggerFactoryMock : public interfaces::TriggerFactory
                 (boost::asio::yield_context&, const SensorsInfo&),
                 (const, override));
 
+    MOCK_METHOD(std::vector<LabeledSensorInfo>, getLabeledSensorsInfo,
+                (const SensorsInfo&), (const, override));
+
+    MOCK_METHOD(void, updateThresholds,
+                (std::vector<std::shared_ptr<interfaces::Threshold>> &
+                     currentThresholds,
+                 const std::vector<TriggerAction>& triggerActions,
+                 const std::shared_ptr<std::vector<std::string>>& reportIds,
+                 const Sensors& sensors,
+                 const LabeledTriggerThresholdParams& newParams),
+                (const, override));
+
+    MOCK_METHOD(void, updateSensors,
+                (Sensors & currentSensors,
+                 const std::vector<LabeledSensorInfo>& senorParams),
+                (const, override));
+
     auto& expectMake(
         std::optional<TriggerParams> paramsOpt,
         const testing::Matcher<interfaces::TriggerManager&>& tm,
@@ -53,7 +71,11 @@ class TriggerFactoryMock : public interfaces::TriggerFactory
                 .WillByDefault(Return(params.sensors()));
 
             return EXPECT_CALL(
-                *this, make(params.id(), params.name(), params.triggerActions(),
+                *this, make(params.id(), params.name(),
+                            utils::transform(params.triggerActions(),
+                                             [](const auto& action) {
+                                                 return actionToString(action);
+                                             }),
                             params.reportIds(), tm, triggerStorage,
                             params.thresholdParams(), params.sensors()));
         }

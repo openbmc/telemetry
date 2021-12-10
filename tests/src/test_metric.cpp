@@ -145,7 +145,7 @@ TEST_F(TestMetricAfterInitialization, dumpsConfiguration)
     expected.at_label<ts::CollectionTimeScope>() = params.collectionTimeScope();
     expected.at_label<ts::CollectionDuration>() = params.collectionDuration();
     expected.at_label<ts::SensorPath>() = {
-        LabeledSensorParameters("service1", "path1", "metadata1")};
+        LabeledSensorInfo("service1", "path1", "metadata1")};
 
     EXPECT_THAT(conf, Eq(expected));
 }

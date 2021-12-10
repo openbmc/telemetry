@@ -1,5 +1,6 @@
 #pragma once
 
+#include "types/sensor_types.hpp"
 #include "utils/conversion.hpp"
 #include "utils/labeled_tuple.hpp"
 #include "utils/tstring.hpp"
@@ -29,6 +30,11 @@ constexpr std::array<std::pair<std::string_view, TriggerAction>, 3>
 inline TriggerAction toTriggerAction(const std::string& str)
 {
     return utils::toEnum(details::convDataTriggerAction, str);
+}
+
+inline std::string actionToString(TriggerAction v)
+{
+    return std::string(utils::enumToString(details::convDataTriggerAction, v));
 }
 
 namespace discrete
@@ -132,14 +138,6 @@ using LabeledThresholdParam =
                         utils::tstring::ThresholdValue>;
 } // namespace numeric
 
-using SensorsInfo =
-    std::vector<std::pair<sdbusplus::message::object_path, std::string>>;
-
-using LabeledSensorInfo =
-    utils::LabeledTuple<std::tuple<std::string, std::string, std::string>,
-                        utils::tstring::Service, utils::tstring::SensorPath,
-                        utils::tstring::Metadata>;
-
 using TriggerThresholdParamsExt =
     std::variant<std::monostate, std::vector<numeric::ThresholdParam>,
                  std::vector<discrete::ThresholdParam>>;
@@ -151,6 +149,10 @@ using TriggerThresholdParams =
 using LabeledTriggerThresholdParams =
     std::variant<std::vector<numeric::LabeledThresholdParam>,
                  std::vector<discrete::LabeledThresholdParam>>;
+
+using LabeledThresholdParam =
+    std::variant<std::monostate, numeric::LabeledThresholdParam,
+                 discrete::LabeledThresholdParam>;
 
 inline bool
     isTriggerThresholdDiscrete(const LabeledTriggerThresholdParams& params)
