@@ -1,6 +1,9 @@
 #include "dbus_environment.hpp"
 #include "helpers.hpp"
 #include "mocks/json_storage_mock.hpp"
+#include "mocks/sensor_mock.hpp"
+#include "mocks/threshold_mock.hpp"
+#include "mocks/trigger_factory_mock.hpp"
 #include "mocks/trigger_manager_mock.hpp"
 #include "params/trigger_params.hpp"
 #include "trigger.hpp"
@@ -14,7 +17,7 @@
 using namespace testing;
 using namespace std::literals::string_literals;
 
-static constexpr size_t expectedTriggerVersion = 0;
+static constexpr size_t expectedTriggerVersion = 1;
 
 class TestTrigger : public Test
 {
@@ -35,7 +38,10 @@ class TestTrigger : public Test
 
     std::unique_ptr<TriggerManagerMock> triggerManagerMockPtr =
         std::make_unique<NiceMock<TriggerManagerMock>>();
+    std::unique_ptr<TriggerFactoryMock> triggerFactoryMockPtr =
+        std::make_unique<NiceMock<TriggerFactoryMock>>();
     testing::NiceMock<StorageMock> storageMock;
+    std::vector<std::shared_ptr<interfaces::Threshold>> thresholdMocks;
     std::unique_ptr<Trigger> sut;
 
     void SetUp() override
@@ -54,12 +60,17 @@ class TestTrigger : public Test
 
     std::unique_ptr<Trigger> makeTrigger(const TriggerParams& params)
     {
+        thresholdMocks =
+            ThresholdMock::makeThresholds(params.thresholdParams());
+
         return std::make_unique<Trigger>(
             DbusEnvironment::getIoc(), DbusEnvironment::getObjServer(),
             params.id(), params.name(), params.triggerActions(),
-            params.reportIds(), params.sensors(), params.thresholdParams(),
-            std::vector<std::shared_ptr<interfaces::Threshold>>{},
-            *triggerManagerMockPtr, storageMock);
+            std::make_shared<std::vector<std::string>>(
+                params.reportIds().begin(), params.reportIds().end()),
+            std::vector<std::shared_ptr<interfaces::Threshold>>(thresholdMocks),
+            *triggerManagerMockPtr, storageMock, *triggerFactoryMockPtr,
+            SensorMock::makeSensorMocks(params.sensors()));
     }
 
     static interfaces::JsonStorage::FilePath to_file_path(std::string name)
@@ -104,12 +115,17 @@ TEST_F(TestTrigger, checkIfPropertiesAreSet)
     EXPECT_THAT(getProperty<bool>(sut->getPath(), "Persistent"), Eq(true));
     EXPECT_THAT(
         getProperty<std::vector<std::string>>(sut->getPath(), "TriggerActions"),
-        Eq(triggerParams.triggerActions()));
+        Eq(utils::transform(
+            triggerParams.triggerActions(),
+            [](const auto& action) { return actionToString(action); })));
     EXPECT_THAT((getProperty<SensorsInfo>(sut->getPath(), "Sensors")),
                 Eq(utils::fromLabeledSensorsInfo(triggerParams.sensors())));
     EXPECT_THAT(
         getProperty<std::vector<std::string>>(sut->getPath(), "ReportNames"),
         Eq(triggerParams.reportIds()));
+    EXPECT_THAT(
+        getProperty<bool>(sut->getPath(), "Discrete"),
+        Eq(isTriggerThresholdDiscrete(triggerParams.thresholdParams())));
     EXPECT_THAT(
         getProperty<TriggerThresholdParams>(sut->getPath(), "Thresholds"),
         Eq(std::visit(utils::FromLabeledThresholdParamConversion(),
@@ -122,6 +138,41 @@ TEST_F(TestTrigger, setPropertyNameToCorrectValue)
     EXPECT_THAT(setProperty(sut->getPath(), "Name", name),
                 Eq(boost::system::errc::success));
     EXPECT_THAT(getProperty<std::string>(sut->getPath(), "Name"), Eq(name));
+}
+
+TEST_F(TestTrigger, setPropertyReportNames)
+{
+    std::vector<std::string> newNames = {"abc", "one", "two"};
+    EXPECT_THAT(setProperty(sut->getPath(), "ReportNames", newNames),
+                Eq(boost::system::errc::success));
+    EXPECT_THAT(
+        getProperty<std::vector<std::string>>(sut->getPath(), "ReportNames"),
+        Eq(newNames));
+}
+
+TEST_F(TestTrigger, setPropertySensors)
+{
+    EXPECT_CALL(*triggerFactoryMockPtr, updateSensors(_, _));
+    for (const auto& threshold : thresholdMocks)
+    {
+        auto thresholdMockPtr =
+            std::dynamic_pointer_cast<NiceMock<ThresholdMock>>(threshold);
+        EXPECT_CALL(*thresholdMockPtr, updateSensors(_));
+    }
+    SensorsInfo newSensors({std::make_pair(
+        sdbusplus::message::object_path("/abc/def"), "metadata")});
+    EXPECT_THAT(setProperty(sut->getPath(), "Sensors", newSensors),
+                Eq(boost::system::errc::success));
+}
+
+TEST_F(TestTrigger, setPropertyThresholds)
+{
+    EXPECT_CALL(*triggerFactoryMockPtr, updateThresholds(_, _, _, _, _));
+    TriggerThresholdParams newThresholds =
+        std::vector<discrete::ThresholdParam>(
+            {std::make_tuple("discrete threshold", "OK", 10, "12.3")});
+    EXPECT_THAT(setProperty(sut->getPath(), "Thresholds", newThresholds),
+                Eq(boost::system::errc::success));
 }
 
 TEST_F(TestTrigger, checkIfNumericCoversionsAreGood)
@@ -265,7 +316,10 @@ TEST_F(TestTriggerStore, settingPersistencyToTrueStoresTriggerName)
 TEST_F(TestTriggerStore, settingPersistencyToTrueStoresTriggerTriggerActions)
 {
     ASSERT_THAT(storedConfiguration.at("TriggerActions"),
-                Eq(triggerParams.triggerActions()));
+                Eq(utils::transform(triggerParams.triggerActions(),
+                                    [](const auto& action) {
+                                        return actionToString(action);
+                                    })));
 }
 
 TEST_F(TestTriggerStore, settingPersistencyToTrueStoresTriggerReportIds)
@@ -278,8 +332,7 @@ TEST_F(TestTriggerStore, settingPersistencyToTrueStoresTriggerSensors)
 {
     nlohmann::json expectedItem;
     expectedItem["service"] = "service1";
-    expectedItem["sensorPath"] =
-        "/xyz/openbmc_project/sensors/temperature/BMC_Temp";
+    expectedItem["path"] = "/xyz/openbmc_project/sensors/temperature/BMC_Temp";
     expectedItem["metadata"] = "metadata1";
 
     ASSERT_THAT(storedConfiguration.at("Sensors"), ElementsAre(expectedItem));

@@ -329,9 +329,9 @@ TEST_P(TestReportManagerWithAggregationOperationType,
 {
     reportParams.metricParameters(
         std::vector<LabeledMetricParameters>{{LabeledMetricParameters{
-            {LabeledSensorParameters{"Service",
-                                     "/xyz/openbmc_project/sensors/power/p1",
-                                     "Metadata1"}},
+            {LabeledSensorInfo{"Service",
+                               "/xyz/openbmc_project/sensors/power/p1",
+                               "Metadata1"}},
             operationType,
             "MetricId1",
             CollectionTimeScope::point,

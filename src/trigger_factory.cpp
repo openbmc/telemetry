@@ -20,31 +20,54 @@ TriggerFactory::TriggerFactory(
     reportManager(reportManager)
 {}
 
-std::unique_ptr<interfaces::Trigger> TriggerFactory::make(
-    const std::string& id, const std::string& name,
-    const std::vector<std::string>& triggerActionsIn,
-    const std::vector<std::string>& reportIds,
-    interfaces::TriggerManager& triggerManager,
-    interfaces::JsonStorage& triggerStorage,
-    const LabeledTriggerThresholdParams& labeledThresholdParams,
-    const std::vector<LabeledSensorInfo>& labeledSensorsInfo) const
+void TriggerFactory::updateThresholds(
+    std::vector<std::shared_ptr<interfaces::Threshold>>& currentThresholds,
+    const std::vector<TriggerAction>& triggerActions,
+    const std::shared_ptr<std::vector<std::string>>& reportIds,
+    const Sensors& sensors,
+    const LabeledTriggerThresholdParams& newParams) const
 {
-    const auto& [sensors, sensorNames] = getSensors(labeledSensorsInfo);
-    std::vector<TriggerAction> triggerActions;
-    std::transform(triggerActionsIn.begin(), triggerActionsIn.end(),
-                   std::back_inserter(triggerActions),
-                   [](const auto& triggerActionStr) {
-                       return toTriggerAction(triggerActionStr);
-                   });
-    std::vector<std::shared_ptr<interfaces::Threshold>> thresholds;
-
-    if (isTriggerThresholdDiscrete(labeledThresholdParams))
+    std::vector<std::shared_ptr<interfaces::Threshold>> oldThresholds =
+        currentThresholds;
+    std::vector<std::shared_ptr<interfaces::Threshold>> newThresholds;
+    if (isTriggerThresholdDiscrete(newParams))
     {
+
         const auto& labeledDiscreteThresholdParams =
-            std::get<std::vector<discrete::LabeledThresholdParam>>(
-                labeledThresholdParams);
+            std::get<std::vector<discrete::LabeledThresholdParam>>(newParams);
+
+        bool isCurrentOnChange = false;
+        if (oldThresholds.size() == 1 &&
+            std::holds_alternative<std::monostate>(
+                oldThresholds.back()->getThresholdParam()))
+        {
+            isCurrentOnChange = true;
+        }
+
+        newThresholds.reserve(labeledDiscreteThresholdParams.empty()
+                                  ? 1
+                                  : labeledDiscreteThresholdParams.size());
+
         for (const auto& labeledThresholdParam : labeledDiscreteThresholdParams)
         {
+            if (!isCurrentOnChange)
+            {
+                auto existing = std::find_if(
+                    oldThresholds.begin(), oldThresholds.end(),
+                    [labeledThresholdParam](auto threshold) {
+                        return labeledThresholdParam ==
+                               std::get<discrete::LabeledThresholdParam>(
+                                   threshold->getThresholdParam());
+                    });
+
+                if (existing != oldThresholds.end())
+                {
+                    newThresholds.emplace_back(*existing);
+                    oldThresholds.erase(existing);
+                    continue;
+                }
+            }
+
             std::vector<std::unique_ptr<interfaces::TriggerAction>> actions;
 
             std::string thresholdName =
@@ -59,30 +82,53 @@ std::unique_ptr<interfaces::Trigger> TriggerFactory::make(
             action::discrete::fillActions(actions, triggerActions, severity,
                                           reportManager, reportIds);
 
-            thresholds.emplace_back(std::make_shared<DiscreteThreshold>(
-                bus->get_io_context(), sensors, sensorNames, std::move(actions),
+            newThresholds.emplace_back(std::make_shared<DiscreteThreshold>(
+                bus->get_io_context(), sensors, std::move(actions),
                 Milliseconds(dwellTime), std::stod(thresholdValue),
-                thresholdName));
+                thresholdName, severity));
         }
         if (labeledDiscreteThresholdParams.empty())
         {
-            std::vector<std::unique_ptr<interfaces::TriggerAction>> actions;
-            action::discrete::onChange::fillActions(actions, triggerActions,
-                                                    reportManager, reportIds);
+            if (isCurrentOnChange)
+            {
+                newThresholds.emplace_back(*oldThresholds.begin());
+            }
+            else
+            {
+                std::vector<std::unique_ptr<interfaces::TriggerAction>> actions;
+                action::discrete::onChange::fillActions(
+                    actions, triggerActions, reportManager, reportIds);
 
-            thresholds.emplace_back(std::make_shared<OnChangeThreshold>(
-                sensors, sensorNames, std::move(actions)));
+                newThresholds.emplace_back(std::make_shared<OnChangeThreshold>(
+                    sensors, std::move(actions)));
+            }
         }
     }
     else
     {
         const auto& labeledNumericThresholdParams =
-            std::get<std::vector<numeric::LabeledThresholdParam>>(
-                labeledThresholdParams);
+            std::get<std::vector<numeric::LabeledThresholdParam>>(newParams);
+        newThresholds.reserve(labeledNumericThresholdParams.size());
 
         for (const auto& labeledThresholdParam : labeledNumericThresholdParams)
         {
+            auto existing = std::find_if(
+                oldThresholds.begin(), oldThresholds.end(),
+                [labeledThresholdParam](auto threshold) {
+                    return labeledThresholdParam ==
+                           std::get<numeric::LabeledThresholdParam>(
+                               threshold->getThresholdParam());
+                });
+
+            if (existing != oldThresholds.end())
+            {
+                newThresholds.emplace_back(*existing);
+                oldThresholds.erase(existing);
+                continue;
+            }
+
             std::vector<std::unique_ptr<interfaces::TriggerAction>> actions;
+
             auto type = labeledThresholdParam.at_label<ts::Type>();
             auto dwellTime =
                 Milliseconds(labeledThresholdParam.at_label<ts::DwellTime>());
@@ -94,52 +140,110 @@ std::unique_ptr<interfaces::Trigger> TriggerFactory::make(
                                          thresholdValue, reportManager,
                                          reportIds);
 
-            thresholds.emplace_back(std::make_shared<NumericThreshold>(
-                bus->get_io_context(), sensors, sensorNames, std::move(actions),
-                dwellTime, direction, thresholdValue));
+            newThresholds.emplace_back(std::make_shared<NumericThreshold>(
+                bus->get_io_context(), sensors, std::move(actions), dwellTime,
+                direction, thresholdValue, type));
         }
     }
 
-    return std::make_unique<Trigger>(
-        bus->get_io_context(), objServer, id, name, triggerActionsIn, reportIds,
-        labeledSensorsInfo, labeledThresholdParams, std::move(thresholds),
-        triggerManager, triggerStorage);
+    currentThresholds = std::move(newThresholds);
 }
 
-std::pair<Sensors, std::vector<std::string>> TriggerFactory::getSensors(
+std::unique_ptr<interfaces::Trigger> TriggerFactory::make(
+    const std::string& id, const std::string& name,
+    const std::vector<std::string>& triggerActionsIn,
+    const std::vector<std::string>& reportIdsIn,
+    interfaces::TriggerManager& triggerManager,
+    interfaces::JsonStorage& triggerStorage,
+    const LabeledTriggerThresholdParams& labeledThresholdParams,
+    const std::vector<LabeledSensorInfo>& labeledSensorsInfo) const
+{
+    const auto& sensors = getSensors(labeledSensorsInfo);
+    auto triggerActions =
+        utils::transform(triggerActionsIn, [](const auto& triggerActionStr) {
+            return toTriggerAction(triggerActionStr);
+        });
+    std::vector<std::shared_ptr<interfaces::Threshold>> thresholds;
+
+    auto reportIds = std::make_shared<std::vector<std::string>>(
+        reportIdsIn.begin(), reportIdsIn.end());
+
+    updateThresholds(thresholds, triggerActions, reportIds, sensors,
+                     labeledThresholdParams);
+
+    return std::make_unique<Trigger>(
+        bus->get_io_context(), objServer, id, name, triggerActions, reportIds,
+        std::move(thresholds), triggerManager, triggerStorage, *this, sensors);
+}
+
+Sensors TriggerFactory::getSensors(
     const std::vector<LabeledSensorInfo>& labeledSensorsInfo) const
 {
     Sensors sensors;
-    std::vector<std::string> sensorNames;
+    updateSensors(sensors, labeledSensorsInfo);
+    return sensors;
+}
+
+void TriggerFactory::updateSensors(
+    Sensors& currentSensors,
+    const std::vector<LabeledSensorInfo>& labeledSensorsInfo) const
+{
+    Sensors oldSensors = currentSensors;
+    Sensors newSensors;
 
     for (const auto& labeledSensorInfo : labeledSensorsInfo)
     {
+        auto existing = std::find_if(oldSensors.begin(), oldSensors.end(),
+                                     [labeledSensorInfo](auto sensor) {
+                                         return labeledSensorInfo ==
+                                                sensor->getLabeledSensorInfo();
+                                     });
+
+        if (existing != oldSensors.end())
+        {
+            newSensors.emplace_back(*existing);
+            oldSensors.erase(existing);
+            continue;
+        }
+
         const auto& service = labeledSensorInfo.at_label<ts::Service>();
-        const auto& sensorPath = labeledSensorInfo.at_label<ts::SensorPath>();
+        const auto& sensorPath = labeledSensorInfo.at_label<ts::Path>();
         const auto& metadata = labeledSensorInfo.at_label<ts::Metadata>();
 
-        sensors.emplace_back(sensorCache.makeSensor<Sensor>(
+        newSensors.emplace_back(sensorCache.makeSensor<Sensor>(
             service, sensorPath, metadata, bus->get_io_context(), bus));
-
-        if (metadata.empty())
-        {
-            sensorNames.emplace_back(sensorPath);
-        }
-        else
-        {
-            sensorNames.emplace_back(metadata);
-        }
     }
 
-    return {sensors, sensorNames};
+    currentSensors = std::move(newSensors);
 }
 
 std::vector<LabeledSensorInfo>
     TriggerFactory::getLabeledSensorsInfo(boost::asio::yield_context& yield,
                                           const SensorsInfo& sensorsInfo) const
 {
+    if (sensorsInfo.empty())
+    {
+        return {};
+    }
     auto tree = utils::getSubTreeSensors(yield, bus);
+    return parseSensorTree(tree, sensorsInfo);
+}
 
+std::vector<LabeledSensorInfo>
+    TriggerFactory::getLabeledSensorsInfo(const SensorsInfo& sensorsInfo) const
+{
+    if (sensorsInfo.empty())
+    {
+        return {};
+    }
+    auto tree = utils::getSubTreeSensors(bus);
+    return parseSensorTree(tree, sensorsInfo);
+}
+
+std::vector<LabeledSensorInfo>
+    TriggerFactory::parseSensorTree(const std::vector<utils::SensorTree>& tree,
+                                    const SensorsInfo& sensorsInfo)
+{
     return utils::transform(sensorsInfo, [&tree](const auto& item) {
         const auto& [sensorPath, metadata] = item;
         auto found = std::find_if(
