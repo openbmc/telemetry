@@ -179,11 +179,13 @@ TEST_F(TestReport, setIntervalWithValidValue)
                 Eq(newValue));
 }
 
-TEST_F(TestReport, settingIntervalWithInvalidValueDoesNotChangeProperty)
+TEST_F(
+    TestReport,
+    settingIntervalWithInvalidValueDoesNotChangePropertyAndReturnsInvalidArgument)
 {
     uint64_t newValue = defaultParams.interval().count() - 1;
     EXPECT_THAT(setProperty(sut->getPath(), "Interval", newValue).value(),
-                Eq(boost::system::errc::success));
+                Eq(boost::system::errc::invalid_argument));
     EXPECT_THAT(getProperty<uint64_t>(sut->getPath(), "Interval"),
                 Eq(defaultParams.interval().count()));
 }

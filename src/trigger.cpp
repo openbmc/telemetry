@@ -50,7 +50,7 @@ Trigger::Trigger(
                 [this](bool newVal, const auto&) {
                     if (newVal == persistent)
                     {
-                        return true;
+                        return 1;
                     }
                     if (newVal)
                     {
@@ -61,7 +61,7 @@ Trigger::Trigger(
                         triggerStorage.remove(fileName);
                         persistent = false;
                     }
-                    return true;
+                    return 1;
                 },
                 [this](const auto&) { return persistent; });
 
@@ -97,7 +97,7 @@ Trigger::Trigger(
                 sdbusplus::vtable::property_::emits_change,
                 [this](auto newVal, auto& oldVal) {
                     name = oldVal = newVal;
-                    return true;
+                    return 1;
                 },
                 [this](const auto&) { return name; });
 

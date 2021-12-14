@@ -161,7 +161,7 @@ std::unique_ptr<sdbusplus::asio::dbus_interface> Report::makeReportInterface()
                 enabled = newVal;
                 persistency = storeConfiguration();
             }
-            return true;
+            return 1;
         },
         [this](const auto&) { return enabled; });
     dbusIface->register_property_rw(
@@ -176,9 +176,11 @@ std::unique_ptr<sdbusplus::asio::dbus_interface> Report::makeReportInterface()
                     interval = newValT;
                     persistency = storeConfiguration();
                 }
-                return true;
+                return 1;
             }
-            return false;
+            throw sdbusplus::exception::SdBusError(
+                static_cast<int>(std::errc::invalid_argument),
+                "Invalid interval");
         },
         [this](const auto&) { return interval.count(); });
     dbusIface->register_property_rw(
@@ -186,7 +188,7 @@ std::unique_ptr<sdbusplus::asio::dbus_interface> Report::makeReportInterface()
         [this](bool newVal, const auto&) {
             if (newVal == persistency)
             {
-                return true;
+                return 1;
             }
             if (newVal)
             {
@@ -197,7 +199,7 @@ std::unique_ptr<sdbusplus::asio::dbus_interface> Report::makeReportInterface()
                 reportStorage.remove(fileName());
                 persistency = false;
             }
-            return true;
+            return 1;
         },
         [this](const auto&) { return persistency; });
 
@@ -251,7 +253,7 @@ std::unique_ptr<sdbusplus::asio::dbus_interface> Report::makeReportInterface()
             ReportManager::verifyReportUpdates(utils::toReportUpdates(newVal));
             setReportUpdates(utils::toReportUpdates(newVal));
             oldVal = newVal;
-            return true;
+            return 1;
         },
         [this](const auto&) { return utils::enumToString(reportUpdates); });
     dbusIface->register_method("Update", [this] {

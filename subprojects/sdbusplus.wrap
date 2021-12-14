@@ -1,3 +1,3 @@
 [wrap-git]
 url = https://github.com/openbmc/sdbusplus.git
-revision = 0ade192c8f8f30128ccdd3daea5cfe41a1cec8e9
+revision = ce62764d6c0a72ec88eb433e1afd05b751225971
