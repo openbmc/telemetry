@@ -1,0 +1,349 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "209fc9d0_4e1d6d11",
+        "filename": "src/discrete_threshold.hpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2021-12-16T18:33:16Z",
+      "side": 1,
+      "message": "Is this map can be replaced by unordered_map? Unordered_map is smaller and has more efficient underlaying mechanism for insert and access, I suggest to consider it if you do not need sorting of SensorDetails elements.",
+      "range": {
+        "startLine": 61,
+        "startChar": 26,
+        "endLine": 61,
+        "endChar": 34
+      },
+      "revId": "16c545907c62c1625710eb3259122def9ec028fa",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5105ce0c_f30e8752",
+        "filename": "src/numeric_threshold.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2021-12-16T18:33:16Z",
+      "side": 1,
+      "message": "It seems that sensorName should not be modifiable in here, by introducing reference in the lambda you increase efficiency of this code by risking protection of the variable - I would vote to keep it captured by value as before.",
+      "range": {
+        "startLine": 82,
+        "startChar": 32,
+        "endLine": 82,
+        "endChar": 43
+      },
+      "revId": "16c545907c62c1625710eb3259122def9ec028fa",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "27fb80f3_8bff51e0",
+        "filename": "src/numeric_threshold.hpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2021-12-16T18:33:16Z",
+      "side": 1,
+      "message": "As above - please consider using unordered_map instead.",
+      "range": {
+        "startLine": 60,
+        "startChar": 26,
+        "endLine": 60,
+        "endChar": 34
+      },
+      "revId": "16c545907c62c1625710eb3259122def9ec028fa",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cd2439f3_bd66da71",
+        "filename": "src/on_change_threshold.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2021-12-16T18:33:16Z",
+      "side": 1,
+      "message": "Are there any cons against moving sensors into oldSensors instead of copying it?",
+      "range": {
+        "startLine": 23,
+        "startChar": 25,
+        "endLine": 23,
+        "endChar": 32
+      },
+      "revId": "16c545907c62c1625710eb3259122def9ec028fa",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "dbd7e728_1cbc7c9a",
+        "filename": "src/trigger.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2021-12-16T18:33:16Z",
+      "side": 1,
+      "message": "Can this one be moved as well?",
+      "range": {
+        "startLine": 77,
+        "startChar": 29,
+        "endLine": 77,
+        "endChar": 35
+      },
+      "revId": "16c545907c62c1625710eb3259122def9ec028fa",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d047f1b4_0c14e7c1",
+        "filename": "src/trigger.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2021-12-16T18:33:16Z",
+      "side": 1,
+      "message": "Why check against numeric alternative and negate? You could just check against discrete and get direct result.",
+      "range": {
+        "startLine": 116,
+        "startChar": 27,
+        "endLine": 116,
+        "endChar": 50
+      },
+      "revId": "16c545907c62c1625710eb3259122def9ec028fa",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8470d45b_623aa8d1",
+        "filename": "src/trigger_factory.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2021-12-16T18:33:16Z",
+      "side": 1,
+      "message": "This is very long function, maybe you could split it into a few smaller modules, IMO such sliced routine would be much easier to read and understand.",
+      "range": {
+        "startLine": 23,
+        "startChar": 21,
+        "endLine": 23,
+        "endChar": 37
+      },
+      "revId": "16c545907c62c1625710eb3259122def9ec028fa",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0b02bf57_5435db10",
+        "filename": "src/trigger_factory.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2021-12-16T18:33:16Z",
+      "side": 1,
+      "message": "auto?",
+      "range": {
+        "startLine": 29,
+        "startChar": 4,
+        "endLine": 29,
+        "endChar": 55
+      },
+      "revId": "16c545907c62c1625710eb3259122def9ec028fa",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3bab504e_894f220f",
+        "filename": "src/trigger_factory.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2021-12-16T18:33:16Z",
+      "side": 1,
+      "message": "Are there any cons against moving currentThresholds into oldThresholds instead of copying it?",
+      "range": {
+        "startLine": 29,
+        "startChar": 56,
+        "endLine": 30,
+        "endChar": 26
+      },
+      "revId": "16c545907c62c1625710eb3259122def9ec028fa",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "64df8d5e_c612a4ee",
+        "filename": "src/trigger_factory.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2021-12-16T18:33:16Z",
+      "side": 1,
+      "message": "Vector capacity reservation for a single element only should not be needed.",
+      "range": {
+        "startLine": 46,
+        "startChar": 8,
+        "endLine": 48,
+        "endChar": 75
+      },
+      "revId": "16c545907c62c1625710eb3259122def9ec028fa",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "adc6c327_9abe9729",
+        "filename": "src/trigger_factory.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2021-12-16T18:33:16Z",
+      "side": 1,
+      "message": "Seems that isCurrentOnChange is same for all items in labeledDiscreteThresholdParams, maybe you  could extract it to separate section as a separate condition instead checking this flag every loop in here?",
+      "range": {
+        "startLine": 52,
+        "startChar": 12,
+        "endLine": 52,
+        "endChar": 35
+      },
+      "revId": "16c545907c62c1625710eb3259122def9ec028fa",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0e8206a4_59039f26",
+        "filename": "src/trigger_factory.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 187,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2021-12-16T18:33:16Z",
+      "side": 1,
+      "message": "Are there any cons against moving currentSensors into oldSensors instead of copying it?",
+      "range": {
+        "startLine": 187,
+        "startChar": 4,
+        "endLine": 187,
+        "endChar": 40
+      },
+      "revId": "16c545907c62c1625710eb3259122def9ec028fa",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bf0dcce7_4219f3fd",
+        "filename": "src/utils/conversion_trigger.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2021-12-16T18:33:16Z",
+      "side": 1,
+      "message": "There are several repeats of this construct with holds_alternative, and IMO in this form it obfuscates the code, maybe you could replace/create something like isTriggerThresholdDiscrete but for LabeledThresholdParam?",
+      "range": {
+        "startLine": 95,
+        "startChar": 8,
+        "endLine": 96,
+        "endChar": 28
+      },
+      "revId": "16c545907c62c1625710eb3259122def9ec028fa",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8da88df8_74f0884c",
+        "filename": "src/utils/threshold_mixin.hpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2021-12-16T18:33:16Z",
+      "side": 1,
+      "message": "nit: IMO the name of this struct is confusing, could you use more substantial name to better understand its meaning of handling both discrete trigger and numeric trigger common operations?",
+      "range": {
+        "startLine": 7,
+        "startChar": 7,
+        "endLine": 7,
+        "endChar": 21
+      },
+      "revId": "16c545907c62c1625710eb3259122def9ec028fa",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "88e69337_d2d5d1ac",
+        "filename": "src/utils/threshold_mixin.hpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2021-12-16T18:33:16Z",
+      "side": 1,
+      "message": "Are there any cons against moving instead of copying it?",
+      "range": {
+        "startLine": 36,
+        "startChar": 46,
+        "endLine": 37,
+        "endChar": 39
+      },
+      "revId": "16c545907c62c1625710eb3259122def9ec028fa",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
