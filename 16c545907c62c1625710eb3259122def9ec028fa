@@ -140,6 +140,30 @@
     },
     {
       "key": {
+        "uuid": "1d5bba23_93aa163e",
+        "filename": "src/trigger.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2021-12-16T18:43:55Z",
+      "side": 1,
+      "message": "\u003e Why check against numeric alternative and negate? You could just check against discrete and get direct result.\n\nGuessing it comes from that LabeledThresholdParam contains also monostate for discrete (discrete trigger works as specified or changed)?",
+      "parentUuid": "d047f1b4_0c14e7c1",
+      "range": {
+        "startLine": 116,
+        "startChar": 27,
+        "endLine": 116,
+        "endChar": 50
+      },
+      "revId": "16c545907c62c1625710eb3259122def9ec028fa",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "8470d45b_623aa8d1",
         "filename": "src/trigger_factory.cpp",
         "patchSetId": 2
