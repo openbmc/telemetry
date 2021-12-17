@@ -3,6 +3,7 @@
 #include "interfaces/json_storage.hpp"
 #include "interfaces/metric.hpp"
 #include "interfaces/report.hpp"
+#include "interfaces/report_factory.hpp"
 #include "interfaces/report_manager.hpp"
 #include "types/report_action.hpp"
 #include "types/report_types.hpp"
@@ -29,7 +30,7 @@ class Report : public interfaces::Report
            interfaces::ReportManager& reportManager,
            interfaces::JsonStorage& reportStorage,
            std::vector<std::shared_ptr<interfaces::Metric>> metrics,
-           const bool enabled);
+           const interfaces::ReportFactory& reportFactory, const bool enabled);
     ~Report() = default;
 
     Report(const Report&) = delete;
@@ -51,7 +52,8 @@ class Report : public interfaces::Report
     bool storeConfiguration() const;
 
   private:
-    std::unique_ptr<sdbusplus::asio::dbus_interface> makeReportInterface();
+    std::unique_ptr<sdbusplus::asio::dbus_interface>
+        makeReportInterface(const interfaces::ReportFactory& reportFactory);
     static void timerProc(boost::system::error_code, Report& self);
     void scheduleTimer(Milliseconds interval);
     uint64_t deduceAppendLimit(const uint64_t appendLimitIn) const;
