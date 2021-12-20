@@ -4,6 +4,7 @@
 #include "interfaces/json_storage.hpp"
 #include "interfaces/metric.hpp"
 #include "interfaces/report.hpp"
+#include "interfaces/report_factory.hpp"
 #include "interfaces/report_manager.hpp"
 #include "types/report_action.hpp"
 #include "types/report_types.hpp"
@@ -30,7 +31,8 @@ class Report : public interfaces::Report
            interfaces::ReportManager& reportManager,
            interfaces::JsonStorage& reportStorage,
            std::vector<std::shared_ptr<interfaces::Metric>> metrics,
-           const bool enabled, std::unique_ptr<interfaces::Clock> clock);
+           const interfaces::ReportFactory& reportFactory, const bool enabled,
+           std::unique_ptr<interfaces::Clock> clock);
 
     Report(const Report&) = delete;
     Report(Report&&) = delete;
@@ -51,13 +53,15 @@ class Report : public interfaces::Report
     bool storeConfiguration() const;
 
   private:
-    std::unique_ptr<sdbusplus::asio::dbus_interface> makeReportInterface();
+    std::unique_ptr<sdbusplus::asio::dbus_interface>
+        makeReportInterface(const interfaces::ReportFactory& reportFactory);
     static void timerProc(boost::system::error_code, Report& self);
     void scheduleTimer(Milliseconds interval);
     std::optional<uint64_t>
         deduceAppendLimit(const uint64_t appendLimitIn) const;
     uint64_t deduceBufferSize(const ReportUpdates reportUpdatesIn,
                               const ReportingType reportingTypeIn) const;
+    void setReadingBuffer(const ReportUpdates newReportUpdates);
     void setReportUpdates(const ReportUpdates newReportUpdates);
     static uint64_t getSensorCount(
         std::vector<std::shared_ptr<interfaces::Metric>>& metrics);

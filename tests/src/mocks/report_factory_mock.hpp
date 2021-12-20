@@ -32,6 +32,10 @@ class ReportFactoryMock : public interfaces::ReportFactory
     {
         using namespace testing;
 
+        ON_CALL(*this, convertMetricParams(_))
+            .WillByDefault(
+                WithArgs<0>(Invoke(&ReportFactoryMock::convertToLabeled)));
+
         ON_CALL(*this, convertMetricParams(_, _))
             .WillByDefault(
                 WithArgs<1>(Invoke(&ReportFactoryMock::convertToLabeled)));
@@ -45,6 +49,14 @@ class ReportFactoryMock : public interfaces::ReportFactory
 
     MOCK_METHOD(std::vector<LabeledMetricParameters>, convertMetricParams,
                 (boost::asio::yield_context&, const ReadingParameters&),
+                (const, override));
+
+    MOCK_METHOD(std::vector<LabeledMetricParameters>, convertMetricParams,
+                (const ReadingParameters&), (const, override));
+
+    MOCK_METHOD(void, updateMetrics,
+                (std::vector<std::shared_ptr<interfaces::Metric>> & metrics,
+                 bool enabled, const ReadingParameters&),
                 (const, override));
 
     MOCK_METHOD(std::unique_ptr<interfaces::Report>, make,
