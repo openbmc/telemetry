@@ -21,6 +21,7 @@ Report::Report(boost::asio::io_context& ioc,
                interfaces::ReportManager& reportManager,
                interfaces::JsonStorage& reportStorageIn,
                std::vector<std::shared_ptr<interfaces::Metric>> metricsIn,
+               const interfaces::ReportFactory& reportFactory,
                const bool enabledIn) :
     id(reportId),
     name(reportName), reportingType(reportingTypeIn), interval(intervalIn),
@@ -62,7 +63,7 @@ Report::Report(boost::asio::io_context& ioc,
         });
 
     persistency = storeConfiguration();
-    reportIface = makeReportInterface();
+    reportIface = makeReportInterface(reportFactory);
 
     if (reportingType == ReportingType::periodic)
     {
@@ -130,7 +131,8 @@ void Report::setReportUpdates(const ReportUpdates newReportUpdates)
     }
 }
 
-std::unique_ptr<sdbusplus::asio::dbus_interface> Report::makeReportInterface()
+std::unique_ptr<sdbusplus::asio::dbus_interface>
+    Report::makeReportInterface(const interfaces::ReportFactory& reportFactory)
 {
     auto dbusIface =
         objServer->add_unique_interface(getPath(), reportIfaceName);
@@ -217,9 +219,18 @@ std::unique_ptr<sdbusplus::asio::dbus_interface> Report::makeReportInterface()
         "ReadingParameters", readingParametersPastVersion,
         sdbusplus::vtable::property_::const_,
         [this](const auto&) { return readingParametersPastVersion; });
-    dbusIface->register_property_r(
+    dbusIface->register_property_rw(
         "ReadingParametersFutureVersion", readingParameters,
-        sdbusplus::vtable::property_::const_,
+        sdbusplus::vtable::property_::emits_change,
+        [this, &reportFactory](auto newVal, auto& oldVal) {
+            reportFactory.updateMetrics(metrics, enabled, newVal);
+            readingParameters = toReadingParameters(
+                utils::transform(metrics, [](const auto& metric) {
+                    return metric->dumpConfiguration();
+                }));
+            oldVal = std::move(newVal);
+            return 1;
+        },
         [this](const auto&) { return readingParameters; });
     dbusIface->register_property_r(
         "EmitsReadingsUpdate", bool{}, sdbusplus::vtable::property_::const_,
