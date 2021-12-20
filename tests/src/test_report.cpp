@@ -3,6 +3,7 @@
 #include "helpers.hpp"
 #include "mocks/json_storage_mock.hpp"
 #include "mocks/metric_mock.hpp"
+#include "mocks/report_factory_mock.hpp"
 #include "mocks/report_manager_mock.hpp"
 #include "params/report_params.hpp"
 #include "report.hpp"
@@ -29,6 +30,8 @@ class TestReport : public Test
 
     std::unique_ptr<ReportManagerMock> reportManagerMock =
         std::make_unique<NiceMock<ReportManagerMock>>();
+    std::unique_ptr<ReportFactoryMock> reportFactoryMock =
+        std::make_unique<NiceMock<ReportFactoryMock>>();
     testing::NiceMock<StorageMock> storageMock;
     std::vector<std::shared_ptr<MetricMock>> metricMocks;
     std::unique_ptr<ClockFake> clockFakePtr = std::make_unique<ClockFake>();
@@ -86,7 +89,7 @@ class TestReport : public Test
             params.reportUpdates(), *reportManagerMock, storageMock,
             utils::convContainer<std::shared_ptr<interfaces::Metric>>(
                 metricMocks),
-            params.enabled(), std::move(clockFakePtr));
+            *reportFactoryMock, params.enabled(), std::move(clockFakePtr));
     }
 
     template <class T>
@@ -170,6 +173,98 @@ TEST_F(TestReport, readingsAreInitialyEmpty)
 {
     EXPECT_THAT(getProperty<Readings>(sut->getPath(), "Readings"),
                 Eq(Readings{}));
+}
+
+TEST_F(TestReport, setReadingParametersUpdateWithValidParams)
+{
+    ON_CALL(*reportFactoryMock, updateMetrics(_, _, _))
+        .WillByDefault(WithArgs<0, 2>(Invoke(
+            [this](std::vector<std::shared_ptr<interfaces::Metric>>& metrics,
+                   const ReadingParameters& params) {
+                for (const auto& param : params)
+                {
+                    const auto& [_, operation, id, timeScope, duration] = param;
+                    if (utils::toCollectionTimeScope(timeScope) ==
+                            CollectionTimeScope::interval &&
+                        duration <= 0)
+                    {
+                        throw sdbusplus::exception::SdBusError(
+                            static_cast<int>(std::errc::invalid_argument),
+                            "Invalid CollectionDuration");
+                    }
+                }
+                auto labeledParams =
+                    reportFactoryMock->convertMetricParams(params);
+                initMetricMocks(labeledParams);
+                metrics =
+                    utils::convContainer<std::shared_ptr<interfaces::Metric>>(
+                        metricMocks);
+            })));
+
+    ReadingParameters newParams = toReadingParameters(
+        std::vector<LabeledMetricParameters>{{LabeledMetricParameters{
+            {LabeledSensorInfo{"Service",
+                               "/xyz/openbmc_project/sensors/power/psu",
+                               "NewMetadata123"}},
+            OperationType::avg,
+            "NewMetricId123",
+            CollectionTimeScope::startup,
+            CollectionDuration(250ms)}}});
+
+    EXPECT_CALL(*reportFactoryMock, updateMetrics(_, _, _));
+    EXPECT_THAT(
+        setProperty(sut->getPath(), "ReadingParametersFutureVersion", newParams)
+            .value(),
+        Eq(boost::system::errc::success));
+    EXPECT_THAT(getProperty<ReadingParameters>(
+                    sut->getPath(), "ReadingParametersFutureVersion"),
+                Eq(newParams));
+}
+
+TEST_F(TestReport, setReadingParametersUpdateWithInvalidParams)
+{
+    ON_CALL(*reportFactoryMock, updateMetrics(_, _, _))
+        .WillByDefault(WithArgs<0, 2>(Invoke(
+            [this](std::vector<std::shared_ptr<interfaces::Metric>>& metrics,
+                   const ReadingParameters& params) {
+                for (const auto& param : params)
+                {
+                    const auto& [_, operation, id, timeScope, duration] = param;
+                    if (utils::toCollectionTimeScope(timeScope) ==
+                            CollectionTimeScope::interval &&
+                        duration <= 0)
+                    {
+                        throw sdbusplus::exception::SdBusError(
+                            static_cast<int>(std::errc::invalid_argument),
+                            "Invalid CollectionDuration");
+                    }
+                }
+                auto labeledParams =
+                    reportFactoryMock->convertMetricParams(params);
+                initMetricMocks(labeledParams);
+                metrics =
+                    utils::convContainer<std::shared_ptr<interfaces::Metric>>(
+                        metricMocks);
+            })));
+
+    ReadingParameters newParams = toReadingParameters(
+        std::vector<LabeledMetricParameters>{{LabeledMetricParameters{
+            {LabeledSensorInfo{"Service",
+                               "/xyz/openbmc_project/sensors/power/psu",
+                               "NewMetadata123"}},
+            OperationType::sum,
+            "NewMetricId123",
+            CollectionTimeScope::interval,
+            CollectionDuration(0ms)}}});
+
+    EXPECT_CALL(*reportFactoryMock, updateMetrics(_, _, _));
+    EXPECT_THAT(
+        setProperty(sut->getPath(), "ReadingParametersFutureVersion", newParams)
+            .value(),
+        Ne(boost::system::errc::success));
+    EXPECT_THAT(getProperty<ReadingParameters>(
+                    sut->getPath(), "ReadingParametersFutureVersion"),
+                Eq(toReadingParameters(defaultParams.metricParameters())));
 }
 
 TEST_F(TestReport, setEnabledWithNewValue)

@@ -40,10 +40,60 @@ std::unique_ptr<interfaces::Report> ReportFactory::make(
                 std::make_unique<Clock>());
         });
 
-    return std::make_unique<Report>(
-        bus->get_io_context(), objServer, id, name, reportingType,
-        reportActions, period, appendLimit, reportUpdates, reportManager,
-        reportStorage, std::move(metrics), enabled, std::make_unique<Clock>());
+    return std::make_unique<Report>(bus->get_io_context(), objServer, id, name,
+                                    reportingType, reportActions, period,
+                                    appendLimit, reportUpdates, reportManager,
+                                    reportStorage, std::move(metrics), *this,
+                                    enabled, std::make_unique<Clock>());
+}
+
+void ReportFactory::updateMetrics(
+    std::vector<std::shared_ptr<interfaces::Metric>>& metrics, bool enabled,
+    const ReadingParameters& metricParams) const
+{
+    auto labeledMetricParams = convertMetricParams(metricParams);
+    std::vector<std::shared_ptr<interfaces::Metric>> oldMetrics = metrics;
+    std::vector<std::shared_ptr<interfaces::Metric>> newMetrics;
+
+    for (const auto& labeledMetricParam : labeledMetricParams)
+    {
+        auto existing = std::find_if(oldMetrics.begin(), oldMetrics.end(),
+                                     [labeledMetricParam](auto metric) {
+                                         return labeledMetricParam ==
+                                                metric->dumpConfiguration();
+                                     });
+
+        if (existing != oldMetrics.end())
+        {
+            newMetrics.emplace_back(*existing);
+            oldMetrics.erase(existing);
+            continue;
+        }
+
+        namespace ts = utils::tstring;
+        newMetrics.emplace_back(std::make_shared<Metric>(
+            getSensors(labeledMetricParam.at_label<ts::SensorPath>()),
+            labeledMetricParam.at_label<ts::OperationType>(),
+            labeledMetricParam.at_label<ts::Id>(),
+            labeledMetricParam.at_label<ts::CollectionTimeScope>(),
+            labeledMetricParam.at_label<ts::CollectionDuration>(),
+            std::make_unique<Clock>()));
+
+        if (enabled)
+        {
+            newMetrics.back()->initialize();
+        }
+    }
+
+    if (enabled)
+    {
+        for (auto& metric : oldMetrics)
+        {
+            metric->deinitialize();
+        }
+    }
+
+    metrics = std::move(newMetrics);
 }
 
 Sensors ReportFactory::getSensors(
@@ -66,6 +116,55 @@ std::vector<LabeledMetricParameters> ReportFactory::convertMetricParams(
     const ReadingParameters& metricParams) const
 {
     auto tree = utils::getSubTreeSensors(yield, bus);
+
+    return utils::transform(metricParams, [&tree](const auto& item) {
+        auto [sensorPaths, operationType, id, collectionTimeScope,
+              collectionDuration] = item;
+
+        std::vector<LabeledSensorInfo> sensorParameters;
+
+        for (const auto& [sensorPath, metadata] : sensorPaths)
+        {
+            auto it = std::find_if(
+                tree.begin(), tree.end(),
+                [&sensorPath](const auto& v) { return v.first == sensorPath; });
+
+            if (it != tree.end() && it->second.size() == 1)
+            {
+                const auto& [service, ifaces] = it->second.front();
+                sensorParameters.emplace_back(service, sensorPath, metadata);
+            }
+        }
+
+        if (sensorParameters.size() != sensorPaths.size())
+        {
+            throw sdbusplus::exception::SdBusError(
+                static_cast<int>(std::errc::invalid_argument),
+                "Could not find service for provided sensors");
+        }
+
+        if (operationType.empty())
+        {
+            operationType = utils::enumToString(OperationType::avg);
+        }
+
+        if (collectionTimeScope.empty())
+        {
+            collectionTimeScope =
+                utils::enumToString(CollectionTimeScope::point);
+        }
+
+        return LabeledMetricParameters(
+            std::move(sensorParameters), utils::toOperationType(operationType),
+            id, utils::toCollectionTimeScope(collectionTimeScope),
+            CollectionDuration(Milliseconds(collectionDuration)));
+    });
+}
+
+std::vector<LabeledMetricParameters> ReportFactory::convertMetricParams(
+    const ReadingParameters& metricParams) const
+{
+    auto tree = utils::getSubTreeSensors(bus);
 
     return utils::transform(metricParams, [&tree](const auto& item) {
         auto [sensorPaths, operationType, id, collectionTimeScope,
