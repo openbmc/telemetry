@@ -21,6 +21,7 @@ Report::Report(boost::asio::io_context& ioc,
                interfaces::ReportManager& reportManager,
                interfaces::JsonStorage& reportStorageIn,
                std::vector<std::shared_ptr<interfaces::Metric>> metricsIn,
+               const interfaces::ReportFactory& reportFactory,
                const bool enabledIn, std::unique_ptr<interfaces::Clock> clock) :
     id(reportId),
     name(reportName), reportingType(reportingTypeIn), interval(intervalIn),
@@ -32,6 +33,7 @@ Report::Report(boost::asio::io_context& ioc,
     objServer(objServer), metrics(std::move(metricsIn)), timer(ioc),
     reportStorage(reportStorageIn), enabled(enabledIn), clock(std::move(clock))
 {
+
     readingParameters =
         toReadingParameters(utils::transform(metrics, [](const auto& metric) {
             return metric->dumpConfiguration();
@@ -46,6 +48,13 @@ Report::Report(boost::asio::io_context& ioc,
                 std::get<0>(sensorData.front()), operationType, id,
                 std::get<1>(sensorData.front()));
         });
+
+    if (!utils::contains(reportActions,
+                         ReportAction::logToMetricReportsCollection))
+    {
+        reportActions.emplace_back(ReportAction::logToMetricReportsCollection);
+    }
+    std::sort(reportActions.begin(), reportActions.end());
 
     deleteIface = objServer->add_unique_interface(
         getPath(), deleteIfaceName,
@@ -62,7 +71,7 @@ Report::Report(boost::asio::io_context& ioc,
         });
 
     persistency = storeConfiguration();
-    reportIface = makeReportInterface();
+    reportIface = makeReportInterface(reportFactory);
 
     if (reportingType == ReportingType::periodic)
     {
@@ -130,7 +139,8 @@ void Report::setReportUpdates(const ReportUpdates newReportUpdates)
     }
 }
 
-std::unique_ptr<sdbusplus::asio::dbus_interface> Report::makeReportInterface()
+std::unique_ptr<sdbusplus::asio::dbus_interface>
+    Report::makeReportInterface(const interfaces::ReportFactory& reportFactory)
 {
     auto dbusIface =
         objServer->add_unique_interface(getPath(), reportIfaceName);
@@ -203,12 +213,8 @@ std::unique_ptr<sdbusplus::asio::dbus_interface> Report::makeReportInterface()
         },
         [this](const auto&) { return persistency; });
 
-    auto readingsFlag = sdbusplus::vtable::property_::none;
-    if (utils::contains(reportActions, ReportAction::emitsReadingsUpdate))
-    {
-        readingsFlag = sdbusplus::vtable::property_::emits_change;
-    }
-    dbusIface->register_property_r("Readings", readings, readingsFlag,
+    dbusIface->register_property_r("Readings", readings,
+                                   sdbusplus::vtable::property_::emits_change,
                                    [this](const auto&) { return readings; });
     dbusIface->register_property_r(
         "ReportingType", std::string(), sdbusplus::vtable::property_::const_,
@@ -217,12 +223,22 @@ std::unique_ptr<sdbusplus::asio::dbus_interface> Report::makeReportInterface()
         "ReadingParameters", readingParametersPastVersion,
         sdbusplus::vtable::property_::const_,
         [this](const auto&) { return readingParametersPastVersion; });
-    dbusIface->register_property_r(
+    dbusIface->register_property_rw(
         "ReadingParametersFutureVersion", readingParameters,
-        sdbusplus::vtable::property_::const_,
+        sdbusplus::vtable::property_::emits_change,
+        [this, &reportFactory](auto newVal, auto& oldVal) {
+            reportFactory.updateMetrics(metrics, enabled, newVal);
+            readingParameters = toReadingParameters(
+                utils::transform(metrics, [](const auto& metric) {
+                    return metric->dumpConfiguration();
+                }));
+            persistency = storeConfiguration();
+            oldVal = std::move(newVal);
+            return 1;
+        },
         [this](const auto&) { return readingParameters; });
     dbusIface->register_property_r(
-        "EmitsReadingsUpdate", bool{}, sdbusplus::vtable::property_::const_,
+        "EmitsReadingsUpdate", bool{}, sdbusplus::vtable::property_::none,
         [this](const auto&) {
             return utils::contains(reportActions,
                                    ReportAction::emitsReadingsUpdate);
@@ -236,9 +252,29 @@ std::unique_ptr<sdbusplus::asio::dbus_interface> Report::makeReportInterface()
             return utils::contains(reportActions,
                                    ReportAction::logToMetricReportsCollection);
         });
-    dbusIface->register_property_r(
+    dbusIface->register_property_rw(
         "ReportActions", std::vector<std::string>{},
-        sdbusplus::vtable::property_::const_, [this](const auto&) {
+        sdbusplus::vtable::property_::emits_change,
+        [this](auto newVal, auto& oldVal) {
+            auto tmp = utils::transform(newVal, [](const auto& reportAction) {
+                return utils::toReportAction(reportAction);
+            });
+            if (!utils::contains(tmp,
+                                 ReportAction::logToMetricReportsCollection))
+            {
+                tmp.emplace_back(ReportAction::logToMetricReportsCollection);
+            }
+            std::sort(tmp.begin(), tmp.end());
+
+            if (tmp != reportActions)
+            {
+                reportActions = tmp;
+                persistency = storeConfiguration();
+            }
+            oldVal = std::move(newVal);
+            return 1;
+        },
+        [this](const auto&) {
             return utils::transform(reportActions, [](const auto reportAction) {
                 return utils::enumToString(reportAction);
             });
@@ -321,7 +357,10 @@ void Report::updateReadings()
             .count(),
         std::vector<ReadingData>(readingsBuffer.begin(), readingsBuffer.end())};
 
-    reportIface->signal_property("Readings");
+    if (utils::contains(reportActions, ReportAction::emitsReadingsUpdate))
+    {
+        reportIface->signal_property("Readings");
+    }
 }
 
 bool Report::storeConfiguration() const
