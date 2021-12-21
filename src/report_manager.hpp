@@ -24,9 +24,9 @@ class ReportManager : public interfaces::ReportManager
         const std::shared_ptr<sdbusplus::asio::object_server>& objServer);
     ~ReportManager() = default;
 
-    ReportManager(ReportManager&) = delete;
+    ReportManager(const ReportManager&) = delete;
     ReportManager(ReportManager&&) = delete;
-    ReportManager& operator=(ReportManager&) = delete;
+    ReportManager& operator=(const ReportManager&) = delete;
     ReportManager& operator=(ReportManager&&) = delete;
 
     void removeReport(const interfaces::Report* report) override;

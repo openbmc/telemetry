@@ -18,9 +18,9 @@ class TriggerManager : public interfaces::TriggerManager
         std::unique_ptr<interfaces::JsonStorage> triggerStorage,
         const std::shared_ptr<sdbusplus::asio::object_server>& objServer);
 
-    TriggerManager(TriggerManager&) = delete;
+    TriggerManager(const TriggerManager&) = delete;
     TriggerManager(TriggerManager&&) = delete;
-    TriggerManager& operator=(TriggerManager&) = delete;
+    TriggerManager& operator=(const TriggerManager&) = delete;
     TriggerManager& operator=(TriggerManager&&) = delete;
 
     void removeTrigger(const interfaces::Trigger* trigger) override;
