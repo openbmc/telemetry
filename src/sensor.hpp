@@ -2,7 +2,7 @@
 
 #include "interfaces/sensor.hpp"
 #include "interfaces/sensor_listener.hpp"
-#include "types/milliseconds.hpp"
+#include "types/duration_types.hpp"
 #include "utils/unique_call.hpp"
 
 #include <boost/asio/high_resolution_timer.hpp>
@@ -53,7 +53,7 @@ class Sensor final :
 
     utils::UniqueCall uniqueCall;
     std::vector<std::weak_ptr<interfaces::SensorListener>> listeners;
-    uint64_t timestamp = 0;
+    Milliseconds timestamp = Milliseconds{0u};
     std::optional<double> value;
     std::unique_ptr<sdbusplus::bus::match_t> signalMonitor;
 };

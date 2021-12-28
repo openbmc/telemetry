@@ -1,22 +1,24 @@
 #pragma once
 
 #include "interfaces/clock.hpp"
-#include "types/duration_type.hpp"
+#include "types/duration_types.hpp"
 
 #include <chrono>
 
 class Clock : public interfaces::Clock
 {
   public:
-    time_point now() const noexcept override
+    Milliseconds steadyTimestamp() const noexcept override
     {
-        return std::chrono::steady_clock::now();
+        return std::chrono::time_point_cast<Milliseconds>(
+                   std::chrono::steady_clock::now())
+            .time_since_epoch();
     }
 
-    uint64_t timestamp() const noexcept override
+    Milliseconds systemTimestamp() const noexcept override
     {
-        return std::chrono::time_point_cast<Milliseconds>(now())
-            .time_since_epoch()
-            .count();
+        return std::chrono::time_point_cast<Milliseconds>(
+                   std::chrono::system_clock::now())
+            .time_since_epoch();
     }
 };

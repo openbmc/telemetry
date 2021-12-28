@@ -7,6 +7,6 @@
 class TriggerActionMock : public interfaces::TriggerAction
 {
   public:
-    MOCK_METHOD(void, commit, (const std::string&, uint64_t, double),
+    MOCK_METHOD(void, commit, (const std::string&, Milliseconds, double),
                 (override));
 };

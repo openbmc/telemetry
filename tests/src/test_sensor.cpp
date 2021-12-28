@@ -52,7 +52,7 @@ class TestSensor : public Test
     std::unique_ptr<stubs::DbusSensorObject> sensorObject = makeSensorObject();
 
     SensorCache sensorCache;
-    uint64_t timestamp = Clock().timestamp();
+    Milliseconds timestamp = Clock().steadyTimestamp();
     std::shared_ptr<Sensor> sut = sensorCache.makeSensor<Sensor>(
         DbusEnvironment::serviceName(), sensorObject->path(), "metadata",
         DbusEnvironment::getIoc(), DbusEnvironment::getBus());

@@ -69,14 +69,14 @@ struct NumericParams
     }
 
     NumericParams&
-        Updates(std::vector<std::tuple<size_t, uint64_t, double>> val)
+        Updates(std::vector<std::tuple<size_t, Milliseconds, double>> val)
     {
         updates = std::move(val);
         return *this;
     }
 
     NumericParams&
-        Expected(std::vector<std::tuple<size_t, uint64_t, double>> val)
+        Expected(std::vector<std::tuple<size_t, Milliseconds, double>> val)
     {
         expected = std::move(val);
         return *this;
@@ -88,21 +88,23 @@ struct NumericParams
             << ", Updates: ";
         for (const auto& [index, timestamp, value] : o.updates)
         {
-            *os << "{ SensorIndex: " << index << ", Timestamp: " << timestamp
-                << ", Value: " << value << " }, ";
+            *os << "{ SensorIndex: " << index
+                << ", Timestamp: " << timestamp.count() << ", Value: " << value
+                << " }, ";
         }
         *os << "Expected: ";
         for (const auto& [index, timestamp, value] : o.expected)
         {
-            *os << "{ SensorIndex: " << index << ", Timestamp: " << timestamp
-                << ", Value: " << value << " }, ";
+            *os << "{ SensorIndex: " << index
+                << ", Timestamp: " << timestamp.count() << ", Value: " << value
+                << " }, ";
         }
         *os << " }";
     }
 
     numeric::Direction direction;
-    std::vector<std::tuple<size_t, uint64_t, double>> updates;
-    std::vector<std::tuple<size_t, uint64_t, double>> expected;
+    std::vector<std::tuple<size_t, Milliseconds, double>> updates;
+    std::vector<std::tuple<size_t, Milliseconds, double>> expected;
 };
 
 class TestNumericThresholdNoDwellTime :
@@ -116,53 +118,70 @@ class TestNumericThresholdNoDwellTime :
     }
 };
 
-INSTANTIATE_TEST_SUITE_P(
-    _, TestNumericThresholdNoDwellTime,
-    Values(
-        NumericParams()
-            .Direction(numeric::Direction::increasing)
-            .Updates({{0, 1, 80.0}, {0, 2, 89.0}})
-            .Expected({}),
-        NumericParams()
-            .Direction(numeric::Direction::increasing)
-            .Updates({{0, 1, 80.0}, {0, 2, 91.0}})
-            .Expected({{0, 2, 91.0}}),
-        NumericParams()
-            .Direction(numeric::Direction::increasing)
-            .Updates({{0, 1, 80.0}, {0, 2, 99.0}, {0, 3, 80.0}, {0, 4, 98.0}})
-            .Expected({{0, 2, 99.0}, {0, 4, 98.0}}),
-        NumericParams()
-            .Direction(numeric::Direction::increasing)
-            .Updates({{0, 1, 80.0}, {0, 2, 99.0}, {1, 3, 100.0}, {1, 4, 98.0}})
-            .Expected({{0, 2, 99.0}}),
-        NumericParams()
-            .Direction(numeric::Direction::decreasing)
-            .Updates({{0, 1, 100.0}, {0, 2, 91.0}})
-            .Expected({}),
-        NumericParams()
-            .Direction(numeric::Direction::decreasing)
-            .Updates({{0, 1, 100.0}, {0, 2, 80.0}})
-            .Expected({{0, 2, 80.0}}),
-        NumericParams()
-            .Direction(numeric::Direction::decreasing)
-            .Updates({{0, 1, 100.0}, {0, 2, 80.0}, {0, 3, 99.0}, {0, 4, 85.0}})
-            .Expected({{0, 2, 80.0}, {0, 4, 85.0}}),
-        NumericParams()
-            .Direction(numeric::Direction::decreasing)
-            .Updates({{0, 1, 100.0}, {0, 2, 80.0}, {1, 3, 99.0}, {1, 4, 88.0}})
-            .Expected({{0, 2, 80.0}, {1, 4, 88.0}}),
-        NumericParams()
-            .Direction(numeric::Direction::either)
-            .Updates({{0, 1, 98.0}, {0, 2, 91.0}})
-            .Expected({}),
-        NumericParams()
-            .Direction(numeric::Direction::either)
-            .Updates({{0, 1, 100.0}, {0, 2, 80.0}, {0, 3, 85.0}, {0, 4, 91.0}})
-            .Expected({{0, 2, 80.0}, {0, 4, 91.0}}),
-        NumericParams()
-            .Direction(numeric::Direction::either)
-            .Updates({{0, 1, 100.0}, {1, 2, 80.0}, {0, 3, 85.0}, {1, 4, 91.0}})
-            .Expected({{0, 3, 85.0}, {1, 4, 91.0}})));
+INSTANTIATE_TEST_SUITE_P(_, TestNumericThresholdNoDwellTime,
+                         Values(NumericParams()
+                                    .Direction(numeric::Direction::increasing)
+                                    .Updates({{0, 1ms, 80.0}, {0, 2ms, 89.0}})
+                                    .Expected({}),
+                                NumericParams()
+                                    .Direction(numeric::Direction::increasing)
+                                    .Updates({{0, 1ms, 80.0}, {0, 2ms, 91.0}})
+                                    .Expected({{0, 2ms, 91.0}}),
+                                NumericParams()
+                                    .Direction(numeric::Direction::increasing)
+                                    .Updates({{0, 1ms, 80.0},
+                                              {0, 2ms, 99.0},
+                                              {0, 3ms, 80.0},
+                                              {0, 4ms, 98.0}})
+                                    .Expected({{0, 2ms, 99.0}, {0, 4ms, 98.0}}),
+                                NumericParams()
+                                    .Direction(numeric::Direction::increasing)
+                                    .Updates({{0, 1ms, 80.0},
+                                              {0, 2ms, 99.0},
+                                              {1, 3ms, 100.0},
+                                              {1, 4ms, 98.0}})
+                                    .Expected({{0, 2ms, 99.0}}),
+                                NumericParams()
+                                    .Direction(numeric::Direction::decreasing)
+                                    .Updates({{0, 1ms, 100.0}, {0, 2ms, 91.0}})
+                                    .Expected({}),
+                                NumericParams()
+                                    .Direction(numeric::Direction::decreasing)
+                                    .Updates({{0, 1ms, 100.0}, {0, 2ms, 80.0}})
+                                    .Expected({{0, 2ms, 80.0}}),
+                                NumericParams()
+                                    .Direction(numeric::Direction::decreasing)
+                                    .Updates({{0, 1ms, 100.0},
+                                              {0, 2ms, 80.0},
+                                              {0, 3ms, 99.0},
+                                              {0, 4ms, 85.0}})
+                                    .Expected({{0, 2ms, 80.0}, {0, 4ms, 85.0}}),
+                                NumericParams()
+                                    .Direction(numeric::Direction::decreasing)
+                                    .Updates({{0, 1ms, 100.0},
+                                              {0, 2ms, 80.0},
+                                              {1, 3ms, 99.0},
+                                              {1, 4ms, 88.0}})
+                                    .Expected({{0, 2ms, 80.0}, {1, 4ms, 88.0}}),
+                                NumericParams()
+                                    .Direction(numeric::Direction::either)
+                                    .Updates({{0, 1ms, 98.0}, {0, 2ms, 91.0}})
+                                    .Expected({}),
+                                NumericParams()
+                                    .Direction(numeric::Direction::either)
+                                    .Updates({{0, 1ms, 100.0},
+                                              {0, 2ms, 80.0},
+                                              {0, 3ms, 85.0},
+                                              {0, 4ms, 91.0}})
+                                    .Expected({{0, 2ms, 80.0}, {0, 4ms, 91.0}}),
+                                NumericParams()
+                                    .Direction(numeric::Direction::either)
+                                    .Updates({{0, 1ms, 100.0},
+                                              {1, 2ms, 80.0},
+                                              {0, 3ms, 85.0},
+                                              {1, 4ms, 91.0}})
+                                    .Expected({{0, 3ms, 85.0},
+                                               {1, 4ms, 91.0}})));
 
 TEST_P(TestNumericThresholdNoDwellTime, senorsIsUpdatedMultipleTimes)
 {
@@ -195,53 +214,70 @@ class TestNumericThresholdWithDwellTime :
     }
 };
 
-INSTANTIATE_TEST_SUITE_P(
-    _, TestNumericThresholdWithDwellTime,
-    Values(
-        NumericParams()
-            .Direction(numeric::Direction::increasing)
-            .Updates({{0, 1, 80.0}, {0, 2, 89.0}})
-            .Expected({}),
-        NumericParams()
-            .Direction(numeric::Direction::increasing)
-            .Updates({{0, 1, 80.0}, {0, 2, 91.0}})
-            .Expected({{0, 2, 91.0}}),
-        NumericParams()
-            .Direction(numeric::Direction::increasing)
-            .Updates({{0, 1, 80.0}, {0, 2, 99.0}, {0, 3, 80.0}, {0, 4, 98.0}})
-            .Expected({{0, 2, 99.0}, {0, 4, 98.0}}),
-        NumericParams()
-            .Direction(numeric::Direction::increasing)
-            .Updates({{0, 1, 80.0}, {1, 2, 99.0}, {0, 3, 100.0}, {1, 4, 86.0}})
-            .Expected({{0, 3, 100.0}}),
-        NumericParams()
-            .Direction(numeric::Direction::decreasing)
-            .Updates({{0, 1, 100.0}, {0, 2, 91.0}})
-            .Expected({}),
-        NumericParams()
-            .Direction(numeric::Direction::decreasing)
-            .Updates({{0, 1, 100.0}, {0, 2, 80.0}})
-            .Expected({{0, 2, 80.0}}),
-        NumericParams()
-            .Direction(numeric::Direction::decreasing)
-            .Updates({{0, 1, 100.0}, {0, 2, 80.0}, {0, 3, 99.0}, {0, 4, 85.0}})
-            .Expected({{0, 2, 80.0}, {0, 4, 85.0}}),
-        NumericParams()
-            .Direction(numeric::Direction::decreasing)
-            .Updates({{0, 1, 100.0}, {0, 2, 80.0}, {1, 3, 99.0}, {1, 4, 88.0}})
-            .Expected({{0, 2, 80.0}, {1, 4, 88.0}}),
-        NumericParams()
-            .Direction(numeric::Direction::either)
-            .Updates({{0, 1, 98.0}, {0, 2, 91.0}})
-            .Expected({}),
-        NumericParams()
-            .Direction(numeric::Direction::either)
-            .Updates({{0, 1, 100.0}, {0, 2, 80.0}, {0, 3, 85.0}, {0, 4, 91.0}})
-            .Expected({{0, 2, 80.0}, {0, 4, 91.0}}),
-        NumericParams()
-            .Direction(numeric::Direction::either)
-            .Updates({{0, 1, 100.0}, {1, 2, 80.0}, {0, 3, 85.0}, {1, 4, 91.0}})
-            .Expected({{0, 3, 85.0}, {1, 4, 91.0}})));
+INSTANTIATE_TEST_SUITE_P(_, TestNumericThresholdWithDwellTime,
+                         Values(NumericParams()
+                                    .Direction(numeric::Direction::increasing)
+                                    .Updates({{0, 1ms, 80.0}, {0, 2ms, 89.0}})
+                                    .Expected({}),
+                                NumericParams()
+                                    .Direction(numeric::Direction::increasing)
+                                    .Updates({{0, 1ms, 80.0}, {0, 2ms, 91.0}})
+                                    .Expected({{0, 2ms, 91.0}}),
+                                NumericParams()
+                                    .Direction(numeric::Direction::increasing)
+                                    .Updates({{0, 1ms, 80.0},
+                                              {0, 2ms, 99.0},
+                                              {0, 3ms, 80.0},
+                                              {0, 4ms, 98.0}})
+                                    .Expected({{0, 2ms, 99.0}, {0, 4ms, 98.0}}),
+                                NumericParams()
+                                    .Direction(numeric::Direction::increasing)
+                                    .Updates({{0, 1ms, 80.0},
+                                              {1, 2ms, 99.0},
+                                              {0, 3ms, 100.0},
+                                              {1, 4ms, 86.0}})
+                                    .Expected({{0, 3ms, 100.0}}),
+                                NumericParams()
+                                    .Direction(numeric::Direction::decreasing)
+                                    .Updates({{0, 1ms, 100.0}, {0, 2ms, 91.0}})
+                                    .Expected({}),
+                                NumericParams()
+                                    .Direction(numeric::Direction::decreasing)
+                                    .Updates({{0, 1ms, 100.0}, {0, 2ms, 80.0}})
+                                    .Expected({{0, 2ms, 80.0}}),
+                                NumericParams()
+                                    .Direction(numeric::Direction::decreasing)
+                                    .Updates({{0, 1ms, 100.0},
+                                              {0, 2ms, 80.0},
+                                              {0, 3ms, 99.0},
+                                              {0, 4ms, 85.0}})
+                                    .Expected({{0, 2ms, 80.0}, {0, 4ms, 85.0}}),
+                                NumericParams()
+                                    .Direction(numeric::Direction::decreasing)
+                                    .Updates({{0, 1ms, 100.0},
+                                              {0, 2ms, 80.0},
+                                              {1, 3ms, 99.0},
+                                              {1, 4ms, 88.0}})
+                                    .Expected({{0, 2ms, 80.0}, {1, 4ms, 88.0}}),
+                                NumericParams()
+                                    .Direction(numeric::Direction::either)
+                                    .Updates({{0, 1ms, 98.0}, {0, 2ms, 91.0}})
+                                    .Expected({}),
+                                NumericParams()
+                                    .Direction(numeric::Direction::either)
+                                    .Updates({{0, 1ms, 100.0},
+                                              {0, 2ms, 80.0},
+                                              {0, 3ms, 85.0},
+                                              {0, 4ms, 91.0}})
+                                    .Expected({{0, 2ms, 80.0}, {0, 4ms, 91.0}}),
+                                NumericParams()
+                                    .Direction(numeric::Direction::either)
+                                    .Updates({{0, 1ms, 100.0},
+                                              {1, 2ms, 80.0},
+                                              {0, 3ms, 85.0},
+                                              {1, 4ms, 91.0}})
+                                    .Expected({{0, 3ms, 85.0},
+                                               {1, 4ms, 91.0}})));
 
 TEST_P(TestNumericThresholdWithDwellTime,
        senorsIsUpdatedMultipleTimesSleepAfterEveryUpdate)
@@ -276,53 +312,70 @@ class TestNumericThresholdWithDwellTime2 :
     }
 };
 
-INSTANTIATE_TEST_SUITE_P(
-    _, TestNumericThresholdWithDwellTime2,
-    Values(
-        NumericParams()
-            .Direction(numeric::Direction::increasing)
-            .Updates({{0, 1, 80.0}, {0, 2, 89.0}})
-            .Expected({}),
-        NumericParams()
-            .Direction(numeric::Direction::increasing)
-            .Updates({{0, 1, 80.0}, {0, 2, 91.0}})
-            .Expected({{0, 2, 91.0}}),
-        NumericParams()
-            .Direction(numeric::Direction::increasing)
-            .Updates({{0, 1, 80.0}, {0, 2, 99.0}, {0, 3, 80.0}, {0, 4, 98.0}})
-            .Expected({{0, 4, 98.0}}),
-        NumericParams()
-            .Direction(numeric::Direction::increasing)
-            .Updates({{0, 1, 80.0}, {1, 2, 99.0}, {0, 3, 100.0}, {1, 4, 98.0}})
-            .Expected({{0, 3, 100.0}}),
-        NumericParams()
-            .Direction(numeric::Direction::decreasing)
-            .Updates({{0, 1, 100.0}, {0, 2, 91.0}})
-            .Expected({}),
-        NumericParams()
-            .Direction(numeric::Direction::decreasing)
-            .Updates({{0, 1, 100.0}, {0, 2, 80.0}})
-            .Expected({{0, 2, 80.0}}),
-        NumericParams()
-            .Direction(numeric::Direction::decreasing)
-            .Updates({{0, 1, 100.0}, {0, 2, 80.0}, {0, 3, 99.0}, {0, 4, 85.0}})
-            .Expected({{0, 4, 85.0}}),
-        NumericParams()
-            .Direction(numeric::Direction::decreasing)
-            .Updates({{0, 1, 100.0}, {0, 2, 80.0}, {1, 3, 99.0}, {1, 4, 88.0}})
-            .Expected({{0, 2, 80.0}, {1, 4, 88.0}}),
-        NumericParams()
-            .Direction(numeric::Direction::either)
-            .Updates({{0, 1, 98.0}, {0, 2, 91.0}})
-            .Expected({}),
-        NumericParams()
-            .Direction(numeric::Direction::either)
-            .Updates({{0, 1, 100.0}, {0, 2, 80.0}, {0, 3, 85.0}, {0, 4, 91.0}})
-            .Expected({{0, 4, 91.0}}),
-        NumericParams()
-            .Direction(numeric::Direction::either)
-            .Updates({{0, 1, 100.0}, {1, 2, 80.0}, {0, 3, 85.0}, {1, 4, 91.0}})
-            .Expected({{0, 3, 85.0}, {1, 4, 91.0}})));
+INSTANTIATE_TEST_SUITE_P(_, TestNumericThresholdWithDwellTime2,
+                         Values(NumericParams()
+                                    .Direction(numeric::Direction::increasing)
+                                    .Updates({{0, 1ms, 80.0}, {0, 2ms, 89.0}})
+                                    .Expected({}),
+                                NumericParams()
+                                    .Direction(numeric::Direction::increasing)
+                                    .Updates({{0, 1ms, 80.0}, {0, 2ms, 91.0}})
+                                    .Expected({{0, 2ms, 91.0}}),
+                                NumericParams()
+                                    .Direction(numeric::Direction::increasing)
+                                    .Updates({{0, 1ms, 80.0},
+                                              {0, 2ms, 99.0},
+                                              {0, 3ms, 80.0},
+                                              {0, 4ms, 98.0}})
+                                    .Expected({{0, 4ms, 98.0}}),
+                                NumericParams()
+                                    .Direction(numeric::Direction::increasing)
+                                    .Updates({{0, 1ms, 80.0},
+                                              {1, 2ms, 99.0},
+                                              {0, 3ms, 100.0},
+                                              {1, 4ms, 98.0}})
+                                    .Expected({{0, 3ms, 100.0}}),
+                                NumericParams()
+                                    .Direction(numeric::Direction::decreasing)
+                                    .Updates({{0, 1ms, 100.0}, {0, 2ms, 91.0}})
+                                    .Expected({}),
+                                NumericParams()
+                                    .Direction(numeric::Direction::decreasing)
+                                    .Updates({{0, 1ms, 100.0}, {0, 2ms, 80.0}})
+                                    .Expected({{0, 2ms, 80.0}}),
+                                NumericParams()
+                                    .Direction(numeric::Direction::decreasing)
+                                    .Updates({{0, 1ms, 100.0},
+                                              {0, 2ms, 80.0},
+                                              {0, 3ms, 99.0},
+                                              {0, 4ms, 85.0}})
+                                    .Expected({{0, 4ms, 85.0}}),
+                                NumericParams()
+                                    .Direction(numeric::Direction::decreasing)
+                                    .Updates({{0, 1ms, 100.0},
+                                              {0, 2ms, 80.0},
+                                              {1, 3ms, 99.0},
+                                              {1, 4ms, 88.0}})
+                                    .Expected({{0, 2ms, 80.0}, {1, 4ms, 88.0}}),
+                                NumericParams()
+                                    .Direction(numeric::Direction::either)
+                                    .Updates({{0, 1ms, 98.0}, {0, 2ms, 91.0}})
+                                    .Expected({}),
+                                NumericParams()
+                                    .Direction(numeric::Direction::either)
+                                    .Updates({{0, 1ms, 100.0},
+                                              {0, 2ms, 80.0},
+                                              {0, 3ms, 85.0},
+                                              {0, 4ms, 91.0}})
+                                    .Expected({{0, 4ms, 91.0}}),
+                                NumericParams()
+                                    .Direction(numeric::Direction::either)
+                                    .Updates({{0, 1ms, 100.0},
+                                              {1, 2ms, 80.0},
+                                              {0, 3ms, 85.0},
+                                              {1, 4ms, 91.0}})
+                                    .Expected({{0, 3ms, 85.0},
+                                               {1, 4ms, 91.0}})));
 
 TEST_P(TestNumericThresholdWithDwellTime2,
        senorsIsUpdatedMultipleTimesSleepAfterLastUpdate)

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "types/duration_type.hpp"
+#include "types/duration_types.hpp"
 #include "utils/set_exception.hpp"
 
 #include <sdbusplus/asio/object_server.hpp>
