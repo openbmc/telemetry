@@ -1,49 +1,64 @@
 #pragma once
 
 #include "interfaces/clock.hpp"
-#include "types/duration_type.hpp"
+#include "types/duration_types.hpp"
 
 class ClockFake : public interfaces::Clock
 {
   public:
-    time_point now() const noexcept override
+    template <class ClockType>
+    struct InternalClock
     {
-        return timePoint;
-    }
+        using clock = ClockType;
+        using time_point = typename clock::time_point;
 
-    uint64_t timestamp() const noexcept override
-    {
-        return toTimestamp(now());
-    }
+        Milliseconds timestamp() const noexcept
+        {
+            return ClockFake::toTimestamp(now);
+        }
 
-    uint64_t advance(Milliseconds delta) noexcept
-    {
-        timePoint += delta;
-        return timestamp();
-    }
+        void advance(Milliseconds delta) noexcept
+        {
+            now += delta;
+        }
 
-    void set(Milliseconds timeSinceEpoch) noexcept
-    {
-        timePoint = time_point{timeSinceEpoch};
-    }
+        void set(Milliseconds timeSinceEpoch) noexcept
+        {
+            now = time_point{timeSinceEpoch};
+        }
 
-    void reset(void) noexcept
-    {
-        set(Milliseconds(0));
-    }
+        void reset() noexcept
+        {
+            now = time_point{Milliseconds{0u}};
+        }
 
-    static uint64_t toTimestamp(Milliseconds time)
-    {
-        return time.count();
-    }
+      private:
+        time_point now = clock::now();
+    };
 
-    static uint64_t toTimestamp(time_point tp)
+    template <class TimePoint>
+    static Milliseconds toTimestamp(TimePoint tp)
     {
         return std::chrono::time_point_cast<Milliseconds>(tp)
-            .time_since_epoch()
-            .count();
+            .time_since_epoch();
     }
 
-  private:
-    time_point timePoint = std::chrono::steady_clock::now();
+    Milliseconds steadyTimestamp() const noexcept override
+    {
+        return steady.timestamp();
+    }
+
+    Milliseconds systemTimestamp() const noexcept override
+    {
+        return system.timestamp();
+    }
+
+    void advance(Milliseconds delta) noexcept
+    {
+        steady.advance(delta);
+        system.advance(delta);
+    }
+
+    InternalClock<std::chrono::steady_clock> steady;
+    InternalClock<std::chrono::system_clock> system;
 };

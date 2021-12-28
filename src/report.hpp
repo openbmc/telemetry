@@ -1,5 +1,6 @@
 #pragma once
 
+#include "interfaces/clock.hpp"
 #include "interfaces/json_storage.hpp"
 #include "interfaces/metric.hpp"
 #include "interfaces/report.hpp"
@@ -29,7 +30,7 @@ class Report : public interfaces::Report
            interfaces::ReportManager& reportManager,
            interfaces::JsonStorage& reportStorage,
            std::vector<std::shared_ptr<interfaces::Metric>> metrics,
-           const bool enabled);
+           const bool enabled, std::unique_ptr<interfaces::Clock> clock);
     ~Report() = default;
 
     Report(const Report&) = delete;
@@ -83,6 +84,7 @@ class Report : public interfaces::Report
 
     interfaces::JsonStorage& reportStorage;
     bool enabled;
+    std::unique_ptr<interfaces::Clock> clock;
 
   public:
     static constexpr const char* reportIfaceName =

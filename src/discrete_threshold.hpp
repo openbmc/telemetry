@@ -4,7 +4,7 @@
 #include "interfaces/sensor_listener.hpp"
 #include "interfaces/threshold.hpp"
 #include "interfaces/trigger_action.hpp"
-#include "types/milliseconds.hpp"
+#include "types/duration_types.hpp"
 #include "types/trigger_types.hpp"
 
 #include <boost/asio/steady_timer.hpp>
@@ -30,8 +30,8 @@ class DiscreteThreshold :
     {}
 
     void initialize() override;
-    void sensorUpdated(interfaces::Sensor&, uint64_t) override;
-    void sensorUpdated(interfaces::Sensor&, uint64_t, double) override;
+    void sensorUpdated(interfaces::Sensor&, Milliseconds) override;
+    void sensorUpdated(interfaces::Sensor&, Milliseconds, double) override;
 
   private:
     boost::asio::io_context& ioc;
@@ -55,7 +55,7 @@ class DiscreteThreshold :
     };
     std::vector<ThresholdDetail> details;
 
-    void startTimer(interfaces::Sensor&, uint64_t, double);
-    void commit(const std::string&, uint64_t, double);
+    void startTimer(interfaces::Sensor&, Milliseconds, double);
+    void commit(const std::string&, Milliseconds, double);
     ThresholdDetail& getDetails(interfaces::Sensor& sensor);
 };

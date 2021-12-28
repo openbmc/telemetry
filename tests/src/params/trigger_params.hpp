@@ -1,6 +1,6 @@
 #pragma once
 
-#include "types/milliseconds.hpp"
+#include "types/duration_types.hpp"
 #include "types/trigger_types.hpp"
 
 #include <sdbusplus/message.hpp>

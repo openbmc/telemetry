@@ -15,7 +15,7 @@ class LogToJournal : public interfaces::TriggerAction
     LogToJournal(::numeric::Type type, double val) : type(type), threshold(val)
     {}
 
-    void commit(const std::string& id, uint64_t timestamp,
+    void commit(const std::string& id, Milliseconds timestamp,
                 double value) override;
 
   private:
@@ -31,7 +31,7 @@ class LogToRedfish : public interfaces::TriggerAction
     LogToRedfish(::numeric::Type type, double val) : type(type), threshold(val)
     {}
 
-    void commit(const std::string& id, uint64_t timestamp,
+    void commit(const std::string& id, Milliseconds timestamp,
                 double value) override;
 
   private:
@@ -56,7 +56,7 @@ class LogToJournal : public interfaces::TriggerAction
     LogToJournal(::discrete::Severity severity) : severity(severity)
     {}
 
-    void commit(const std::string& id, uint64_t timestamp,
+    void commit(const std::string& id, Milliseconds timestamp,
                 double value) override;
 
   private:
@@ -71,7 +71,7 @@ class LogToRedfish : public interfaces::TriggerAction
     LogToRedfish(::discrete::Severity severity) : severity(severity)
     {}
 
-    void commit(const std::string& id, uint64_t timestamp,
+    void commit(const std::string& id, Milliseconds timestamp,
                 double value) override;
 
   private:
@@ -94,7 +94,7 @@ class LogToJournal : public interfaces::TriggerAction
     LogToJournal()
     {}
 
-    void commit(const std::string& id, uint64_t timestamp,
+    void commit(const std::string& id, Milliseconds timestamp,
                 double value) override;
 };
 
@@ -104,7 +104,7 @@ class LogToRedfish : public interfaces::TriggerAction
     LogToRedfish()
     {}
 
-    void commit(const std::string& id, uint64_t timestamp,
+    void commit(const std::string& id, Milliseconds timestamp,
                 double value) override;
 };
 
@@ -126,7 +126,7 @@ class UpdateReport : public interfaces::TriggerAction
         reportIds(std::move(ids))
     {}
 
-    void commit(const std::string& id, uint64_t timestamp,
+    void commit(const std::string& id, Milliseconds timestamp,
                 double value) override;
 
   private:

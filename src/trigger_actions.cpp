@@ -9,9 +9,9 @@ namespace action
 
 namespace
 {
-std::string timestampToString(uint64_t timestamp)
+std::string timestampToString(Milliseconds timestamp)
 {
-    std::time_t t = static_cast<time_t>(timestamp);
+    std::time_t t = static_cast<time_t>(timestamp.count());
     std::array<char, sizeof("YYYY-MM-DDThh:mm:ssZ")> buf = {};
     size_t size =
         std::strftime(buf.data(), buf.size(), "%FT%TZ", std::gmtime(&t));
@@ -55,7 +55,7 @@ const char* LogToJournal::getType() const
     throw std::runtime_error("Invalid type");
 }
 
-void LogToJournal::commit(const std::string& sensorName, uint64_t timestamp,
+void LogToJournal::commit(const std::string& sensorName, Milliseconds timestamp,
                           double value)
 {
     std::string msg = std::string(getType()) +
@@ -84,14 +84,14 @@ const char* LogToRedfish::getMessageId() const
     throw std::runtime_error("Invalid type");
 }
 
-void LogToRedfish::commit(const std::string& sensorName, uint64_t timestamp,
+void LogToRedfish::commit(const std::string& sensorName, Milliseconds timestamp,
                           double value)
 {
     phosphor::logging::log<phosphor::logging::level::INFO>(
         "Threshold value is exceeded",
         phosphor::logging::entry("REDFISH_MESSAGE_ID=%s", getMessageId()),
         phosphor::logging::entry("REDFISH_MESSAGE_ARGS=%s,%f,%llu,%s",
-                                 sensorName.c_str(), value, timestamp,
+                                 sensorName.c_str(), value, timestamp.count(),
                                  getDirection(value, threshold)));
 }
 
@@ -146,7 +146,7 @@ const char* LogToJournal::getSeverity() const
     throw std::runtime_error("Invalid severity");
 }
 
-void LogToJournal::commit(const std::string& sensorName, uint64_t timestamp,
+void LogToJournal::commit(const std::string& sensorName, Milliseconds timestamp,
                           double value)
 {
     std::string msg = std::string(getSeverity()) +
@@ -171,14 +171,14 @@ const char* LogToRedfish::getMessageId() const
     throw std::runtime_error("Invalid severity");
 }
 
-void LogToRedfish::commit(const std::string& sensorName, uint64_t timestamp,
+void LogToRedfish::commit(const std::string& sensorName, Milliseconds timestamp,
                           double value)
 {
     phosphor::logging::log<phosphor::logging::level::INFO>(
         "Discrete treshold condition is met",
         phosphor::logging::entry("REDFISH_MESSAGE_ID=%s", getMessageId()),
         phosphor::logging::entry("REDFISH_MESSAGE_ARGS=%s,%f,%llu",
-                                 sensorName.c_str(), value, timestamp));
+                                 sensorName.c_str(), value, timestamp.count()));
 }
 
 void fillActions(
@@ -216,7 +216,7 @@ void fillActions(
 
 namespace onChange
 {
-void LogToJournal::commit(const std::string& sensorName, uint64_t timestamp,
+void LogToJournal::commit(const std::string& sensorName, Milliseconds timestamp,
                           double value)
 {
     std::string msg = "Value changed on sensor " + sensorName +
@@ -226,7 +226,7 @@ void LogToJournal::commit(const std::string& sensorName, uint64_t timestamp,
     phosphor::logging::log<phosphor::logging::level::INFO>(msg.c_str());
 }
 
-void LogToRedfish::commit(const std::string& sensorName, uint64_t timestamp,
+void LogToRedfish::commit(const std::string& sensorName, Milliseconds timestamp,
                           double value)
 {
     const char* messageId = "OpenBMC.0.1.0.DiscreteThresholdOnChange";
@@ -234,7 +234,7 @@ void LogToRedfish::commit(const std::string& sensorName, uint64_t timestamp,
         "Uncondtional discrete threshold triggered",
         phosphor::logging::entry("REDFISH_MESSAGE_ID=%s", messageId),
         phosphor::logging::entry("REDFISH_MESSAGE_ARGS=%s,%f,%llu",
-                                 sensorName.c_str(), value, timestamp));
+                                 sensorName.c_str(), value, timestamp.count()));
 }
 
 void fillActions(
@@ -270,7 +270,7 @@ void fillActions(
 } // namespace onChange
 } // namespace discrete
 
-void UpdateReport::commit(const std::string&, uint64_t, double)
+void UpdateReport::commit(const std::string&, Milliseconds, double)
 {
     for (const auto& name : reportIds)
     {

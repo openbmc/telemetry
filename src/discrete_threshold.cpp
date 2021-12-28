@@ -37,11 +37,11 @@ DiscreteThreshold::ThresholdDetail&
 }
 
 void DiscreteThreshold::sensorUpdated(interfaces::Sensor& sensor,
-                                      uint64_t timestamp)
+                                      Milliseconds timestamp)
 {}
 
 void DiscreteThreshold::sensorUpdated(interfaces::Sensor& sensor,
-                                      uint64_t timestamp, double value)
+                                      Milliseconds timestamp, double value)
 {
     auto& [sensorName, dwell, timer] = getDetails(sensor);
 
@@ -60,7 +60,7 @@ void DiscreteThreshold::sensorUpdated(interfaces::Sensor& sensor,
 }
 
 void DiscreteThreshold::startTimer(interfaces::Sensor& sensor,
-                                   uint64_t timestamp, double value)
+                                   Milliseconds timestamp, double value)
 {
     auto& [sensorName, dwell, timer] = getDetails(sensor);
     if (dwellTime == Milliseconds::zero())
@@ -87,7 +87,7 @@ void DiscreteThreshold::startTimer(interfaces::Sensor& sensor,
 }
 
 void DiscreteThreshold::commit(const std::string& sensorName,
-                               uint64_t timestamp, double value)
+                               Milliseconds timestamp, double value)
 {
     for (const auto& action : actions)
     {

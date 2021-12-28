@@ -14,11 +14,17 @@ using namespace std::chrono_literals;
 
 namespace tstring = utils::tstring;
 
-using Timestamp = uint64_t;
+constexpr Milliseconds systemTimestamp = 42ms;
 
 class TestMetric : public Test
 {
   public:
+    TestMetric()
+    {
+        clockFake.steady.reset();
+        clockFake.system.set(systemTimestamp);
+    }
+
     static std::vector<std::shared_ptr<SensorMock>>
         makeSensorMocks(size_t amount)
     {
@@ -102,18 +108,23 @@ TEST_F(TestMetricAfterInitialization, containsEmptyReading)
 
 TEST_F(TestMetricAfterInitialization, updatesMetricValuesOnSensorUpdate)
 {
-    sut->sensorUpdated(*sensorMocks.front(), Timestamp{18}, 31.2);
+    sut->sensorUpdated(*sensorMocks.front(), Milliseconds{18}, 31.2);
 
-    ASSERT_THAT(sut->getReadings(),
-                ElementsAre(MetricValue{"id", "metadata", 31.2, 18u}));
+    ASSERT_THAT(
+        sut->getReadings(),
+        ElementsAre(MetricValue{"id", "metadata", 31.2,
+                                std::chrono::duration_cast<Milliseconds>(
+                                    clockFake.system.timestamp())
+                                    .count()}));
 }
 
 TEST_F(TestMetricAfterInitialization,
        throwsWhenUpdateIsPerformedOnUnknownSensor)
 {
     auto sensor = std::make_shared<StrictMock<SensorMock>>();
-    EXPECT_THROW(sut->sensorUpdated(*sensor, Timestamp{10}), std::out_of_range);
-    EXPECT_THROW(sut->sensorUpdated(*sensor, Timestamp{10}, 20.0),
+    EXPECT_THROW(sut->sensorUpdated(*sensor, Milliseconds{10}),
+                 std::out_of_range);
+    EXPECT_THROW(sut->sensorUpdated(*sensor, Milliseconds{10}, 20.0),
                  std::out_of_range);
 }
 
@@ -146,7 +157,6 @@ class TestMetricCalculationFunctions :
   public:
     void SetUp() override
     {
-        clockFake.reset();
         sut = makeSut(params.operationType(GetParam().operationType())
                           .collectionTimeScope(GetParam().collectionTimeScope())
                           .collectionDuration(GetParam().collectionDuration()));
@@ -168,7 +178,7 @@ MetricParams defaultSingleParams()
     return MetricParams()
         .operationType(OperationType::single)
         .readings(TestMetricCalculationFunctions::defaultReadings())
-        .expectedReading(11ms, 7.0);
+        .expectedReading(systemTimestamp + 16ms, 7.0);
 }
 
 INSTANTIATE_TEST_SUITE_P(
@@ -205,14 +215,14 @@ INSTANTIATE_TEST_SUITE_P(
     Values(defaultMinParams()
                .collectionTimeScope(CollectionTimeScope::interval)
                .collectionDuration(CollectionDuration(100ms))
-               .expectedReading(10ms, 3.0),
+               .expectedReading(systemTimestamp + 16ms, 3.0),
            defaultMinParams()
                .collectionTimeScope(CollectionTimeScope::interval)
                .collectionDuration(CollectionDuration(3ms))
-               .expectedReading(13ms, 7.0),
+               .expectedReading(systemTimestamp + 16ms, 7.0),
            defaultMinParams()
                .collectionTimeScope(CollectionTimeScope::startup)
-               .expectedReading(10ms, 3.0)));
+               .expectedReading(systemTimestamp + 16ms, 3.0)));
 
 MetricParams defaultMaxParams()
 {
@@ -224,18 +234,18 @@ INSTANTIATE_TEST_SUITE_P(
     Values(defaultMaxParams()
                .collectionTimeScope(CollectionTimeScope::interval)
                .collectionDuration(CollectionDuration(100ms))
-               .expectedReading(0ms, 14.0),
+               .expectedReading(systemTimestamp + 16ms, 14.0),
            defaultMaxParams()
                .collectionTimeScope(CollectionTimeScope::interval)
                .collectionDuration(CollectionDuration(6ms))
-               .expectedReading(10ms, 14.0),
+               .expectedReading(systemTimestamp + 16ms, 14.0),
            defaultMaxParams()
                .collectionTimeScope(CollectionTimeScope::interval)
                .collectionDuration(CollectionDuration(5ms))
-               .expectedReading(11ms, 7.0),
+               .expectedReading(systemTimestamp + 16ms, 7.0),
            defaultMaxParams()
                .collectionTimeScope(CollectionTimeScope::startup)
-               .expectedReading(0ms, 14.0)));
+               .expectedReading(systemTimestamp + 16ms, 14.0)));
 
 MetricParams defaultSumParams()
 {
@@ -247,18 +257,21 @@ INSTANTIATE_TEST_SUITE_P(
     Values(defaultSumParams()
                .collectionTimeScope(CollectionTimeScope::interval)
                .collectionDuration(CollectionDuration(100ms))
-               .expectedReading(16ms, 14. * 10 + 3. * 1 + 7 * 5),
+               .expectedReading(systemTimestamp + 16ms,
+                                14. * 0.01 + 3. * 0.001 + 7. * 0.005),
            defaultSumParams()
                .collectionTimeScope(CollectionTimeScope::interval)
                .collectionDuration(CollectionDuration(8ms))
-               .expectedReading(16ms, 14. * 2 + 3. * 1 + 7 * 5),
+               .expectedReading(systemTimestamp + 16ms,
+                                14. * 0.002 + 3. * 0.001 + 7 * 0.005),
            defaultSumParams()
                .collectionTimeScope(CollectionTimeScope::interval)
                .collectionDuration(CollectionDuration(6ms))
-               .expectedReading(16ms, 3. * 1 + 7 * 5),
+               .expectedReading(systemTimestamp + 16ms, 3. * 0.001 + 7 * 0.005),
            defaultSumParams()
                .collectionTimeScope(CollectionTimeScope::startup)
-               .expectedReading(16ms, 14. * 10 + 3. * 1 + 7 * 5)));
+               .expectedReading(systemTimestamp + 16ms,
+                                14. * 0.01 + 3. * 0.001 + 7 * 0.005)));
 
 MetricParams defaultAvgParams()
 {
@@ -270,24 +283,27 @@ INSTANTIATE_TEST_SUITE_P(
     Values(defaultAvgParams()
                .collectionTimeScope(CollectionTimeScope::interval)
                .collectionDuration(CollectionDuration(100ms))
-               .expectedReading(16ms, (14. * 10 + 3. * 1 + 7 * 5) / 16.),
+               .expectedReading(systemTimestamp + 16ms,
+                                (14. * 10 + 3. * 1 + 7 * 5) / 16.),
            defaultAvgParams()
                .collectionTimeScope(CollectionTimeScope::interval)
                .collectionDuration(CollectionDuration(8ms))
-               .expectedReading(16ms, (14. * 2 + 3. * 1 + 7 * 5) / 8.),
+               .expectedReading(systemTimestamp + 16ms,
+                                (14. * 2 + 3. * 1 + 7 * 5) / 8.),
            defaultAvgParams()
                .collectionTimeScope(CollectionTimeScope::interval)
                .collectionDuration(CollectionDuration(6ms))
-               .expectedReading(16ms, (3. * 1 + 7 * 5) / 6.),
+               .expectedReading(systemTimestamp + 16ms, (3. * 1 + 7 * 5) / 6.),
            defaultAvgParams()
                .collectionTimeScope(CollectionTimeScope::startup)
-               .expectedReading(16ms, (14. * 10 + 3. * 1 + 7 * 5) / 16.)));
+               .expectedReading(systemTimestamp + 16ms,
+                                (14. * 10 + 3. * 1 + 7 * 5) / 16.)));
 
 TEST_P(TestMetricCalculationFunctions, calculatesReadingValue)
 {
     for (auto [timestamp, reading] : GetParam().readings())
     {
-        sut->sensorUpdated(*sensorMocks.front(), clockFake.timestamp(),
+        sut->sensorUpdated(*sensorMocks.front(), clockFake.steadyTimestamp(),
                            reading);
         clockFake.advance(timestamp);
     }
@@ -296,9 +312,9 @@ TEST_P(TestMetricCalculationFunctions, calculatesReadingValue)
         GetParam().expectedReading();
     const auto readings = sut->getReadings();
 
-    EXPECT_THAT(readings, ElementsAre(MetricValue{
-                              "id", "metadata", expectedReading,
-                              ClockFake::toTimestamp(expectedTimestamp)}));
+    EXPECT_THAT(readings,
+                ElementsAre(MetricValue{"id", "metadata", expectedReading,
+                                        expectedTimestamp.count()}));
 }
 
 TEST_P(TestMetricCalculationFunctions,
@@ -306,7 +322,7 @@ TEST_P(TestMetricCalculationFunctions,
 {
     for (auto [timestamp, reading] : GetParam().readings())
     {
-        sut->sensorUpdated(*sensorMocks.front(), clockFake.timestamp(),
+        sut->sensorUpdated(*sensorMocks.front(), clockFake.steadyTimestamp(),
                            reading);
         clockFake.advance(timestamp);
         sut->getReadings();
@@ -316,7 +332,7 @@ TEST_P(TestMetricCalculationFunctions,
         GetParam().expectedReading();
     const auto readings = sut->getReadings();
 
-    EXPECT_THAT(readings, ElementsAre(MetricValue{
-                              "id", "metadata", expectedReading,
-                              ClockFake::toTimestamp(expectedTimestamp)}));
+    EXPECT_THAT(readings,
+                ElementsAre(MetricValue{"id", "metadata", expectedReading,
+                                        expectedTimestamp.count()}));
 }

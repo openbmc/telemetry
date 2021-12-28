@@ -19,8 +19,9 @@ class Metric :
     void initialize() override;
     void deinitialize() override;
     std::vector<MetricValue> getReadings() const override;
-    void sensorUpdated(interfaces::Sensor&, uint64_t) override;
-    void sensorUpdated(interfaces::Sensor&, uint64_t, double value) override;
+    void sensorUpdated(interfaces::Sensor&, Milliseconds) override;
+    void sensorUpdated(interfaces::Sensor&, Milliseconds,
+                       double value) override;
     LabeledMetricParameters dumpConfiguration() const override;
     uint64_t sensorCount() const override;
 

@@ -18,11 +18,11 @@ void OnChangeThreshold::initialize()
 }
 
 void OnChangeThreshold::sensorUpdated(interfaces::Sensor& sensor,
-                                      uint64_t timestamp)
+                                      Milliseconds timestamp)
 {}
 
 void OnChangeThreshold::sensorUpdated(interfaces::Sensor& sensor,
-                                      uint64_t timestamp, double value)
+                                      Milliseconds timestamp, double value)
 {
     auto it =
         std::find_if(sensors.begin(), sensors.end(),
@@ -32,7 +32,7 @@ void OnChangeThreshold::sensorUpdated(interfaces::Sensor& sensor,
 }
 
 void OnChangeThreshold::commit(const std::string& sensorName,
-                               uint64_t timestamp, double value)
+                               Milliseconds timestamp, double value)
 {
     for (const auto& action : actions)
     {

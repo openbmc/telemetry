@@ -21,7 +21,7 @@ Report::Report(boost::asio::io_context& ioc,
                interfaces::ReportManager& reportManager,
                interfaces::JsonStorage& reportStorageIn,
                std::vector<std::shared_ptr<interfaces::Metric>> metricsIn,
-               const bool enabledIn) :
+               const bool enabledIn, std::unique_ptr<interfaces::Clock> clock) :
     id(reportId),
     name(reportName), reportingType(reportingTypeIn), interval(intervalIn),
     reportActions(std::move(reportActionsIn)),
@@ -30,7 +30,7 @@ Report::Report(boost::asio::io_context& ioc,
     reportUpdates(reportUpdatesIn),
     readingsBuffer(deduceBufferSize(reportUpdates, reportingType)),
     objServer(objServer), metrics(std::move(metricsIn)), timer(ioc),
-    reportStorage(reportStorageIn), enabled(enabledIn)
+    reportStorage(reportStorageIn), enabled(enabledIn), clock(std::move(clock))
 {
     readingParameters =
         toReadingParameters(utils::transform(metrics, [](const auto& metric) {
@@ -318,7 +318,8 @@ void Report::updateReadings()
     }
 
     readings = {
-        Clock().timestamp(),
+        std::chrono::duration_cast<Milliseconds>(clock->systemTimestamp())
+            .count(),
         std::vector<ReadingData>(readingsBuffer.begin(), readingsBuffer.end())};
 
     reportIface->signal_property("Readings");
