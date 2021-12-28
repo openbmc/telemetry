@@ -1,5 +1,7 @@
 #pragma once
 
+#include "types/duration_types.hpp"
+
 #include <cstdint>
 #include <optional>
 
@@ -13,8 +15,8 @@ class SensorListener
   public:
     virtual ~SensorListener() = default;
 
-    virtual void sensorUpdated(interfaces::Sensor&, uint64_t) = 0;
-    virtual void sensorUpdated(interfaces::Sensor&, uint64_t, double) = 0;
+    virtual void sensorUpdated(interfaces::Sensor&, Milliseconds) = 0;
+    virtual void sensorUpdated(interfaces::Sensor&, Milliseconds, double) = 0;
 };
 
 } // namespace interfaces

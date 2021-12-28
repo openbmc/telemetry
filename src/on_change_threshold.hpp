@@ -25,13 +25,13 @@ class OnChangeThreshold :
     {}
 
     void initialize() override;
-    void sensorUpdated(interfaces::Sensor&, uint64_t) override;
-    void sensorUpdated(interfaces::Sensor&, uint64_t, double) override;
+    void sensorUpdated(interfaces::Sensor&, Milliseconds) override;
+    void sensorUpdated(interfaces::Sensor&, Milliseconds, double) override;
 
   private:
     const Sensors sensors;
     const std::vector<std::string> sensorNames;
     const std::vector<std::unique_ptr<interfaces::TriggerAction>> actions;
 
-    void commit(const std::string&, uint64_t, double);
+    void commit(const std::string&, Milliseconds, double);
 };

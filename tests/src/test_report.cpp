@@ -1,4 +1,5 @@
 #include "dbus_environment.hpp"
+#include "fakes/clock_fake.hpp"
 #include "helpers.hpp"
 #include "mocks/json_storage_mock.hpp"
 #include "mocks/metric_mock.hpp"
@@ -19,6 +20,8 @@ using namespace std::literals::string_literals;
 using namespace std::chrono_literals;
 namespace tstring = utils::tstring;
 
+constexpr Milliseconds systemTimestamp = 55ms;
+
 class TestReport : public Test
 {
   public:
@@ -28,9 +31,16 @@ class TestReport : public Test
         std::make_unique<NiceMock<ReportManagerMock>>();
     testing::NiceMock<StorageMock> storageMock;
     std::vector<std::shared_ptr<MetricMock>> metricMocks;
+    std::unique_ptr<ClockFake> clockFakePtr = std::make_unique<ClockFake>();
+    ClockFake& clockFake = *clockFakePtr;
     std::unique_ptr<Report> sut;
 
     MockFunction<void()> checkPoint;
+
+    TestReport()
+    {
+        clockFake.system.set(systemTimestamp);
+    }
 
     void initMetricMocks(
         const std::vector<LabeledMetricParameters>& metricParameters)
@@ -76,7 +86,7 @@ class TestReport : public Test
             params.reportUpdates(), *reportManagerMock, storageMock,
             utils::convContainer<std::shared_ptr<interfaces::Metric>>(
                 metricMocks),
-            params.enabled());
+            params.enabled(), std::move(clockFakePtr));
     }
 
     template <class T>
@@ -396,7 +406,7 @@ TEST_P(TestReportAllReportTypes, returnPropertValueOfReportType)
 
 TEST_P(TestReportAllReportTypes, updateReadingsCallEnabledPropertyOff)
 {
-    const uint64_t expectedTime = Clock().timestamp();
+    clockFake.system.advance(10ms);
 
     setProperty(sut->getPath(), "Enabled", false);
     sut->updateReadings();
@@ -404,19 +414,19 @@ TEST_P(TestReportAllReportTypes, updateReadingsCallEnabledPropertyOff)
         getProperty<Readings>(sut->getPath(), "Readings");
 
     EXPECT_THAT(getProperty<bool>(sut->getPath(), "Enabled"), Eq(false));
-    EXPECT_THAT(timestamp, Lt(expectedTime));
+    EXPECT_THAT(Milliseconds{timestamp}, Eq(0ms));
 }
 
 TEST_P(TestReportAllReportTypes, updateReadingsCallEnabledPropertyOn)
 {
-    const uint64_t expectedTime = Clock().timestamp();
+    clockFake.system.advance(10ms);
 
     sut->updateReadings();
     const auto [timestamp, readings] =
         getProperty<Readings>(sut->getPath(), "Readings");
 
     EXPECT_THAT(getProperty<bool>(sut->getPath(), "Enabled"), Eq(true));
-    EXPECT_THAT(timestamp, Ge(expectedTime));
+    EXPECT_THAT(Milliseconds{timestamp}, Eq(systemTimestamp + 10ms));
 }
 
 class TestReportOnRequestType : public TestReport
@@ -430,14 +440,14 @@ class TestReportOnRequestType : public TestReport
 
 TEST_F(TestReportOnRequestType, updatesReadingTimestamp)
 {
-    const uint64_t expectedTime = Clock().timestamp();
+    clockFake.system.advance(10ms);
 
     ASSERT_THAT(update(sut->getPath()), Eq(boost::system::errc::success));
 
     const auto [timestamp, readings] =
         getProperty<Readings>(sut->getPath(), "Readings");
 
-    EXPECT_THAT(timestamp, Ge(expectedTime));
+    EXPECT_THAT(Milliseconds{timestamp}, Eq(systemTimestamp + 10ms));
 }
 
 TEST_F(TestReportOnRequestType, updatesReadingWhenUpdateIsCalled)
@@ -509,13 +519,13 @@ class TestReportPeriodicReport : public TestReport
 
 TEST_F(TestReportPeriodicReport, readingTimestampIsUpdatedAfterIntervalExpires)
 {
-    const uint64_t expectedTime = Clock().timestamp();
+    clockFake.system.advance(10ms);
     DbusEnvironment::sleepFor(ReportManager::minInterval + 1ms);
 
     const auto [timestamp, readings] =
         getProperty<Readings>(sut->getPath(), "Readings");
 
-    EXPECT_THAT(timestamp, Ge(expectedTime));
+    EXPECT_THAT(Milliseconds{timestamp}, Eq(systemTimestamp + 10ms));
 }
 
 TEST_F(TestReportPeriodicReport, readingsAreUpdatedAfterIntervalExpires)

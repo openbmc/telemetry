@@ -3,7 +3,7 @@
 #include "helpers.hpp"
 #include "mocks/sensor_mock.hpp"
 #include "mocks/trigger_action_mock.hpp"
-#include "types/milliseconds.hpp"
+#include "types/duration_types.hpp"
 #include "utils/conv_container.hpp"
 
 #include <gmock/gmock.h>
@@ -66,11 +66,11 @@ struct DiscreteParams
     struct UpdateParams
     {
         size_t sensor;
-        uint64_t timestamp;
+        Milliseconds timestamp;
         double value;
         Milliseconds sleepAfter;
 
-        UpdateParams(size_t sensor, uint64_t timestamp, double value,
+        UpdateParams(size_t sensor, Milliseconds timestamp, double value,
                      Milliseconds sleepAfter = 0ms) :
             sensor(sensor),
             timestamp(timestamp), value(value), sleepAfter(sleepAfter)
@@ -80,11 +80,11 @@ struct DiscreteParams
     struct ExpectedParams
     {
         size_t sensor;
-        uint64_t timestamp;
+        Milliseconds timestamp;
         double value;
         Milliseconds waitMin;
 
-        ExpectedParams(size_t sensor, uint64_t timestamp, double value,
+        ExpectedParams(size_t sensor, Milliseconds timestamp, double value,
                        Milliseconds waitMin = 0ms) :
             sensor(sensor),
             timestamp(timestamp), value(value), waitMin(waitMin)
@@ -122,16 +122,16 @@ struct DiscreteParams
         *os << ", Updates: ";
         for (const auto& [index, timestamp, value, sleepAfter] : o.updates)
         {
-            *os << "{ SensorIndex: " << index << ", Timestamp: " << timestamp
-                << ", Value: " << value
+            *os << "{ SensorIndex: " << index
+                << ", Timestamp: " << timestamp.count() << ", Value: " << value
                 << ", SleepAfter: " << sleepAfter.count() << "ms }, ";
         }
         *os << "Expected: ";
         for (const auto& [index, timestamp, value, waitMin] : o.expected)
         {
-            *os << "{ SensorIndex: " << index << ", Timestamp: " << timestamp
-                << ", Value: " << value << ", waitMin: " << waitMin.count()
-                << "ms }, ";
+            *os << "{ SensorIndex: " << index
+                << ", Timestamp: " << timestamp.count() << ", Value: " << value
+                << ", waitMin: " << waitMin.count() << "ms }, ";
         }
         *os << " }";
     }
@@ -204,21 +204,26 @@ class TestDiscreteThresholdNoDwellTime : public TestDiscreteThresholdCommon
     }
 };
 
-INSTANTIATE_TEST_SUITE_P(
-    _, TestDiscreteThresholdNoDwellTime,
-    Values(
-        DiscreteParams()
-            .ThresholdValue(90.0)
-            .Updates({{0, 1, 80.0}, {0, 2, 89.0}})
-            .Expected({}),
-        DiscreteParams()
-            .ThresholdValue(90.0)
-            .Updates({{0, 1, 80.0}, {0, 2, 90.0}, {0, 3, 80.0}, {0, 4, 90.0}})
-            .Expected({{0, 2, 90.0}, {0, 4, 90.0}}),
-        DiscreteParams()
-            .ThresholdValue(90.0)
-            .Updates({{0, 1, 90.0}, {0, 2, 99.0}, {1, 3, 100.0}, {1, 4, 90.0}})
-            .Expected({{0, 1, 90.0}, {1, 4, 90.0}})));
+INSTANTIATE_TEST_SUITE_P(_, TestDiscreteThresholdNoDwellTime,
+                         Values(DiscreteParams()
+                                    .ThresholdValue(90.0)
+                                    .Updates({{0, 1ms, 80.0}, {0, 2ms, 89.0}})
+                                    .Expected({}),
+                                DiscreteParams()
+                                    .ThresholdValue(90.0)
+                                    .Updates({{0, 1ms, 80.0},
+                                              {0, 2ms, 90.0},
+                                              {0, 3ms, 80.0},
+                                              {0, 4ms, 90.0}})
+                                    .Expected({{0, 2ms, 90.0}, {0, 4ms, 90.0}}),
+                                DiscreteParams()
+                                    .ThresholdValue(90.0)
+                                    .Updates({{0, 1ms, 90.0},
+                                              {0, 2ms, 99.0},
+                                              {1, 3ms, 100.0},
+                                              {1, 4ms, 90.0}})
+                                    .Expected({{0, 1ms, 90.0},
+                                               {1, 4ms, 90.0}})));
 
 TEST_P(TestDiscreteThresholdNoDwellTime, senorsIsUpdatedMultipleTimes)
 {
@@ -239,31 +244,31 @@ INSTANTIATE_TEST_SUITE_P(
     Values(DiscreteParams()
                .DwellTime(200ms)
                .ThresholdValue(90.0)
-               .Updates({{0, 1, 90.0, 100ms}, {0, 2, 91.0}, {0, 3, 90.0}})
-               .Expected({{0, 3, 90.0, 300ms}}),
+               .Updates({{0, 1ms, 90.0, 100ms}, {0, 2ms, 91.0}, {0, 3ms, 90.0}})
+               .Expected({{0, 3ms, 90.0, 300ms}}),
            DiscreteParams()
                .DwellTime(100ms)
                .ThresholdValue(90.0)
-               .Updates({{0, 1, 90.0, 100ms}})
-               .Expected({{0, 1, 90.0, 100ms}}),
+               .Updates({{0, 1ms, 90.0, 100ms}})
+               .Expected({{0, 1ms, 90.0, 100ms}}),
            DiscreteParams()
                .DwellTime(1000ms)
                .ThresholdValue(90.0)
-               .Updates({{0, 1, 90.0, 700ms},
-                         {0, 1, 91.0, 100ms},
-                         {0, 1, 90.0, 300ms},
-                         {0, 1, 91.0, 100ms}})
+               .Updates({{0, 1ms, 90.0, 700ms},
+                         {0, 1ms, 91.0, 100ms},
+                         {0, 1ms, 90.0, 300ms},
+                         {0, 1ms, 91.0, 100ms}})
                .Expected({}),
            DiscreteParams()
                .DwellTime(200ms)
                .ThresholdValue(90.0)
-               .Updates({{0, 1, 90.0},
-                         {1, 2, 89.0, 100ms},
-                         {1, 3, 90.0, 100ms},
-                         {1, 4, 89.0, 100ms},
-                         {1, 5, 90.0, 300ms},
-                         {1, 6, 89.0, 100ms}})
-               .Expected({{0, 1, 90, 200ms}, {1, 5, 90, 500ms}})));
+               .Updates({{0, 1ms, 90.0},
+                         {1, 2ms, 89.0, 100ms},
+                         {1, 3ms, 90.0, 100ms},
+                         {1, 4ms, 89.0, 100ms},
+                         {1, 5ms, 90.0, 300ms},
+                         {1, 6ms, 89.0, 100ms}})
+               .Expected({{0, 1ms, 90, 200ms}, {1, 5ms, 90, 500ms}})));
 
 TEST_P(TestDiscreteThresholdWithDwellTime, senorsIsUpdatedMultipleTimes)
 {

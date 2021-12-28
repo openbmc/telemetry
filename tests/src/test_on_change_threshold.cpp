@@ -54,8 +54,8 @@ TEST_F(TestOnChangeThreshold, thresholdIsNotInitializeExpectNoActionCommit)
 
 struct OnChangeParams
 {
-    using UpdateParams = std::tuple<size_t, uint64_t, double>;
-    using ExpectedParams = std::tuple<size_t, uint64_t, double>;
+    using UpdateParams = std::tuple<size_t, Milliseconds, double>;
+    using ExpectedParams = std::tuple<size_t, Milliseconds, double>;
 
     OnChangeParams& Updates(std::vector<UpdateParams> val)
     {
@@ -74,14 +74,16 @@ struct OnChangeParams
         *os << "{ Updates: ";
         for (const auto& [index, timestamp, value] : o.updates)
         {
-            *os << "{ SensorIndex: " << index << ", Timestamp: " << timestamp
-                << ", Value: " << value << " }, ";
+            *os << "{ SensorIndex: " << index
+                << ", Timestamp: " << timestamp.count() << ", Value: " << value
+                << " }, ";
         }
         *os << "Expected: ";
         for (const auto& [index, timestamp, value] : o.expected)
         {
-            *os << "{ SensorIndex: " << index << ", Timestamp: " << timestamp
-                << ", Value: " << value << " }, ";
+            *os << "{ SensorIndex: " << index
+                << ", Timestamp: " << timestamp.count() << ", Value: " << value
+                << " }, ";
         }
         *os << " }";
     }
@@ -98,20 +100,25 @@ class TestOnChangeThresholdUpdates :
 INSTANTIATE_TEST_SUITE_P(
     _, TestOnChangeThresholdUpdates,
     Values(
-        OnChangeParams().Updates({{0, 1, 80.0}}).Expected({{0, 1, 80.0}}),
+        OnChangeParams().Updates({{0, 1ms, 80.0}}).Expected({{0, 1ms, 80.0}}),
         OnChangeParams()
-            .Updates({{0, 1, 80.0}, {1, 2, 81.0}})
-            .Expected({{0, 1, 80.0}, {1, 2, 81.0}}),
+            .Updates({{0, 1ms, 80.0}, {1, 2ms, 81.0}})
+            .Expected({{0, 1ms, 80.0}, {1, 2ms, 81.0}}),
         OnChangeParams()
-            .Updates({{0, 1, 80.0}, {0, 2, 90.0}})
-            .Expected({{0, 1, 80.0}, {0, 2, 90.0}}),
+            .Updates({{0, 1ms, 80.0}, {0, 2ms, 90.0}})
+            .Expected({{0, 1ms, 80.0}, {0, 2ms, 90.0}}),
         OnChangeParams()
-            .Updates({{0, 1, 80.0}, {1, 2, 90.0}, {0, 3, 90.0}})
-            .Expected({{0, 1, 80.0}, {1, 2, 90.0}, {0, 3, 90.0}}),
+            .Updates({{0, 1ms, 80.0}, {1, 2ms, 90.0}, {0, 3ms, 90.0}})
+            .Expected({{0, 1ms, 80.0}, {1, 2ms, 90.0}, {0, 3ms, 90.0}}),
         OnChangeParams()
-            .Updates({{0, 1, 80.0}, {1, 2, 80.0}, {1, 3, 90.0}, {0, 4, 90.0}})
-            .Expected(
-                {{0, 1, 80.0}, {1, 2, 80.0}, {1, 3, 90.0}, {0, 4, 90.0}})));
+            .Updates({{0, 1ms, 80.0},
+                      {1, 2ms, 80.0},
+                      {1, 3ms, 90.0},
+                      {0, 4ms, 90.0}})
+            .Expected({{0, 1ms, 80.0},
+                       {1, 2ms, 80.0},
+                       {1, 3ms, 90.0},
+                       {0, 4ms, 90.0}})));
 
 TEST_P(TestOnChangeThresholdUpdates, senorsIsUpdatedMultipleTimes)
 {

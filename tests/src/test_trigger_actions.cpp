@@ -46,7 +46,7 @@ INSTANTIATE_TEST_SUITE_P(LogToJournalNumericParams, TestLogToJournalNumeric,
 
 TEST_P(TestLogToJournalNumeric, commitAnActionDoesNotThrow)
 {
-    EXPECT_NO_THROW(sut->commit("Test", 100'000, commmitValue));
+    EXPECT_NO_THROW(sut->commit("Test", Milliseconds{100'000}, commmitValue));
 }
 
 class TestLogToJournalNumericThrow : public TestLogToJournalNumeric
@@ -56,7 +56,7 @@ INSTANTIATE_TEST_SUITE_P(_, TestLogToJournalNumericThrow, getIncorrectParams());
 
 TEST_P(TestLogToJournalNumericThrow, commitAnActionExpectThrow)
 {
-    EXPECT_THROW(sut->commit("Test", 100'000, commmitValue),
+    EXPECT_THROW(sut->commit("Test", Milliseconds{100'000}, commmitValue),
                  std::runtime_error);
 }
 
@@ -79,7 +79,7 @@ INSTANTIATE_TEST_SUITE_P(LogToRedfishNumericParams, TestLogToRedfishNumeric,
 
 TEST_P(TestLogToRedfishNumeric, commitExpectNoThrow)
 {
-    EXPECT_NO_THROW(sut->commit("Test", 100'000, commmitValue));
+    EXPECT_NO_THROW(sut->commit("Test", Milliseconds{100'000}, commmitValue));
 }
 
 class TestLogToRedfishNumericThrow : public TestLogToRedfishNumeric
@@ -89,7 +89,7 @@ INSTANTIATE_TEST_SUITE_P(_, TestLogToRedfishNumericThrow, getIncorrectParams());
 
 TEST_P(TestLogToRedfishNumericThrow, commitExpectToThrow)
 {
-    EXPECT_THROW(sut->commit("Test", 100'000, commmitValue),
+    EXPECT_THROW(sut->commit("Test", Milliseconds{100'000}, commmitValue),
                  std::runtime_error);
 }
 
@@ -130,7 +130,7 @@ INSTANTIATE_TEST_SUITE_P(LogToJournalDiscreteParams, TestLogToJournalDiscrete,
 
 TEST_P(TestLogToJournalDiscrete, commitAnActionDoesNotThrow)
 {
-    EXPECT_NO_THROW(sut->commit("Test", 100'000, 90.0));
+    EXPECT_NO_THROW(sut->commit("Test", Milliseconds{100'000}, 90.0));
 }
 
 class TestLogToJournalDiscreteThrow : public TestLogToJournalDiscrete
@@ -141,7 +141,8 @@ INSTANTIATE_TEST_SUITE_P(_, TestLogToJournalDiscreteThrow,
 
 TEST_P(TestLogToJournalDiscreteThrow, commitAnActionExpectThrow)
 {
-    EXPECT_THROW(sut->commit("Test", 100'000, 90.0), std::runtime_error);
+    EXPECT_THROW(sut->commit("Test", Milliseconds{100'000}, 90.0),
+                 std::runtime_error);
 }
 
 class TestLogToRedfishDiscrete :
@@ -163,7 +164,7 @@ INSTANTIATE_TEST_SUITE_P(LogToRedfishDiscreteParams, TestLogToRedfishDiscrete,
 
 TEST_P(TestLogToRedfishDiscrete, commitExpectNoThrow)
 {
-    EXPECT_NO_THROW(sut->commit("Test", 100'000, 90.0));
+    EXPECT_NO_THROW(sut->commit("Test", Milliseconds{100'000}, 90.0));
 }
 
 class TestLogToRedfishDiscreteThrow : public TestLogToRedfishDiscrete
@@ -174,7 +175,8 @@ INSTANTIATE_TEST_SUITE_P(_, TestLogToRedfishDiscreteThrow,
 
 TEST_P(TestLogToRedfishDiscreteThrow, commitExpectToThrow)
 {
-    EXPECT_THROW(sut->commit("Test", 100'000, 90.0), std::runtime_error);
+    EXPECT_THROW(sut->commit("Test", Milliseconds{100'000}, 90.0),
+                 std::runtime_error);
 }
 
 namespace onChange
@@ -192,7 +194,7 @@ class TestLogToJournalDiscreteOnChange : public Test
 
 TEST_F(TestLogToJournalDiscreteOnChange, commitExpectNoThrow)
 {
-    EXPECT_NO_THROW(sut->commit("Test", 100'000, 90.0));
+    EXPECT_NO_THROW(sut->commit("Test", Milliseconds{100'000}, 90.0));
 }
 
 class TestLogToRedfishDiscreteOnChange : public Test
@@ -208,7 +210,7 @@ class TestLogToRedfishDiscreteOnChange : public Test
 
 TEST_F(TestLogToRedfishDiscreteOnChange, commitExpectNoThrow)
 {
-    EXPECT_NO_THROW(sut->commit("Test", 100'000, 90.0));
+    EXPECT_NO_THROW(sut->commit("Test", Milliseconds{100'000}, 90.0));
 }
 } // namespace onChange
 } // namespace discrete
@@ -230,7 +232,7 @@ TEST_F(TestUpdateReport, commitWhenReportNameIsEmptyExpectNoReportUpdate)
     EXPECT_CALL(reportManager, updateReport(_)).Times(0);
 
     make({});
-    sut->commit("Test", 100'000, 90.0);
+    sut->commit("Test", Milliseconds{100'000}, 90.0);
 }
 
 TEST_F(TestUpdateReport, commitExpectReportUpdate)
@@ -242,7 +244,7 @@ TEST_F(TestUpdateReport, commitExpectReportUpdate)
     }
 
     make(names);
-    sut->commit("Test", 100'000, 90.0);
+    sut->commit("Test", Milliseconds{100'000}, 90.0);
 }
 
 } // namespace action

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "types/duration_types.hpp"
+
 #include <cstdint>
 #include <string>
 
@@ -11,7 +13,7 @@ class TriggerAction
   public:
     virtual ~TriggerAction() = default;
 
-    virtual void commit(const std::string& id, uint64_t timestamp,
+    virtual void commit(const std::string& id, Milliseconds timestamp,
                         double value) = 0;
 };
 } // namespace interfaces

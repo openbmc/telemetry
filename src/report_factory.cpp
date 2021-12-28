@@ -40,10 +40,10 @@ std::unique_ptr<interfaces::Report> ReportFactory::make(
                 std::make_unique<Clock>());
         });
 
-    return std::make_unique<Report>(bus->get_io_context(), objServer, id, name,
-                                    reportingType, reportActions, period,
-                                    appendLimit, reportUpdates, reportManager,
-                                    reportStorage, std::move(metrics), enabled);
+    return std::make_unique<Report>(
+        bus->get_io_context(), objServer, id, name, reportingType,
+        reportActions, period, appendLimit, reportUpdates, reportManager,
+        reportStorage, std::move(metrics), enabled, std::make_unique<Clock>());
 }
 
 Sensors ReportFactory::getSensors(

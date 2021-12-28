@@ -1,6 +1,6 @@
 #pragma once
 
-#include "types/milliseconds.hpp"
+#include "types/duration_types.hpp"
 
 #include <boost/serialization/strong_typedef.hpp>
 #include <nlohmann/json.hpp>

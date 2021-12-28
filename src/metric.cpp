@@ -16,28 +16,26 @@ class Metric::CollectionData
 
     virtual ~CollectionData() = default;
 
-    virtual ReadingItem update(uint64_t timestamp) = 0;
-    virtual ReadingItem update(uint64_t timestamp, double value) = 0;
+    virtual std::optional<double> update(Milliseconds timestamp) = 0;
+    virtual double update(Milliseconds timestamp, double value) = 0;
 };
 
 class Metric::DataPoint : public Metric::CollectionData
 {
   public:
-    ReadingItem update(uint64_t timestamp) override
+    std::optional<double> update(Milliseconds) override
     {
-        return ReadingItem{lastTimestamp, lastReading};
+        return lastReading;
     }
 
-    ReadingItem update(uint64_t timestamp, double reading) override
+    double update(Milliseconds, double reading) override
     {
-        lastTimestamp = timestamp;
         lastReading = reading;
-        return update(timestamp);
+        return reading;
     }
 
   private:
-    uint64_t lastTimestamp = 0u;
-    double lastReading = 0.0;
+    std::optional<double> lastReading;
 };
 
 class Metric::DataInterval : public Metric::CollectionData
@@ -56,43 +54,51 @@ class Metric::DataInterval : public Metric::CollectionData
         }
     }
 
-    ReadingItem update(uint64_t timestamp) override
+    std::optional<double> update(Milliseconds timestamp) override
     {
-        if (readings.size() > 0)
+        if (readings.empty())
         {
-            auto it = readings.begin();
-            for (auto kt = std::next(readings.rbegin()); kt != readings.rend();
-                 ++kt)
-            {
-                const auto& [nextItemTimestamp, nextItemReading] =
-                    *std::prev(kt);
-                if (timestamp >= nextItemTimestamp &&
-                    static_cast<uint64_t>(timestamp - nextItemTimestamp) >
-                        duration.t.count())
-                {
-                    it = kt.base();
-                    break;
-                }
-            }
-            readings.erase(readings.begin(), it);
-
-            if (timestamp > duration.t.count())
-            {
-                readings.front().first = std::max(
-                    readings.front().first, timestamp - duration.t.count());
-            }
+            return std::nullopt;
         }
+
+        cleanup(timestamp);
 
         return function->calculate(readings, timestamp);
     }
 
-    ReadingItem update(uint64_t timestamp, double reading) override
+    double update(Milliseconds timestamp, double reading) override
     {
         readings.emplace_back(timestamp, reading);
-        return update(timestamp);
+
+        cleanup(timestamp);
+
+        return function->calculate(readings, timestamp);
     }
 
   private:
+    void cleanup(Milliseconds timestamp)
+    {
+        auto it = readings.begin();
+        for (auto kt = std::next(readings.rbegin()); kt != readings.rend();
+             ++kt)
+        {
+            const auto& [nextItemTimestamp, nextItemReading] = *std::prev(kt);
+            if (timestamp >= nextItemTimestamp &&
+                timestamp - nextItemTimestamp > duration.t)
+            {
+                it = kt.base();
+                break;
+            }
+        }
+        readings.erase(readings.begin(), it);
+
+        if (timestamp > duration.t)
+        {
+            readings.front().first =
+                std::max(readings.front().first, timestamp - duration.t);
+        }
+    }
+
     std::shared_ptr<details::CollectionFunction> function;
     std::vector<ReadingItem> readings;
     CollectionDuration duration;
@@ -105,12 +111,17 @@ class Metric::DataStartup : public Metric::CollectionData
         function(std::move(function))
     {}
 
-    ReadingItem update(uint64_t timestamp) override
+    std::optional<double> update(Milliseconds timestamp) override
     {
+        if (readings.empty())
+        {
+            return std::nullopt;
+        }
+
         return function->calculateForStartupInterval(readings, timestamp);
     }
 
-    ReadingItem update(uint64_t timestamp, double reading) override
+    double update(Milliseconds timestamp, double reading) override
     {
         readings.emplace_back(timestamp, reading);
         return function->calculateForStartupInterval(readings, timestamp);
@@ -158,24 +169,31 @@ void Metric::deinitialize()
 
 std::vector<MetricValue> Metric::getReadings() const
 {
-    const auto timestamp = clock->timestamp();
+    const auto steadyTimestamp = clock->steadyTimestamp();
+    const auto systemTimestamp = clock->systemTimestamp();
+
     auto resultReadings = readings;
 
     for (size_t i = 0; i < resultReadings.size(); ++i)
     {
-        std::tie(resultReadings[i].timestamp, resultReadings[i].value) =
-            collectionAlgorithms[i]->update(timestamp);
+        if (const auto value = collectionAlgorithms[i]->update(steadyTimestamp))
+        {
+            resultReadings[i].timestamp =
+                std::chrono::duration_cast<Milliseconds>(systemTimestamp)
+                    .count();
+            resultReadings[i].value = *value;
+        }
     }
 
     return resultReadings;
 }
 
-void Metric::sensorUpdated(interfaces::Sensor& notifier, uint64_t timestamp)
+void Metric::sensorUpdated(interfaces::Sensor& notifier, Milliseconds timestamp)
 {
     findAssociatedData(notifier).update(timestamp);
 }
 
-void Metric::sensorUpdated(interfaces::Sensor& notifier, uint64_t timestamp,
+void Metric::sensorUpdated(interfaces::Sensor& notifier, Milliseconds timestamp,
                            double value)
 {
     findAssociatedData(notifier).update(timestamp, value);

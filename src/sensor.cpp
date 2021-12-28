@@ -100,7 +100,7 @@ void Sensor::unregisterFromUpdates(
 
 void Sensor::updateValue(double newValue)
 {
-    timestamp = Clock().timestamp();
+    timestamp = Clock().steadyTimestamp();
 
     if (value == newValue)
     {

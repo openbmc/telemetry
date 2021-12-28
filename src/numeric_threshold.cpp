@@ -42,11 +42,11 @@ NumericThreshold::ThresholdDetail&
 }
 
 void NumericThreshold::sensorUpdated(interfaces::Sensor& sensor,
-                                     uint64_t timestamp)
+                                     Milliseconds timestamp)
 {}
 
 void NumericThreshold::sensorUpdated(interfaces::Sensor& sensor,
-                                     uint64_t timestamp, double value)
+                                     Milliseconds timestamp, double value)
 {
     auto& [sensorName, prevValue, dwell, timer] = getDetails(sensor);
     bool decreasing = thresholdValue < prevValue && thresholdValue > value;
@@ -68,8 +68,8 @@ void NumericThreshold::sensorUpdated(interfaces::Sensor& sensor,
 }
 
 void NumericThreshold::startTimer(const std::string& sensorName,
-                                  uint64_t timestamp, double value, bool& dwell,
-                                  boost::asio::steady_timer& timer)
+                                  Milliseconds timestamp, double value,
+                                  bool& dwell, boost::asio::steady_timer& timer)
 {
     if (dwellTime == Milliseconds::zero())
     {
@@ -93,8 +93,8 @@ void NumericThreshold::startTimer(const std::string& sensorName,
     }
 }
 
-void NumericThreshold::commit(const std::string& sensorName, uint64_t timestamp,
-                              double value)
+void NumericThreshold::commit(const std::string& sensorName,
+                              Milliseconds timestamp, double value)
 {
     for (const auto& action : actions)
     {

@@ -18,10 +18,10 @@ class SensorListenerMock : public interfaces::SensorListener
             .WillByDefault(InvokeWithoutArgs([this] { sensorUpdated(); }));
     }
 
-    MOCK_METHOD(void, sensorUpdated, (interfaces::Sensor&, uint64_t),
+    MOCK_METHOD(void, sensorUpdated, (interfaces::Sensor&, Milliseconds),
                 (override));
-    MOCK_METHOD(void, sensorUpdated, (interfaces::Sensor&, uint64_t, double),
-                (override));
+    MOCK_METHOD(void, sensorUpdated,
+                (interfaces::Sensor&, Milliseconds, double), (override));
 
     MOCK_METHOD(void, sensorUpdated, (), ());
 };
