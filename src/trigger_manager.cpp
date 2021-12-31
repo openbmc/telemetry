@@ -61,7 +61,6 @@ void TriggerManager::verifyAddTrigger(const std::string& triggerId,
             "Reached maximal trigger count");
     }
 
-    verifyTriggerIdLength(triggerId);
     utils::verifyIdCharacters(triggerId);
 
     for (const auto& trigger : triggers)
@@ -74,26 +73,6 @@ void TriggerManager::verifyAddTrigger(const std::string& triggerId,
     }
 }
 
-void TriggerManager::verifyTriggerIdLength(const std::string& triggerId)
-{
-    if (triggerId.length() > maxTriggerIdLength)
-    {
-        throw sdbusplus::exception::SdBusError(
-            static_cast<int>(std::errc::invalid_argument),
-            "Trigger id exceeds maximum length");
-    }
-}
-
-std::string TriggerManager::generateId(const std::string& prefix,
-                                       const std::string& triggerName) const
-{
-    const auto existingTriggerIds = utils::transform(
-        triggers, [](const auto& trigger) { return trigger->getId(); });
-
-    return utils::generateId(prefix, triggerName, existingTriggerIds,
-                             maxTriggerIdLength);
-}
-
 interfaces::Trigger& TriggerManager::addTrigger(
     const std::string& triggerIdIn, const std::string& triggerNameIn,
     const std::vector<std::string>& triggerActions,
@@ -101,13 +80,12 @@ interfaces::Trigger& TriggerManager::addTrigger(
     const std::vector<std::string>& reportIds,
     const LabeledTriggerThresholdParams& labeledThresholdParams)
 {
-    std::string triggerName = triggerNameIn;
-    if (triggerName.empty())
-    {
-        triggerName = triggerNameDefault;
-    }
+    const auto existingTriggerIds = utils::transform(
+        triggers, [](const auto& trigger) { return trigger->getId(); });
 
-    std::string triggerId = generateId(triggerIdIn, triggerName);
+    auto [triggerId, triggerName] =
+        utils::generateId(triggerIdIn, triggerNameIn, triggerNameDefault,
+                          existingTriggerIds, maxTriggerIdLength);
 
     verifyAddTrigger(triggerId, triggerName);
 

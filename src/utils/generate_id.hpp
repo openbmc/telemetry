@@ -7,9 +7,9 @@
 namespace utils
 {
 
-void verifyIdCharacters(std::string_view triggerId);
-std::string generateId(std::string_view prefix, std::string_view triggerName,
-                       const std::vector<std::string>& conflictIds,
-                       size_t maxLength);
+void verifyIdCharacters(std::string_view id);
+std::pair<std::string, std::string> generateId(
+    std::string_view id, std::string_view name, std::string_view defaultName,
+    const std::vector<std::string>& conflictIds, const size_t maxLength);
 
 } // namespace utils
