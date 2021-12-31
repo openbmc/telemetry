@@ -250,7 +250,6 @@ std::unique_ptr<sdbusplus::asio::dbus_interface> Report::makeReportInterface()
         "ReportUpdates", std::string(),
         sdbusplus::vtable::property_::emits_change,
         [this](auto newVal, auto& oldVal) {
-            ReportManager::verifyReportUpdates(utils::toReportUpdates(newVal));
             setReportUpdates(utils::toReportUpdates(newVal));
             oldVal = newVal;
             return 1;

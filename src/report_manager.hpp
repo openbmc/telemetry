@@ -39,7 +39,6 @@ class ReportManager : public interfaces::ReportManager
     std::unique_ptr<sdbusplus::asio::dbus_interface> reportManagerIface;
     std::vector<std::unique_ptr<interfaces::Report>> reports;
 
-    void verifyReportIdLength(const std::string& reportName);
     void verifyAddReport(
         const std::string& reportId, const std::string& reportName,
         const ReportingType reportingType, Milliseconds interval,
@@ -70,9 +69,5 @@ class ReportManager : public interfaces::ReportManager
         "xyz.openbmc_project.Telemetry.ReportManager";
     static constexpr const char* reportManagerPath =
         "/xyz/openbmc_project/Telemetry/Reports";
-    static constexpr std::array<ReportUpdates, 3> supportedReportUpdates = {
-        ReportUpdates::overwrite, ReportUpdates::appendStopsWhenFull,
-        ReportUpdates::appendWrapsWhenFull};
-
-    static void verifyReportUpdates(const ReportUpdates reportUpdates);
+    static constexpr const char* reportNameDefault = "Report";
 };

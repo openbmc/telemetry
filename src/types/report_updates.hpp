@@ -13,8 +13,7 @@ enum class ReportUpdates : uint32_t
 {
     overwrite,
     appendStopsWhenFull,
-    appendWrapsWhenFull,
-    newReport
+    appendWrapsWhenFull
 };
 
 namespace utils
@@ -31,16 +30,13 @@ struct EnumTraits<ReportUpdates>
     }
 };
 
-constexpr std::array<std::pair<std::string_view, ReportUpdates>, 4>
-    convDataReportUpdates = {
-        {std::make_pair<std::string_view, ReportUpdates>(
-             "Overwrite", ReportUpdates::overwrite),
-         std::make_pair<std::string_view, ReportUpdates>(
-             "AppendStopsWhenFull", ReportUpdates::appendStopsWhenFull),
-         std::make_pair<std::string_view, ReportUpdates>(
-             "AppendWrapsWhenFull", ReportUpdates::appendWrapsWhenFull),
-         std::make_pair<std::string_view, ReportUpdates>(
-             "NewReport", ReportUpdates::newReport)}};
+constexpr auto convDataReportUpdates =
+    std::array{std::make_pair<std::string_view, ReportUpdates>(
+                   "Overwrite", ReportUpdates::overwrite),
+               std::make_pair<std::string_view, ReportUpdates>(
+                   "AppendStopsWhenFull", ReportUpdates::appendStopsWhenFull),
+               std::make_pair<std::string_view, ReportUpdates>(
+                   "AppendWrapsWhenFull", ReportUpdates::appendWrapsWhenFull)};
 
 inline ReportUpdates
     toReportUpdates(std::underlying_type_t<ReportUpdates> value)
