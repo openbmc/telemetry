@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "624a45dd_4c34e947",
+        "filename": "src/details/collection_function.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1000588
+      },
+      "writtenOn": "2021-12-31T13:43:17Z",
+      "side": 1,
+      "message": "Do we need to create new ReadingItem here with actual timestamp to be consistent with new assumptions: \"Changed readings timestamp to display current timestamp instead of a time when reading was received.\"?",
+      "range": {
+        "startLine": 20,
+        "startChar": 24,
+        "endLine": 20,
+        "endChar": 41
+      },
+      "revId": "51f0fd501f4b772533271d15cb27d396186a7192",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
