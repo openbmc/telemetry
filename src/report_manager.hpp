@@ -39,7 +39,6 @@ class ReportManager : public interfaces::ReportManager
     std::unique_ptr<sdbusplus::asio::dbus_interface> reportManagerIface;
     std::vector<std::unique_ptr<interfaces::Report>> reports;
 
-    void verifyReportIdLength(const std::string& reportName);
     void verifyAddReport(
         const std::string& reportId, const std::string& reportName,
         const ReportingType reportingType, Milliseconds interval,
