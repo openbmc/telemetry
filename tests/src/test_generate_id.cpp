@@ -1,67 +1,171 @@
 #include "utils/generate_id.hpp"
 
+#include <sdbusplus/exception.hpp>
+
 #include <gmock/gmock.h>
 
 using namespace testing;
+using namespace std::literals::string_literals;
 
-class TestGenerateId : public Test
+class ScenarioBase : public Test
 {
   public:
+    std::string_view defaultName = "defName";
+    size_t maxSize = 32;
     std::vector<std::string> conflicts;
 };
 
-TEST_F(TestGenerateId, returnPrefixWhenPrefixIsId)
+class ScenarioNameProvided : public ScenarioBase
 {
-    constexpr size_t maxSize = 32;
-    EXPECT_THAT(utils::generateId("prefix", "name", conflicts, maxSize),
-                Eq("prefix"));
-    EXPECT_THAT(utils::generateId("pre", "name123", conflicts, maxSize),
-                Eq("pre"));
-    EXPECT_THAT(utils::generateId("prefix/abc", "name", conflicts, maxSize),
-                Eq("prefix/abc"));
-    EXPECT_THAT(utils::generateId("prefix/abc", "name",
-                                  {"conflicts", "prefix/abc"}, maxSize),
-                Eq("prefix/abc"));
+  public:
+    auto generateId(std::string_view id, std::string_view name) const
+    {
+        return utils::generateId(id, name, defaultName, conflicts, maxSize);
+    }
+};
+
+class TestGenerateIdNameProvided : public ScenarioNameProvided
+{};
+
+TEST_F(TestGenerateIdNameProvided, usesIdWhenProvided)
+{
+    const std::string name = "name";
+
+    EXPECT_THAT(this->generateId("id0", name), Eq(std::pair{"id0"s, name}));
+    EXPECT_THAT(this->generateId("/id1", name), Eq(std::pair{"id1"s, name}));
+    EXPECT_THAT(this->generateId("prefix/id2", name),
+                Eq(std::pair{"prefix/id2"s, name}));
 }
 
-TEST_F(TestGenerateId, returnsNameWithPrefixWhenPrefixIsNamesapce)
+TEST_F(TestGenerateIdNameProvided, usedDefaultWhenNothingProvided)
 {
-    constexpr size_t maxSize = 32;
-    EXPECT_THAT(utils::generateId("prefix/", "name", conflicts, maxSize),
-                Eq("prefix/name"));
-    EXPECT_THAT(utils::generateId("pre/", "name", conflicts, maxSize),
-                Eq("pre/name"));
+    this->defaultName = "def";
+
+    EXPECT_THAT(this->generateId("", ""), Eq(std::pair{"def"s, "def"s}));
+    EXPECT_THAT(this->generateId("/", ""), Eq(std::pair{"def"s, "def"s}));
+    EXPECT_THAT(this->generateId("abc/", ""),
+                Eq(std::pair{"abc/def"s, "def"s}));
 }
 
-TEST_F(TestGenerateId, returnsOriginalNameWithoutInvalidCharacters)
+class ScenarioNameNotProvided : public ScenarioBase
 {
-    constexpr size_t maxSize = 32;
-    EXPECT_THAT(utils::generateId("", "n#a$m@e", conflicts, maxSize),
-                Eq("name"));
-    EXPECT_THAT(utils::generateId("/", "n!^aŹme", conflicts, maxSize),
-                Eq("/name"));
-    EXPECT_THAT(utils::generateId("p/", "n!^aŹm*(e", conflicts, maxSize),
-                Eq("p/name"));
+  public:
+    auto generateId(std::string_view id, std::string_view name) const
+    {
+        return utils::generateId(id, "", name, conflicts, maxSize);
+    }
+};
+
+class TestGenerateIdNameNotProvided : public ScenarioNameNotProvided
+{};
+
+TEST_F(TestGenerateIdNameNotProvided, usesIdAsNameWhenProvided)
+{
+    EXPECT_THAT(this->generateId("id0", defaultName),
+                Eq(std::pair{"id0"s, "id0"s}));
+    EXPECT_THAT(this->generateId("/id1", defaultName),
+                Eq(std::pair{"id1"s, "id1"s}));
+    EXPECT_THAT(this->generateId("prefix/id2", defaultName),
+                Eq(std::pair{"prefix/id2"s, "id2"s}));
 }
 
-TEST_F(TestGenerateId, returnsUniqueIdWhenConflictExist)
-{
-    constexpr size_t maxSize = 32;
+template <class Scenario>
+class TestGenerateId : public Scenario
+{};
 
-    EXPECT_THAT(utils::generateId("p/", "name",
-                                  {"conflicts", "p/name", "p/name1"}, maxSize),
-                Eq("p/name0"));
-    EXPECT_THAT(utils::generateId("p/", "name",
-                                  {"conflicts", "p/name", "p/name0", "p/name1"},
-                                  maxSize),
-                Eq("p/name2"));
+using TestScenarios =
+    ::testing::Types<ScenarioNameProvided, ScenarioNameNotProvided>;
+TYPED_TEST_SUITE(TestGenerateId, TestScenarios);
+
+TEST_F(TestGenerateIdNameNotProvided, leadingSlashDoesntCountToLengthLimit)
+{
+    this->maxSize = 2;
+
+    EXPECT_THAT(this->generateId("12", "default").first, Eq("12"));
+    EXPECT_THAT(this->generateId("/23", "default").first, Eq("23"));
+    EXPECT_THROW(this->generateId("123", "trigger"),
+                 sdbusplus::exception::SdBusError);
 }
 
-TEST_F(TestGenerateId, returnsUniqueIdWithingMaxSize)
+TYPED_TEST(TestGenerateId, throwsWhenProvidedIdIsTooLong)
 {
-    constexpr size_t maxSize = 4;
+    this->maxSize = 4;
 
-    EXPECT_THAT(utils::generateId("", "trigger", {""}, maxSize), Eq("trig"));
-    EXPECT_THAT(utils::generateId("", "trigger", {"trig"}, maxSize),
-                Eq("tri0"));
+    EXPECT_THROW(this->generateId("12345", "name"),
+                 sdbusplus::exception::SdBusError);
+    EXPECT_THROW(this->generateId("12/45", "name"),
+                 sdbusplus::exception::SdBusError);
+    EXPECT_THROW(this->generateId("123/", "trigger"),
+                 sdbusplus::exception::SdBusError);
+}
+
+TYPED_TEST(TestGenerateId, throwsWhenThereAreNoFreeIds)
+{
+    this->maxSize = 1;
+    this->conflicts = {"n", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"};
+
+    EXPECT_THROW(this->generateId("", "n"), sdbusplus::exception::SdBusError);
+}
+
+TYPED_TEST(TestGenerateId, throwsWhenIdContainsMoreThanOneSlash)
+{
+    EXPECT_THROW(this->generateId("/12/", "name"),
+                 sdbusplus::exception::SdBusError);
+    EXPECT_THROW(this->generateId("12//", "name"),
+                 sdbusplus::exception::SdBusError);
+    EXPECT_THROW(this->generateId("12//123", "name"),
+                 sdbusplus::exception::SdBusError);
+    EXPECT_THROW(this->generateId("12/12/123", "name"),
+                 sdbusplus::exception::SdBusError);
+}
+
+TYPED_TEST(TestGenerateId, usesNamePartOfNameWhenIdNotProvidedAndNameIsTooLong)
+{
+    this->maxSize = 4;
+
+    this->conflicts = {};
+    EXPECT_THAT(this->generateId("", "trigger"),
+                Eq(std::pair{"trig"s, "trigger"s}));
+    EXPECT_THAT(this->generateId("a/", "trigger"),
+                Eq(std::pair{"a/tr"s, "trigger"s}));
+
+    this->conflicts = {"trig"};
+    EXPECT_THAT(this->generateId("", "trigger"),
+                Eq(std::pair{"tri0"s, "trigger"s}));
+
+    this->conflicts = {"trig", "tri0"};
+    EXPECT_THAT(this->generateId("", "trigger"),
+                Eq(std::pair{"tri1"s, "trigger"s}));
+}
+
+TYPED_TEST(TestGenerateId, throwsWhenProvidedIdIsTaken)
+{
+    this->conflicts = {"id", "prefix/id"};
+
+    EXPECT_THROW(this->generateId("id", "name"),
+                 sdbusplus::exception::SdBusError);
+    EXPECT_THROW(this->generateId("/id", "name"),
+                 sdbusplus::exception::SdBusError);
+    EXPECT_THROW(this->generateId("prefix/id", "name"),
+                 sdbusplus::exception::SdBusError);
+}
+
+TYPED_TEST(TestGenerateId, usesNameWhenIdNotProvided)
+{
+    EXPECT_THAT(this->generateId("", "name"), Eq(std::pair{"name"s, "name"s}));
+    EXPECT_THAT(this->generateId("/", "name"), Eq(std::pair{"name"s, "name"s}));
+    EXPECT_THAT(this->generateId("abc/", "name"),
+                Eq(std::pair{"abc/name"s, "name"s}));
+    EXPECT_THAT(this->generateId("123/", "name"),
+                Eq(std::pair{"123/name"s, "name"s}));
+}
+
+TYPED_TEST(TestGenerateId, usesNameWithoutInvalidCharactersWhenIdNotProvided)
+{
+    EXPECT_THAT(this->generateId("", "n#a$/m@e"),
+                Eq(std::pair{"name"s, "n#a$/m@e"s}));
+    EXPECT_THAT(this->generateId("", "n!^aŹ/me"),
+                Eq(std::pair{"name"s, "n!^aŹ/me"s}));
+    EXPECT_THAT(this->generateId("p/", "n!^aŹ/m*(e"),
+                Eq(std::pair{"p/name"s, "n!^aŹ/m*(e"s}));
 }

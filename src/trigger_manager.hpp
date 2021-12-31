@@ -33,9 +33,6 @@ class TriggerManager : public interfaces::TriggerManager
 
     void verifyAddTrigger(const std::string& triggerId,
                           const std::string& triggerName) const;
-    std::string generateId(const std::string& prefix,
-                           const std::string& triggerName) const;
-    static void verifyTriggerIdLength(const std::string& triggerId);
 
     interfaces::Trigger&
         addTrigger(const std::string& triggerId, const std::string& triggerName,

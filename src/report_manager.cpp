@@ -124,16 +124,6 @@ void ReportManager::removeReport(const interfaces::Report* report)
         reports.end());
 }
 
-void ReportManager::verifyReportIdLength(const std::string& reportId)
-{
-    if (reportId.length() > maxReportIdLength)
-    {
-        throw sdbusplus::exception::SdBusError(
-            static_cast<int>(std::errc::invalid_argument),
-            "Report id exceeds maximum length");
-    }
-}
-
 void ReportManager::verifyAddReport(
     const std::string& reportId, const std::string& reportName,
     const ReportingType reportingType, Milliseconds interval,
@@ -154,7 +144,6 @@ void ReportManager::verifyAddReport(
             "Reached maximal report count");
     }
 
-    verifyReportIdLength(reportId);
     utils::verifyIdCharacters(reportId);
 
     for (const auto& report : reports)
@@ -222,17 +211,11 @@ interfaces::Report& ReportManager::addReport(
     std::vector<LabeledMetricParameters> labeledMetricParams,
     const bool enabled)
 {
-    std::string name = reportName;
-    if (name.empty())
-    {
-        name = "Report";
-    }
-
     const auto existingReportIds = utils::transform(
         reports, [](const auto& report) { return report->getId(); });
 
-    std::string id =
-        utils::generateId(reportId, name, existingReportIds, maxReportIdLength);
+    auto [id, name] = utils::generateId(reportId, reportName, "Report",
+                                        existingReportIds, maxReportIdLength);
 
     verifyAddReport(id, name, reportingType, interval, reportUpdates,
                     labeledMetricParams);
