@@ -119,14 +119,14 @@ class DbusEnvironment : public ::testing::Environment
         setProperty(const std::string& path, const std::string& interfaceName,
                     const std::string& property, const T& newValue)
     {
-        auto setPromise = std::promise<boost::system::error_code>();
-        auto future = setPromise.get_future();
+        auto promise = std::promise<boost::system::error_code>();
+        auto future = promise.get_future();
         sdbusplus::asio::setProperty(
             *DbusEnvironment::getBus(), DbusEnvironment::serviceName(), path,
             interfaceName, property, std::move(newValue),
-            [setPromise =
-                 std::move(setPromise)](boost::system::error_code ec) mutable {
-                setPromise.set_value(ec);
+            [promise =
+                 std::move(promise)](boost::system::error_code ec) mutable {
+                promise.set_value(ec);
             });
         return DbusEnvironment::waitForFuture(std::move(future));
     }

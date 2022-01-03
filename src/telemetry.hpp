@@ -15,7 +15,7 @@
 class Telemetry
 {
   public:
-    Telemetry(std::shared_ptr<sdbusplus::asio::connection> bus) :
+    explicit Telemetry(std::shared_ptr<sdbusplus::asio::connection> bus) :
         objServer(std::make_shared<sdbusplus::asio::object_server>(bus)),
         reportManager(
             std::make_unique<ReportFactory>(bus, objServer, sensorCache),

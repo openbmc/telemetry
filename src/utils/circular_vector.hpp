@@ -4,7 +4,7 @@ template <class T>
 class CircularVector
 {
   public:
-    CircularVector(size_t maxSizeIn) : maxSize(maxSizeIn)
+    explicit CircularVector(size_t maxSizeIn) : maxSize(maxSizeIn)
     {}
 
     template <class... Args>
