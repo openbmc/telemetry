@@ -27,7 +27,7 @@ class TriggerFactory : public interfaces::TriggerFactory
 
     std::vector<LabeledSensorInfo>
         getLabeledSensorsInfo(boost::asio::yield_context& yield,
-                              const SensorsInfo& sensorsInfo) const;
+                              const SensorsInfo& sensorsInfo) const override;
 
   private:
     std::shared_ptr<sdbusplus::asio::connection> bus;

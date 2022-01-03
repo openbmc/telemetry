@@ -6,7 +6,8 @@ DiscreteThreshold::DiscreteThreshold(
     boost::asio::io_context& ioc, Sensors sensorsIn,
     std::vector<std::string> sensorNames,
     std::vector<std::unique_ptr<interfaces::TriggerAction>> actionsIn,
-    Milliseconds dwellTimeIn, double thresholdValueIn, std::string name) :
+    Milliseconds dwellTimeIn, double thresholdValueIn,
+    const std::string& name) :
     ioc(ioc),
     sensors(std::move(sensorsIn)), actions(std::move(actionsIn)),
     dwellTime(dwellTimeIn), thresholdValue(thresholdValueIn), name(name)

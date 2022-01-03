@@ -33,7 +33,7 @@ std::unique_ptr<interfaces::Trigger> TriggerFactory::make(
     std::vector<TriggerAction> triggerActions;
     std::transform(triggerActionsIn.begin(), triggerActionsIn.end(),
                    std::back_inserter(triggerActions),
-                   [](auto& triggerActionStr) {
+                   [](const auto& triggerActionStr) {
                        return toTriggerAction(triggerActionStr);
                    });
     std::vector<std::shared_ptr<interfaces::Threshold>> thresholds;
@@ -142,9 +142,10 @@ std::vector<LabeledSensorInfo>
 
     return utils::transform(sensorsInfo, [&tree](const auto& item) {
         const auto& [sensorPath, metadata] = item;
-        auto found = std::find_if(
-            tree.begin(), tree.end(),
-            [&sensorPath](const auto& x) { return x.first == sensorPath; });
+        auto found = std::find_if(tree.begin(), tree.end(),
+                                  [sensorPath = sensorPath](const auto& x) {
+                                      return x.first == sensorPath;
+                                  });
 
         if (tree.end() != found)
         {
