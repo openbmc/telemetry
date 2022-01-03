@@ -7,7 +7,7 @@
 class ReportMock : public interfaces::Report
 {
   public:
-    ReportMock(const std::string& id)
+    explicit ReportMock(const std::string& id)
     {
         using namespace testing;
 
