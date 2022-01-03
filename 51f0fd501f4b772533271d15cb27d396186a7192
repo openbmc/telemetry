@@ -1,0 +1,8 @@
+Code-Review+1: Agata Wiatrowska <agata.wiatrowska@intel.com>
+Code-Review+2: Krzysztof Grobelny <krzysztof.grobelny@intel.com>
+Verified+1: OpenBMC CI <openbmcbump-ci@yahoo.com>
+Submitted-by: Krzysztof Grobelny <krzysztof.grobelny@intel.com>
+Submitted-at: Mon, 03 Jan 2022 08:33:18 +0000
+Reviewed-on: https://gerrit.openbmc-project.xyz/c/openbmc/telemetry/+/50028
+Project: openbmc/telemetry
+Branch: refs/heads/master
