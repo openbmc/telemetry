@@ -307,9 +307,9 @@ void Report::updateReadings()
                 readingsBuffer.isFull())
             {
                 enabled = false;
-                for (auto& metric : metrics)
+                for (auto& m : metrics)
                 {
-                    metric->deinitialize();
+                    m->deinitialize();
                 }
                 break;
             }

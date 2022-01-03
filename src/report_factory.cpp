@@ -77,7 +77,7 @@ std::vector<LabeledMetricParameters> ReportFactory::convertMetricParams(
         {
             auto it = std::find_if(
                 tree.begin(), tree.end(),
-                [&sensorPath](const auto& v) { return v.first == sensorPath; });
+                [path = sensorPath](const auto& v) { return v.first == path; });
 
             if (it != tree.end() && it->second.size() == 1)
             {

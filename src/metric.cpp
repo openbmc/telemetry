@@ -107,7 +107,8 @@ class Metric::DataInterval : public Metric::CollectionData
 class Metric::DataStartup : public Metric::CollectionData
 {
   public:
-    DataStartup(std::shared_ptr<details::CollectionFunction> function) :
+    explicit DataStartup(
+        std::shared_ptr<details::CollectionFunction> function) :
         function(std::move(function))
     {}
 
