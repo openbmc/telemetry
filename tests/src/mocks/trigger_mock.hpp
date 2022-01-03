@@ -7,7 +7,7 @@
 class TriggerMock : public interfaces::Trigger
 {
   public:
-    TriggerMock(std::string id)
+    explicit TriggerMock(std::string id)
     {
         using namespace testing;
 

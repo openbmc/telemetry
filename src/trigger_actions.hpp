@@ -53,7 +53,7 @@ namespace discrete
 class LogToJournal : public interfaces::TriggerAction
 {
   public:
-    LogToJournal(::discrete::Severity severity) : severity(severity)
+    explicit LogToJournal(::discrete::Severity severity) : severity(severity)
     {}
 
     void commit(const std::string& id, Milliseconds timestamp,
@@ -68,7 +68,7 @@ class LogToJournal : public interfaces::TriggerAction
 class LogToRedfish : public interfaces::TriggerAction
 {
   public:
-    LogToRedfish(::discrete::Severity severity) : severity(severity)
+    explicit LogToRedfish(::discrete::Severity severity) : severity(severity)
     {}
 
     void commit(const std::string& id, Milliseconds timestamp,

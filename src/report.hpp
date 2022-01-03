@@ -31,7 +31,6 @@ class Report : public interfaces::Report
            interfaces::JsonStorage& reportStorage,
            std::vector<std::shared_ptr<interfaces::Metric>> metrics,
            const bool enabled, std::unique_ptr<interfaces::Clock> clock);
-    ~Report() = default;
 
     Report(const Report&) = delete;
     Report(Report&&) = delete;
