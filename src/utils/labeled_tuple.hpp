@@ -61,7 +61,7 @@ struct LabeledTuple<std::tuple<Args...>, Labels...>
     LabeledTuple(const LabeledTuple&) = default;
     LabeledTuple(LabeledTuple&&) = default;
 
-    LabeledTuple(tuple_type v) : value(std::move(v))
+    explicit LabeledTuple(tuple_type v) : value(std::move(v))
     {}
     LabeledTuple(Args... args) : value(std::move(args)...)
     {}

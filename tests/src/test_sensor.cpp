@@ -110,9 +110,6 @@ class TestSensorNotification : public TestSensor
 
         ASSERT_TRUE(DbusEnvironment::waitForFuture("async_read"));
     }
-
-    std::shared_ptr<SensorListenerMock> listenerMock2 =
-        std::make_shared<StrictMock<SensorListenerMock>>();
 };
 
 TEST_F(TestSensorNotification, notifiesListenerWithValueWhenChangeOccurs)
