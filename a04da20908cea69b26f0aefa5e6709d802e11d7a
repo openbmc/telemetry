@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "58861c70_ebb5b2e5",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2022-01-12T10:51:06Z",
+      "side": 1,
+      "message": "Here are also modifications that affect unit tests, please check and state as well if unit tests run and complete without an issue.",
+      "range": {
+        "startLine": 12,
+        "startChar": 2,
+        "endLine": 12,
+        "endChar": 15
+      },
+      "revId": "a04da20908cea69b26f0aefa5e6709d802e11d7a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "19097368_4ef58693",
+        "filename": "tests/src/dbus_environment.hpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2022-01-12T10:51:06Z",
+      "side": 1,
+      "message": "Please use meaningful name for the variable, \u0027primise\u0027 looks like it is a typo in the name.",
+      "range": {
+        "startLine": 122,
+        "startChar": 13,
+        "endLine": 122,
+        "endChar": 20
+      },
+      "revId": "a04da20908cea69b26f0aefa5e6709d802e11d7a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
