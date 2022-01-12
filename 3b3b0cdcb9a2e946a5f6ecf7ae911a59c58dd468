@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "248b667c_947af056",
+        "filename": "src/report_manager.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 217,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2022-01-12T10:52:27Z",
+      "side": 1,
+      "message": "How about using here the same approach as in trigger_manager.cpp and use \u0027reportNameDefault\u0027 constexpr char* instead? It will make both - reports and triggers more consistent.",
+      "range": {
+        "startLine": 217,
+        "startChar": 62,
+        "endLine": 217,
+        "endChar": 70
+      },
+      "revId": "3b3b0cdcb9a2e946a5f6ecf7ae911a59c58dd468",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "639cc1e2_f3fb6e3c",
+        "filename": "src/trigger_manager.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2022-01-12T10:52:27Z",
+      "side": 1,
+      "message": "In report_manager.cpp we have \u0027auto [id, name] \u003d utils::generateId[...]\u0027, is it possible to reduce naming also here from triggerId and triggerName into id + name, and next, change triggerIdIn, triggerNameIn -\u003e triggerId, triggerName? IMO it would make implementation easier to read and more consistent for both triggers and reports.",
+      "range": {
+        "startLine": 86,
+        "startChar": 4,
+        "endLine": 86,
+        "endChar": 33
+      },
+      "revId": "3b3b0cdcb9a2e946a5f6ecf7ae911a59c58dd468",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "14e7a5fa_2a14c27e",
+        "filename": "src/utils/generate_id.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2022-01-12T10:52:27Z",
+      "side": 1,
+      "message": "Is it possible to add reason of failure to the message? I.e. available unique indices/names are depleted.",
+      "range": {
+        "startLine": 79,
+        "startChar": 17,
+        "endLine": 79,
+        "endChar": 45
+      },
+      "revId": "3b3b0cdcb9a2e946a5f6ecf7ae911a59c58dd468",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
