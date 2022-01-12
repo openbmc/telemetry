@@ -1,6 +1,7 @@
 {
   "comments": [
     {
+      "unresolved": true,
       "key": {
         "uuid": "209fc9d0_4e1d6d11",
         "filename": "src/discrete_threshold.hpp",
@@ -20,10 +21,34 @@
         "endChar": 34
       },
       "revId": "16c545907c62c1625710eb3259122def9ec028fa",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": true,
+      "key": {
+        "uuid": "dc247231_f2d0c301",
+        "filename": "src/discrete_threshold.hpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2022-01-12T15:53:03Z",
+      "side": 1,
+      "message": "There wont be much elements in map, probably we won\u0027t notice any difference.",
+      "parentUuid": "209fc9d0_4e1d6d11",
+      "range": {
+        "startLine": 61,
+        "startChar": 26,
+        "endLine": 61,
+        "endChar": 34
+      },
+      "revId": "16c545907c62c1625710eb3259122def9ec028fa",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
       "key": {
         "uuid": "5105ce0c_f30e8752",
         "filename": "src/numeric_threshold.cpp",
@@ -43,10 +68,34 @@
         "endChar": 43
       },
       "revId": "16c545907c62c1625710eb3259122def9ec028fa",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": true,
+      "key": {
+        "uuid": "4c4784fe_5d315356",
+        "filename": "src/numeric_threshold.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2022-01-12T15:53:03Z",
+      "side": 1,
+      "message": "Some middle ground would be to:\nconst auto\u0026 sensorName \u003d details.sensorName;\nauto\u0026 dwell \u003d details.dwell;",
+      "parentUuid": "5105ce0c_f30e8752",
+      "range": {
+        "startLine": 82,
+        "startChar": 32,
+        "endLine": 82,
+        "endChar": 43
+      },
+      "revId": "16c545907c62c1625710eb3259122def9ec028fa",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
       "key": {
         "uuid": "27fb80f3_8bff51e0",
         "filename": "src/numeric_threshold.hpp",
@@ -66,10 +115,10 @@
         "endChar": 34
       },
       "revId": "16c545907c62c1625710eb3259122def9ec028fa",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": true,
       "key": {
         "uuid": "cd2439f3_bd66da71",
         "filename": "src/on_change_threshold.cpp",
@@ -89,10 +138,34 @@
         "endChar": 32
       },
       "revId": "16c545907c62c1625710eb3259122def9ec028fa",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": true,
+      "key": {
+        "uuid": "89be097a_57fe62db",
+        "filename": "src/on_change_threshold.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2022-01-12T15:53:03Z",
+      "side": 1,
+      "message": "copy is needed because Threshold is unregistering oldSensors which are no longer used",
+      "parentUuid": "cd2439f3_bd66da71",
+      "range": {
+        "startLine": 23,
+        "startChar": 25,
+        "endLine": 23,
+        "endChar": 32
+      },
+      "revId": "16c545907c62c1625710eb3259122def9ec028fa",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
       "key": {
         "uuid": "16822843_ba468e06",
         "filename": "src/trigger.cpp",
@@ -112,10 +185,10 @@
         "endChar": 19
       },
       "revId": "16c545907c62c1625710eb3259122def9ec028fa",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": true,
       "key": {
         "uuid": "dbd7e728_1cbc7c9a",
         "filename": "src/trigger.cpp",
@@ -135,10 +208,10 @@
         "endChar": 35
       },
       "revId": "16c545907c62c1625710eb3259122def9ec028fa",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": true,
       "key": {
         "uuid": "d047f1b4_0c14e7c1",
         "filename": "src/trigger.cpp",
@@ -158,10 +231,10 @@
         "endChar": 50
       },
       "revId": "16c545907c62c1625710eb3259122def9ec028fa",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": true,
       "key": {
         "uuid": "1d5bba23_93aa163e",
         "filename": "src/trigger.cpp",
@@ -182,10 +255,10 @@
         "endChar": 50
       },
       "revId": "16c545907c62c1625710eb3259122def9ec028fa",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": true,
       "key": {
         "uuid": "8470d45b_623aa8d1",
         "filename": "src/trigger_factory.cpp",
@@ -205,10 +278,10 @@
         "endChar": 37
       },
       "revId": "16c545907c62c1625710eb3259122def9ec028fa",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": true,
       "key": {
         "uuid": "0b02bf57_5435db10",
         "filename": "src/trigger_factory.cpp",
@@ -228,10 +301,10 @@
         "endChar": 55
       },
       "revId": "16c545907c62c1625710eb3259122def9ec028fa",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": true,
       "key": {
         "uuid": "3bab504e_894f220f",
         "filename": "src/trigger_factory.cpp",
@@ -251,10 +324,10 @@
         "endChar": 26
       },
       "revId": "16c545907c62c1625710eb3259122def9ec028fa",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": true,
       "key": {
         "uuid": "64df8d5e_c612a4ee",
         "filename": "src/trigger_factory.cpp",
@@ -274,10 +347,10 @@
         "endChar": 75
       },
       "revId": "16c545907c62c1625710eb3259122def9ec028fa",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": true,
       "key": {
         "uuid": "adc6c327_9abe9729",
         "filename": "src/trigger_factory.cpp",
@@ -297,10 +370,10 @@
         "endChar": 35
       },
       "revId": "16c545907c62c1625710eb3259122def9ec028fa",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": true,
       "key": {
         "uuid": "0e8206a4_59039f26",
         "filename": "src/trigger_factory.cpp",
@@ -320,10 +393,10 @@
         "endChar": 40
       },
       "revId": "16c545907c62c1625710eb3259122def9ec028fa",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": true,
       "key": {
         "uuid": "bf0dcce7_4219f3fd",
         "filename": "src/utils/conversion_trigger.cpp",
@@ -343,10 +416,10 @@
         "endChar": 28
       },
       "revId": "16c545907c62c1625710eb3259122def9ec028fa",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": true,
       "key": {
         "uuid": "8da88df8_74f0884c",
         "filename": "src/utils/threshold_mixin.hpp",
@@ -366,10 +439,10 @@
         "endChar": 21
       },
       "revId": "16c545907c62c1625710eb3259122def9ec028fa",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": true,
       "key": {
         "uuid": "88e69337_d2d5d1ac",
         "filename": "src/utils/threshold_mixin.hpp",
@@ -389,8 +462,7 @@
         "endChar": 39
       },
       "revId": "16c545907c62c1625710eb3259122def9ec028fa",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
