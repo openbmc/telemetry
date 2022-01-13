@@ -5,23 +5,6 @@
 namespace details
 {
 
-class FunctionSingle : public CollectionFunction
-{
-  public:
-    double calculate(const std::vector<ReadingItem>& readings,
-                     Milliseconds) const override
-    {
-        return readings.back().second;
-    }
-
-    double calculateForStartupInterval(std::vector<ReadingItem>& readings,
-                                       Milliseconds) const override
-    {
-        readings.assign({readings.back()});
-        return readings.back().second;
-    }
-};
-
 class FunctionMinimum : public CollectionFunction
 {
   public:
@@ -175,8 +158,6 @@ std::shared_ptr<CollectionFunction>
 
     switch (operationType)
     {
-        case OperationType::single:
-            return std::make_shared<FunctionSingle>();
         case OperationType::min:
             return std::make_shared<FunctionMinimum>();
         case OperationType::max:

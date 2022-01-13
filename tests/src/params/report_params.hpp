@@ -121,7 +121,7 @@ class ReportParams final
              {LabeledSensorParameters{"Service",
                                       "/xyz/openbmc_project/sensors/power/p1",
                                       "metadata1"}},
-             OperationType::single,
+             OperationType::avg,
              "MetricId1",
              CollectionTimeScope::point,
              CollectionDuration(Milliseconds(0u))},
@@ -129,7 +129,7 @@ class ReportParams final
              {LabeledSensorParameters{"Service",
                                       "/xyz/openbmc_project/sensors/power/p2",
                                       "metadata2"}},
-             OperationType::single,
+             OperationType::avg,
              "MetricId2",
              CollectionTimeScope::point,
              CollectionDuration(Milliseconds(0u))}}};

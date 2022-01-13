@@ -101,6 +101,13 @@ TEST_F(TestReportManager, maxReports)
                 Eq(ReportManager::maxReports));
 }
 
+TEST_F(TestReportManager, returnsPropertySupportedOperationTypes)
+{
+    EXPECT_THAT(
+        getProperty<std::vector<std::string>>("SupportedOperationTypes"),
+        UnorderedElementsAre("Maximum", "Minimum", "Average", "Summation"));
+}
+
 TEST_F(TestReportManager, addReport)
 {
     EXPECT_CALL(reportFactoryMock, convertMetricParams(_, _));
@@ -387,9 +394,8 @@ class TestReportManagerWithAggregationOperationType :
 };
 
 INSTANTIATE_TEST_SUITE_P(_, TestReportManagerWithAggregationOperationType,
-                         Values(OperationType::single, OperationType::max,
-                                OperationType::min, OperationType::avg,
-                                OperationType::sum));
+                         Values(OperationType::max, OperationType::min,
+                                OperationType::avg, OperationType::sum));
 
 TEST_P(TestReportManagerWithAggregationOperationType,
        addReportWithDifferentOperationTypes)
