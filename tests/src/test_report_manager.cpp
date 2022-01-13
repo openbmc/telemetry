@@ -101,6 +101,13 @@ TEST_F(TestReportManager, maxReports)
                 Eq(ReportManager::maxReports));
 }
 
+TEST_F(TestReportManager, returnsPropertySupportedOperationTypes)
+{
+    EXPECT_THAT(
+        getProperty<std::vector<std::string>>("SupportedOperationTypes"),
+        UnorderedElementsAre("Maximum", "Minimum", "Average", "Summation"));
+}
+
 TEST_F(TestReportManager, addReport)
 {
     EXPECT_CALL(reportFactoryMock, convertMetricParams(_, _));
@@ -218,7 +225,7 @@ TEST_F(TestReportManager,
             {LabeledSensorParameters{"Service",
                                      "/xyz/openbmc_project/sensors/power/p1",
                                      "Metadata1"}},
-            OperationType::single,
+            OperationType::avg,
             "MetricId1",
             CollectionTimeScope::point,
             CollectionDuration(Milliseconds(0u))}}});
@@ -252,7 +259,7 @@ TEST_F(TestReportManager, DISABLED_failToAddReportWithMoreMetricsThanExpected)
     {
         metricParams.emplace_back(
             LabeledMetricParameters{{},
-                                    OperationType::single,
+                                    OperationType::avg,
                                     "MetricId1",
                                     CollectionTimeScope::point,
                                     CollectionDuration(Milliseconds(0u))});
@@ -387,9 +394,8 @@ class TestReportManagerWithAggregationOperationType :
 };
 
 INSTANTIATE_TEST_SUITE_P(_, TestReportManagerWithAggregationOperationType,
-                         Values(OperationType::single, OperationType::max,
-                                OperationType::min, OperationType::avg,
-                                OperationType::sum));
+                         Values(OperationType::max, OperationType::min,
+                                OperationType::avg, OperationType::sum));
 
 TEST_P(TestReportManagerWithAggregationOperationType,
        addReportWithDifferentOperationTypes)
