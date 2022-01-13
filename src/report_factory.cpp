@@ -97,6 +97,12 @@ std::vector<LabeledMetricParameters> ReportFactory::convertMetricParams(
         {
             operationType = utils::enumToString(OperationType::avg);
         }
+        else if (operationType == "SINGLE")
+        {
+            operationType = utils::enumToString(OperationType::avg);
+            collectionTimeScope =
+                utils::enumToString(CollectionTimeScope::point);
+        }
 
         if (collectionTimeScope.empty())
         {

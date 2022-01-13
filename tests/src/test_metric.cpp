@@ -173,41 +173,29 @@ class TestMetricCalculationFunctions :
     }
 };
 
-MetricParams defaultSingleParams()
+MetricParams defaultCollectionFunctionParams()
 {
     return MetricParams()
-        .operationType(OperationType::single)
         .readings(TestMetricCalculationFunctions::defaultReadings())
         .expectedReading(systemTimestamp + 16ms, 7.0);
 }
 
-INSTANTIATE_TEST_SUITE_P(
-    OperationSingleReturnsLastReading, TestMetricCalculationFunctions,
-    Values(
-        defaultSingleParams().collectionTimeScope(CollectionTimeScope::point),
-        defaultSingleParams()
-            .collectionTimeScope(CollectionTimeScope::interval)
-            .collectionDuration(CollectionDuration(100ms)),
-        defaultSingleParams().collectionTimeScope(
-            CollectionTimeScope::startup)));
-
 MetricParams defaultPointParams()
 {
-    return defaultSingleParams().collectionTimeScope(
+    return defaultCollectionFunctionParams().collectionTimeScope(
         CollectionTimeScope::point);
 }
 
 INSTANTIATE_TEST_SUITE_P(
     TimeScopePointReturnsLastReading, TestMetricCalculationFunctions,
-    Values(defaultPointParams().operationType(OperationType::single),
-           defaultPointParams().operationType(OperationType::min),
+    Values(defaultPointParams().operationType(OperationType::min),
            defaultPointParams().operationType(OperationType::max),
            defaultPointParams().operationType(OperationType::sum),
            defaultPointParams().operationType(OperationType::avg)));
 
 MetricParams defaultMinParams()
 {
-    return defaultSingleParams().operationType(OperationType::min);
+    return defaultCollectionFunctionParams().operationType(OperationType::min);
 }
 
 INSTANTIATE_TEST_SUITE_P(
@@ -226,7 +214,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 MetricParams defaultMaxParams()
 {
-    return defaultSingleParams().operationType(OperationType::max);
+    return defaultCollectionFunctionParams().operationType(OperationType::max);
 }
 
 INSTANTIATE_TEST_SUITE_P(
@@ -249,7 +237,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 MetricParams defaultSumParams()
 {
-    return defaultSingleParams().operationType(OperationType::sum);
+    return defaultCollectionFunctionParams().operationType(OperationType::sum);
 }
 
 INSTANTIATE_TEST_SUITE_P(
@@ -275,7 +263,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 MetricParams defaultAvgParams()
 {
-    return defaultSingleParams().operationType(OperationType::avg);
+    return defaultCollectionFunctionParams().operationType(OperationType::avg);
 }
 
 INSTANTIATE_TEST_SUITE_P(

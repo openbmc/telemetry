@@ -52,6 +52,15 @@ ReportManager::ReportManager(
             dbusIface.register_property_r(
                 "MinInterval", uint64_t{}, sdbusplus::vtable::property_::const_,
                 [](const auto&) -> uint64_t { return minInterval.count(); });
+            dbusIface.register_property_r(
+                "SupportedOperationTypes", std::vector<std::string>{},
+                sdbusplus::vtable::property_::const_,
+                [](const auto&) -> std::vector<std::string> {
+                    return utils::transform<std::vector<std::string>>(
+                        utils::convDataOperationType, [](const auto& item) {
+                            return std::string(item.first);
+                        });
+                });
 
             dbusIface.register_method(
                 "AddReport", [this](boost::asio::yield_context& yield,

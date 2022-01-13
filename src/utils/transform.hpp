@@ -9,34 +9,19 @@ namespace detail
 {
 
 template <class T>
-struct has_member_reserve
+concept has_member_reserve = requires(T t)
 {
-    template <class U>
-    static U& ref();
-
-    template <class U>
-    static std::true_type check(decltype(ref<U>().reserve(size_t{}))*);
-
-    template <class>
-    static std::false_type check(...);
-
-    static constexpr bool value =
-        decltype(check<std::decay_t<T>>(nullptr))::value;
+    t.reserve(size_t{});
 };
-
-template <class T>
-constexpr bool has_member_reserve_v = has_member_reserve<T>::value;
 
 } // namespace detail
 
-template <template <class, class...> class Container, class T, class... Args,
-          class F>
-auto transform(const Container<T, Args...>& container, F&& functor)
+template <class R, class Container, class F>
+auto transform(const Container& container, F&& functor)
 {
-    using R = decltype(functor(*container.begin()));
+    auto result = R{};
 
-    Container<R> result;
-    if constexpr (detail::has_member_reserve_v<Container<T, Args...>>)
+    if constexpr (detail::has_member_reserve<decltype(result)>)
     {
         result.reserve(container.size());
     }
@@ -44,6 +29,14 @@ auto transform(const Container<T, Args...>& container, F&& functor)
                    std::inserter(result, result.end()),
                    std::forward<F>(functor));
     return result;
+}
+
+template <template <class, class...> class Container, class T, class... Args,
+          class F>
+auto transform(const Container<T, Args...>& container, F&& functor)
+{
+    using R = Container<decltype(functor(*container.begin()))>;
+    return transform<R>(container, std::forward<F>(functor));
 }
 
 } // namespace utils
