@@ -61,6 +61,7 @@ class ReportManager : public interfaces::ReportManager
   public:
     static constexpr size_t maxReports{TELEMETRY_MAX_REPORTS};
     static constexpr size_t maxReadingParams{TELEMETRY_MAX_READING_PARAMS};
+    static constexpr size_t maxNumberMetrics{TELEMETRY_MAX_NUMBER_METRICS};
     static constexpr size_t maxReportIdLength{
         TELEMETRY_MAX_DBUS_PATH_LENGTH -
         std::string_view(Report::reportDir).length()};
