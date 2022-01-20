@@ -158,6 +158,21 @@ void ReportManager::verifyAddReport(
             "Too many reading parameters");
     }
 
+    size_t metricCount = 0;
+    for (auto metricParam : readingParams)
+    {
+        auto metricParamsVec = metricParam.at_index<0>();
+        metricCount += metricParamsVec.size();
+    }
+
+    if (metricCount > maxNumberMetrics)
+    {
+
+        throw sdbusplus::exception::SdBusError(
+            static_cast<int>(std::errc::argument_list_too_long),
+            "Too many reading parameters");
+    }
+
     try
     {
         namespace ts = utils::tstring;
