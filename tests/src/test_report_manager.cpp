@@ -207,21 +207,50 @@ TEST_F(TestReportManager, DISABLED_failToAddReportWithInvalidReportingType)
     EXPECT_THAT(path, Eq(std::string()));
 }
 
-TEST_F(TestReportManager, DISABLED_failToAddReportWithMoreSensorsThanExpected)
+TEST_F(TestReportManager,
+       DISABLED_failToAddReportWithMoreSensorParametersThanExpected)
 {
     reportFactoryMock.expectMake(std::nullopt, Ref(*sut), Ref(storageMock))
         .Times(0);
 
+    reportParams.metricParameters(
+        std::vector<LabeledMetricParameters>{{LabeledMetricParameters{
+            {LabeledSensorParameters{"Service",
+                                     "/xyz/openbmc_project/sensors/power/p1",
+                                     "Metadata1"}},
+            OperationType::single,
+            "MetricId1",
+            CollectionTimeScope::point,
+            CollectionDuration(Milliseconds(0u))}}});
+
     auto metricParams = reportParams.metricParameters();
-    for (size_t i = 0; i < ReportManager::maxReadingParams + 1; i++)
+    auto& metricParamsVec =
+        metricParams[0].at_label<utils::tstring::SensorPath>();
+
+    for (size_t i = 0; i < ReportManager::maxNumberMetrics; i++)
     {
-        metricParams.push_back(metricParams.front());
+        metricParamsVec.emplace_back(LabeledSensorParameters{
+            "Service", "/xyz/openbmc_project/sensors/power/p1", "Metadata1"});
     }
+
     reportParams.metricParameters(std::move(metricParams));
 
     auto [ec, path] = addReport(reportParams);
 
     EXPECT_THAT(ec.value(), Eq(boost::system::errc::argument_list_too_long));
+    EXPECT_THAT(path, Eq(std::string()));
+}
+
+TEST_F(TestReportManager, DISABLED_failToAddReportWithAppendLimitGreaterThanMax)
+{
+    reportFactoryMock.expectMake(std::nullopt, Ref(*sut), Ref(storageMock))
+        .Times(0);
+
+    reportParams.appendLimit(ReportManager::maxAppendLimit + 1);
+
+    auto [ec, path] = addReport(reportParams);
+
+    EXPECT_THAT(ec.value(), Eq(boost::system::errc::invalid_argument));
     EXPECT_THAT(path, Eq(std::string()));
 }
 
