@@ -67,6 +67,8 @@ add_project_arguments(
     '-DTELEMETRY_MAX_TRIGGERS=' + get_option('max-triggers').to_string(),
     '-DTELEMETRY_MAX_DBUS_PATH_LENGTH=' +
         get_option('max-dbus-path-length').to_string(),
+    '-DTELEMETRY_MAX_APPEND_LIMIT=' +
+        get_option('max-append-limit').to_string(),
     language: 'cpp'
 )
 
