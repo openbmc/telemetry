@@ -150,9 +150,16 @@ void ReportManager::verifyAddReport(
             static_cast<int>(std::errc::invalid_argument), "Invalid interval");
     }
 
-    if (readingParams.size() > maxReadingParams)
-
+    size_t metricCount = 0;
+    for (auto metricParam : readingParams)
     {
+        auto metricParamsVec = metricParam.at_label<utils::tstring::SensorPath>();
+        metricCount += metricParamsVec.size();
+    }
+
+    if (metricCount > maxNumberMetrics)
+    {
+
         throw sdbusplus::exception::SdBusError(
             static_cast<int>(std::errc::argument_list_too_long),
             "Too many reading parameters");
