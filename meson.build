@@ -62,11 +62,13 @@ endif
 add_project_arguments(
     '-DTELEMETRY_MAX_REPORTS=' + get_option('max-reports').to_string(),
     '-DTELEMETRY_MAX_READING_PARAMS=' +
-        get_option('max-reading-parameters').to_string(),
+            get_option('max-reading-parameters').to_string(),
     '-DTELEMETRY_MIN_INTERVAL=' + get_option('min-interval').to_string(),
     '-DTELEMETRY_MAX_TRIGGERS=' + get_option('max-triggers').to_string(),
     '-DTELEMETRY_MAX_DBUS_PATH_LENGTH=' +
         get_option('max-dbus-path-length').to_string(),
+    '-DTELEMETRY_MAX_APPEND_LIMIT=' +
+        get_option('max-append-limit').to_string(),
     language: 'cpp'
 )
 

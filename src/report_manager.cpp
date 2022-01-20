@@ -127,7 +127,7 @@ void ReportManager::removeReport(const interfaces::Report* report)
 void ReportManager::verifyAddReport(
     const std::string& reportId, const std::string& reportName,
     const ReportingType reportingType, Milliseconds interval,
-    const ReportUpdates reportUpdates,
+    const ReportUpdates reportUpdates, const uint64_t appendLimit,
     const std::vector<LabeledMetricParameters>& readingParams)
 {
     if (reportingType == ReportingType::onChange)
@@ -144,14 +144,29 @@ void ReportManager::verifyAddReport(
             "Reached maximal report count");
     }
 
+    if (appendLimit > maxAppendLimit)
+    {
+        throw sdbusplus::exception::SdBusError(
+            static_cast<int>(std::errc::invalid_argument),
+            "Append limit out of range");
+    }
+
     if (reportingType == ReportingType::periodic && interval < minInterval)
     {
         throw sdbusplus::exception::SdBusError(
             static_cast<int>(std::errc::invalid_argument), "Invalid interval");
     }
 
-    if (readingParams.size() > maxReadingParams)
+    size_t metricCount = 0;
+    for (auto metricParam : readingParams)
+    {
+        auto metricParamsVec =
+            metricParam.at_label<utils::tstring::SensorPath>();
+        metricCount += metricParamsVec.size();
+    }
 
+    if (readingParams.size() > maxNumberMetrics ||
+        metricCount > maxNumberMetrics)
     {
         throw sdbusplus::exception::SdBusError(
             static_cast<int>(std::errc::argument_list_too_long),
@@ -205,7 +220,7 @@ interfaces::Report& ReportManager::addReport(
                                         existingReportIds, maxReportIdLength);
 
     verifyAddReport(id, name, reportingType, interval, reportUpdates,
-                    labeledMetricParams);
+                    appendLimit, labeledMetricParams);
 
     reports.emplace_back(reportFactory->make(
         id, name, reportingType, reportActions, interval, appendLimit,
