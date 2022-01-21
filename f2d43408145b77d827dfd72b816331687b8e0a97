@@ -1,0 +1,90 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "63942eef_75449599",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2022-01-21T11:21:03Z",
+      "side": 1,
+      "message": "Please follow the rule 50/72 for commit message, also please avoid breaking the lines by hand",
+      "revId": "f2d43408145b77d827dfd72b816331687b8e0a97",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "647ad350_76ed8834",
+        "filename": "meson_options.txt",
+        "patchSetId": 2
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2022-01-21T11:21:03Z",
+      "side": 1,
+      "message": "use max-reading-parameters instead, which was supposed to be limiting readings parameters exactly like max-number-metrics is limiting them in this patchset",
+      "range": {
+        "startLine": 12,
+        "startChar": 8,
+        "endLine": 12,
+        "endChar": 26
+      },
+      "revId": "f2d43408145b77d827dfd72b816331687b8e0a97",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "46488ece_71d6d50b",
+        "filename": "src/report_manager.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 164,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2022-01-21T11:21:03Z",
+      "side": 1,
+      "message": "use at_label\u003cutils::tstring::MetricProperties\u003e like in line 183 to increase readability",
+      "range": {
+        "startLine": 164,
+        "startChar": 43,
+        "endLine": 164,
+        "endChar": 51
+      },
+      "revId": "f2d43408145b77d827dfd72b816331687b8e0a97",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "0ff67705_d8fc8b02",
+        "filename": "src/report_manager.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2022-01-21T11:21:03Z",
+      "side": 1,
+      "message": "Adding new code requires new unit test.",
+      "range": {
+        "startLine": 161,
+        "startChar": 0,
+        "endLine": 174,
+        "endChar": 5
+      },
+      "revId": "f2d43408145b77d827dfd72b816331687b8e0a97",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
