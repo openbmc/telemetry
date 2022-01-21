@@ -20,6 +20,29 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "07dd0323_0ab73aae",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2022-01-21T11:49:46Z",
+      "side": 1,
+      "message": "Let\u0027s consider a situation that on some machines there are sensors with very long name considering browser limitations and how redfish resources are named max resource name will be around 2000 length (old IE has limit to 2084 characters). So that would mean that EventService can handle only around 32 MetricProperties in single report. If user decides to create also long metricReport name it would be less than 30 metric properties in single report. It\u0027s very unlikely, but it looks like security hole in event service. Maybe I am overthinking, but it might be worth checking with bmcweb maintainers.",
+      "range": {
+        "startLine": 12,
+        "startChar": 29,
+        "endLine": 12,
+        "endChar": 36
+      },
+      "revId": "f2d43408145b77d827dfd72b816331687b8e0a97",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "52d7e527_51f076c4",
         "filename": "/COMMIT_MSG",
         "patchSetId": 2
