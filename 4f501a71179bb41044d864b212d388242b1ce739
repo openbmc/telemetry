@@ -24,6 +24,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "f0d4a565_3684554f",
+        "filename": "src/report_factory.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 209,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2022-01-21T12:54:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "647b8efc_903703d7",
+      "range": {
+        "startLine": 168,
+        "startChar": 0,
+        "endLine": 209,
+        "endChar": 7
+      },
+      "revId": "4f501a71179bb41044d864b212d388242b1ce739",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "a4443265_d464e5ea",
@@ -47,6 +71,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "1c6f3a88_859bfaae",
+        "filename": "tests/src/test_report.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 192,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2022-01-21T12:54:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a4443265_d464e5ea",
+      "range": {
+        "startLine": 171,
+        "startChar": 38,
+        "endLine": 192,
+        "endChar": 13
+      },
+      "revId": "4f501a71179bb41044d864b212d388242b1ce739",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "94d8c96a_68e106f4",
@@ -60,6 +108,30 @@
       "writtenOn": "2022-01-12T11:06:46Z",
       "side": 1,
       "message": "Add Proper checks if possible.",
+      "range": {
+        "startLine": 250,
+        "startChar": 50,
+        "endLine": 250,
+        "endChar": 57
+      },
+      "revId": "4f501a71179bb41044d864b212d388242b1ce739",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "22d88299_1b5ef041",
+        "filename": "tests/src/test_report.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 250,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2022-01-21T12:54:33Z",
+      "side": 1,
+      "message": "Test removed so closing this one.",
+      "parentUuid": "94d8c96a_68e106f4",
       "range": {
         "startLine": 250,
         "startChar": 50,
