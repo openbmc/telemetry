@@ -18,6 +18,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "42196dd3_cc688705",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1001213
+      },
+      "writtenOn": "2022-01-25T19:04:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "63942eef_75449599",
+      "revId": "f2d43408145b77d827dfd72b816331687b8e0a97",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "07dd0323_0ab73aae",
@@ -58,6 +76,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "9c44b983_7791fb07",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1001213
+      },
+      "writtenOn": "2022-01-25T19:04:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "52d7e527_51f076c4",
+      "revId": "f2d43408145b77d827dfd72b816331687b8e0a97",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "647ad350_76ed8834",
@@ -71,6 +107,30 @@
       "writtenOn": "2022-01-21T11:21:03Z",
       "side": 1,
       "message": "use max-reading-parameters instead, which was supposed to be limiting readings parameters exactly like max-number-metrics is limiting them in this patchset",
+      "range": {
+        "startLine": 12,
+        "startChar": 8,
+        "endLine": 12,
+        "endChar": 26
+      },
+      "revId": "f2d43408145b77d827dfd72b816331687b8e0a97",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d683c539_cfade94b",
+        "filename": "meson_options.txt",
+        "patchSetId": 2
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1001213
+      },
+      "writtenOn": "2022-01-25T19:04:53Z",
+      "side": 1,
+      "message": "We are already using max-reading-parameters to limit number of metric parameters which is already being implemented.\nThis limit (max-number-metrics) is introduced to have a cap on number of metric properties (URI\u0027s) provided.\nExample: \n{\nID: \"MyMetric1\",\nMetricProperties: [\n\"/example1/test\",\n\"/example2/test\"\n]\n}\n{\nID: \"MyMetric2\",\nMetricProperties: [\n\"/example1/test\",\n\"/example2/test\"\n]\n}\n\nSo here we have 2 Metric Parameters (MyMetric1 and MyMetric2)\nand 4 Metric parameters.\n\nAm i missing something here ?",
+      "parentUuid": "647ad350_76ed8834",
       "range": {
         "startLine": 12,
         "startChar": 8,
@@ -106,6 +166,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "a0f25a37_ac986e54",
+        "filename": "src/report_manager.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 164,
+      "author": {
+        "id": 1001213
+      },
+      "writtenOn": "2022-01-25T19:04:53Z",
+      "side": 1,
+      "message": "I think the parameter that i am trying to access wouldn\u0027t be accessible by using at_label\u003c\u003e().\n\nThe structure LabeledTuple has two sections, i.e. Args and Lables, where the Args part is a tuple.\nIn our case, we would need to access std::vector\u003cLabeledSensorParameters\u003e which would be the Args part of LabeledMetricParameters.\nand i see that, this section is accessible only via at_index\u003c\u003e().",
+      "parentUuid": "46488ece_71d6d50b",
+      "range": {
+        "startLine": 164,
+        "startChar": 43,
+        "endLine": 164,
+        "endChar": 51
+      },
+      "revId": "f2d43408145b77d827dfd72b816331687b8e0a97",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "0ff67705_d8fc8b02",
         "filename": "src/report_manager.cpp",
         "patchSetId": 2
@@ -117,6 +201,30 @@
       "writtenOn": "2022-01-21T11:21:03Z",
       "side": 1,
       "message": "Adding new code requires new unit test.",
+      "range": {
+        "startLine": 161,
+        "startChar": 0,
+        "endLine": 174,
+        "endChar": 5
+      },
+      "revId": "f2d43408145b77d827dfd72b816331687b8e0a97",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "99b1f7fd_a5260f34",
+        "filename": "src/report_manager.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 1001213
+      },
+      "writtenOn": "2022-01-25T19:04:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0ff67705_d8fc8b02",
       "range": {
         "startLine": 161,
         "startChar": 0,
