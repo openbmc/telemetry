@@ -143,6 +143,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "281483a6_b788cd7d",
+        "filename": "meson_options.txt",
+        "patchSetId": 2
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2022-01-26T08:18:42Z",
+      "side": 1,
+      "message": "Your understanding is correct. It just that new limit will also prevent user from adding max-reading-parameters up to limit. Because if we consider that each Metric will have 1 MetricProperty then it is possible to create 150 metrics, or less if other Metric have more MetricProperties.\n\nSince this two limits overlaps each other it would make sense to merge them into one. I suggest to keep max-number-metrics since it is more precise and remove max-reading-parameters.",
+      "parentUuid": "d683c539_cfade94b",
+      "range": {
+        "startLine": 12,
+        "startChar": 8,
+        "endLine": 12,
+        "endChar": 26
+      },
+      "revId": "f2d43408145b77d827dfd72b816331687b8e0a97",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "46488ece_71d6d50b",
         "filename": "src/report_manager.cpp",
         "patchSetId": 2
@@ -178,6 +202,30 @@
       "side": 1,
       "message": "I think the parameter that i am trying to access wouldn\u0027t be accessible by using at_label\u003c\u003e().\n\nThe structure LabeledTuple has two sections, i.e. Args and Lables, where the Args part is a tuple.\nIn our case, we would need to access std::vector\u003cLabeledSensorParameters\u003e which would be the Args part of LabeledMetricParameters.\nand i see that, this section is accessible only via at_index\u003c\u003e().",
       "parentUuid": "46488ece_71d6d50b",
+      "range": {
+        "startLine": 164,
+        "startChar": 43,
+        "endLine": 164,
+        "endChar": 51
+      },
+      "revId": "f2d43408145b77d827dfd72b816331687b8e0a97",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "9903d5a2_f2d93b6d",
+        "filename": "src/report_manager.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 164,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2022-01-26T08:18:42Z",
+      "side": 1,
+      "message": "at_label and at_index both access value inside the tuple.\nat_index was designed to covertion to tuple like:\nstd::get\u003c0\u003e(tuple) \u003d labeledTuple.at_index\u003c0\u003e()\n\nat_label was designed to used where order dosn\u0027t matter, trust me it will work. Your new unit test will confirm it.",
+      "parentUuid": "a0f25a37_ac986e54",
       "range": {
         "startLine": 164,
         "startChar": 43,
