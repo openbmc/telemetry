@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b435d07d_ab0ebc3d",
+        "filename": "src/report.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2022-01-26T10:33:53Z",
+      "side": 1,
+      "message": "Just sort them no matter the size, effect will be the same.",
+      "range": {
+        "startLine": 57,
+        "startChar": 2,
+        "endLine": 58,
+        "endChar": 5
+      },
+      "revId": "4e894a3f34c3072f29a5d287b116eaad987f5dd9",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "aaa97148_a1fae6b8",
+        "filename": "src/report.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 270,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2022-01-26T10:33:53Z",
+      "side": 1,
+      "message": "No need for this check",
+      "range": {
+        "startLine": 270,
+        "startChar": 12,
+        "endLine": 270,
+        "endChar": 31
+      },
+      "revId": "4e894a3f34c3072f29a5d287b116eaad987f5dd9",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a622bd7a_2ce8530c",
+        "filename": "src/report_factory.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2022-01-26T10:33:53Z",
+      "side": 1,
+      "message": "Do we need this?",
+      "range": {
+        "startLine": 129,
+        "startChar": 2,
+        "endLine": 132,
+        "endChar": 5
+      },
+      "revId": "4e894a3f34c3072f29a5d287b116eaad987f5dd9",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "57601c26_8e571486",
+        "filename": "tests/src/test_report.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2022-01-26T10:33:53Z",
+      "side": 1,
+      "message": "you can replace call to initMetricMocks with:\nmetricMocks \u003d getMetricMocks(metricParameters)",
+      "range": {
+        "startLine": 48,
+        "startChar": 9,
+        "endLine": 48,
+        "endChar": 24
+      },
+      "revId": "4e894a3f34c3072f29a5d287b116eaad987f5dd9",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "979b36a0_0ef46e4b",
+        "filename": "tests/src/test_report.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 231,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2022-01-26T10:33:53Z",
+      "side": 1,
+      "message": "nit: consider creating helper, expectSuccesulSetProperty",
+      "range": {
+        "startLine": 225,
+        "startChar": 0,
+        "endLine": 231,
+        "endChar": 31
+      },
+      "revId": "4e894a3f34c3072f29a5d287b116eaad987f5dd9",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
