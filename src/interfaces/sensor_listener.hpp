@@ -15,7 +15,6 @@ class SensorListener
   public:
     virtual ~SensorListener() = default;
 
-    virtual void sensorUpdated(interfaces::Sensor&, Milliseconds) = 0;
     virtual void sensorUpdated(interfaces::Sensor&, Milliseconds, double) = 0;
 };
 

@@ -18,7 +18,7 @@
 #include <chrono>
 #include <memory>
 
-class Report : public interfaces::Report
+class Report : public interfaces::Report, public interfaces::SensorListener
 {
   public:
     Report(boost::asio::io_context& ioc,
@@ -31,9 +31,9 @@ class Report : public interfaces::Report
            interfaces::JsonStorage& reportStorage,
            std::vector<std::shared_ptr<interfaces::Metric>> metrics,
            const bool enabled, std::unique_ptr<interfaces::Clock> clock);
-
     Report(const Report&) = delete;
     Report(Report&&) = delete;
+    ~Report();
     Report& operator=(const Report&) = delete;
     Report& operator=(Report&&) = delete;
 
@@ -48,7 +48,7 @@ class Report : public interfaces::Report
     }
 
     void updateReadings() override;
-    bool storeConfiguration() const;
+    void sensorUpdated(interfaces::Sensor&, Milliseconds, double) override;
 
   private:
     std::unique_ptr<sdbusplus::asio::dbus_interface> makeReportInterface();
@@ -59,8 +59,9 @@ class Report : public interfaces::Report
                               const ReportingType reportingTypeIn) const;
     void setReportUpdates(const ReportUpdates newReportUpdates);
     static uint64_t getSensorCount(
-        std::vector<std::shared_ptr<interfaces::Metric>>& metrics);
+        const std::vector<std::shared_ptr<interfaces::Metric>>& metrics);
     interfaces::JsonStorage::FilePath fileName() const;
+    bool storeConfiguration() const;
 
     std::string id;
     std::string name;

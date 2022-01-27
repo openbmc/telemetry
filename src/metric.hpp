@@ -19,11 +19,12 @@ class Metric :
     void initialize() override;
     void deinitialize() override;
     std::vector<MetricValue> getReadings() const override;
-    void sensorUpdated(interfaces::Sensor&, Milliseconds) override;
     void sensorUpdated(interfaces::Sensor&, Milliseconds,
                        double value) override;
     LabeledMetricParameters dumpConfiguration() const override;
     uint64_t sensorCount() const override;
+    void registerForUpdates(interfaces::SensorListener& listener) override;
+    void unregisterFromUpdates(interfaces::SensorListener& listener) override;
 
   private:
     class CollectionData;
@@ -45,4 +46,5 @@ class Metric :
     CollectionDuration collectionDuration;
     std::vector<std::unique_ptr<CollectionData>> collectionAlgorithms;
     std::unique_ptr<interfaces::Clock> clock;
+    std::vector<std::reference_wrapper<interfaces::SensorListener>> listeners;
 };

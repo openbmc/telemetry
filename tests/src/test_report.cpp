@@ -429,6 +429,18 @@ TEST_P(TestReportAllReportTypes, updateReadingsCallEnabledPropertyOn)
     EXPECT_THAT(Milliseconds{timestamp}, Eq(systemTimestamp + 10ms));
 }
 
+TEST_P(TestReportAllReportTypes, deregistersForMetricUpdatesWhenDestroyed)
+{
+    for (auto& metric : metricMocks)
+    {
+        EXPECT_CALL(*metric,
+                    unregisterFromUpdates(Ref(
+                        static_cast<interfaces::SensorListener&>(*sut.get()))));
+    }
+
+    sut = nullptr;
+}
+
 class TestReportOnRequestType : public TestReport
 {
     void SetUp() override
@@ -671,7 +683,9 @@ class TestReportInitialization : public TestReport
 {
   public:
     void SetUp() override
-    {}
+    {
+        initMetricMocks(defaultParams.metricParameters());
+    }
 
     void monitorProc(sdbusplus::message::message& msg)
     {
@@ -707,13 +721,34 @@ class TestReportInitialization : public TestReport
     MockFunction<void()> readingsUpdated;
 };
 
+TEST_F(TestReportInitialization, registersForMetricUpdatesWhenCreated)
+{
+    std::vector<const interfaces::SensorListener*> args;
+    for (auto& metric : metricMocks)
+    {
+        EXPECT_CALL(*metric, registerForUpdates(_))
+            .WillOnce(Invoke([&args](const interfaces::SensorListener& report) {
+                std::cout << "TYGRYS\n";
+                args.emplace_back(&report);
+            }));
+        ;
+    }
+
+    sut = makeReport(defaultParams.reportingType(ReportingType::onChange));
+
+    EXPECT_THAT(args, SizeIs(metricMocks.size()));
+    for (const auto* reportPtr : args)
+    {
+        EXPECT_THAT(reportPtr, Eq(sut.get()));
+    }
+}
+
 TEST_F(TestReportInitialization,
        metricsAreInitializedWhenEnabledReportConstructed)
 {
-    initMetricMocks(defaultParams.metricParameters());
     for (auto& metric : metricMocks)
     {
-        EXPECT_CALL(*metric, initialize()).Times(1);
+        EXPECT_CALL(*metric, initialize());
     }
     sut = makeReport(defaultParams.enabled(true));
 }
@@ -721,7 +756,6 @@ TEST_F(TestReportInitialization,
 TEST_F(TestReportInitialization,
        metricsAreNotInitializedWhenDisabledReportConstructed)
 {
-    initMetricMocks(defaultParams.metricParameters());
     for (auto& metric : metricMocks)
     {
         EXPECT_CALL(*metric, initialize()).Times(0);

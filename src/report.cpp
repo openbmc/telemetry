@@ -69,6 +69,14 @@ Report::Report(boost::asio::io_context& ioc,
         scheduleTimer(interval);
     }
 
+    if (reportingType == ReportingType::onChange)
+    {
+        for (auto& metric : this->metrics)
+        {
+            metric->registerForUpdates(*this);
+        }
+    }
+
     if (enabled)
     {
         for (auto& metric : this->metrics)
@@ -78,8 +86,16 @@ Report::Report(boost::asio::io_context& ioc,
     }
 }
 
+Report::~Report()
+{
+    for (auto& metric : this->metrics)
+    {
+        metric->unregisterFromUpdates(*this);
+    }
+}
+
 uint64_t Report::getSensorCount(
-    std::vector<std::shared_ptr<interfaces::Metric>>& metrics)
+    const std::vector<std::shared_ptr<interfaces::Metric>>& metrics)
 {
     uint64_t sensorCount = 0;
     for (auto& metric : metrics)
@@ -359,8 +375,14 @@ bool Report::storeConfiguration() const
 
     return true;
 }
+
 interfaces::JsonStorage::FilePath Report::fileName() const
 {
     return interfaces::JsonStorage::FilePath{
         std::to_string(std::hash<std::string>{}(id))};
+}
+
+void Report::sensorUpdated(interfaces::Sensor&, Milliseconds, double)
+{
+    updateReadings();
 }

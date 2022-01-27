@@ -1,6 +1,7 @@
 #include "fakes/clock_fake.hpp"
 #include "helpers.hpp"
 #include "metric.hpp"
+#include "mocks/sensor_listener_mock.hpp"
 #include "mocks/sensor_mock.hpp"
 #include "params/metric_params.hpp"
 #include "utils/conv_container.hpp"
@@ -98,6 +99,8 @@ class TestMetricAfterInitialization : public TestMetric
         sut = makeSut(params);
         sut->initialize();
     }
+
+    NiceMock<SensorListenerMock> listenerMock;
 };
 
 TEST_F(TestMetricAfterInitialization, containsEmptyReading)
@@ -122,8 +125,6 @@ TEST_F(TestMetricAfterInitialization,
        throwsWhenUpdateIsPerformedOnUnknownSensor)
 {
     auto sensor = std::make_shared<StrictMock<SensorMock>>();
-    EXPECT_THROW(sut->sensorUpdated(*sensor, Milliseconds{10}),
-                 std::out_of_range);
     EXPECT_THROW(sut->sensorUpdated(*sensor, Milliseconds{10}, 20.0),
                  std::out_of_range);
 }
@@ -148,6 +149,35 @@ TEST_F(TestMetricAfterInitialization, dumpsConfiguration)
         LabeledSensorParameters("service1", "path1", "metadata1")};
 
     EXPECT_THAT(conf, Eq(expected));
+}
+
+TEST_F(TestMetricAfterInitialization, notifiesRegisteredListeners)
+{
+    EXPECT_CALL(listenerMock, sensorUpdated(Ref(*sensorMocks.front()),
+                                            Milliseconds{18}, 31.2));
+
+    sut->registerForUpdates(listenerMock);
+    sut->sensorUpdated(*sensorMocks.front(), Milliseconds{18}, 31.2);
+}
+
+TEST_F(TestMetricAfterInitialization,
+       doesntNotifyRegisteredListenersWhenValueDoesntChange)
+{
+    EXPECT_CALL(listenerMock, sensorUpdated(Ref(*sensorMocks.front()),
+                                            Milliseconds{18}, 31.2));
+
+    sut->registerForUpdates(listenerMock);
+    sut->sensorUpdated(*sensorMocks.front(), Milliseconds{18}, 31.2);
+    sut->sensorUpdated(*sensorMocks.front(), Milliseconds{70}, 31.2);
+}
+
+TEST_F(TestMetricAfterInitialization, doesntNotifyAfterUnRegisterListener)
+{
+    EXPECT_CALL(listenerMock, sensorUpdated(_, _, _)).Times(0);
+
+    sut->registerForUpdates(listenerMock);
+    sut->unregisterFromUpdates(listenerMock);
+    sut->sensorUpdated(*sensorMocks.front(), Milliseconds{18}, 31.2);
 }
 
 class TestMetricCalculationFunctions :

@@ -18,6 +18,16 @@ class Metric::CollectionData
 
     virtual std::optional<double> update(Milliseconds timestamp) = 0;
     virtual double update(Milliseconds timestamp, double value) = 0;
+
+    bool updateLastValue(double value)
+    {
+        const bool changed = lastValue != value;
+        lastValue = value;
+        return changed;
+    }
+
+  private:
+    std::optional<double> lastValue;
 };
 
 class Metric::DataPoint : public Metric::CollectionData
@@ -152,6 +162,21 @@ Metric::Metric(Sensors sensorsIn, OperationType operationTypeIn,
 
 Metric::~Metric() = default;
 
+void Metric::registerForUpdates(interfaces::SensorListener& listener)
+{
+    listeners.emplace_back(listener);
+}
+
+void Metric::unregisterFromUpdates(interfaces::SensorListener& listener)
+{
+    listeners.erase(
+        std::remove_if(listeners.begin(), listeners.end(),
+                       [&listener](const interfaces::SensorListener& item) {
+                           return &item == &listener;
+                       }),
+        listeners.end());
+}
+
 void Metric::initialize()
 {
     for (const auto& sensor : sensors)
@@ -189,15 +214,19 @@ std::vector<MetricValue> Metric::getReadings() const
     return resultReadings;
 }
 
-void Metric::sensorUpdated(interfaces::Sensor& notifier, Milliseconds timestamp)
-{
-    findAssociatedData(notifier).update(timestamp);
-}
-
 void Metric::sensorUpdated(interfaces::Sensor& notifier, Milliseconds timestamp,
                            double value)
 {
-    findAssociatedData(notifier).update(timestamp, value);
+    auto& data = findAssociatedData(notifier);
+    double newValue = data.update(timestamp, value);
+
+    if (data.updateLastValue(newValue))
+    {
+        for (interfaces::SensorListener& listener : listeners)
+        {
+            listener.sensorUpdated(notifier, timestamp, value);
+        }
+    }
 }
 
 Metric::CollectionData&

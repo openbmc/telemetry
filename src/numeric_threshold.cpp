@@ -42,10 +42,6 @@ NumericThreshold::ThresholdDetail&
 }
 
 void NumericThreshold::sensorUpdated(interfaces::Sensor& sensor,
-                                     Milliseconds timestamp)
-{}
-
-void NumericThreshold::sensorUpdated(interfaces::Sensor& sensor,
                                      Milliseconds timestamp, double value)
 {
     auto& [sensorName, prevValue, dwell, timer] = getDetails(sensor);

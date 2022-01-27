@@ -139,13 +139,6 @@ void ReportManager::verifyAddReport(
     const ReportUpdates reportUpdates,
     const std::vector<LabeledMetricParameters>& readingParams)
 {
-    if (reportingType == ReportingType::onChange)
-    {
-        throw sdbusplus::exception::SdBusError(
-            static_cast<int>(std::errc::invalid_argument),
-            "Invalid reportingType");
-    }
-
     if (reports.size() >= maxReports)
     {
         throw sdbusplus::exception::SdBusError(
