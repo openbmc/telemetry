@@ -1,6 +1,6 @@
 #include "metric.hpp"
 
-#include "details/collection_function.hpp"
+#include "metrics/collection_data.hpp"
 #include "types/report_types.hpp"
 #include "types/sensor_types.hpp"
 #include "utils/labeled_tuple.hpp"
@@ -10,130 +10,6 @@
 
 #include <algorithm>
 
-class Metric::CollectionData
-{
-  public:
-    using ReadingItem = details::ReadingItem;
-
-    virtual ~CollectionData() = default;
-
-    virtual std::optional<double> update(Milliseconds timestamp) = 0;
-    virtual double update(Milliseconds timestamp, double value) = 0;
-};
-
-class Metric::DataPoint : public Metric::CollectionData
-{
-  public:
-    std::optional<double> update(Milliseconds) override
-    {
-        return lastReading;
-    }
-
-    double update(Milliseconds, double reading) override
-    {
-        lastReading = reading;
-        return reading;
-    }
-
-  private:
-    std::optional<double> lastReading;
-};
-
-class Metric::DataInterval : public Metric::CollectionData
-{
-  public:
-    DataInterval(std::shared_ptr<details::CollectionFunction> function,
-                 CollectionDuration duration) :
-        function(std::move(function)),
-        duration(duration)
-    {
-        if (duration.t.count() == 0)
-        {
-            throw sdbusplus::exception::SdBusError(
-                static_cast<int>(std::errc::invalid_argument),
-                "Invalid CollectionDuration");
-        }
-    }
-
-    std::optional<double> update(Milliseconds timestamp) override
-    {
-        if (readings.empty())
-        {
-            return std::nullopt;
-        }
-
-        cleanup(timestamp);
-
-        return function->calculate(readings, timestamp);
-    }
-
-    double update(Milliseconds timestamp, double reading) override
-    {
-        readings.emplace_back(timestamp, reading);
-
-        cleanup(timestamp);
-
-        return function->calculate(readings, timestamp);
-    }
-
-  private:
-    void cleanup(Milliseconds timestamp)
-    {
-        auto it = readings.begin();
-        for (auto kt = std::next(readings.rbegin()); kt != readings.rend();
-             ++kt)
-        {
-            const auto& [nextItemTimestamp, nextItemReading] = *std::prev(kt);
-            if (timestamp >= nextItemTimestamp &&
-                timestamp - nextItemTimestamp > duration.t)
-            {
-                it = kt.base();
-                break;
-            }
-        }
-        readings.erase(readings.begin(), it);
-
-        if (timestamp > duration.t)
-        {
-            readings.front().first =
-                std::max(readings.front().first, timestamp - duration.t);
-        }
-    }
-
-    std::shared_ptr<details::CollectionFunction> function;
-    std::vector<ReadingItem> readings;
-    CollectionDuration duration;
-};
-
-class Metric::DataStartup : public Metric::CollectionData
-{
-  public:
-    explicit DataStartup(
-        std::shared_ptr<details::CollectionFunction> function) :
-        function(std::move(function))
-    {}
-
-    std::optional<double> update(Milliseconds timestamp) override
-    {
-        if (readings.empty())
-        {
-            return std::nullopt;
-        }
-
-        return function->calculateForStartupInterval(readings, timestamp);
-    }
-
-    double update(Milliseconds timestamp, double reading) override
-    {
-        readings.emplace_back(timestamp, reading);
-        return function->calculateForStartupInterval(readings, timestamp);
-    }
-
-  private:
-    std::shared_ptr<details::CollectionFunction> function;
-    std::vector<ReadingItem> readings;
-};
-
 Metric::Metric(Sensors sensorsIn, OperationType operationTypeIn,
                std::string idIn, CollectionTimeScope timeScopeIn,
                CollectionDuration collectionDurationIn,
@@ -141,9 +17,9 @@ Metric::Metric(Sensors sensorsIn, OperationType operationTypeIn,
     id(std::move(idIn)),
     sensors(std::move(sensorsIn)), operationType(operationTypeIn),
     collectionTimeScope(timeScopeIn), collectionDuration(collectionDurationIn),
-    collectionAlgorithms(makeCollectionData(sensors.size(), operationType,
-                                            collectionTimeScope,
-                                            collectionDuration)),
+    collectionAlgorithms(
+        metrics::makeCollectionData(sensors.size(), operationType,
+                                    collectionTimeScope, collectionDuration)),
     clock(std::move(clockIn))
 {
     readings = utils::transform(sensors, [this](const auto& sensor) {
@@ -151,7 +27,20 @@ Metric::Metric(Sensors sensorsIn, OperationType operationTypeIn,
     });
 }
 
-Metric::~Metric() = default;
+void Metric::registerForUpdates(interfaces::MetricListener& listener)
+{
+    listeners.emplace_back(listener);
+}
+
+void Metric::unregisterFromUpdates(interfaces::MetricListener& listener)
+{
+    listeners.erase(
+        std::remove_if(listeners.begin(), listeners.end(),
+                       [&listener](const interfaces::MetricListener& item) {
+                           return &item == &listener;
+                       }),
+        listeners.end());
+}
 
 void Metric::initialize()
 {
@@ -190,18 +79,22 @@ std::vector<MetricValue> Metric::getReadings() const
     return resultReadings;
 }
 
-void Metric::sensorUpdated(interfaces::Sensor& notifier, Milliseconds timestamp)
-{
-    findAssociatedData(notifier).update(timestamp);
-}
-
 void Metric::sensorUpdated(interfaces::Sensor& notifier, Milliseconds timestamp,
                            double value)
 {
-    findAssociatedData(notifier).update(timestamp, value);
+    auto& data = findAssociatedData(notifier);
+    double newValue = data.update(timestamp, value);
+
+    if (data.updateLastValue(newValue))
+    {
+        for (interfaces::MetricListener& listener : listeners)
+        {
+            listener.metricUpdated();
+        }
+    }
 }
 
-Metric::CollectionData&
+metrics::CollectionData&
     Metric::findAssociatedData(const interfaces::Sensor& notifier)
 {
     auto it = std::find_if(
@@ -222,46 +115,42 @@ LabeledMetricParameters Metric::dumpConfiguration() const
                                    collectionTimeScope, collectionDuration);
 }
 
-std::vector<std::unique_ptr<Metric::CollectionData>>
-    Metric::makeCollectionData(size_t size, OperationType op,
-                               CollectionTimeScope timeScope,
-                               CollectionDuration duration)
-{
-    using namespace std::string_literals;
-
-    std::vector<std::unique_ptr<Metric::CollectionData>> result;
-
-    result.reserve(size);
-
-    switch (timeScope)
-    {
-        case CollectionTimeScope::interval:
-            std::generate_n(
-                std::back_inserter(result), size,
-                [cf = details::makeCollectionFunction(op), duration] {
-                    return std::make_unique<DataInterval>(cf, duration);
-                });
-            break;
-        case CollectionTimeScope::point:
-            std::generate_n(std::back_inserter(result), size,
-                            [] { return std::make_unique<DataPoint>(); });
-            break;
-        case CollectionTimeScope::startup:
-            std::generate_n(std::back_inserter(result), size,
-                            [cf = details::makeCollectionFunction(op)] {
-                                return std::make_unique<DataStartup>(cf);
-                            });
-            break;
-        default:
-            throw std::runtime_error("timeScope: "s +
-                                     utils::enumToString(timeScope) +
-                                     " is not supported"s);
-    }
-
-    return result;
-}
-
 uint64_t Metric::sensorCount() const
 {
     return sensors.size();
+}
+
+void Metric::updateReadings(Milliseconds timestamp)
+{
+    for (auto& data : collectionAlgorithms)
+    {
+        if (std::optional<double> newValue = data->update(timestamp))
+        {
+            if (data->updateLastValue(*newValue))
+            {
+                for (interfaces::MetricListener& listener : listeners)
+                {
+                    listener.metricUpdated();
+                }
+                return;
+            }
+        }
+    }
+}
+
+bool Metric::isTimerRequired() const
+{
+    if (collectionTimeScope == CollectionTimeScope::point)
+    {
+        return false;
+    }
+
+    if (collectionTimeScope == CollectionTimeScope::startup &&
+        (operationType == OperationType::min ||
+         operationType == OperationType::max))
+    {
+        return false;
+    }
+
+    return true;
 }

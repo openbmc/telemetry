@@ -25,7 +25,6 @@ class OnChangeThreshold :
     {}
 
     void initialize() override;
-    void sensorUpdated(interfaces::Sensor&, Milliseconds) override;
     void sensorUpdated(interfaces::Sensor&, Milliseconds, double) override;
     LabeledThresholdParam getThresholdParam() const override;
     void updateSensors(Sensors newSensors) override;

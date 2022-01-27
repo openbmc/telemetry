@@ -79,6 +79,17 @@ class MetricParams final
         return expectedReadingProperty;
     }
 
+    bool expectedIsTimerRequired() const
+    {
+        return expectedIsTimerRequiredProperty;
+    }
+
+    MetricParams& expectedIsTimerRequired(bool value)
+    {
+        expectedIsTimerRequiredProperty = value;
+        return *this;
+    }
+
   private:
     OperationType operationTypeProperty = {};
     std::string idProperty = "MetricId";
@@ -87,6 +98,7 @@ class MetricParams final
         CollectionDuration(Milliseconds(0u));
     std::vector<std::pair<Milliseconds, double>> readingsProperty = {};
     std::pair<Milliseconds, double> expectedReadingProperty = {};
+    bool expectedIsTimerRequiredProperty = true;
 };
 
 inline std::ostream& operator<<(std::ostream& os, const MetricParams& mp)
@@ -103,6 +115,8 @@ inline std::ostream& operator<<(std::ostream& os, const MetricParams& mp)
     }
 
     auto [timestamp, reading] = mp.expectedReading();
-    os << " }, expected: " << reading << "(" << timestamp.count() << "ms) }";
+    os << " }, expectedReading: " << reading << "(" << timestamp.count()
+       << "ms), expectedIsTimerRequired: " << std::boolalpha
+       << mp.expectedIsTimerRequired() << " }";
     return os;
 }

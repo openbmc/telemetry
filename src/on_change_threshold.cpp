@@ -51,10 +51,6 @@ void OnChangeThreshold::updateSensors(Sensors newSensors)
 }
 
 void OnChangeThreshold::sensorUpdated(interfaces::Sensor& sensor,
-                                      Milliseconds timestamp)
-{}
-
-void OnChangeThreshold::sensorUpdated(interfaces::Sensor& sensor,
                                       Milliseconds timestamp, double value)
 {
     commit(sensor.getName(), timestamp, value);

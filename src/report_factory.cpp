@@ -26,7 +26,7 @@ std::unique_ptr<interfaces::Report> ReportFactory::make(
     std::vector<LabeledMetricParameters> labeledMetricParams,
     bool enabled) const
 {
-    std::vector<std::shared_ptr<interfaces::Metric>> metrics = utils::transform(
+    auto metrics = utils::transform(
         labeledMetricParams,
         [this](const LabeledMetricParameters& param)
             -> std::shared_ptr<interfaces::Metric> {

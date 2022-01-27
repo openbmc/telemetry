@@ -6,6 +6,7 @@
 #include "report_manager.hpp"
 #include "utils/clock.hpp"
 #include "utils/contains.hpp"
+#include "utils/ensure.hpp"
 #include "utils/transform.hpp"
 
 #include <phosphor-logging/log.hpp>
@@ -13,6 +14,7 @@
 
 #include <limits>
 #include <numeric>
+#include <optional>
 
 Report::Report(boost::asio::io_context& ioc,
                const std::shared_ptr<sdbusplus::asio::object_server>& objServer,
@@ -70,7 +72,26 @@ Report::Report(boost::asio::io_context& ioc,
 
     if (reportingType == ReportingType::periodic)
     {
-        scheduleTimer(interval);
+        scheduleTimerForPeriodicReport(interval);
+    }
+
+    if (reportingType == ReportingType::onChange)
+    {
+        bool isTimerRequired = false;
+
+        for (auto& metric : this->metrics)
+        {
+            metric->registerForUpdates(*this);
+            if (metric->isTimerRequired())
+            {
+                isTimerRequired = true;
+            }
+        }
+
+        if (isTimerRequired)
+        {
+            scheduleTimerForOnChangeReport();
+        }
     }
 
     if (enabled)
@@ -115,8 +136,16 @@ Report::Report(boost::asio::io_context& ioc,
     });
 }
 
+Report::~Report()
+{
+    for (auto& metric : this->metrics)
+    {
+        metric->unregisterFromUpdates(*this);
+    }
+}
+
 uint64_t Report::getSensorCount(
-    std::vector<std::shared_ptr<interfaces::Metric>>& metrics)
+    const std::vector<std::shared_ptr<interfaces::Metric>>& metrics)
 {
     uint64_t sensorCount = 0;
     for (auto& metric : metrics)
@@ -179,7 +208,7 @@ std::unique_ptr<sdbusplus::asio::dbus_interface> Report::makeReportInterface()
             {
                 if (true == newVal && ReportingType::periodic == reportingType)
                 {
-                    scheduleTimer(interval);
+                    scheduleTimerForPeriodicReport(interval);
                 }
                 if (newVal)
                 {
@@ -311,7 +340,8 @@ std::unique_ptr<sdbusplus::asio::dbus_interface> Report::makeReportInterface()
     return dbusIface;
 }
 
-void Report::timerProc(boost::system::error_code ec, Report& self)
+void Report::timerProcForPeriodicReport(boost::system::error_code ec,
+                                        Report& self)
 {
     if (ec)
     {
@@ -319,14 +349,48 @@ void Report::timerProc(boost::system::error_code ec, Report& self)
     }
 
     self.updateReadings();
-    self.scheduleTimer(self.interval);
+    self.scheduleTimerForPeriodicReport(self.interval);
 }
 
-void Report::scheduleTimer(Milliseconds timerInterval)
+void Report::timerProcForOnChangeReport(boost::system::error_code ec,
+                                        Report& self)
+{
+    if (ec)
+    {
+        return;
+    }
+
+    const auto ensure =
+        utils::Ensure{[&self] { self.onChangeContext = std::nullopt; }};
+
+    self.onChangeContext.emplace(self);
+
+    const auto steadyTimestamp = self.clock->steadyTimestamp();
+
+    for (auto& metric : self.metrics)
+    {
+        metric->updateReadings(steadyTimestamp);
+    }
+
+    self.scheduleTimerForOnChangeReport();
+}
+
+void Report::scheduleTimerForPeriodicReport(Milliseconds timerInterval)
 {
     timer.expires_after(timerInterval);
-    timer.async_wait(
-        [this](boost::system::error_code ec) { timerProc(ec, *this); });
+    timer.async_wait([this](boost::system::error_code ec) {
+        timerProcForPeriodicReport(ec, *this);
+    });
+}
+
+void Report::scheduleTimerForOnChangeReport()
+{
+    constexpr Milliseconds timerInterval{100};
+
+    timer.expires_after(timerInterval);
+    timer.async_wait([this](boost::system::error_code ec) {
+        timerProcForOnChangeReport(ec, *this);
+    });
 }
 
 void Report::updateReadings()
@@ -425,4 +489,15 @@ std::unordered_set<std::string>
     tmp.send(messages::CollectTriggerIdReq{id});
 
     return result;
+}
+
+void Report::metricUpdated()
+{
+    if (onChangeContext)
+    {
+        onChangeContext->metricUpdated();
+        return;
+    }
+
+    updateReadings();
 }
