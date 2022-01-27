@@ -1,8 +1,8 @@
-#include "collection_function.hpp"
+#include "metrics/collection_function.hpp"
 
 #include <cmath>
 
-namespace details
+namespace metrics
 {
 
 class FunctionMinimum : public CollectionFunction
@@ -173,4 +173,4 @@ std::shared_ptr<CollectionFunction>
     }
 }
 
-} // namespace details
+} // namespace metrics

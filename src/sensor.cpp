@@ -102,17 +102,7 @@ void Sensor::updateValue(double newValue)
 {
     timestamp = Clock().steadyTimestamp();
 
-    if (value == newValue)
-    {
-        for (const auto& weakListener : listeners)
-        {
-            if (auto listener = weakListener.lock())
-            {
-                listener->sensorUpdated(*this, timestamp);
-            }
-        }
-    }
-    else
+    if (value != newValue)
     {
         value = newValue;
 

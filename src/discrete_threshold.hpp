@@ -28,7 +28,6 @@ class DiscreteThreshold :
     DiscreteThreshold(DiscreteThreshold&&) = delete;
 
     void initialize() override;
-    void sensorUpdated(interfaces::Sensor&, Milliseconds) override;
     void sensorUpdated(interfaces::Sensor&, Milliseconds, double) override;
 
   private:
