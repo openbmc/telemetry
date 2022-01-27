@@ -40,10 +40,6 @@ std::shared_ptr<DiscreteThreshold::ThresholdDetail>
 }
 
 void DiscreteThreshold::sensorUpdated(interfaces::Sensor& sensor,
-                                      Milliseconds timestamp)
-{}
-
-void DiscreteThreshold::sensorUpdated(interfaces::Sensor& sensor,
                                       Milliseconds timestamp, double value)
 {
     auto& details = getDetails(sensor);

@@ -8,7 +8,7 @@
 #include <utility>
 #include <vector>
 
-namespace details
+namespace metrics
 {
 
 using ReadingItem = std::pair<Milliseconds, double>;
@@ -27,4 +27,4 @@ class CollectionFunction
 
 std::shared_ptr<CollectionFunction> makeCollectionFunction(OperationType);
 
-} // namespace details
+} // namespace metrics

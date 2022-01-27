@@ -3,6 +3,7 @@
 #include "interfaces/clock.hpp"
 #include "interfaces/json_storage.hpp"
 #include "interfaces/metric.hpp"
+#include "interfaces/metric_listener.hpp"
 #include "interfaces/report.hpp"
 #include "interfaces/report_factory.hpp"
 #include "interfaces/report_manager.hpp"
@@ -11,6 +12,7 @@
 #include "types/report_updates.hpp"
 #include "types/reporting_type.hpp"
 #include "utils/circular_vector.hpp"
+#include "utils/ensure.hpp"
 #include "utils/messanger.hpp"
 
 #include <boost/asio/io_context.hpp>
@@ -21,8 +23,32 @@
 #include <memory>
 #include <unordered_set>
 
-class Report : public interfaces::Report
+class Report : public interfaces::Report, public interfaces::MetricListener
 {
+    class OnChangeContext
+    {
+      public:
+        OnChangeContext(Report& report) : report(report)
+        {}
+
+        ~OnChangeContext()
+        {
+            if (updated)
+            {
+                report.updateReadings();
+            }
+        }
+
+        void metricUpdated()
+        {
+            updated = true;
+        }
+
+      private:
+        Report& report;
+        bool updated = false;
+    };
+
   public:
     Report(boost::asio::io_context& ioc,
            const std::shared_ptr<sdbusplus::asio::object_server>& objServer,
@@ -51,11 +77,17 @@ class Report : public interfaces::Report
         return reportDir + id;
     }
 
+    void metricUpdated() override;
+
   private:
     std::unique_ptr<sdbusplus::asio::dbus_interface>
         makeReportInterface(const interfaces::ReportFactory& reportFactory);
-    static void timerProc(boost::system::error_code, Report& self);
-    void scheduleTimer(Milliseconds interval);
+    static void timerProcForPeriodicReport(boost::system::error_code,
+                                           Report& self);
+    static void timerProcForOnChangeReport(boost::system::error_code,
+                                           Report& self);
+    void scheduleTimerForPeriodicReport(Milliseconds interval);
+    void scheduleTimerForOnChangeReport();
     std::optional<uint64_t>
         deduceAppendLimit(const uint64_t appendLimitIn) const;
     uint64_t deduceBufferSize(const ReportUpdates reportUpdatesIn,
@@ -63,12 +95,13 @@ class Report : public interfaces::Report
     void setReadingBuffer(const ReportUpdates newReportUpdates);
     void setReportUpdates(const ReportUpdates newReportUpdates);
     static uint64_t getSensorCount(
-        std::vector<std::shared_ptr<interfaces::Metric>>& metrics);
+        const std::vector<std::shared_ptr<interfaces::Metric>>& metrics);
     interfaces::JsonStorage::FilePath fileName() const;
     std::unordered_set<std::string>
         collectTriggerIds(boost::asio::io_context& ioc) const;
     bool storeConfiguration() const;
     void updateReadings();
+    void updateReportingType(ReportingType);
 
     std::string id;
     std::string name;
@@ -94,6 +127,8 @@ class Report : public interfaces::Report
     bool enabled;
     std::unique_ptr<interfaces::Clock> clock;
     utils::Messanger messanger;
+    std::optional<OnChangeContext> onChangeContext;
+    utils::Ensure<std::function<void()>> unregisterFromMetrics;
 
   public:
     static constexpr const char* reportIfaceName =

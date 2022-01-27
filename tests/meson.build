@@ -11,9 +11,10 @@ test(
     executable(
         'telemetry-ut',
         [
-            '../src/details/collection_function.cpp',
             '../src/discrete_threshold.cpp',
             '../src/metric.cpp',
+            '../src/metrics/collection_data.cpp',
+            '../src/metrics/collection_function.cpp',
             '../src/numeric_threshold.cpp',
             '../src/on_change_threshold.cpp',
             '../src/persistent_json_storage.cpp',
@@ -36,6 +37,7 @@ test(
             'src/test_conversion.cpp',
             'src/test_detached_timer.cpp',
             'src/test_discrete_threshold.cpp',
+            'src/test_ensure.cpp',
             'src/test_generate_id.cpp',
             'src/test_metric.cpp',
             'src/test_numeric_threshold.cpp',

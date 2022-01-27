@@ -147,12 +147,9 @@ TEST_F(TestSensorNotification, notifiesListenerWithValueWhenChangeOccurs)
     ASSERT_TRUE(DbusEnvironment::waitForFuture("notify"));
 }
 
-TEST_F(TestSensorNotification, notifiesListenerWithValueWhenNoChangeOccurs)
+TEST_F(TestSensorNotification, doesntNotifyListenerWhenNoChangeOccurs)
 {
-    InSequence seq;
-
-    EXPECT_CALL(*listenerMock, sensorUpdated(Ref(*sut), Ge(timestamp), 42.7));
-    EXPECT_CALL(*listenerMock, sensorUpdated(Ref(*sut), Ge(timestamp)))
+    EXPECT_CALL(*listenerMock, sensorUpdated(Ref(*sut), Ge(timestamp), 42.7))
         .WillOnce(InvokeWithoutArgs(DbusEnvironment::setPromise("notify")));
 
     sensorObject->setValue(42.7);

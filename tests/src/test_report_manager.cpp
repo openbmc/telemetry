@@ -121,6 +121,19 @@ TEST_F(TestReportManager, addReport)
     EXPECT_THAT(path, Eq(reportMock.getPath()));
 }
 
+TEST_F(TestReportManager, addOnChangeReport)
+{
+    EXPECT_CALL(reportFactoryMock, convertMetricParams(_, _));
+    reportFactoryMock
+        .expectMake(reportParams.reportingType(ReportingType::onChange),
+                    Ref(*sut), Ref(storageMock))
+        .WillOnce(Return(ByMove(std::move(reportMockPtr))));
+
+    auto [ec, path] = addReport(reportParams);
+    EXPECT_THAT(ec.value(), Eq(boost::system::errc::success));
+    EXPECT_THAT(path, Eq(reportMock.getPath()));
+}
+
 TEST_F(TestReportManager, nameIsUsedToGenerateIdWhenIdIsEmptyInAddReport)
 {
     reportParams.reportId("ReportName");
