@@ -38,10 +38,6 @@ DiscreteThreshold::ThresholdDetail&
 }
 
 void DiscreteThreshold::sensorUpdated(interfaces::Sensor& sensor,
-                                      Milliseconds timestamp)
-{}
-
-void DiscreteThreshold::sensorUpdated(interfaces::Sensor& sensor,
                                       Milliseconds timestamp, double value)
 {
     auto& [sensorName, dwell, timer] = getDetails(sensor);
