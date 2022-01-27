@@ -18,10 +18,6 @@ void OnChangeThreshold::initialize()
 }
 
 void OnChangeThreshold::sensorUpdated(interfaces::Sensor& sensor,
-                                      Milliseconds timestamp)
-{}
-
-void OnChangeThreshold::sensorUpdated(interfaces::Sensor& sensor,
                                       Milliseconds timestamp, double value)
 {
     auto it =

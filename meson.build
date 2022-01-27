@@ -73,10 +73,11 @@ add_project_arguments(
 executable(
     'telemetry',
     [
-        'src/details/collection_function.cpp',
         'src/discrete_threshold.cpp',
         'src/main.cpp',
         'src/metric.cpp',
+        'src/metrics/collection_data.cpp',
+        'src/metrics/collection_function.cpp',
         'src/numeric_threshold.cpp',
         'src/on_change_threshold.cpp',
         'src/persistent_json_storage.cpp',

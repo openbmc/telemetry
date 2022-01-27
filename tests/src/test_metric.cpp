@@ -1,6 +1,7 @@
 #include "fakes/clock_fake.hpp"
 #include "helpers.hpp"
 #include "metric.hpp"
+#include "mocks/metric_listener_mock.hpp"
 #include "mocks/sensor_mock.hpp"
 #include "params/metric_params.hpp"
 #include "utils/conv_container.hpp"
@@ -55,6 +56,7 @@ class TestMetric : public Test
     std::vector<std::shared_ptr<SensorMock>> sensorMocks = makeSensorMocks(1u);
     std::unique_ptr<ClockFake> clockFakePtr = std::make_unique<ClockFake>();
     ClockFake& clockFake = *clockFakePtr;
+    NiceMock<MetricListenerMock> listenerMock;
     std::shared_ptr<Metric> sut;
 };
 
@@ -90,6 +92,34 @@ TEST_F(TestMetric, containsEmptyReadingAfterCreated)
                 ElementsAre(MetricValue({"id", "metadata", 0., 0u})));
 }
 
+TEST_F(TestMetric,
+       notifiesRegisteredListenersOnManualUpdateWhenMetricValueChanges)
+{
+    sut = makeSut(params.collectionTimeScope(CollectionTimeScope::startup));
+    sut->sensorUpdated(*sensorMocks.front(), Milliseconds{18}, 31.2);
+    sut->registerForUpdates(listenerMock);
+
+    EXPECT_CALL(listenerMock, metricUpdated()).Times(2);
+
+    sut->updateReadings(Milliseconds{50u});
+    sut->updateReadings(Milliseconds{100u});
+}
+
+TEST_F(TestMetric,
+       doesntNotifyRegisteredListenersOnManualUpdateWhenMetricValueDoesntChange)
+{
+    sut = makeSut(params.collectionTimeScope(CollectionTimeScope::startup)
+                      .operationType(OperationType::max));
+    sut->sensorUpdated(*sensorMocks.front(), Milliseconds{18}, 31.2);
+    sut->registerForUpdates(listenerMock);
+
+    EXPECT_CALL(listenerMock, metricUpdated()).Times(0);
+
+    sut->updateReadings(Milliseconds{50u});
+    sut->sensorUpdated(*sensorMocks.front(), Milliseconds{180}, 11.);
+    sut->updateReadings(Milliseconds{100u});
+}
+
 class TestMetricAfterInitialization : public TestMetric
 {
   public:
@@ -122,8 +152,6 @@ TEST_F(TestMetricAfterInitialization,
        throwsWhenUpdateIsPerformedOnUnknownSensor)
 {
     auto sensor = std::make_shared<StrictMock<SensorMock>>();
-    EXPECT_THROW(sut->sensorUpdated(*sensor, Milliseconds{10}),
-                 std::out_of_range);
     EXPECT_THROW(sut->sensorUpdated(*sensor, Milliseconds{10}, 20.0),
                  std::out_of_range);
 }
@@ -148,6 +176,33 @@ TEST_F(TestMetricAfterInitialization, dumpsConfiguration)
         LabeledSensorParameters("service1", "path1", "metadata1")};
 
     EXPECT_THAT(conf, Eq(expected));
+}
+
+TEST_F(TestMetricAfterInitialization, notifiesRegisteredListeners)
+{
+    EXPECT_CALL(listenerMock, metricUpdated());
+
+    sut->registerForUpdates(listenerMock);
+    sut->sensorUpdated(*sensorMocks.front(), Milliseconds{18}, 31.2);
+}
+
+TEST_F(TestMetricAfterInitialization,
+       doesntNotifyRegisteredListenersWhenValueDoesntChange)
+{
+    EXPECT_CALL(listenerMock, metricUpdated());
+
+    sut->registerForUpdates(listenerMock);
+    sut->sensorUpdated(*sensorMocks.front(), Milliseconds{18}, 31.2);
+    sut->sensorUpdated(*sensorMocks.front(), Milliseconds{70}, 31.2);
+}
+
+TEST_F(TestMetricAfterInitialization, doesntNotifyAfterUnRegisterListener)
+{
+    EXPECT_CALL(listenerMock, metricUpdated()).Times(0);
+
+    sut->registerForUpdates(listenerMock);
+    sut->unregisterFromUpdates(listenerMock);
+    sut->sensorUpdated(*sensorMocks.front(), Milliseconds{18}, 31.2);
 }
 
 class TestMetricCalculationFunctions :
@@ -182,8 +237,9 @@ MetricParams defaultCollectionFunctionParams()
 
 MetricParams defaultPointParams()
 {
-    return defaultCollectionFunctionParams().collectionTimeScope(
-        CollectionTimeScope::point);
+    return defaultCollectionFunctionParams()
+        .collectionTimeScope(CollectionTimeScope::point)
+        .expectedIsTimerRequired(false);
 }
 
 INSTANTIATE_TEST_SUITE_P(
@@ -210,7 +266,8 @@ INSTANTIATE_TEST_SUITE_P(
                .expectedReading(systemTimestamp + 16ms, 7.0),
            defaultMinParams()
                .collectionTimeScope(CollectionTimeScope::startup)
-               .expectedReading(systemTimestamp + 16ms, 3.0)));
+               .expectedReading(systemTimestamp + 16ms, 3.0)
+               .expectedIsTimerRequired(false)));
 
 MetricParams defaultMaxParams()
 {
@@ -233,7 +290,8 @@ INSTANTIATE_TEST_SUITE_P(
                .expectedReading(systemTimestamp + 16ms, 7.0),
            defaultMaxParams()
                .collectionTimeScope(CollectionTimeScope::startup)
-               .expectedReading(systemTimestamp + 16ms, 14.0)));
+               .expectedReading(systemTimestamp + 16ms, 14.0)
+               .expectedIsTimerRequired(false)));
 
 MetricParams defaultSumParams()
 {
@@ -323,4 +381,10 @@ TEST_P(TestMetricCalculationFunctions,
     EXPECT_THAT(readings,
                 ElementsAre(MetricValue{"id", "metadata", expectedReading,
                                         expectedTimestamp.count()}));
+}
+
+TEST_P(TestMetricCalculationFunctions, returnsIsTimerRequired)
+{
+    EXPECT_THAT(sut->isTimerRequired(),
+                Eq(GetParam().expectedIsTimerRequired()));
 }
