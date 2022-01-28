@@ -86,7 +86,7 @@ class TestReport : public Test
             params.reportUpdates(), *reportManagerMock, storageMock,
             utils::convContainer<std::shared_ptr<interfaces::Metric>>(
                 metricMocks),
-            params.enabled(), std::move(clockFakePtr));
+            params.enabled(), std::move(clockFakePtr), params.triggerIds());
     }
 
     template <class T>
@@ -164,6 +164,9 @@ TEST_F(TestReport, verifyIfPropertiesHaveValidValue)
                 Eq(toReadingParameters(defaultParams.metricParameters())));
     EXPECT_THAT(getProperty<std::string>(sut->getPath(), "Name"),
                 Eq(defaultParams.reportName()));
+    EXPECT_THAT(
+        getProperty<std::vector<std::string>>(sut->getPath(), "TriggerIds"),
+        Eq(std::vector<std::string>()));
 }
 
 TEST_F(TestReport, readingsAreInitialyEmpty)
@@ -251,6 +254,59 @@ TEST_F(TestReport, deleteReportExpectThatFileIsRemoveFromStorage)
     EXPECT_CALL(storageMock, remove(to_file_path(sut->getId())));
     auto ec = deleteReport(sut->getPath());
     EXPECT_THAT(ec, Eq(boost::system::errc::success));
+}
+
+TEST_F(TestReport, triggerIdsAreUpdatedProperly)
+{
+    sut->updateTriggerIds("trigger1", TriggerIdUpdate::Add);
+    EXPECT_THAT(
+        getProperty<std::vector<std::string>>(sut->getPath(), "TriggerIds"),
+        UnorderedElementsAre("trigger1"));
+
+    sut->updateTriggerIds("trigger2", TriggerIdUpdate::Add);
+    EXPECT_THAT(
+        getProperty<std::vector<std::string>>(sut->getPath(), "TriggerIds"),
+        UnorderedElementsAre("trigger1", "trigger2"));
+
+    sut->updateTriggerIds("trigger3", TriggerIdUpdate::Add);
+    EXPECT_THAT(
+        getProperty<std::vector<std::string>>(sut->getPath(), "TriggerIds"),
+        UnorderedElementsAre("trigger1", "trigger2", "trigger3"));
+
+    sut->updateTriggerIds("trigger1", TriggerIdUpdate::Remove);
+    EXPECT_THAT(
+        getProperty<std::vector<std::string>>(sut->getPath(), "TriggerIds"),
+        UnorderedElementsAre("trigger2", "trigger3"));
+}
+
+TEST_F(TestReport, successWhenRemovingSameTriggerIdMultipleTimes)
+{
+    sut->updateTriggerIds("trigger1", TriggerIdUpdate::Add);
+    sut->updateTriggerIds("trigger2", TriggerIdUpdate::Add);
+    sut->updateTriggerIds("trigger1", TriggerIdUpdate::Remove);
+    sut->updateTriggerIds("trigger1", TriggerIdUpdate::Remove);
+    EXPECT_THAT(
+        getProperty<std::vector<std::string>>(sut->getPath(), "TriggerIds"),
+        UnorderedElementsAre("trigger2"));
+}
+
+TEST_F(TestReport, successWhenRemovingNonExistingTriggerId)
+{
+    sut->updateTriggerIds("trigger1", TriggerIdUpdate::Add);
+    sut->updateTriggerIds("notTrigger", TriggerIdUpdate::Remove);
+    EXPECT_THAT(
+        getProperty<std::vector<std::string>>(sut->getPath(), "TriggerIds"),
+        UnorderedElementsAre("trigger1"));
+}
+
+TEST_F(TestReport, noDuplicatesWhenSameTriggerIdIsAdded)
+{
+    sut->updateTriggerIds("trigger1", TriggerIdUpdate::Add);
+    sut->updateTriggerIds("trigger2", TriggerIdUpdate::Add);
+    sut->updateTriggerIds("trigger1", TriggerIdUpdate::Add);
+    EXPECT_THAT(
+        getProperty<std::vector<std::string>>(sut->getPath(), "TriggerIds"),
+        UnorderedElementsAre("trigger1", "trigger2"));
 }
 
 class TestReportStore :
@@ -765,4 +821,13 @@ TEST_F(TestReportInitialization, appendLimitDeducedProperly)
         ReportParams().appendLimit(std::numeric_limits<uint64_t>::max()));
     auto appendLimit = getProperty<uint64_t>(sut->getPath(), "AppendLimit");
     EXPECT_EQ(appendLimit, 2ull);
+}
+
+TEST_F(TestReportInitialization, triggerIdsPropertyIsInitialzed)
+{
+    sut = makeReport(ReportParams().triggerIds({"trigger1", "trigger2"}));
+
+    EXPECT_THAT(
+        getProperty<std::vector<std::string>>(sut->getPath(), "TriggerIds"),
+        UnorderedElementsAre("trigger1", "trigger2"));
 }

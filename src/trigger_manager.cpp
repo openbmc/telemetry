@@ -8,6 +8,8 @@
 
 #include <phosphor-logging/log.hpp>
 
+#include <unordered_set>
+
 TriggerManager::TriggerManager(
     std::unique_ptr<interfaces::TriggerFactory> triggerFactoryIn,
     std::unique_ptr<interfaces::JsonStorage> triggerStorageIn,
@@ -51,8 +53,21 @@ void TriggerManager::removeTrigger(const interfaces::Trigger* trigger)
         triggers.end());
 }
 
-void TriggerManager::verifyAddTrigger(const std::string& triggerId,
-                                      const std::string& triggerName) const
+void TriggerManager::verifyReportIds(
+    const std::vector<std::string>& newReportIds)
+{
+    if (std::unordered_set(newReportIds.begin(), newReportIds.end()).size() !=
+        newReportIds.size())
+    {
+        throw sdbusplus::exception::SdBusError(
+            static_cast<int>(std::errc::invalid_argument),
+            "Duplicate element in ReportIds");
+    }
+}
+
+void TriggerManager::verifyAddTrigger(
+    const std::string& triggerId, const std::string& triggerName,
+    const std::vector<std::string>& newReportIds) const
 {
     if (triggers.size() >= maxTriggers)
     {
@@ -71,6 +86,8 @@ void TriggerManager::verifyAddTrigger(const std::string& triggerId,
                 static_cast<int>(std::errc::file_exists), "Duplicate trigger");
         }
     }
+
+    verifyReportIds(newReportIds);
 }
 
 interfaces::Trigger& TriggerManager::addTrigger(
@@ -87,7 +104,7 @@ interfaces::Trigger& TriggerManager::addTrigger(
         utils::generateId(triggerIdIn, triggerNameIn, triggerNameDefault,
                           existingTriggerIds, maxTriggerIdLength);
 
-    verifyAddTrigger(id, name);
+    verifyAddTrigger(id, name, reportIds);
 
     triggers.emplace_back(triggerFactory->make(
         id, name, triggerActions, reportIds, *this, *triggerStorage,
@@ -156,4 +173,20 @@ void TriggerManager::loadFromPersistent()
             triggerStorage->remove(path);
         }
     }
+}
+
+std::vector<std::string>
+    TriggerManager::getTriggerIdsForReport(const std::string& reportId) const
+{
+    std::vector<std::string> result;
+    for (const auto& trigger : triggers)
+    {
+        const auto& reportIds = trigger->getReportIds();
+        if (std::find(reportIds.begin(), reportIds.end(), reportId) !=
+            reportIds.end())
+        {
+            result.emplace_back(trigger->getId());
+        }
+    }
+    return result;
 }

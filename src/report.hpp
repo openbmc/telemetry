@@ -17,6 +17,7 @@
 
 #include <chrono>
 #include <memory>
+#include <unordered_set>
 
 class Report : public interfaces::Report
 {
@@ -30,7 +31,8 @@ class Report : public interfaces::Report
            interfaces::ReportManager& reportManager,
            interfaces::JsonStorage& reportStorage,
            std::vector<std::shared_ptr<interfaces::Metric>> metrics,
-           const bool enabled, std::unique_ptr<interfaces::Clock> clock);
+           const bool enabled, std::unique_ptr<interfaces::Clock> clock,
+           const std::vector<std::string>& triggerIds);
 
     Report(const Report&) = delete;
     Report(Report&&) = delete;
@@ -48,6 +50,8 @@ class Report : public interfaces::Report
     }
 
     void updateReadings() override;
+    void updateTriggerIds(const std::string& triggerId,
+                          TriggerIdUpdate updateType) override;
     bool storeConfiguration() const;
 
   private:
@@ -80,6 +84,7 @@ class Report : public interfaces::Report
     std::unique_ptr<sdbusplus::asio::dbus_interface> deleteIface;
     std::vector<std::shared_ptr<interfaces::Metric>> metrics;
     boost::asio::steady_timer timer;
+    std::unordered_set<std::string> triggerIds;
 
     interfaces::JsonStorage& reportStorage;
     bool enabled;

@@ -54,6 +54,12 @@ class TriggerParams
         return reportIdsProperty;
     }
 
+    TriggerParams& reportIds(std::vector<std::string> val)
+    {
+        reportIdsProperty = std::move(val);
+        return *this;
+    }
+
     TriggerParams& thresholdParams(LabeledTriggerThresholdParams val)
     {
         labeledThresholdsProperty = std::move(val);

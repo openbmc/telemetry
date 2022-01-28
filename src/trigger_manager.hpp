@@ -25,6 +25,11 @@ class TriggerManager : public interfaces::TriggerManager
 
     void removeTrigger(const interfaces::Trigger* trigger) override;
 
+    static void verifyReportIds(const std::vector<std::string>& newReportIds);
+
+    std::vector<std::string>
+        getTriggerIdsForReport(const std::string& reportId) const override;
+
   private:
     std::unique_ptr<interfaces::TriggerFactory> triggerFactory;
     std::unique_ptr<interfaces::JsonStorage> triggerStorage;
@@ -32,7 +37,8 @@ class TriggerManager : public interfaces::TriggerManager
     std::vector<std::unique_ptr<interfaces::Trigger>> triggers;
 
     void verifyAddTrigger(const std::string& triggerId,
-                          const std::string& triggerName) const;
+                          const std::string& triggerName,
+                          const std::vector<std::string>& newReportIds) const;
 
     interfaces::Trigger&
         addTrigger(const std::string& triggerId, const std::string& triggerName,
