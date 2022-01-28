@@ -108,6 +108,17 @@ class ReportParams final
         return metricParametersProperty;
     }
 
+    ReportParams& triggerIds(std::vector<std::string> val)
+    {
+        triggerIdsProperty = std::move(val);
+        return *this;
+    }
+
+    std::vector<std::string> triggerIds() const
+    {
+        return triggerIdsProperty;
+    }
+
   private:
     std::string reportIdProperty = "TestId";
     std::string reportNameProperty = "TestReport";
@@ -133,5 +144,6 @@ class ReportParams final
              "MetricId2",
              CollectionTimeScope::point,
              CollectionDuration(Milliseconds(0u))}}};
+    std::vector<std::string> triggerIdsProperty{};
     bool enabledProperty = true;
 };

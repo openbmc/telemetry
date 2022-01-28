@@ -228,7 +228,8 @@ std::unique_ptr<interfaces::Trigger> TriggerFactory::make(
 
     return std::make_unique<Trigger>(
         bus->get_io_context(), objServer, id, name, triggerActions, reportIds,
-        std::move(thresholds), triggerManager, triggerStorage, *this, sensors);
+        std::move(thresholds), triggerManager, triggerStorage, *this, sensors,
+        reportManager);
 }
 
 Sensors TriggerFactory::getSensors(

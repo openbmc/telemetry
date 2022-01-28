@@ -19,13 +19,15 @@ Trigger::Trigger(
     std::vector<std::shared_ptr<interfaces::Threshold>>&& thresholdsIn,
     interfaces::TriggerManager& triggerManager,
     interfaces::JsonStorage& triggerStorageIn,
-    const interfaces::TriggerFactory& triggerFactory, Sensors sensorsIn) :
+    const interfaces::TriggerFactory& triggerFactory, Sensors sensorsIn,
+    interfaces::ReportManager& reportManagerIn) :
     id(idIn),
     name(nameIn), triggerActions(std::move(triggerActionsIn)),
     path(triggerDir + id), reportIds(std::move(reportIdsIn)),
     thresholds(std::move(thresholdsIn)),
     fileName(std::to_string(std::hash<std::string>{}(id))),
-    triggerStorage(triggerStorageIn), sensors(std::move(sensorsIn))
+    triggerStorage(triggerStorageIn), sensors(std::move(sensorsIn)),
+    reportManager(reportManagerIn)
 {
     deleteIface = objServer->add_unique_interface(
         path, deleteIfaceName, [this, &ioc, &triggerManager](auto& dbusIface) {
@@ -33,6 +35,11 @@ Trigger::Trigger(
                 if (persistent)
                 {
                     triggerStorage.remove(fileName);
+                }
+                for (const auto& reportId : *reportIds)
+                {
+                    reportManager.updateTriggerIds(reportId, id,
+                                                   TriggerIdUpdate::Remove);
                 }
                 boost::asio::post(ioc, [this, &triggerManager] {
                     triggerManager.removeTrigger(this);
@@ -108,6 +115,8 @@ Trigger::Trigger(
                 "ReportNames", std::vector<std::string>{},
                 sdbusplus::vtable::property_::emits_change,
                 [this](auto newVal, auto& oldVal) {
+                    TriggerManager::verifyReportIds(newVal);
+                    updateTriggerIdsInReports(newVal);
                     reportIds->clear();
                     std::copy(newVal.begin(), newVal.end(),
                               std::back_inserter(*reportIds));
@@ -146,6 +155,11 @@ Trigger::Trigger(
     for (const auto& threshold : thresholds)
     {
         threshold->initialize();
+    }
+
+    for (const auto& reportId : *reportIds)
+    {
+        reportManager.updateTriggerIds(reportId, id, TriggerIdUpdate::Add);
     }
 }
 
@@ -188,4 +202,27 @@ bool Trigger::storeConfiguration() const
         return false;
     }
     return true;
+}
+
+void Trigger::updateTriggerIdsInReports(
+    const std::vector<std::string>& newReportIds)
+{
+    std::vector<std::string> toBeRemoved, toBeAdded;
+    size_t maxSize = std::max(reportIds->size(), newReportIds.size());
+    toBeRemoved.reserve(maxSize);
+    toBeAdded.reserve(maxSize);
+    std::set_difference(reportIds->begin(), reportIds->end(),
+                        newReportIds.begin(), newReportIds.end(),
+                        std::back_inserter(toBeRemoved));
+    std::set_difference(newReportIds.begin(), newReportIds.end(),
+                        reportIds->begin(), reportIds->end(),
+                        std::back_inserter(toBeAdded));
+    for (auto& reportId : toBeRemoved)
+    {
+        reportManager.updateTriggerIds(reportId, id, TriggerIdUpdate::Remove);
+    }
+    for (auto& reportId : toBeAdded)
+    {
+        reportManager.updateTriggerIds(reportId, id, TriggerIdUpdate::Add);
+    }
 }
