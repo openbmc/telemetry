@@ -48,6 +48,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "3d3ba1e1_9ac15da9",
+        "filename": "src/discrete_threshold.hpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2022-01-28T15:40:20Z",
+      "side": 1,
+      "message": "I vote for efficiency, and unordered map won\u0027t have any cons in this use case.",
+      "parentUuid": "dc247231_f2d0c301",
+      "range": {
+        "startLine": 61,
+        "startChar": 26,
+        "endLine": 61,
+        "endChar": 34
+      },
+      "revId": "16c545907c62c1625710eb3259122def9ec028fa",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "5105ce0c_f30e8752",
@@ -95,6 +119,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "b860c863_444814f0",
+        "filename": "src/numeric_threshold.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2022-01-28T15:40:20Z",
+      "side": 1,
+      "message": "I agree, we should be const correct when possible.",
+      "parentUuid": "4c4784fe_5d315356",
+      "range": {
+        "startLine": 82,
+        "startChar": 32,
+        "endLine": 82,
+        "endChar": 43
+      },
+      "revId": "16c545907c62c1625710eb3259122def9ec028fa",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "27fb80f3_8bff51e0",
@@ -108,6 +156,30 @@
       "writtenOn": "2021-12-16T18:33:16Z",
       "side": 1,
       "message": "As above - please consider using unordered_map instead.",
+      "range": {
+        "startLine": 60,
+        "startChar": 26,
+        "endLine": 60,
+        "endChar": 34
+      },
+      "revId": "16c545907c62c1625710eb3259122def9ec028fa",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "62cbdea1_a931e413",
+        "filename": "src/numeric_threshold.hpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2022-01-28T15:40:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "27fb80f3_8bff51e0",
       "range": {
         "startLine": 60,
         "startChar": 26,
@@ -167,6 +239,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "85497205_03d7590a",
+        "filename": "src/on_change_threshold.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2022-01-28T15:40:20Z",
+      "side": 1,
+      "message": "Unregistering was the main reason here. I also wanted to increase security by working on a copy instead of updating it in place. We are copying pointers, so it is not as expensive.",
+      "parentUuid": "89be097a_57fe62db",
+      "range": {
+        "startLine": 23,
+        "startChar": 25,
+        "endLine": 23,
+        "endChar": 32
+      },
+      "revId": "16c545907c62c1625710eb3259122def9ec028fa",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "16822843_ba468e06",
         "filename": "src/trigger.cpp",
         "patchSetId": 2
@@ -178,6 +274,30 @@
       "writtenOn": "2021-12-17T13:29:59Z",
       "side": 1,
       "message": "Is this include really needed here?",
+      "range": {
+        "startLine": 12,
+        "startChar": 0,
+        "endLine": 12,
+        "endChar": 19
+      },
+      "revId": "16c545907c62c1625710eb3259122def9ec028fa",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "5e2c05be_5e4d111a",
+        "filename": "src/trigger.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2022-01-28T15:40:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "16822843_ba468e06",
       "range": {
         "startLine": 12,
         "startChar": 0,
@@ -201,6 +321,30 @@
       "writtenOn": "2021-12-16T18:33:16Z",
       "side": 1,
       "message": "Can this one be moved as well?",
+      "range": {
+        "startLine": 77,
+        "startChar": 29,
+        "endLine": 77,
+        "endChar": 35
+      },
+      "revId": "16c545907c62c1625710eb3259122def9ec028fa",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "ef249e20_7852839d",
+        "filename": "src/trigger.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2022-01-28T15:40:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "dbd7e728_1cbc7c9a",
       "range": {
         "startLine": 77,
         "startChar": 29,
@@ -258,6 +402,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "98396681_04ac9036",
+        "filename": "src/trigger.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2022-01-28T15:40:20Z",
+      "side": 1,
+      "message": "Exactly, holding monostate in thresholdsParam means that this is Discrete OnChange thresholds, which still counts as Discrete.",
+      "parentUuid": "1d5bba23_93aa163e",
+      "range": {
+        "startLine": 116,
+        "startChar": 27,
+        "endLine": 116,
+        "endChar": 50
+      },
+      "revId": "16c545907c62c1625710eb3259122def9ec028fa",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "8470d45b_623aa8d1",
@@ -281,6 +449,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "26e4977e_efb8a7de",
+        "filename": "src/trigger_factory.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2022-01-28T15:40:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8470d45b_623aa8d1",
+      "range": {
+        "startLine": 23,
+        "startChar": 21,
+        "endLine": 23,
+        "endChar": 37
+      },
+      "revId": "16c545907c62c1625710eb3259122def9ec028fa",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "0b02bf57_5435db10",
@@ -294,6 +486,30 @@
       "writtenOn": "2021-12-16T18:33:16Z",
       "side": 1,
       "message": "auto?",
+      "range": {
+        "startLine": 29,
+        "startChar": 4,
+        "endLine": 29,
+        "endChar": 55
+      },
+      "revId": "16c545907c62c1625710eb3259122def9ec028fa",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "8feba512_7f50955d",
+        "filename": "src/trigger_factory.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2022-01-28T15:40:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0b02bf57_5435db10",
       "range": {
         "startLine": 29,
         "startChar": 4,
@@ -329,6 +545,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "d7b27f02_68970d9a",
+        "filename": "src/trigger_factory.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2022-01-28T15:40:20Z",
+      "side": 1,
+      "message": "I think it is more secure this way. If, for any reason, following code would throw an exception (memory allocation is one possibility) currentSensors won\u0027t be modified, and service would still work properly.",
+      "parentUuid": "3bab504e_894f220f",
+      "range": {
+        "startLine": 29,
+        "startChar": 56,
+        "endLine": 30,
+        "endChar": 26
+      },
+      "revId": "16c545907c62c1625710eb3259122def9ec028fa",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "64df8d5e_c612a4ee",
         "filename": "src/trigger_factory.cpp",
         "patchSetId": 2
@@ -340,6 +580,30 @@
       "writtenOn": "2021-12-16T18:33:16Z",
       "side": 1,
       "message": "Vector capacity reservation for a single element only should not be needed.",
+      "range": {
+        "startLine": 46,
+        "startChar": 8,
+        "endLine": 48,
+        "endChar": 75
+      },
+      "revId": "16c545907c62c1625710eb3259122def9ec028fa",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "6c5a89e5_498bbd33",
+        "filename": "src/trigger_factory.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2022-01-28T15:40:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "64df8d5e_c612a4ee",
       "range": {
         "startLine": 46,
         "startChar": 8,
@@ -363,6 +627,30 @@
       "writtenOn": "2021-12-16T18:33:16Z",
       "side": 1,
       "message": "Seems that isCurrentOnChange is same for all items in labeledDiscreteThresholdParams, maybe you  could extract it to separate section as a separate condition instead checking this flag every loop in here?",
+      "range": {
+        "startLine": 52,
+        "startChar": 12,
+        "endLine": 52,
+        "endChar": 35
+      },
+      "revId": "16c545907c62c1625710eb3259122def9ec028fa",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "6d21714e_75beba96",
+        "filename": "src/trigger_factory.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2022-01-28T15:40:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "adc6c327_9abe9729",
       "range": {
         "startLine": 52,
         "startChar": 12,
@@ -398,6 +686,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "de7b0e24_51465c46",
+        "filename": "src/trigger_factory.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 187,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2022-01-28T15:40:20Z",
+      "side": 1,
+      "message": "I think it is more secure this way. If, for any reason, following code would throw an exception (memory allocation is one possibility) currentSensors won\u0027t be modified, and service would still work properly.",
+      "parentUuid": "0e8206a4_59039f26",
+      "range": {
+        "startLine": 187,
+        "startChar": 4,
+        "endLine": 187,
+        "endChar": 40
+      },
+      "revId": "16c545907c62c1625710eb3259122def9ec028fa",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "bf0dcce7_4219f3fd",
         "filename": "src/utils/conversion_trigger.cpp",
         "patchSetId": 2
@@ -409,6 +721,30 @@
       "writtenOn": "2021-12-16T18:33:16Z",
       "side": 1,
       "message": "There are several repeats of this construct with holds_alternative, and IMO in this form it obfuscates the code, maybe you could replace/create something like isTriggerThresholdDiscrete but for LabeledThresholdParam?",
+      "range": {
+        "startLine": 95,
+        "startChar": 8,
+        "endLine": 96,
+        "endChar": 28
+      },
+      "revId": "16c545907c62c1625710eb3259122def9ec028fa",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "05a8621d_7cb96610",
+        "filename": "src/utils/conversion_trigger.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2022-01-28T15:40:20Z",
+      "side": 1,
+      "message": "I made a helper method, what do you think about it?",
+      "parentUuid": "bf0dcce7_4219f3fd",
       "range": {
         "startLine": 95,
         "startChar": 8,
@@ -444,6 +780,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "dbb2875d_343c05b7",
+        "filename": "src/utils/threshold_mixin.hpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2022-01-28T15:40:20Z",
+      "side": 1,
+      "message": "changed to ThresholdOperations",
+      "parentUuid": "8da88df8_74f0884c",
+      "range": {
+        "startLine": 7,
+        "startChar": 7,
+        "endLine": 7,
+        "endChar": 21
+      },
+      "revId": "16c545907c62c1625710eb3259122def9ec028fa",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "88e69337_d2d5d1ac",
         "filename": "src/utils/threshold_mixin.hpp",
         "patchSetId": 2
@@ -455,6 +815,30 @@
       "writtenOn": "2021-12-16T18:33:16Z",
       "side": 1,
       "message": "Are there any cons against moving instead of copying it?",
+      "range": {
+        "startLine": 36,
+        "startChar": 46,
+        "endLine": 37,
+        "endChar": 39
+      },
+      "revId": "16c545907c62c1625710eb3259122def9ec028fa",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "8941eaa4_8d363b3b",
+        "filename": "src/utils/threshold_mixin.hpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2022-01-28T15:40:20Z",
+      "side": 1,
+      "message": "Same as in other update methods, I opted to use copy for safety concerns. Also, same as in OnChange update method, this helps with unregistering unused sensors.",
+      "parentUuid": "88e69337_d2d5d1ac",
       "range": {
         "startLine": 36,
         "startChar": 46,
