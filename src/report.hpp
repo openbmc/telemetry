@@ -54,7 +54,8 @@ class Report : public interfaces::Report
     std::unique_ptr<sdbusplus::asio::dbus_interface> makeReportInterface();
     static void timerProc(boost::system::error_code, Report& self);
     void scheduleTimer(Milliseconds interval);
-    uint64_t deduceAppendLimit(const uint64_t appendLimitIn) const;
+    std::optional<uint64_t>
+        deduceAppendLimit(const uint64_t appendLimitIn) const;
     uint64_t deduceBufferSize(const ReportUpdates reportUpdatesIn,
                               const ReportingType reportingTypeIn) const;
     void setReportUpdates(const ReportUpdates newReportUpdates);
@@ -71,7 +72,7 @@ class Report : public interfaces::Report
     ReadingParameters readingParameters;
     bool persistency = false;
     uint64_t sensorCount;
-    uint64_t appendLimit;
+    std::optional<uint64_t> appendLimit;
     ReportUpdates reportUpdates;
     CircularVector<ReadingData> readingsBuffer;
     Readings readings = {};

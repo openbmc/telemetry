@@ -144,7 +144,8 @@ void ReportManager::verifyAddReport(
             "Reached maximal report count");
     }
 
-    if (appendLimit > maxAppendLimit)
+    if (appendLimit > maxAppendLimit &&
+        appendLimit != std::numeric_limits<uint64_t>::max())
     {
         throw sdbusplus::exception::SdBusError(
             static_cast<int>(std::errc::invalid_argument),

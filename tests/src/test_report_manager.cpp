@@ -279,6 +279,19 @@ TEST_F(TestReportManager, DISABLED_failToAddReportWithAppendLimitGreaterThanMax)
     EXPECT_THAT(path, Eq(std::string()));
 }
 
+TEST_F(TestReportManager, addReportWithAppendLimitEqualToUint64MaxIsAllowed)
+{
+    reportParams.appendLimit(std::numeric_limits<uint64_t>::max());
+
+    EXPECT_CALL(reportFactoryMock, convertMetricParams(_, _));
+    reportFactoryMock.expectMake(reportParams, Ref(*sut), Ref(storageMock))
+        .WillOnce(Return(ByMove(std::move(reportMockPtr))));
+
+    auto [ec, path] = addReport(reportParams);
+    EXPECT_THAT(ec.value(), Eq(boost::system::errc::success));
+    EXPECT_THAT(path, Eq(reportMock.getPath()));
+}
+
 TEST_F(TestReportManager, DISABLED_failToAddReportWhenMaxReportIsReached)
 {
     reportFactoryMock.expectMake(std::nullopt, Ref(*sut), Ref(storageMock))

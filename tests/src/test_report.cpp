@@ -280,6 +280,8 @@ INSTANTIATE_TEST_SUITE_P(
                                                }))),
            std::make_pair("Interval",
                           nlohmann::json(ReportParams().interval().count())),
+           std::make_pair("AppendLimit",
+                          nlohmann::json(ReportParams().appendLimit())),
            std::make_pair(
                "ReadingParameters",
                nlohmann::json(
@@ -765,4 +767,18 @@ TEST_F(TestReportInitialization, appendLimitDeducedProperly)
         ReportParams().appendLimit(std::numeric_limits<uint64_t>::max()));
     auto appendLimit = getProperty<uint64_t>(sut->getPath(), "AppendLimit");
     EXPECT_EQ(appendLimit, 2ull);
+}
+
+TEST_F(TestReportInitialization, appendLimitSetToUintMaxIsStoredCorrectly)
+{
+    nlohmann::json storedConfiguration;
+
+    EXPECT_CALL(storageMock, store(to_file_path(ReportParams().reportId()), _))
+        .WillOnce(SaveArg<1>(&storedConfiguration));
+
+    sut = makeReport(
+        ReportParams().appendLimit(std::numeric_limits<uint64_t>::max()));
+
+    ASSERT_THAT(storedConfiguration.at("AppendLimit"),
+                Eq(std::numeric_limits<uint64_t>::max()));
 }
