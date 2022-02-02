@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "3f28d027_d3c6c253",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2022-02-02T16:45:21Z",
+      "side": 1,
+      "message": "fast merge: this fixes issue introduced in previous commit",
+      "revId": "e6c417cfe7f092352b4d6058cf852b2d72023e74",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
