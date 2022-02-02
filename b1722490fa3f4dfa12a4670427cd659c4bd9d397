@@ -68,6 +68,30 @@
       },
       "revId": "b1722490fa3f4dfa12a4670427cd659c4bd9d397",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "2b99f5f4_13cbf14d",
+        "filename": "tests/src/test_report_manager.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 268,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2022-02-02T12:15:59Z",
+      "side": 1,
+      "message": "This is just to prevent some invalid user input. It\u0027s perfectly allowed to create metric with 0 metricProperties, but we want to avoid situation where there is infinite amount of metric with 0 metricProperties.",
+      "parentUuid": "5c8f00a7_be296398",
+      "range": {
+        "startLine": 244,
+        "startChar": 0,
+        "endLine": 268,
+        "endChar": 0
+      },
+      "revId": "b1722490fa3f4dfa12a4670427cd659c4bd9d397",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
