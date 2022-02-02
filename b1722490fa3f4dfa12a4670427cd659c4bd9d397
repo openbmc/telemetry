@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "fb47006d_74a2a66d",
+        "filename": "meson.build",
+        "patchSetId": 10
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1001213
+      },
+      "writtenOn": "2022-02-02T12:12:12Z",
+      "side": 1,
+      "message": "NIT: Is this space intentional ?",
+      "range": {
+        "startLine": 65,
+        "startChar": 8,
+        "endLine": 65,
+        "endChar": 12
+      },
+      "revId": "b1722490fa3f4dfa12a4670427cd659c4bd9d397",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "42c338fa_3fdee38c",
+        "filename": "tests/src/test_report_manager.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 211,
+      "author": {
+        "id": 1001213
+      },
+      "writtenOn": "2022-02-02T12:12:12Z",
+      "side": 1,
+      "message": "NIT: Properties ?",
+      "range": {
+        "startLine": 211,
+        "startChar": 45,
+        "endLine": 211,
+        "endChar": 55
+      },
+      "revId": "b1722490fa3f4dfa12a4670427cd659c4bd9d397",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "5c8f00a7_be296398",
+        "filename": "tests/src/test_report_manager.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 268,
+      "author": {
+        "id": 1001213
+      },
+      "writtenOn": "2022-02-02T12:12:12Z",
+      "side": 1,
+      "message": "Would we need this test case when we already have the above test case in place ?",
+      "range": {
+        "startLine": 244,
+        "startChar": 0,
+        "endLine": 268,
+        "endChar": 0
+      },
+      "revId": "b1722490fa3f4dfa12a4670427cd659c4bd9d397",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
