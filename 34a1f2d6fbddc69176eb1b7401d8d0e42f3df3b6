@@ -70,6 +70,30 @@
       },
       "revId": "34a1f2d6fbddc69176eb1b7401d8d0e42f3df3b6",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "1ce3574c_cba62adb",
+        "filename": "src/report_manager.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 216,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2022-02-03T12:52:12Z",
+      "side": 1,
+      "message": "There is very similar path which requires reportManager in construction of triggerManager, so wouldn\u0027t it create same check but in different part of code?",
+      "parentUuid": "804ba250_7166b06b",
+      "range": {
+        "startLine": 213,
+        "startChar": 3,
+        "endLine": 216,
+        "endChar": 5
+      },
+      "revId": "34a1f2d6fbddc69176eb1b7401d8d0e42f3df3b6",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
