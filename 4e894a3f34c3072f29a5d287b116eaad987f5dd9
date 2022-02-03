@@ -168,6 +168,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "28358169_7e431e32",
+        "filename": "src/report_factory.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2022-02-03T12:44:34Z",
+      "side": 1,
+      "message": "On one hand Krzysztof is right, and this method would work just fine without this check. But inside utils::getSubTreeSensors(bus), we have a dbus call, which in case of empty metricParams would be obsolete, so this might be a good optimization? There is also a question why and how often client would pass metric without sensors to our service?",
+      "parentUuid": "5e6ab39f_82167262",
+      "range": {
+        "startLine": 129,
+        "startChar": 2,
+        "endLine": 132,
+        "endChar": 5
+      },
+      "revId": "4e894a3f34c3072f29a5d287b116eaad987f5dd9",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "57601c26_8e571486",
         "filename": "tests/src/test_report.cpp",
         "patchSetId": 4
