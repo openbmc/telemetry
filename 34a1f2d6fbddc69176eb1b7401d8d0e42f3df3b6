@@ -46,6 +46,30 @@
       },
       "revId": "34a1f2d6fbddc69176eb1b7401d8d0e42f3df3b6",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "804ba250_7166b06b",
+        "filename": "src/report_manager.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 216,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2022-02-03T12:24:05Z",
+      "side": 1,
+      "message": "It seem that you can change order of creating report and trigger manager. If you create trigger manager you can pass it here as reference.",
+      "parentUuid": "c3e51c53_110525af",
+      "range": {
+        "startLine": 213,
+        "startChar": 3,
+        "endLine": 216,
+        "endChar": 5
+      },
+      "revId": "34a1f2d6fbddc69176eb1b7401d8d0e42f3df3b6",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
