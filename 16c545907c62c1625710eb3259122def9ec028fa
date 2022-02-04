@@ -261,6 +261,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "1d5ba2a6_0dc4034c",
+        "filename": "src/on_change_threshold.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2022-02-04T13:47:24Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "85497205_03d7590a",
+      "range": {
+        "startLine": 23,
+        "startChar": 25,
+        "endLine": 23,
+        "endChar": 32
+      },
+      "revId": "16c545907c62c1625710eb3259122def9ec028fa",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "16822843_ba468e06",
@@ -567,6 +591,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "8d7ca09f_68da5e7a",
+        "filename": "src/trigger_factory.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2022-02-04T13:47:24Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "d7b27f02_68970d9a",
+      "range": {
+        "startLine": 29,
+        "startChar": 56,
+        "endLine": 30,
+        "endChar": 26
+      },
+      "revId": "16c545907c62c1625710eb3259122def9ec028fa",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "64df8d5e_c612a4ee",
@@ -708,6 +756,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "16b8bbe2_4088e44c",
+        "filename": "src/trigger_factory.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 187,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2022-02-04T13:47:24Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "de7b0e24_51465c46",
+      "range": {
+        "startLine": 187,
+        "startChar": 4,
+        "endLine": 187,
+        "endChar": 40
+      },
+      "revId": "16c545907c62c1625710eb3259122def9ec028fa",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "bf0dcce7_4219f3fd",
@@ -745,6 +817,30 @@
       "side": 1,
       "message": "I made a helper method, what do you think about it?",
       "parentUuid": "bf0dcce7_4219f3fd",
+      "range": {
+        "startLine": 95,
+        "startChar": 8,
+        "endLine": 96,
+        "endChar": 28
+      },
+      "revId": "16c545907c62c1625710eb3259122def9ec028fa",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ecdd44f3_4e604425",
+        "filename": "src/utils/conversion_trigger.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2022-02-04T13:47:24Z",
+      "side": 1,
+      "message": "IMO to much work to gain slightly more readable code, if you also need to pass the alternative type to the wrapper then maybe it is better to keep it as it was before by checking via std::holds_alternative in place.\nHowever if you decide to stay with the wrapper then I suggest to rename it to sth like \u0027isElementsOfType\u0027, you have std::vector given as collection to check, and in vector all elements have same type.",
+      "parentUuid": "05a8621d_7cb96610",
       "range": {
         "startLine": 95,
         "startChar": 8,
@@ -802,6 +898,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "d1d6ffdf_bd9f5e94",
+        "filename": "src/utils/threshold_mixin.hpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2022-02-04T13:47:24Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "dbb2875d_343c05b7",
+      "range": {
+        "startLine": 7,
+        "startChar": 7,
+        "endLine": 7,
+        "endChar": 21
+      },
+      "revId": "16c545907c62c1625710eb3259122def9ec028fa",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "88e69337_d2d5d1ac",
@@ -839,6 +959,30 @@
       "side": 1,
       "message": "Same as in other update methods, I opted to use copy for safety concerns. Also, same as in OnChange update method, this helps with unregistering unused sensors.",
       "parentUuid": "88e69337_d2d5d1ac",
+      "range": {
+        "startLine": 36,
+        "startChar": 46,
+        "endLine": 37,
+        "endChar": 39
+      },
+      "revId": "16c545907c62c1625710eb3259122def9ec028fa",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "22b2db0d_827f0d74",
+        "filename": "src/utils/threshold_mixin.hpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2022-02-04T13:47:24Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "8941eaa4_8d363b3b",
       "range": {
         "startLine": 36,
         "startChar": 46,
