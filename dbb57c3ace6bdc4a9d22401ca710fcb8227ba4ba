@@ -26,6 +26,30 @@
     {
       "unresolved": false,
       "key": {
+        "uuid": "ffb7aece_74277c7f",
+        "filename": "src/report.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 267,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2022-02-04T16:01:38Z",
+      "side": 1,
+      "message": "Keeping sort here as discussed, moving \n\u003e oldVal \u003d std::move(newVal);\ninto \u0027if\u0027 branch below to properly emit change signal on dbus.",
+      "parentUuid": "275002b5_2de2ca26",
+      "range": {
+        "startLine": 267,
+        "startChar": 12,
+        "endLine": 267,
+        "endChar": 46
+      },
+      "revId": "dbb57c3ace6bdc4a9d22401ca710fcb8227ba4ba",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
         "uuid": "4c102377_12f8408f",
         "filename": "src/report_factory.cpp",
         "patchSetId": 6
