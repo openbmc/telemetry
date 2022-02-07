@@ -24,6 +24,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "00271334_87c13903",
+        "filename": "src/trigger.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2022-02-07T14:03:05Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6e4408ea_7c55d546",
+      "range": {
+        "startLine": 11,
+        "startChar": 7,
+        "endLine": 11,
+        "endChar": 10
+      },
+      "revId": "14e87d2b71da7cd1e1414c415e49366cb868322f",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "8fa2a3fb_4415bd06",
@@ -37,6 +61,30 @@
       "writtenOn": "2022-02-02T14:11:16Z",
       "side": 1,
       "message": "extra ;",
+      "range": {
+        "startLine": 173,
+        "startChar": 8,
+        "endLine": 173,
+        "endChar": 9
+      },
+      "revId": "14e87d2b71da7cd1e1414c415e49366cb868322f",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "68527238_9ed6f242",
+        "filename": "src/trigger.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2022-02-07T14:03:05Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8fa2a3fb_4415bd06",
       "range": {
         "startLine": 173,
         "startChar": 8,
@@ -70,6 +118,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "05b649b9_3af4df73",
+        "filename": "src/trigger_factory.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2022-02-07T14:03:05Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "65537349_7a82754c",
+      "range": {
+        "startLine": 104,
+        "startChar": 16,
+        "endLine": 108,
+        "endChar": 17
+      },
+      "revId": "14e87d2b71da7cd1e1414c415e49366cb868322f",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "7b0936e8_18185d9d",
@@ -83,6 +155,30 @@
       "writtenOn": "2022-02-02T14:11:16Z",
       "side": 1,
       "message": "nit: make_shared\u003cstd::vector\u003cstd::string\u003e\u003e(names) or make_shared\u003cstd::vector\u003cstd::string\u003e\u003e(std::move(names)) will do the same\n\nYou can stilly copy or move vector to dynamically allocated one",
+      "range": {
+        "startLine": 225,
+        "startChar": 31,
+        "endLine": 225,
+        "endChar": 57
+      },
+      "revId": "14e87d2b71da7cd1e1414c415e49366cb868322f",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "62a3779f_2e7d61a5",
+        "filename": "tests/src/test_trigger_actions.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 225,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2022-02-07T14:03:05Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7b0936e8_18185d9d",
       "range": {
         "startLine": 225,
         "startChar": 31,

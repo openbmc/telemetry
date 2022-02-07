@@ -853,6 +853,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "432c68fd_e32aed99",
+        "filename": "src/utils/conversion_trigger.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2022-02-07T14:03:05Z",
+      "side": 1,
+      "message": "Making such checker would result in looping twice over the collection, so I would leave it like that. But I also removed unnecessary if statements to further improve readability",
+      "parentUuid": "ecdd44f3_4e604425",
+      "range": {
+        "startLine": 95,
+        "startChar": 8,
+        "endLine": 96,
+        "endChar": 28
+      },
+      "revId": "16c545907c62c1625710eb3259122def9ec028fa",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "8da88df8_74f0884c",
         "filename": "src/utils/threshold_mixin.hpp",
         "patchSetId": 2
