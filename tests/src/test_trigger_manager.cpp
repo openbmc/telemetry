@@ -123,6 +123,17 @@ TEST_F(TestTriggerManager, DISABLED_failToAddTriggerWithInvalidId)
     EXPECT_THAT(path, Eq(std::string()));
 }
 
+TEST_F(TestTriggerManager, DISABLED_failToAddTriggerWithDuplicatesInReportsIds)
+{
+    triggerFactoryMock.expectMake(std::nullopt, Ref(*sut), Ref(storageMock))
+        .Times(0);
+
+    auto [ec, path] = addTrigger(
+        TriggerParams().reportIds({"trigger1", "trigger2", "trigger1"}));
+    EXPECT_THAT(ec.value(), Eq(boost::system::errc::invalid_argument));
+    EXPECT_THAT(path, Eq(std::string()));
+}
+
 TEST_F(TestTriggerManager, addTriggerWithoutIdAndName)
 {
     triggerFactoryMock
@@ -266,7 +277,6 @@ TEST_F(TestTriggerManager, removingSameTriggerTwiceHasNoSideEffect)
     sut->removeTrigger(&triggerMock);
     checkPoint.Call("end");
 }
-
 class TestTriggerManagerStorage : public TestTriggerManager
 {
   public:

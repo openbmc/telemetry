@@ -21,7 +21,8 @@ Report::Report(boost::asio::io_context& ioc,
                interfaces::ReportManager& reportManager,
                interfaces::JsonStorage& reportStorageIn,
                std::vector<std::shared_ptr<interfaces::Metric>> metricsIn,
-               const bool enabledIn, std::unique_ptr<interfaces::Clock> clock) :
+               const bool enabledIn, std::unique_ptr<interfaces::Clock> clock,
+               const std::vector<std::string>& triggerIdsIn) :
     id(reportId),
     name(reportName), reportingType(reportingTypeIn), interval(intervalIn),
     reportActions(std::move(reportActionsIn)),
@@ -30,6 +31,7 @@ Report::Report(boost::asio::io_context& ioc,
     reportUpdates(reportUpdatesIn),
     readingsBuffer(deduceBufferSize(reportUpdates, reportingType)),
     objServer(objServer), metrics(std::move(metricsIn)), timer(ioc),
+    triggerIds(triggerIdsIn.begin(), triggerIdsIn.end()),
     reportStorage(reportStorageIn), enabled(enabledIn), clock(std::move(clock))
 {
     readingParameters =
@@ -257,6 +259,12 @@ std::unique_ptr<sdbusplus::asio::dbus_interface> Report::makeReportInterface()
             return 1;
         },
         [this](const auto&) { return utils::enumToString(reportUpdates); });
+    dbusIface->register_property_r(
+        "TriggerIds", std::vector<std::string>{},
+        sdbusplus::vtable::property_::emits_change, [this](const auto&) {
+            return std::vector<std::string>(triggerIds.begin(),
+                                            triggerIds.end());
+        });
     dbusIface->register_method("Update", [this] {
         if (reportingType == ReportingType::onRequest)
         {
@@ -362,8 +370,28 @@ bool Report::storeConfiguration() const
 
     return true;
 }
+
 interfaces::JsonStorage::FilePath Report::fileName() const
 {
     return interfaces::JsonStorage::FilePath{
         std::to_string(std::hash<std::string>{}(id))};
+}
+
+void Report::updateTriggerIds(const std::string& triggerId,
+                              TriggerIdUpdate updateType)
+{
+    if (updateType == TriggerIdUpdate::Add)
+    {
+        if (triggerIds.insert(triggerId).second)
+        {
+            reportIface->signal_property("TriggerIds");
+        }
+    }
+    else if (updateType == TriggerIdUpdate::Remove)
+    {
+        if (triggerIds.erase(triggerId) > 0)
+        {
+            reportIface->signal_property("TriggerIds");
+        }
+    }
 }

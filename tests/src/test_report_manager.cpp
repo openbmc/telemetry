@@ -1,7 +1,9 @@
 #include "dbus_environment.hpp"
 #include "helpers.hpp"
+#include "interfaces/trigger_manager.hpp"
 #include "mocks/json_storage_mock.hpp"
 #include "mocks/report_factory_mock.hpp"
+#include "mocks/trigger_manager_mock.hpp"
 #include "params/report_params.hpp"
 #include "report.hpp"
 #include "report_manager.hpp"
@@ -29,6 +31,9 @@ class TestReportManager : public Test
         std::make_unique<NiceMock<ReportMock>>(reportParams.reportId());
     ReportMock& reportMock = *reportMockPtr;
 
+    std::unique_ptr<interfaces::TriggerManager> triggerManagerMockPtr =
+        std::make_unique<NiceMock<TriggerManagerMock>>();
+
     std::unique_ptr<ReportManager> sut;
 
     MockFunction<void(std::string)> checkPoint;
@@ -38,9 +43,9 @@ class TestReportManager : public Test
         EXPECT_CALL(reportFactoryMock, convertMetricParams(_, _))
             .Times(AnyNumber());
 
-        sut = std::make_unique<ReportManager>(std::move(reportFactoryMockPtr),
-                                              std::move(storageMockPtr),
-                                              DbusEnvironment::getObjServer());
+        sut = std::make_unique<ReportManager>(
+            std::move(reportFactoryMockPtr), std::move(storageMockPtr),
+            DbusEnvironment::getObjServer(), triggerManagerMockPtr);
     }
 
     void TearDown() override
@@ -378,6 +383,32 @@ TEST_F(TestReportManager, updateReportDoNothingIfReportDoesNotExist)
     sut->updateReport("NotAReport");
 }
 
+TEST_F(TestReportManager, updateTriggerIdsUpdatesThemForExistReport)
+{
+    reportFactoryMock.expectMake(reportParams, Ref(*sut), Ref(storageMock))
+        .WillOnce(Return(ByMove(std::move(reportMockPtr))));
+    EXPECT_CALL(reportMock, updateTriggerIds("Trigger1", TriggerIdUpdate::Add));
+    EXPECT_CALL(reportMock,
+                updateTriggerIds("Trigger2", TriggerIdUpdate::Remove));
+
+    addReport(reportParams);
+    sut->updateTriggerIds(reportParams.reportId(), "Trigger1",
+                          TriggerIdUpdate::Add);
+
+    sut->updateTriggerIds(reportParams.reportId(), "Trigger2",
+                          TriggerIdUpdate::Remove);
+}
+
+TEST_F(TestReportManager, updateTriggerIdsDoNothingIfReportDoesNotExist)
+{
+    reportFactoryMock.expectMake(reportParams, Ref(*sut), Ref(storageMock))
+        .WillOnce(Return(ByMove(std::move(reportMockPtr))));
+    EXPECT_CALL(reportMock, updateTriggerIds(_, _)).Times(0);
+
+    addReport(reportParams);
+    sut->updateTriggerIds("NotAReport", "Trigger1", TriggerIdUpdate::Add);
+}
+
 class TestReportManagerWithAggregationOperationType :
     public TestReportManager,
     public WithParamInterface<OperationType>
@@ -431,9 +462,9 @@ class TestReportManagerStorage : public TestReportManager
 
     void makeReportManager()
     {
-        sut = std::make_unique<ReportManager>(std::move(reportFactoryMockPtr),
-                                              std::move(storageMockPtr),
-                                              DbusEnvironment::getObjServer());
+        sut = std::make_unique<ReportManager>(
+            std::move(reportFactoryMockPtr), std::move(storageMockPtr),
+            DbusEnvironment::getObjServer(), triggerManagerMockPtr);
     }
 
     nlohmann::json data = nlohmann::json{

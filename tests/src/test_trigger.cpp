@@ -1,6 +1,7 @@
 #include "dbus_environment.hpp"
 #include "helpers.hpp"
 #include "mocks/json_storage_mock.hpp"
+#include "mocks/report_manager_mock.hpp"
 #include "mocks/sensor_mock.hpp"
 #include "mocks/threshold_mock.hpp"
 #include "mocks/trigger_factory_mock.hpp"
@@ -36,6 +37,8 @@ class TestTrigger : public Test
                     Milliseconds(5).count(), "32.7"},
             });
 
+    std::unique_ptr<ReportManagerMock> reportManagerMockPtr =
+        std::make_unique<NiceMock<ReportManagerMock>>();
     std::unique_ptr<TriggerManagerMock> triggerManagerMockPtr =
         std::make_unique<NiceMock<TriggerManagerMock>>();
     std::unique_ptr<TriggerFactoryMock> triggerFactoryMockPtr =
@@ -70,7 +73,8 @@ class TestTrigger : public Test
                 params.reportIds().begin(), params.reportIds().end()),
             std::vector<std::shared_ptr<interfaces::Threshold>>(thresholdMocks),
             *triggerManagerMockPtr, storageMock, *triggerFactoryMockPtr,
-            SensorMock::makeSensorMocks(params.sensors()));
+            SensorMock::makeSensorMocks(params.sensors()),
+            *reportManagerMockPtr);
     }
 
     static interfaces::JsonStorage::FilePath to_file_path(std::string name)
@@ -132,6 +136,13 @@ TEST_F(TestTrigger, checkIfPropertiesAreSet)
                       triggerParams.thresholdParams())));
 }
 
+TEST_F(TestTrigger, checkBasicGetters)
+{
+    EXPECT_THAT(sut->getId(), Eq(triggerParams.id()));
+    EXPECT_THAT(sut->getPath(), Eq(Trigger::triggerDir + triggerParams.id()));
+    EXPECT_THAT(sut->getReportIds(), Eq(triggerParams.reportIds()));
+}
+
 TEST_F(TestTrigger, setPropertyNameToCorrectValue)
 {
     std::string name = "custom name 1234 %^#5";
@@ -148,6 +159,70 @@ TEST_F(TestTrigger, setPropertyReportNames)
     EXPECT_THAT(
         getProperty<std::vector<std::string>>(sut->getPath(), "ReportNames"),
         Eq(newNames));
+    EXPECT_THAT(
+        getProperty<std::vector<std::string>>(sut->getPath(), "ReportNames"),
+        Eq(sut->getReportIds()));
+}
+
+TEST_F(TestTrigger, settingPropertyReportNamesUptadesTriggerIdsInReports)
+{
+    std::vector<std::string> newPropertyVal = {"abc", "one", "two"};
+
+    for (const auto& reportId : newPropertyVal)
+    {
+        EXPECT_CALL(
+            *reportManagerMockPtr,
+            updateTriggerIds(reportId, sut->getId(), TriggerIdUpdate::Add));
+    }
+    for (const auto& reportId : triggerParams.reportIds())
+    {
+        EXPECT_CALL(
+            *reportManagerMockPtr,
+            updateTriggerIds(reportId, sut->getId(), TriggerIdUpdate::Remove));
+    }
+
+    EXPECT_THAT(setProperty(sut->getPath(), "ReportNames", newPropertyVal),
+                Eq(boost::system::errc::success));
+}
+
+TEST_F(TestTrigger, settingPropertyReportNamesWillNotRemoveTriggerIdsInReports)
+{
+    std::vector<std::string> newPropertyVal = triggerParams.reportIds();
+    std::vector<std::string> newNames{"abc", "one", "two"};
+    newPropertyVal.insert(newPropertyVal.end(), newNames.begin(),
+                          newNames.end());
+
+    for (const auto& reportId : newNames)
+    {
+        EXPECT_CALL(
+            *reportManagerMockPtr,
+            updateTriggerIds(reportId, sut->getId(), TriggerIdUpdate::Add));
+    }
+
+    EXPECT_THAT(setProperty(sut->getPath(), "ReportNames", newPropertyVal),
+                Eq(boost::system::errc::success));
+}
+
+TEST_F(TestTrigger,
+       settingPropertyReportNamesToSameValueWillNotUpdateTriggerIdsInReports)
+{
+    std::vector<std::string> newPropertyVal = triggerParams.reportIds();
+
+    EXPECT_CALL(*reportManagerMockPtr, updateTriggerIds(_, _, _)).Times(0);
+
+    EXPECT_THAT(setProperty(sut->getPath(), "ReportNames", newPropertyVal),
+                Eq(boost::system::errc::success));
+}
+
+TEST_F(TestTrigger,
+       DISABLED_settingPropertyReportNamesThrowsExceptionWhenDuplicateReportIds)
+{
+    std::vector<std::string> newPropertyVal{"trigger1", "trigger2", "trigger1"};
+
+    EXPECT_CALL(*reportManagerMockPtr, updateTriggerIds(_, _, _)).Times(0);
+
+    EXPECT_THAT(setProperty(sut->getPath(), "ReportNames", newPropertyVal),
+                Eq(boost::system::errc::invalid_argument));
 }
 
 TEST_F(TestTrigger, setPropertySensors)
@@ -231,6 +306,12 @@ TEST_F(TestTrigger, deleteTrigger)
 {
     EXPECT_CALL(storageMock, remove(to_file_path(sut->getId())));
     EXPECT_CALL(*triggerManagerMockPtr, removeTrigger(sut.get()));
+    for (const auto& reportId : triggerParams.reportIds())
+    {
+        EXPECT_CALL(
+            *reportManagerMockPtr,
+            updateTriggerIds(reportId, sut->getId(), TriggerIdUpdate::Remove));
+    }
     auto ec = deleteTrigger(sut->getPath());
     EXPECT_THAT(ec, Eq(boost::system::errc::success));
 }
@@ -252,7 +333,7 @@ TEST_F(TestTrigger, settingPersistencyToFalseRemovesTriggerFromStorage)
                 Eq(persistent));
 }
 
-class TestTriggerErrors : public TestTrigger
+class TestTriggerInitialization : public TestTrigger
 {
   public:
     void SetUp() override
@@ -261,7 +342,8 @@ class TestTriggerErrors : public TestTrigger
     nlohmann::json storedConfiguration;
 };
 
-TEST_F(TestTriggerErrors, exceptionDuringTriggerStoreDisablesPersistency)
+TEST_F(TestTriggerInitialization,
+       exceptionDuringTriggerStoreDisablesPersistency)
 {
     EXPECT_CALL(storageMock, store(_, _))
         .WillOnce(Throw(std::runtime_error("Generic error!")));
@@ -271,12 +353,24 @@ TEST_F(TestTriggerErrors, exceptionDuringTriggerStoreDisablesPersistency)
     EXPECT_THAT(getProperty<bool>(sut->getPath(), "Persistent"), Eq(false));
 }
 
-TEST_F(TestTriggerErrors, creatingTriggerThrowsExceptionWhenIdIsInvalid)
+TEST_F(TestTriggerInitialization, creatingTriggerThrowsExceptionWhenIdIsInvalid)
 {
     EXPECT_CALL(storageMock, store(_, _)).Times(0);
 
     EXPECT_THROW(makeTrigger(triggerParams.id("inv?lidId")),
                  sdbusplus::exception::SdBusError);
+}
+
+TEST_F(TestTriggerInitialization, creatingTriggerUpdatesTriggersIdsInReports)
+{
+    for (const auto& reportId : triggerParams.reportIds())
+    {
+        EXPECT_CALL(*reportManagerMockPtr,
+                    updateTriggerIds(reportId, triggerParams.id(),
+                                     TriggerIdUpdate::Add));
+    }
+
+    sut = makeTrigger(triggerParams);
 }
 
 class TestTriggerStore : public TestTrigger

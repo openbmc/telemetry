@@ -32,9 +32,11 @@ ReadingParameters
 ReportManager::ReportManager(
     std::unique_ptr<interfaces::ReportFactory> reportFactoryIn,
     std::unique_ptr<interfaces::JsonStorage> reportStorageIn,
-    const std::shared_ptr<sdbusplus::asio::object_server>& objServerIn) :
+    const std::shared_ptr<sdbusplus::asio::object_server>& objServerIn,
+    std::unique_ptr<interfaces::TriggerManager>& triggerManagerIn) :
     reportFactory(std::move(reportFactoryIn)),
-    reportStorage(std::move(reportStorageIn)), objServer(objServerIn)
+    reportStorage(std::move(reportStorageIn)), objServer(objServerIn),
+    triggerManager(triggerManagerIn)
 {
     reports.reserve(maxReports);
 
@@ -223,9 +225,16 @@ interfaces::Report& ReportManager::addReport(
     verifyAddReport(id, name, reportingType, interval, reportUpdates,
                     appendLimit, labeledMetricParams);
 
-    reports.emplace_back(reportFactory->make(
-        id, name, reportingType, reportActions, interval, appendLimit,
-        reportUpdates, *this, *reportStorage, labeledMetricParams, enabled));
+    std::vector<std::string> triggerIds;
+    if (triggerManager)
+    {
+        triggerIds = triggerManager->getTriggerIdsForReport(id);
+    }
+
+    reports.emplace_back(
+        reportFactory->make(id, name, reportingType, reportActions, interval,
+                            appendLimit, reportUpdates, *this, *reportStorage,
+                            labeledMetricParams, enabled, triggerIds));
     return *reports.back();
 }
 
@@ -288,5 +297,19 @@ void ReportManager::updateReport(const std::string& id)
             report->updateReadings();
             return;
         }
+    }
+}
+
+void ReportManager::updateTriggerIds(const std::string& reportId,
+                                     const std::string& triggerId,
+                                     TriggerIdUpdate updateType)
+{
+    if (auto res = std::find_if(reports.begin(), reports.end(),
+                                [&reportId](const auto& report) {
+                                    return report->getId() == reportId;
+                                });
+        res != reports.end())
+    {
+        (*res)->updateTriggerIds(triggerId, updateType);
     }
 }

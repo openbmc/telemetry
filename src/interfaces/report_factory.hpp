@@ -26,15 +26,14 @@ class ReportFactory
         convertMetricParams(boost::asio::yield_context& yield,
                             const ReadingParameters& metricParams) const = 0;
 
-    virtual std::unique_ptr<interfaces::Report>
-        make(const std::string& id, const std::string& name,
-             const ReportingType reportingType,
-             const std::vector<ReportAction>& reportActions,
-             Milliseconds period, uint64_t appendLimit,
-             const ReportUpdates reportUpdates, ReportManager& reportManager,
-             JsonStorage& reportStorage,
-             std::vector<LabeledMetricParameters> labeledMetricParams,
-             bool enabled) const = 0;
+    virtual std::unique_ptr<interfaces::Report> make(
+        const std::string& id, const std::string& name,
+        const ReportingType reportingType,
+        const std::vector<ReportAction>& reportActions, Milliseconds period,
+        uint64_t appendLimit, const ReportUpdates reportUpdates,
+        ReportManager& reportManager, JsonStorage& reportStorage,
+        std::vector<LabeledMetricParameters> labeledMetricParams, bool enabled,
+        const std::vector<std::string>& triggerIds) const = 0;
 };
 
 } // namespace interfaces

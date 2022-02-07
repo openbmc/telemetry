@@ -4,6 +4,7 @@
 #include "interfaces/report.hpp"
 #include "interfaces/report_factory.hpp"
 #include "interfaces/report_manager.hpp"
+#include "interfaces/trigger_manager.hpp"
 #include "report.hpp"
 
 #include <systemd/sd-bus-protocol.h>
@@ -21,7 +22,8 @@ class ReportManager : public interfaces::ReportManager
     ReportManager(
         std::unique_ptr<interfaces::ReportFactory> reportFactory,
         std::unique_ptr<interfaces::JsonStorage> reportStorage,
-        const std::shared_ptr<sdbusplus::asio::object_server>& objServer);
+        const std::shared_ptr<sdbusplus::asio::object_server>& objServer,
+        std::unique_ptr<interfaces::TriggerManager>& triggerManager);
     ~ReportManager() = default;
 
     ReportManager(const ReportManager&) = delete;
@@ -31,6 +33,9 @@ class ReportManager : public interfaces::ReportManager
 
     void removeReport(const interfaces::Report* report) override;
     void updateReport(const std::string& id) override;
+    void updateTriggerIds(const std::string& reportId,
+                          const std::string& triggerId,
+                          TriggerIdUpdate updateType) override;
 
   private:
     std::unique_ptr<interfaces::ReportFactory> reportFactory;
@@ -38,6 +43,7 @@ class ReportManager : public interfaces::ReportManager
     std::shared_ptr<sdbusplus::asio::object_server> objServer;
     std::unique_ptr<sdbusplus::asio::dbus_interface> reportManagerIface;
     std::vector<std::unique_ptr<interfaces::Report>> reports;
+    std::unique_ptr<interfaces::TriggerManager>& triggerManager;
 
     void verifyAddReport(
         const std::string& reportId, const std::string& reportName,
