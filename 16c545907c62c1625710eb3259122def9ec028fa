@@ -875,6 +875,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "153a9eac_851f4d12",
+        "filename": "src/utils/conversion_trigger.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1001148
+      },
+      "writtenOn": "2022-02-07T14:32:07Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "432c68fd_e32aed99",
+      "range": {
+        "startLine": 95,
+        "startChar": 8,
+        "endLine": 96,
+        "endChar": 28
+      },
+      "revId": "16c545907c62c1625710eb3259122def9ec028fa",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "8da88df8_74f0884c",
