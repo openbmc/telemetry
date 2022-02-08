@@ -23,7 +23,5 @@ class TriggerMock : public interfaces::Trigger
 
     MOCK_METHOD(std::string, getId, (), (const, override));
     MOCK_METHOD(std::string, getPath, (), (const, override));
-    MOCK_METHOD(const std::vector<std::string>&, getReportIds, (),
-                (const, override));
     MOCK_METHOD(void, Die, ());
 };

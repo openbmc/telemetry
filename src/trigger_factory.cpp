@@ -14,10 +14,9 @@ namespace ts = utils::tstring;
 TriggerFactory::TriggerFactory(
     std::shared_ptr<sdbusplus::asio::connection> bus,
     std::shared_ptr<sdbusplus::asio::object_server> objServer,
-    SensorCache& sensorCache, interfaces::ReportManager& reportManager) :
+    SensorCache& sensorCache) :
     bus(std::move(bus)),
-    objServer(std::move(objServer)), sensorCache(sensorCache),
-    reportManager(reportManager)
+    objServer(std::move(objServer)), sensorCache(sensorCache)
 {}
 
 void TriggerFactory::updateDiscreteThresholds(
@@ -159,7 +158,7 @@ void TriggerFactory::makeDiscreteThreshold(
     std::string thresholdValue = thresholdParam.at_label<ts::ThresholdValue>();
 
     action::discrete::fillActions(actions, triggerActions, severity,
-                                  reportManager, reportIds);
+                                  bus->get_io_context(), reportIds);
 
     thresholds.emplace_back(std::make_shared<DiscreteThreshold>(
         bus->get_io_context(), sensors, std::move(actions),
@@ -182,7 +181,7 @@ void TriggerFactory::makeNumericThreshold(
     auto thresholdValue = double{thresholdParam.at_label<ts::ThresholdValue>()};
 
     action::numeric::fillActions(actions, triggerActions, type, thresholdValue,
-                                 reportManager, reportIds);
+                                 bus->get_io_context(), reportIds);
 
     thresholds.emplace_back(std::make_shared<NumericThreshold>(
         bus->get_io_context(), sensors, std::move(actions), dwellTime,
@@ -198,7 +197,7 @@ void TriggerFactory::makeOnChangeThreshold(
     std::vector<std::unique_ptr<interfaces::TriggerAction>> actions;
 
     action::discrete::onChange::fillActions(actions, triggerActions,
-                                            reportManager, reportIds);
+                                            bus->get_io_context(), reportIds);
 
     thresholds.emplace_back(
         std::make_shared<OnChangeThreshold>(sensors, std::move(actions)));
@@ -227,8 +226,7 @@ std::unique_ptr<interfaces::Trigger> TriggerFactory::make(
 
     return std::make_unique<Trigger>(
         bus->get_io_context(), objServer, id, name, triggerActions, reportIds,
-        std::move(thresholds), triggerManager, triggerStorage, *this, sensors,
-        reportManager);
+        std::move(thresholds), triggerManager, triggerStorage, *this, sensors);
 }
 
 Sensors TriggerFactory::getSensors(

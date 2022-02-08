@@ -94,6 +94,7 @@ executable(
         'src/types/report_types.cpp',
         'src/utils/conversion_trigger.cpp',
         'src/utils/generate_id.cpp',
+        'src/utils/messanger_service.cpp',
     ],
     dependencies: [
         boost,
