@@ -36,9 +36,3 @@ using Readings = std::tuple<uint64_t, std::vector<ReadingData>>;
 
 ReadingParameters
     toReadingParameters(const std::vector<LabeledMetricParameters>& labeled);
-
-enum class TriggerIdUpdate
-{
-    Add,
-    Remove
-};

@@ -1,8 +1,11 @@
 #include "trigger.hpp"
 
+#include "messages/collect_trigger_id.hpp"
+#include "messages/trigger_presence_changed_ind.hpp"
 #include "trigger_manager.hpp"
 #include "types/report_types.hpp"
 #include "types/trigger_types.hpp"
+#include "utils/contains.hpp"
 #include "utils/conversion_trigger.hpp"
 #include "utils/transform.hpp"
 
@@ -17,15 +20,14 @@ Trigger::Trigger(
     std::vector<std::shared_ptr<interfaces::Threshold>>&& thresholdsIn,
     interfaces::TriggerManager& triggerManager,
     interfaces::JsonStorage& triggerStorageIn,
-    const interfaces::TriggerFactory& triggerFactory, Sensors sensorsIn,
-    interfaces::ReportManager& reportManagerIn) :
+    const interfaces::TriggerFactory& triggerFactory, Sensors sensorsIn) :
     id(idIn),
     name(nameIn), triggerActions(std::move(triggerActionsIn)),
     path(triggerDir + id), reportIds(std::move(reportIdsIn)),
     thresholds(std::move(thresholdsIn)),
     fileName(std::to_string(std::hash<std::string>{}(id))),
     triggerStorage(triggerStorageIn), sensors(std::move(sensorsIn)),
-    reportManager(reportManagerIn)
+    messanger(ioc)
 {
     deleteIface = objServer->add_unique_interface(
         path, deleteIfaceName, [this, &ioc, &triggerManager](auto& dbusIface) {
@@ -34,11 +36,8 @@ Trigger::Trigger(
                 {
                     triggerStorage.remove(fileName);
                 }
-                for (const auto& reportId : *reportIds)
-                {
-                    reportManager.updateTriggerIds(reportId, id,
-                                                   TriggerIdUpdate::Remove);
-                }
+                messanger.send(messages::TriggerPresenceChangedInd{
+                    messages::Presence::Removed, id, {}});
                 boost::asio::post(ioc, [this, &triggerManager] {
                     triggerManager.removeTrigger(this);
                 });
@@ -114,10 +113,9 @@ Trigger::Trigger(
                 sdbusplus::vtable::property_::emits_change,
                 [this](auto newVal, auto& oldVal) {
                     TriggerManager::verifyReportIds(newVal);
-                    updateTriggerIdsInReports(newVal);
-                    reportIds->clear();
-                    std::copy(newVal.begin(), newVal.end(),
-                              std::back_inserter(*reportIds));
+                    *reportIds = newVal;
+                    messanger.send(messages::TriggerPresenceChangedInd{
+                        messages::Presence::Exist, id, *reportIds});
                     oldVal = std::move(newVal);
                     return 1;
                 },
@@ -155,10 +153,16 @@ Trigger::Trigger(
         threshold->initialize();
     }
 
-    for (const auto& reportId : *reportIds)
-    {
-        reportManager.updateTriggerIds(reportId, id, TriggerIdUpdate::Add);
-    }
+    messanger.on_receive<messages::CollectTriggerIdReq>(
+        [this](const auto& msg) {
+            if (utils::contains(*reportIds, msg.reportId))
+            {
+                messanger.send(messages::CollectTriggerIdResp{id});
+            }
+        });
+
+    messanger.send(messages::TriggerPresenceChangedInd{
+        messages::Presence::Exist, id, *reportIds});
 }
 
 bool Trigger::storeConfiguration() const
@@ -199,27 +203,4 @@ bool Trigger::storeConfiguration() const
         return false;
     }
     return true;
-}
-
-void Trigger::updateTriggerIdsInReports(
-    const std::vector<std::string>& newReportIds)
-{
-    std::vector<std::string> toBeRemoved, toBeAdded;
-    size_t maxSize = std::max(reportIds->size(), newReportIds.size());
-    toBeRemoved.reserve(maxSize);
-    toBeAdded.reserve(maxSize);
-    std::set_difference(reportIds->begin(), reportIds->end(),
-                        newReportIds.begin(), newReportIds.end(),
-                        std::back_inserter(toBeRemoved));
-    std::set_difference(newReportIds.begin(), newReportIds.end(),
-                        reportIds->begin(), reportIds->end(),
-                        std::back_inserter(toBeAdded));
-    for (auto& reportId : toBeRemoved)
-    {
-        reportManager.updateTriggerIds(reportId, id, TriggerIdUpdate::Remove);
-    }
-    for (auto& reportId : toBeAdded)
-    {
-        reportManager.updateTriggerIds(reportId, id, TriggerIdUpdate::Add);
-    }
 }

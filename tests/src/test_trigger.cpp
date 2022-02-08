@@ -1,5 +1,7 @@
 #include "dbus_environment.hpp"
 #include "helpers.hpp"
+#include "messages/collect_trigger_id.hpp"
+#include "messages/trigger_presence_changed_ind.hpp"
 #include "mocks/json_storage_mock.hpp"
 #include "mocks/report_manager_mock.hpp"
 #include "mocks/sensor_mock.hpp"
@@ -10,6 +12,7 @@
 #include "trigger.hpp"
 #include "trigger_manager.hpp"
 #include "utils/conversion_trigger.hpp"
+#include "utils/messanger.hpp"
 #include "utils/transform.hpp"
 #include "utils/tstring.hpp"
 
@@ -44,8 +47,17 @@ class TestTrigger : public Test
     std::unique_ptr<TriggerFactoryMock> triggerFactoryMockPtr =
         std::make_unique<NiceMock<TriggerFactoryMock>>();
     testing::NiceMock<StorageMock> storageMock;
+    NiceMock<MockFunction<void(const messages::TriggerPresenceChangedInd)>>
+        triggerPresenceChanged;
     std::vector<std::shared_ptr<interfaces::Threshold>> thresholdMocks;
+    utils::Messanger messanger;
     std::unique_ptr<Trigger> sut;
+
+    TestTrigger() : messanger(DbusEnvironment::getIoc())
+    {
+        messanger.on_receive<messages::TriggerPresenceChangedInd>(
+            [this](const auto& msg) { triggerPresenceChanged.Call(msg); });
+    }
 
     void SetUp() override
     {
@@ -73,8 +85,7 @@ class TestTrigger : public Test
                 params.reportIds().begin(), params.reportIds().end()),
             std::vector<std::shared_ptr<interfaces::Threshold>>(thresholdMocks),
             *triggerManagerMockPtr, storageMock, *triggerFactoryMockPtr,
-            SensorMock::makeSensorMocks(params.sensors()),
-            *reportManagerMockPtr);
+            SensorMock::makeSensorMocks(params.sensors()));
     }
 
     static interfaces::JsonStorage::FilePath to_file_path(std::string name)
@@ -140,7 +151,6 @@ TEST_F(TestTrigger, checkBasicGetters)
 {
     EXPECT_THAT(sut->getId(), Eq(triggerParams.id()));
     EXPECT_THAT(sut->getPath(), Eq(Trigger::triggerDir + triggerParams.id()));
-    EXPECT_THAT(sut->getReportIds(), Eq(triggerParams.reportIds()));
 }
 
 TEST_F(TestTrigger, setPropertyNameToCorrectValue)
@@ -159,56 +169,28 @@ TEST_F(TestTrigger, setPropertyReportNames)
     EXPECT_THAT(
         getProperty<std::vector<std::string>>(sut->getPath(), "ReportNames"),
         Eq(newNames));
-    EXPECT_THAT(
-        getProperty<std::vector<std::string>>(sut->getPath(), "ReportNames"),
-        Eq(sut->getReportIds()));
 }
 
-TEST_F(TestTrigger, settingPropertyReportNamesUptadesTriggerIdsInReports)
+TEST_F(TestTrigger, sendsUpdateWhenReportNamesChanges)
 {
-    std::vector<std::string> newPropertyVal = {"abc", "one", "two"};
+    const std::vector<std::string> newPropertyVal = {"abc", "one", "two"};
 
-    for (const auto& reportId : newPropertyVal)
-    {
-        EXPECT_CALL(
-            *reportManagerMockPtr,
-            updateTriggerIds(reportId, sut->getId(), TriggerIdUpdate::Add));
-    }
-    for (const auto& reportId : triggerParams.reportIds())
-    {
-        EXPECT_CALL(
-            *reportManagerMockPtr,
-            updateTriggerIds(reportId, sut->getId(), TriggerIdUpdate::Remove));
-    }
+    EXPECT_CALL(triggerPresenceChanged,
+                Call(FieldsAre(messages::Presence::Exist, triggerParams.id(),
+                               UnorderedElementsAreArray(newPropertyVal))));
 
     EXPECT_THAT(setProperty(sut->getPath(), "ReportNames", newPropertyVal),
                 Eq(boost::system::errc::success));
 }
 
-TEST_F(TestTrigger, settingPropertyReportNamesWillNotRemoveTriggerIdsInReports)
+TEST_F(TestTrigger, sendsUpdateWhenReportNamesChangesToSameValue)
 {
-    std::vector<std::string> newPropertyVal = triggerParams.reportIds();
-    std::vector<std::string> newNames{"abc", "one", "two"};
-    newPropertyVal.insert(newPropertyVal.end(), newNames.begin(),
-                          newNames.end());
+    const std::vector<std::string> newPropertyVal = triggerParams.reportIds();
 
-    for (const auto& reportId : newNames)
-    {
-        EXPECT_CALL(
-            *reportManagerMockPtr,
-            updateTriggerIds(reportId, sut->getId(), TriggerIdUpdate::Add));
-    }
-
-    EXPECT_THAT(setProperty(sut->getPath(), "ReportNames", newPropertyVal),
-                Eq(boost::system::errc::success));
-}
-
-TEST_F(TestTrigger,
-       settingPropertyReportNamesToSameValueWillNotUpdateTriggerIdsInReports)
-{
-    std::vector<std::string> newPropertyVal = triggerParams.reportIds();
-
-    EXPECT_CALL(*reportManagerMockPtr, updateTriggerIds(_, _, _)).Times(0);
+    EXPECT_CALL(
+        triggerPresenceChanged,
+        Call(FieldsAre(messages::Presence::Exist, triggerParams.id(),
+                       UnorderedElementsAreArray(triggerParams.reportIds()))));
 
     EXPECT_THAT(setProperty(sut->getPath(), "ReportNames", newPropertyVal),
                 Eq(boost::system::errc::success));
@@ -217,9 +199,9 @@ TEST_F(TestTrigger,
 TEST_F(TestTrigger,
        DISABLED_settingPropertyReportNamesThrowsExceptionWhenDuplicateReportIds)
 {
-    std::vector<std::string> newPropertyVal{"trigger1", "trigger2", "trigger1"};
+    std::vector<std::string> newPropertyVal{"report1", "report2", "report1"};
 
-    EXPECT_CALL(*reportManagerMockPtr, updateTriggerIds(_, _, _)).Times(0);
+    EXPECT_CALL(triggerPresenceChanged, Call(_)).Times(0);
 
     EXPECT_THAT(setProperty(sut->getPath(), "ReportNames", newPropertyVal),
                 Eq(boost::system::errc::invalid_argument));
@@ -306,12 +288,17 @@ TEST_F(TestTrigger, deleteTrigger)
 {
     EXPECT_CALL(storageMock, remove(to_file_path(sut->getId())));
     EXPECT_CALL(*triggerManagerMockPtr, removeTrigger(sut.get()));
-    for (const auto& reportId : triggerParams.reportIds())
-    {
-        EXPECT_CALL(
-            *reportManagerMockPtr,
-            updateTriggerIds(reportId, sut->getId(), TriggerIdUpdate::Remove));
-    }
+
+    auto ec = deleteTrigger(sut->getPath());
+    EXPECT_THAT(ec, Eq(boost::system::errc::success));
+}
+
+TEST_F(TestTrigger, sendUpdateWhenTriggerIsDeleted)
+{
+    EXPECT_CALL(triggerPresenceChanged,
+                Call(FieldsAre(messages::Presence::Removed, triggerParams.id(),
+                               UnorderedElementsAre())));
+
     auto ec = deleteTrigger(sut->getPath());
     EXPECT_THAT(ec, Eq(boost::system::errc::success));
 }
@@ -363,12 +350,10 @@ TEST_F(TestTriggerInitialization, creatingTriggerThrowsExceptionWhenIdIsInvalid)
 
 TEST_F(TestTriggerInitialization, creatingTriggerUpdatesTriggersIdsInReports)
 {
-    for (const auto& reportId : triggerParams.reportIds())
-    {
-        EXPECT_CALL(*reportManagerMockPtr,
-                    updateTriggerIds(reportId, triggerParams.id(),
-                                     TriggerIdUpdate::Add));
-    }
+    EXPECT_CALL(
+        triggerPresenceChanged,
+        Call(FieldsAre(messages::Presence::Exist, triggerParams.id(),
+                       UnorderedElementsAreArray(triggerParams.reportIds()))));
 
     sut = makeTrigger(triggerParams);
 }

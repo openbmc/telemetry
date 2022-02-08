@@ -174,19 +174,3 @@ void TriggerManager::loadFromPersistent()
         }
     }
 }
-
-std::vector<std::string>
-    TriggerManager::getTriggerIdsForReport(const std::string& reportId) const
-{
-    std::vector<std::string> result;
-    for (const auto& trigger : triggers)
-    {
-        const auto& reportIds = trigger->getReportIds();
-        if (std::find(reportIds.begin(), reportIds.end(), reportId) !=
-            reportIds.end())
-        {
-            result.emplace_back(trigger->getId());
-        }
-    }
-    return result;
-}

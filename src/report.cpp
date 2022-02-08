@@ -1,5 +1,8 @@
 #include "report.hpp"
 
+#include "messages/collect_trigger_id.hpp"
+#include "messages/trigger_presence_changed_ind.hpp"
+#include "messages/update_report_ind.hpp"
 #include "report_manager.hpp"
 #include "utils/clock.hpp"
 #include "utils/contains.hpp"
@@ -21,8 +24,7 @@ Report::Report(boost::asio::io_context& ioc,
                interfaces::ReportManager& reportManager,
                interfaces::JsonStorage& reportStorageIn,
                std::vector<std::shared_ptr<interfaces::Metric>> metricsIn,
-               const bool enabledIn, std::unique_ptr<interfaces::Clock> clock,
-               const std::vector<std::string>& triggerIdsIn) :
+               const bool enabledIn, std::unique_ptr<interfaces::Clock> clock) :
     id(reportId),
     name(reportName), reportingType(reportingTypeIn), interval(intervalIn),
     reportActions(std::move(reportActionsIn)),
@@ -31,8 +33,8 @@ Report::Report(boost::asio::io_context& ioc,
     reportUpdates(reportUpdatesIn),
     readingsBuffer(deduceBufferSize(reportUpdates, reportingType)),
     objServer(objServer), metrics(std::move(metricsIn)), timer(ioc),
-    triggerIds(triggerIdsIn.begin(), triggerIdsIn.end()),
-    reportStorage(reportStorageIn), enabled(enabledIn), clock(std::move(clock))
+    triggerIds(collectTriggerIds(ioc)), reportStorage(reportStorageIn),
+    enabled(enabledIn), clock(std::move(clock)), messanger(ioc)
 {
     readingParameters =
         toReadingParameters(utils::transform(metrics, [](const auto& metric) {
@@ -78,6 +80,39 @@ Report::Report(boost::asio::io_context& ioc,
             metric->initialize();
         }
     }
+
+    messanger.on_receive<messages::TriggerPresenceChangedInd>(
+        [this](const auto& msg) {
+            const auto oldSize = triggerIds.size();
+
+            if (msg.presence == messages::Presence::Exist)
+            {
+                if (utils::contains(msg.reportIds, id))
+                {
+                    triggerIds.insert(msg.triggerId);
+                }
+                else if (!utils::contains(msg.reportIds, id))
+                {
+                    triggerIds.erase(msg.triggerId);
+                }
+            }
+            else if (msg.presence == messages::Presence::Removed)
+            {
+                triggerIds.erase(msg.triggerId);
+            }
+
+            if (triggerIds.size() != oldSize)
+            {
+                reportIface->signal_property("TriggerIds");
+            }
+        });
+
+    messanger.on_receive<messages::UpdateReportInd>([this](const auto& msg) {
+        if (utils::contains(msg.reportIds, id))
+        {
+            updateReadings();
+        }
+    });
 }
 
 uint64_t Report::getSensorCount(
@@ -377,21 +412,17 @@ interfaces::JsonStorage::FilePath Report::fileName() const
         std::to_string(std::hash<std::string>{}(id))};
 }
 
-void Report::updateTriggerIds(const std::string& triggerId,
-                              TriggerIdUpdate updateType)
+std::unordered_set<std::string>
+    Report::collectTriggerIds(boost::asio::io_context& ioc) const
 {
-    if (updateType == TriggerIdUpdate::Add)
-    {
-        if (triggerIds.insert(triggerId).second)
-        {
-            reportIface->signal_property("TriggerIds");
-        }
-    }
-    else if (updateType == TriggerIdUpdate::Remove)
-    {
-        if (triggerIds.erase(triggerId) > 0)
-        {
-            reportIface->signal_property("TriggerIds");
-        }
-    }
+    utils::Messanger tmp(ioc);
+
+    auto result = std::unordered_set<std::string>();
+
+    tmp.on_receive<messages::CollectTriggerIdResp>(
+        [&result](const auto& msg) { result.insert(msg.triggerId); });
+
+    tmp.send(messages::CollectTriggerIdReq{id});
+
+    return result;
 }

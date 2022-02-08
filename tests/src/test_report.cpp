@@ -1,6 +1,9 @@
 #include "dbus_environment.hpp"
 #include "fakes/clock_fake.hpp"
 #include "helpers.hpp"
+#include "messages/collect_trigger_id.hpp"
+#include "messages/trigger_presence_changed_ind.hpp"
+#include "messages/update_report_ind.hpp"
 #include "mocks/json_storage_mock.hpp"
 #include "mocks/metric_mock.hpp"
 #include "mocks/report_manager_mock.hpp"
@@ -10,6 +13,7 @@
 #include "utils/clock.hpp"
 #include "utils/contains.hpp"
 #include "utils/conv_container.hpp"
+#include "utils/messanger.hpp"
 #include "utils/transform.hpp"
 #include "utils/tstring.hpp"
 
@@ -34,10 +38,11 @@ class TestReport : public Test
     std::unique_ptr<ClockFake> clockFakePtr = std::make_unique<ClockFake>();
     ClockFake& clockFake = *clockFakePtr;
     std::unique_ptr<Report> sut;
+    utils::Messanger messanger;
 
     MockFunction<void()> checkPoint;
 
-    TestReport()
+    TestReport() : messanger(DbusEnvironment::getIoc())
     {
         clockFake.system.set(systemTimestamp);
     }
@@ -86,7 +91,7 @@ class TestReport : public Test
             params.reportUpdates(), *reportManagerMock, storageMock,
             utils::convContainer<std::shared_ptr<interfaces::Metric>>(
                 metricMocks),
-            params.enabled(), std::move(clockFakePtr), params.triggerIds());
+            params.enabled(), std::move(clockFakePtr));
     }
 
     template <class T>
@@ -256,57 +261,70 @@ TEST_F(TestReport, deleteReportExpectThatFileIsRemoveFromStorage)
     EXPECT_THAT(ec, Eq(boost::system::errc::success));
 }
 
-TEST_F(TestReport, triggerIdsAreUpdatedProperly)
+TEST_F(TestReport, updatesTriggerIdWhenTriggerIsAdded)
 {
-    sut->updateTriggerIds("trigger1", TriggerIdUpdate::Add);
-    EXPECT_THAT(
-        getProperty<std::vector<std::string>>(sut->getPath(), "TriggerIds"),
-        UnorderedElementsAre("trigger1"));
+    utils::Messanger messanger(DbusEnvironment::getIoc());
 
-    sut->updateTriggerIds("trigger2", TriggerIdUpdate::Add);
-    EXPECT_THAT(
-        getProperty<std::vector<std::string>>(sut->getPath(), "TriggerIds"),
-        UnorderedElementsAre("trigger1", "trigger2"));
+    messanger.send(messages::TriggerPresenceChangedInd{
+        messages::Presence::Exist, "trigger1", {defaultParams.reportId()}});
+    messanger.send(messages::TriggerPresenceChangedInd{
+        messages::Presence::Exist, "trigger1", {defaultParams.reportId()}});
+    messanger.send(messages::TriggerPresenceChangedInd{
+        messages::Presence::Exist, "trigger2", {"someOtherReport"}});
+    messanger.send(messages::TriggerPresenceChangedInd{
+        messages::Presence::Exist,
+        "trigger3",
+        {"someOtherReport", defaultParams.reportId()}});
 
-    sut->updateTriggerIds("trigger3", TriggerIdUpdate::Add);
     EXPECT_THAT(
         getProperty<std::vector<std::string>>(sut->getPath(), "TriggerIds"),
-        UnorderedElementsAre("trigger1", "trigger2", "trigger3"));
-
-    sut->updateTriggerIds("trigger1", TriggerIdUpdate::Remove);
-    EXPECT_THAT(
-        getProperty<std::vector<std::string>>(sut->getPath(), "TriggerIds"),
-        UnorderedElementsAre("trigger2", "trigger3"));
+        UnorderedElementsAre("trigger1", "trigger3"));
 }
 
-TEST_F(TestReport, successWhenRemovingSameTriggerIdMultipleTimes)
+TEST_F(TestReport, updatesTriggerIdWhenTriggerIsRemoved)
 {
-    sut->updateTriggerIds("trigger1", TriggerIdUpdate::Add);
-    sut->updateTriggerIds("trigger2", TriggerIdUpdate::Add);
-    sut->updateTriggerIds("trigger1", TriggerIdUpdate::Remove);
-    sut->updateTriggerIds("trigger1", TriggerIdUpdate::Remove);
+    utils::Messanger messanger(DbusEnvironment::getIoc());
+
+    messanger.send(messages::TriggerPresenceChangedInd{
+        messages::Presence::Exist, "trigger1", {defaultParams.reportId()}});
+    messanger.send(messages::TriggerPresenceChangedInd{
+        messages::Presence::Exist, "trigger2", {defaultParams.reportId()}});
+    messanger.send(messages::TriggerPresenceChangedInd{
+        messages::Presence::Exist, "trigger3", {defaultParams.reportId()}});
+
+    messanger.send(messages::TriggerPresenceChangedInd{
+        messages::Presence::Removed, "trigger1", {defaultParams.reportId()}});
+    messanger.send(messages::TriggerPresenceChangedInd{
+        messages::Presence::Removed, "trigger2", {}});
+    messanger.send(messages::TriggerPresenceChangedInd{
+        messages::Presence::Removed, "trigger1", {defaultParams.reportId()}});
+
     EXPECT_THAT(
         getProperty<std::vector<std::string>>(sut->getPath(), "TriggerIds"),
-        UnorderedElementsAre("trigger2"));
+        UnorderedElementsAre("trigger3"));
 }
 
-TEST_F(TestReport, successWhenRemovingNonExistingTriggerId)
+TEST_F(TestReport, updatesTriggerIdWhenTriggerIsModified)
 {
-    sut->updateTriggerIds("trigger1", TriggerIdUpdate::Add);
-    sut->updateTriggerIds("notTrigger", TriggerIdUpdate::Remove);
-    EXPECT_THAT(
-        getProperty<std::vector<std::string>>(sut->getPath(), "TriggerIds"),
-        UnorderedElementsAre("trigger1"));
-}
+    utils::Messanger messanger(DbusEnvironment::getIoc());
 
-TEST_F(TestReport, noDuplicatesWhenSameTriggerIdIsAdded)
-{
-    sut->updateTriggerIds("trigger1", TriggerIdUpdate::Add);
-    sut->updateTriggerIds("trigger2", TriggerIdUpdate::Add);
-    sut->updateTriggerIds("trigger1", TriggerIdUpdate::Add);
+    messanger.send(messages::TriggerPresenceChangedInd{
+        messages::Presence::Exist, "trigger1", {defaultParams.reportId()}});
+    messanger.send(messages::TriggerPresenceChangedInd{
+        messages::Presence::Exist, "trigger2", {defaultParams.reportId()}});
+    messanger.send(messages::TriggerPresenceChangedInd{
+        messages::Presence::Exist, "trigger3", {defaultParams.reportId()}});
+
+    messanger.send(messages::TriggerPresenceChangedInd{
+        messages::Presence::Exist, "trigger1", {defaultParams.reportId()}});
+    messanger.send(messages::TriggerPresenceChangedInd{
+        messages::Presence::Exist, "trigger2", {}});
+    messanger.send(messages::TriggerPresenceChangedInd{
+        messages::Presence::Exist, "trigger3", {defaultParams.reportId()}});
+
     EXPECT_THAT(
         getProperty<std::vector<std::string>>(sut->getPath(), "TriggerIds"),
-        UnorderedElementsAre("trigger1", "trigger2"));
+        UnorderedElementsAre("trigger1", "trigger3"));
 }
 
 class TestReportStore :
@@ -462,29 +480,38 @@ TEST_P(TestReportAllReportTypes, returnPropertValueOfReportType)
                 Eq(GetParam().reportingType()));
 }
 
-TEST_P(TestReportAllReportTypes, updateReadingsCallEnabledPropertyOff)
+TEST_P(TestReportAllReportTypes, readingsAreUpdated)
+{
+    clockFake.system.advance(10ms);
+
+    messanger.send(messages::UpdateReportInd{{sut->getId()}});
+    const auto [timestamp, readings] =
+        getProperty<Readings>(sut->getPath(), "Readings");
+
+    EXPECT_THAT(Milliseconds{timestamp}, Eq(systemTimestamp + 10ms));
+}
+
+TEST_P(TestReportAllReportTypes, readingsAreNotUpdatedWhenReportIsDisabled)
 {
     clockFake.system.advance(10ms);
 
     setProperty(sut->getPath(), "Enabled", false);
-    sut->updateReadings();
+    messanger.send(messages::UpdateReportInd{{sut->getId()}});
     const auto [timestamp, readings] =
         getProperty<Readings>(sut->getPath(), "Readings");
 
-    EXPECT_THAT(getProperty<bool>(sut->getPath(), "Enabled"), Eq(false));
     EXPECT_THAT(Milliseconds{timestamp}, Eq(0ms));
 }
 
-TEST_P(TestReportAllReportTypes, updateReadingsCallEnabledPropertyOn)
+TEST_P(TestReportAllReportTypes, readingsAreNotUpdatedWhenReportIdDiffers)
 {
     clockFake.system.advance(10ms);
 
-    sut->updateReadings();
+    messanger.send(messages::UpdateReportInd{{sut->getId() + "x"s}});
     const auto [timestamp, readings] =
         getProperty<Readings>(sut->getPath(), "Readings");
 
-    EXPECT_THAT(getProperty<bool>(sut->getPath(), "Enabled"), Eq(true));
-    EXPECT_THAT(Milliseconds{timestamp}, Eq(systemTimestamp + 10ms));
+    EXPECT_THAT(Milliseconds{timestamp}, Eq(0ms));
 }
 
 class TestReportOnRequestType : public TestReport
@@ -714,7 +741,7 @@ TEST_P(TestReportWithReportUpdatesAndLimit,
 {
     for (int i = 0; i < 4; i++)
     {
-        sut->updateReadings();
+        messanger.send(messages::UpdateReportInd{{sut->getId()}});
     }
 
     const auto [timestamp, readings] =
@@ -841,7 +868,15 @@ TEST_F(TestReportInitialization, appendLimitSetToUintMaxIsStoredCorrectly)
 
 TEST_F(TestReportInitialization, triggerIdsPropertyIsInitialzed)
 {
-    sut = makeReport(ReportParams().triggerIds({"trigger1", "trigger2"}));
+    for (const auto& triggerId : {"trigger1", "trigger2"})
+    {
+        messanger.on_receive<messages::CollectTriggerIdReq>(
+            [&](const auto& msg) {
+                messanger.send(messages::CollectTriggerIdResp{triggerId});
+            });
+    }
+
+    sut = makeReport(ReportParams());
 
     EXPECT_THAT(
         getProperty<std::vector<std::string>>(sut->getPath(), "TriggerIds"),

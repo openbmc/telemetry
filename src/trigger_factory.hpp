@@ -14,8 +14,7 @@ class TriggerFactory : public interfaces::TriggerFactory
   public:
     TriggerFactory(std::shared_ptr<sdbusplus::asio::connection> bus,
                    std::shared_ptr<sdbusplus::asio::object_server> objServer,
-                   SensorCache& sensorCache,
-                   interfaces::ReportManager& reportManager);
+                   SensorCache& sensorCache);
 
     std::unique_ptr<interfaces::Trigger>
         make(const std::string& id, const std::string& name,
@@ -48,7 +47,6 @@ class TriggerFactory : public interfaces::TriggerFactory
     std::shared_ptr<sdbusplus::asio::connection> bus;
     std::shared_ptr<sdbusplus::asio::object_server> objServer;
     SensorCache& sensorCache;
-    interfaces::ReportManager& reportManager;
 
     Sensors getSensors(
         const std::vector<LabeledSensorInfo>& labeledSensorsInfo) const;

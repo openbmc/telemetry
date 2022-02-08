@@ -1,5 +1,5 @@
-gtest_dep = dependency('gtest', main: false, required: false, version: '>=1.10.0')
-gmock_dep = dependency('gmock', required: false, version: '>=1.10.0')
+gtest_dep = dependency('gtest', main: false, required: false, version: '>=1.11.0')
+gmock_dep = dependency('gmock', required: false, version: '>=1.11.0')
 if not gtest_dep.found() or not gmock_dep.found()
     gtest_proj = import('cmake').subproject('googletest')
     gtest_dep = gtest_proj.dependency('gtest')
@@ -29,6 +29,7 @@ test(
             '../src/types/report_types.cpp',
             '../src/utils/conversion_trigger.cpp',
             '../src/utils/generate_id.cpp',
+            '../src/utils/messanger_service.cpp',
             'src/dbus_environment.cpp',
             'src/main.cpp',
             'src/stubs/dbus_sensor_object.cpp',
