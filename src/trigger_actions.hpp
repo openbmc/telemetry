@@ -1,8 +1,9 @@
 #pragma once
 
-#include "interfaces/report_manager.hpp"
 #include "interfaces/trigger_action.hpp"
 #include "types/trigger_types.hpp"
+
+#include <boost/asio/io_context.hpp>
 
 namespace action
 {
@@ -44,7 +45,7 @@ class LogToRedfish : public interfaces::TriggerAction
 void fillActions(
     std::vector<std::unique_ptr<interfaces::TriggerAction>>& actionsIf,
     const std::vector<TriggerAction>& ActionsEnum, ::numeric::Type type,
-    double thresholdValue, interfaces::ReportManager& reportManager,
+    double thresholdValue, boost::asio::io_context& ioc,
     const std::shared_ptr<std::vector<std::string>>& reportIds);
 } // namespace numeric
 
@@ -83,7 +84,7 @@ class LogToRedfish : public interfaces::TriggerAction
 void fillActions(
     std::vector<std::unique_ptr<interfaces::TriggerAction>>& actionsIf,
     const std::vector<TriggerAction>& ActionsEnum,
-    ::discrete::Severity severity, interfaces::ReportManager& reportManager,
+    ::discrete::Severity severity, boost::asio::io_context& ioc,
     const std::shared_ptr<std::vector<std::string>>& reportIds);
 
 namespace onChange
@@ -110,8 +111,7 @@ class LogToRedfish : public interfaces::TriggerAction
 
 void fillActions(
     std::vector<std::unique_ptr<interfaces::TriggerAction>>& actionsIf,
-    const std::vector<TriggerAction>& ActionsEnum,
-    interfaces::ReportManager& reportManager,
+    const std::vector<TriggerAction>& ActionsEnum, boost::asio::io_context& ioc,
     const std::shared_ptr<std::vector<std::string>>& reportIds);
 } // namespace onChange
 
@@ -120,9 +120,9 @@ void fillActions(
 class UpdateReport : public interfaces::TriggerAction
 {
   public:
-    UpdateReport(interfaces::ReportManager& reportManager,
+    UpdateReport(boost::asio::io_context& ioc,
                  std::shared_ptr<std::vector<std::string>> ids) :
-        reportManager(reportManager),
+        ioc(ioc),
         reportIds(std::move(ids))
     {}
 
@@ -130,7 +130,7 @@ class UpdateReport : public interfaces::TriggerAction
                 double value) override;
 
   private:
-    interfaces::ReportManager& reportManager;
+    boost::asio::io_context& ioc;
     std::shared_ptr<std::vector<std::string>> reportIds;
 };
 } // namespace action

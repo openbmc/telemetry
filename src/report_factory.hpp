@@ -20,15 +20,16 @@ class ReportFactory : public interfaces::ReportFactory
         boost::asio::yield_context& yield,
         const ReadingParameters& metricParams) const override;
 
-    std::unique_ptr<interfaces::Report> make(
-        const std::string& reportId, const std::string& name,
-        const ReportingType reportingType,
-        const std::vector<ReportAction>& reportActions, Milliseconds period,
-        uint64_t appendLimitIn, const ReportUpdates reportUpdatesIn,
-        interfaces::ReportManager& reportManager,
-        interfaces::JsonStorage& reportStorage,
-        std::vector<LabeledMetricParameters> labeledMetricParams, bool enabled,
-        const std::vector<std::string>& triggerIds) const override;
+    std::unique_ptr<interfaces::Report>
+        make(const std::string& reportId, const std::string& name,
+             const ReportingType reportingType,
+             const std::vector<ReportAction>& reportActions,
+             Milliseconds period, uint64_t appendLimitIn,
+             const ReportUpdates reportUpdatesIn,
+             interfaces::ReportManager& reportManager,
+             interfaces::JsonStorage& reportStorage,
+             std::vector<LabeledMetricParameters> labeledMetricParams,
+             bool enabled) const override;
 
   private:
     Sensors getSensors(const std::vector<LabeledSensorInfo>& sensorPaths) const;

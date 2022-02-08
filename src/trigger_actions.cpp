@@ -1,5 +1,8 @@
 #include "trigger_actions.hpp"
 
+#include "messages/update_report_ind.hpp"
+#include "utils/messanger.hpp"
+
 #include <phosphor-logging/log.hpp>
 
 #include <ctime>
@@ -98,7 +101,7 @@ void LogToRedfish::commit(const std::string& sensorName, Milliseconds timestamp,
 void fillActions(
     std::vector<std::unique_ptr<interfaces::TriggerAction>>& actionsIf,
     const std::vector<TriggerAction>& ActionsEnum, ::numeric::Type type,
-    double thresholdValue, interfaces::ReportManager& reportManager,
+    double thresholdValue, boost::asio::io_context& ioc,
     const std::shared_ptr<std::vector<std::string>>& reportIds)
 {
     actionsIf.reserve(ActionsEnum.size());
@@ -121,7 +124,7 @@ void fillActions(
             case TriggerAction::UpdateReport:
             {
                 actionsIf.emplace_back(
-                    std::make_unique<UpdateReport>(reportManager, reportIds));
+                    std::make_unique<UpdateReport>(ioc, reportIds));
                 break;
             }
         }
@@ -184,7 +187,7 @@ void LogToRedfish::commit(const std::string& sensorName, Milliseconds timestamp,
 void fillActions(
     std::vector<std::unique_ptr<interfaces::TriggerAction>>& actionsIf,
     const std::vector<TriggerAction>& ActionsEnum,
-    ::discrete::Severity severity, interfaces::ReportManager& reportManager,
+    ::discrete::Severity severity, boost::asio::io_context& ioc,
     const std::shared_ptr<std::vector<std::string>>& reportIds)
 {
     actionsIf.reserve(ActionsEnum.size());
@@ -207,7 +210,7 @@ void fillActions(
             case TriggerAction::UpdateReport:
             {
                 actionsIf.emplace_back(
-                    std::make_unique<UpdateReport>(reportManager, reportIds));
+                    std::make_unique<UpdateReport>(ioc, reportIds));
                 break;
             }
         }
@@ -239,8 +242,7 @@ void LogToRedfish::commit(const std::string& sensorName, Milliseconds timestamp,
 
 void fillActions(
     std::vector<std::unique_ptr<interfaces::TriggerAction>>& actionsIf,
-    const std::vector<TriggerAction>& ActionsEnum,
-    interfaces::ReportManager& reportManager,
+    const std::vector<TriggerAction>& ActionsEnum, boost::asio::io_context& ioc,
     const std::shared_ptr<std::vector<std::string>>& reportIds)
 {
     actionsIf.reserve(ActionsEnum.size());
@@ -261,7 +263,7 @@ void fillActions(
             case TriggerAction::UpdateReport:
             {
                 actionsIf.emplace_back(
-                    std::make_unique<UpdateReport>(reportManager, reportIds));
+                    std::make_unique<UpdateReport>(ioc, reportIds));
                 break;
             }
         }
@@ -272,9 +274,12 @@ void fillActions(
 
 void UpdateReport::commit(const std::string&, Milliseconds, double)
 {
-    for (const auto& name : *reportIds)
+    if (reportIds->empty())
     {
-        reportManager.updateReport(name);
+        return;
     }
+
+    utils::Messanger messanger(ioc);
+    messanger.send(messages::UpdateReportInd{*reportIds});
 }
 } // namespace action

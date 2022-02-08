@@ -1,7 +1,11 @@
-#include "mocks/report_manager_mock.hpp"
+#include "dbus_environment.hpp"
+#include "messages/update_report_ind.hpp"
 #include "trigger_actions.hpp"
+#include "utils/messanger.hpp"
 
 #include <stdexcept>
+
+#include <gmock/gmock.h>
 
 using namespace testing;
 
@@ -218,20 +222,27 @@ TEST_F(TestLogToRedfishDiscreteOnChange, commitExpectNoThrow)
 class TestUpdateReport : public Test
 {
   public:
+    TestUpdateReport() : messanger(DbusEnvironment::getIoc())
+    {}
+
     void make(std::vector<std::string> names)
     {
+        messanger.on_receive<messages::UpdateReportInd>(
+            [this](const auto& msg) { updateReport.Call(msg); });
+
         sut = std::make_unique<UpdateReport>(
-            reportManager,
+            DbusEnvironment::getIoc(),
             std::make_shared<std::vector<std::string>>(std::move(names)));
     }
 
-    NiceMock<ReportManagerMock> reportManager;
+    utils::Messanger messanger;
+    NiceMock<MockFunction<void(const messages::UpdateReportInd&)>> updateReport;
     std::unique_ptr<UpdateReport> sut;
 };
 
 TEST_F(TestUpdateReport, commitWhenReportNameIsEmptyExpectNoReportUpdate)
 {
-    EXPECT_CALL(reportManager, updateReport(_)).Times(0);
+    EXPECT_CALL(updateReport, Call(_)).Times(0);
 
     make({});
     sut->commit("Test", Milliseconds{100'000}, 90.0);
@@ -240,10 +251,8 @@ TEST_F(TestUpdateReport, commitWhenReportNameIsEmptyExpectNoReportUpdate)
 TEST_F(TestUpdateReport, commitExpectReportUpdate)
 {
     std::vector<std::string> names = {"Report1", "Report2", "Report3"};
-    for (const auto& name : names)
-    {
-        EXPECT_CALL(reportManager, updateReport(name));
-    }
+    EXPECT_CALL(updateReport,
+                Call(FieldsAre(UnorderedElementsAreArray(names))));
 
     make(names);
     sut->commit("Test", Milliseconds{100'000}, 90.0);

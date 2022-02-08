@@ -10,6 +10,7 @@
 #include "types/report_updates.hpp"
 #include "types/reporting_type.hpp"
 #include "utils/circular_vector.hpp"
+#include "utils/messanger.hpp"
 
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/steady_timer.hpp>
@@ -31,8 +32,7 @@ class Report : public interfaces::Report
            interfaces::ReportManager& reportManager,
            interfaces::JsonStorage& reportStorage,
            std::vector<std::shared_ptr<interfaces::Metric>> metrics,
-           const bool enabled, std::unique_ptr<interfaces::Clock> clock,
-           const std::vector<std::string>& triggerIds);
+           const bool enabled, std::unique_ptr<interfaces::Clock> clock);
 
     Report(const Report&) = delete;
     Report(Report&&) = delete;
@@ -49,11 +49,6 @@ class Report : public interfaces::Report
         return reportDir + id;
     }
 
-    void updateReadings() override;
-    void updateTriggerIds(const std::string& triggerId,
-                          TriggerIdUpdate updateType) override;
-    bool storeConfiguration() const;
-
   private:
     std::unique_ptr<sdbusplus::asio::dbus_interface> makeReportInterface();
     static void timerProc(boost::system::error_code, Report& self);
@@ -66,6 +61,10 @@ class Report : public interfaces::Report
     static uint64_t getSensorCount(
         std::vector<std::shared_ptr<interfaces::Metric>>& metrics);
     interfaces::JsonStorage::FilePath fileName() const;
+    std::unordered_set<std::string>
+        collectTriggerIds(boost::asio::io_context& ioc) const;
+    bool storeConfiguration() const;
+    void updateReadings();
 
     std::string id;
     std::string name;
@@ -90,6 +89,7 @@ class Report : public interfaces::Report
     interfaces::JsonStorage& reportStorage;
     bool enabled;
     std::unique_ptr<interfaces::Clock> clock;
+    utils::Messanger messanger;
 
   public:
     static constexpr const char* reportIfaceName =

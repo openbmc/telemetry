@@ -22,19 +22,18 @@ class Telemetry
             std::make_unique<PersistentJsonStorage>(
                 interfaces::JsonStorage::DirectoryPath(
                     "/var/lib/telemetry/Reports")),
-            objServer, triggerManager),
-        triggerManager(std::make_unique<TriggerManager>(
-            std::make_unique<TriggerFactory>(bus, objServer, sensorCache,
-                                             reportManager),
+            objServer),
+        triggerManager(
+            std::make_unique<TriggerFactory>(bus, objServer, sensorCache),
             std::make_unique<PersistentJsonStorage>(
                 interfaces::JsonStorage::DirectoryPath(
                     "/var/lib/telemetry/Triggers")),
-            objServer))
+            objServer)
     {}
 
   private:
     std::shared_ptr<sdbusplus::asio::object_server> objServer;
     mutable SensorCache sensorCache;
     ReportManager reportManager;
-    std::unique_ptr<interfaces::TriggerManager> triggerManager;
+    TriggerManager triggerManager;
 };

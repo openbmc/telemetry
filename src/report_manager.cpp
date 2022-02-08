@@ -32,11 +32,9 @@ ReadingParameters
 ReportManager::ReportManager(
     std::unique_ptr<interfaces::ReportFactory> reportFactoryIn,
     std::unique_ptr<interfaces::JsonStorage> reportStorageIn,
-    const std::shared_ptr<sdbusplus::asio::object_server>& objServerIn,
-    std::unique_ptr<interfaces::TriggerManager>& triggerManagerIn) :
+    const std::shared_ptr<sdbusplus::asio::object_server>& objServerIn) :
     reportFactory(std::move(reportFactoryIn)),
-    reportStorage(std::move(reportStorageIn)), objServer(objServerIn),
-    triggerManager(triggerManagerIn)
+    reportStorage(std::move(reportStorageIn)), objServer(objServerIn)
 {
     reports.reserve(maxReports);
 
@@ -225,16 +223,9 @@ interfaces::Report& ReportManager::addReport(
     verifyAddReport(id, name, reportingType, interval, reportUpdates,
                     appendLimit, labeledMetricParams);
 
-    std::vector<std::string> triggerIds;
-    if (triggerManager)
-    {
-        triggerIds = triggerManager->getTriggerIdsForReport(id);
-    }
-
-    reports.emplace_back(
-        reportFactory->make(id, name, reportingType, reportActions, interval,
-                            appendLimit, reportUpdates, *this, *reportStorage,
-                            labeledMetricParams, enabled, triggerIds));
+    reports.emplace_back(reportFactory->make(
+        id, name, reportingType, reportActions, interval, appendLimit,
+        reportUpdates, *this, *reportStorage, labeledMetricParams, enabled));
     return *reports.back();
 }
 
@@ -285,31 +276,5 @@ void ReportManager::loadFromPersistent()
                 phosphor::logging::entry("EXCEPTION_MSG=%s", e.what()));
             reportStorage->remove(path);
         }
-    }
-}
-
-void ReportManager::updateReport(const std::string& id)
-{
-    for (auto& report : reports)
-    {
-        if (report->getId() == id)
-        {
-            report->updateReadings();
-            return;
-        }
-    }
-}
-
-void ReportManager::updateTriggerIds(const std::string& reportId,
-                                     const std::string& triggerId,
-                                     TriggerIdUpdate updateType)
-{
-    if (auto res = std::find_if(reports.begin(), reports.end(),
-                                [&reportId](const auto& report) {
-                                    return report->getId() == reportId;
-                                });
-        res != reports.end())
-    {
-        (*res)->updateTriggerIds(triggerId, updateType);
     }
 }

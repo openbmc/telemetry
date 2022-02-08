@@ -37,7 +37,7 @@ class ReportFactoryMock : public interfaces::ReportFactory
                 WithArgs<1>(Invoke(&ReportFactoryMock::convertToLabeled)));
 
         ON_CALL(*this,
-                make(A<const std::string&>(), _, _, _, _, _, _, _, _, _, _, _))
+                make(A<const std::string&>(), _, _, _, _, _, _, _, _, _, _))
             .WillByDefault(WithArgs<0>(Invoke([](const std::string& id) {
                 return std::make_unique<NiceMock<ReportMock>>(id);
             })));
@@ -52,7 +52,7 @@ class ReportFactoryMock : public interfaces::ReportFactory
                  const std::vector<ReportAction>&, Milliseconds, uint64_t,
                  const ReportUpdates, interfaces::ReportManager&,
                  interfaces::JsonStorage&, std::vector<LabeledMetricParameters>,
-                 bool, const std::vector<std::string>&),
+                 bool),
                 (const, override));
 
     auto& expectMake(
@@ -69,12 +69,11 @@ class ReportFactoryMock : public interfaces::ReportFactory
                             params.reportingType(), params.reportActions(),
                             params.interval(), params.appendLimit(),
                             params.reportUpdates(), rm, js,
-                            params.metricParameters(), params.enabled(), _));
+                            params.metricParameters(), params.enabled()));
         }
         else
         {
-            return EXPECT_CALL(*this,
-                               make(_, _, _, _, _, _, _, rm, js, _, _, _));
+            return EXPECT_CALL(*this, make(_, _, _, _, _, _, _, rm, js, _, _));
         }
     }
 };

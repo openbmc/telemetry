@@ -27,9 +27,6 @@ class TriggerManager : public interfaces::TriggerManager
 
     static void verifyReportIds(const std::vector<std::string>& newReportIds);
 
-    std::vector<std::string>
-        getTriggerIdsForReport(const std::string& reportId) const override;
-
   private:
     std::unique_ptr<interfaces::TriggerFactory> triggerFactory;
     std::unique_ptr<interfaces::JsonStorage> triggerStorage;

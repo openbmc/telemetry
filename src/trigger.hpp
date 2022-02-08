@@ -1,12 +1,12 @@
 #pragma once
 
 #include "interfaces/json_storage.hpp"
-#include "interfaces/report_manager.hpp"
 #include "interfaces/threshold.hpp"
 #include "interfaces/trigger.hpp"
 #include "interfaces/trigger_factory.hpp"
 #include "interfaces/trigger_manager.hpp"
 #include "types/trigger_types.hpp"
+#include "utils/messanger.hpp"
 
 #include <boost/asio/io_context.hpp>
 #include <sdbusplus/asio/object_server.hpp>
@@ -24,8 +24,8 @@ class Trigger : public interfaces::Trigger
             std::vector<std::shared_ptr<interfaces::Threshold>>&& thresholds,
             interfaces::TriggerManager& triggerManager,
             interfaces::JsonStorage& triggerStorage,
-            const interfaces::TriggerFactory& triggerFactory, Sensors sensorsIn,
-            interfaces::ReportManager& reportManager);
+            const interfaces::TriggerFactory& triggerFactory,
+            Sensors sensorsIn);
 
     Trigger(const Trigger&) = delete;
     Trigger(Trigger&&) = delete;
@@ -44,11 +44,6 @@ class Trigger : public interfaces::Trigger
 
     bool storeConfiguration() const;
 
-    const std::vector<std::string>& getReportIds() const override
-    {
-        return *reportIds;
-    }
-
   private:
     std::string id;
     std::string name;
@@ -63,10 +58,7 @@ class Trigger : public interfaces::Trigger
     interfaces::JsonStorage::FilePath fileName;
     interfaces::JsonStorage& triggerStorage;
     Sensors sensors;
-    interfaces::ReportManager& reportManager;
-
-    void
-        updateTriggerIdsInReports(const std::vector<std::string>& newReportIds);
+    utils::Messanger messanger;
 
   public:
     static constexpr const char* triggerIfaceName =
