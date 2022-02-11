@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c6baab51_7952a4a1",
+        "filename": "src/report.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 226,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2022-02-11T12:14:02Z",
+      "side": 1,
+      "message": "ReportActions are also connected to ReportingType, according to redfish schema they should be ignored once ReportingType is set to \u0027OnRequest\u0027. Does it require any additional logic implemented here?",
+      "range": {
+        "startLine": 226,
+        "startChar": 9,
+        "endLine": 226,
+        "endChar": 22
+      },
+      "revId": "15974ba95ae22cd17322d3a851f2dba302d373ef",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6862d629_9d4880a0",
+        "filename": "src/report.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 253,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2022-02-11T12:14:02Z",
+      "side": 1,
+      "message": "Wouldn\u0027t it make more sense to just do \u0027timer.cancell()\u0027. Right now, reading this code might be misleading, it looks like we are scheduling something to happen right now - instead of not happening at all.",
+      "range": {
+        "startLine": 253,
+        "startChar": 20,
+        "endLine": 253,
+        "endChar": 56
+      },
+      "revId": "15974ba95ae22cd17322d3a851f2dba302d373ef",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "21c1968d_1ca3e745",
+        "filename": "src/report.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 297,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2022-02-11T12:14:02Z",
+      "side": 1,
+      "message": "ReportActions are also connected to ReportingType, according to redfish schema they should be ignored once ReportingType is set to \u0027OnRequest\u0027. Does it require any additional logic implemented here?",
+      "range": {
+        "startLine": 297,
+        "startChar": 9,
+        "endLine": 297,
+        "endChar": 22
+      },
+      "revId": "15974ba95ae22cd17322d3a851f2dba302d373ef",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e3a8c23f_5282c8a6",
+        "filename": "src/report.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 363,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2022-02-11T12:14:02Z",
+      "side": 1,
+      "message": "If you go with my suggestion above, this if might be removed.",
+      "range": {
+        "startLine": 360,
+        "startChar": 0,
+        "endLine": 363,
+        "endChar": 5
+      },
+      "revId": "15974ba95ae22cd17322d3a851f2dba302d373ef",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
