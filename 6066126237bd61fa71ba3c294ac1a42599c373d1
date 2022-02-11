@@ -1,0 +1,67 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "3741c913_a7f11889",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2022-02-11T13:19:23Z",
+      "side": 1,
+      "message": "Looks great, just few minor details.",
+      "revId": "6066126237bd61fa71ba3c294ac1a42599c373d1",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "4e83e9da_515682f8",
+        "filename": "src/metrics/collection_data.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2022-02-11T13:19:23Z",
+      "side": 1,
+      "message": "I don\u0027t think there is timescope which currently is not unsupported? If you remove default clause, we would have compile time protection for non-handled TimeScopes.",
+      "range": {
+        "startLine": 157,
+        "startChar": 0,
+        "endLine": 160,
+        "endChar": 59
+      },
+      "revId": "6066126237bd61fa71ba3c294ac1a42599c373d1",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d2410b70_d0bbe85e",
+        "filename": "src/report.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2022-02-11T13:19:23Z",
+      "side": 1,
+      "message": "This could be changed to method. It would come useful once change to writable properties is merged.",
+      "range": {
+        "startLine": 68,
+        "startChar": 0,
+        "endLine": 91,
+        "endChar": 5
+      },
+      "revId": "6066126237bd61fa71ba3c294ac1a42599c373d1",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
