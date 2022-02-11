@@ -1,6 +1,7 @@
 #pragma once
 
 #include "interfaces/json_storage.hpp"
+#include "interfaces/metric.hpp"
 #include "interfaces/report.hpp"
 #include "interfaces/report_manager.hpp"
 #include "types/report_action.hpp"
@@ -25,6 +26,13 @@ class ReportFactory
     virtual std::vector<LabeledMetricParameters>
         convertMetricParams(boost::asio::yield_context& yield,
                             const ReadingParameters& metricParams) const = 0;
+    virtual std::vector<LabeledMetricParameters>
+        convertMetricParams(const ReadingParameters& metricParams) const = 0;
+
+    virtual void
+        updateMetrics(std::vector<std::shared_ptr<interfaces::Metric>>& metrics,
+                      bool enabled,
+                      const ReadingParameters& metricParams) const = 0;
 
     virtual std::unique_ptr<interfaces::Report> make(
         const std::string& id, const std::string& name,
