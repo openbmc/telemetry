@@ -56,7 +56,7 @@ ReportManager::ReportManager(
                 "SupportedOperationTypes", std::vector<std::string>{},
                 sdbusplus::vtable::property_::const_,
                 [](const auto&) -> std::vector<std::string> {
-                    return utils::transform<std::vector<std::string>>(
+                    return utils::transform<std::vector>(
                         utils::convDataOperationType, [](const auto& item) {
                             return std::string(item.first);
                         });

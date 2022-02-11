@@ -1,19 +1,14 @@
 #pragma once
 
-#include <algorithm>
+#include "utils/transform.hpp"
 
 namespace utils
 {
 
-template <class R, class T, class... Args,
-          template <class, class...> class Container>
-auto convContainer(const Container<T, Args...>& container)
+template <class R, class Container>
+auto convContainer(const Container& container)
 {
-    Container<R> result;
-    std::transform(container.begin(), container.end(),
-                   std::back_inserter(result),
-                   [](const auto& item) -> R { return item; });
-    return result;
+    return transform(container, [](const auto& item) -> R { return item; });
 }
 
 } // namespace utils

@@ -6,6 +6,7 @@
 #include "messages/update_report_ind.hpp"
 #include "mocks/json_storage_mock.hpp"
 #include "mocks/metric_mock.hpp"
+#include "mocks/report_factory_mock.hpp"
 #include "mocks/report_manager_mock.hpp"
 #include "params/report_params.hpp"
 #include "report.hpp"
@@ -33,7 +34,9 @@ class TestReport : public Test
 
     std::unique_ptr<ReportManagerMock> reportManagerMock =
         std::make_unique<NiceMock<ReportManagerMock>>();
-    testing::NiceMock<StorageMock> storageMock;
+    std::unique_ptr<ReportFactoryMock> reportFactoryMock =
+        std::make_unique<NiceMock<ReportFactoryMock>>();
+    NiceMock<StorageMock> storageMock;
     std::vector<std::shared_ptr<MetricMock>> metricMocks;
     std::unique_ptr<ClockFake> clockFakePtr = std::make_unique<ClockFake>();
     ClockFake& clockFake = *clockFakePtr;
@@ -69,6 +72,24 @@ class TestReport : public Test
         }
     }
 
+    std::vector<std::shared_ptr<interfaces::Metric>>
+        getMetricsFromReadingParams(const ReadingParameters& params)
+    {
+        const auto metricParameters =
+            reportFactoryMock->convertMetricParams(params);
+        std::vector<std::shared_ptr<MetricMock>> metricMocks;
+
+        for (size_t i = 0; i < metricParameters.size(); ++i)
+        {
+            metricMocks.emplace_back(std::make_shared<NiceMock<MetricMock>>());
+            ON_CALL(*metricMocks[i], dumpConfiguration())
+                .WillByDefault(Return(metricParameters[i]));
+        }
+
+        return utils::convContainer<std::shared_ptr<interfaces::Metric>>(
+            metricMocks);
+    }
+
     void SetUp() override
     {
         sut = makeReport(ReportParams());
@@ -91,7 +112,7 @@ class TestReport : public Test
             params.reportUpdates(), *reportManagerMock, storageMock,
             utils::convContainer<std::shared_ptr<interfaces::Metric>>(
                 metricMocks),
-            params.enabled(), std::move(clockFakePtr));
+            *reportFactoryMock, params.enabled(), std::move(clockFakePtr));
     }
 
     template <class T>
@@ -178,6 +199,147 @@ TEST_F(TestReport, readingsAreInitialyEmpty)
 {
     EXPECT_THAT(getProperty<Readings>(sut->getPath(), "Readings"),
                 Eq(Readings{}));
+}
+
+TEST_F(TestReport, setReadingParametersWithNewParams)
+{
+    ReadingParameters newParams = toReadingParameters(
+        std::vector<LabeledMetricParameters>{{LabeledMetricParameters{
+            {LabeledSensorInfo{"Service",
+                               "/xyz/openbmc_project/sensors/power/psu",
+                               "NewMetadata123"}},
+            OperationType::avg,
+            "NewMetricId123",
+            CollectionTimeScope::startup,
+            CollectionDuration(250ms)}}});
+    auto metrics = getMetricsFromReadingParams(newParams);
+
+    EXPECT_CALL(*reportFactoryMock, updateMetrics(_, _, _))
+        .WillOnce(SetArgReferee<0>(metrics));
+    EXPECT_THAT(
+        setProperty(sut->getPath(), "ReadingParametersFutureVersion", newParams)
+            .value(),
+        Eq(boost::system::errc::success));
+    EXPECT_THAT(getProperty<ReadingParameters>(
+                    sut->getPath(), "ReadingParametersFutureVersion"),
+                Eq(newParams));
+}
+
+TEST_F(TestReport, setReportingTypeWithValidNewType)
+{
+    std::string newType = "Periodic";
+    std::string currType = utils::enumToString(defaultParams.reportingType());
+
+    EXPECT_THAT(newType, Ne(currType));
+    EXPECT_THAT(setProperty(sut->getPath(), "ReportingType", newType).value(),
+                Eq(boost::system::errc::success));
+    EXPECT_THAT(getProperty<std::string>(sut->getPath(), "ReportingType"),
+                Eq(newType));
+}
+
+TEST_F(TestReport, setReportingTypeWithInvalidType)
+{
+    std::string newType = "Periodic_ABC";
+    std::string prevType = utils::enumToString(defaultParams.reportingType());
+
+    EXPECT_THAT(setProperty(sut->getPath(), "ReportingType", newType).value(),
+                Eq(boost::system::errc::invalid_argument));
+    EXPECT_THAT(getProperty<std::string>(sut->getPath(), "ReportingType"),
+                Eq(prevType));
+}
+
+TEST_F(TestReport, setReportActionsWithValidNewActions)
+{
+    std::vector<std::string> newActions = {"EmitsReadingsUpdate"};
+    std::vector<std::string> currActions =
+        utils::transform(defaultParams.reportActions(),
+                         [](const auto v) { return utils::enumToString(v); });
+
+    EXPECT_THAT(newActions, Ne(currActions));
+    EXPECT_THAT(
+        setProperty(sut->getPath(), "ReportActions", newActions).value(),
+        Eq(boost::system::errc::success));
+    EXPECT_THAT(
+        getProperty<std::vector<std::string>>(sut->getPath(), "ReportActions"),
+        UnorderedElementsAre("EmitsReadingsUpdate",
+                             "LogToMetricReportsCollection"));
+}
+
+TEST_F(TestReport, setReportActionsWithValidUnsortedActions)
+{
+    std::vector<std::string> newActions = {"LogToMetricReportsCollection",
+                                           "EmitsReadingsUpdate"};
+    std::vector<std::string> expectedActions = {"EmitsReadingsUpdate",
+                                                "LogToMetricReportsCollection"};
+    std::vector<std::string> currActions =
+        utils::transform(defaultParams.reportActions(),
+                         [](const auto v) { return utils::enumToString(v); });
+
+    EXPECT_THAT(newActions, Ne(currActions));
+    EXPECT_THAT(
+        setProperty(sut->getPath(), "ReportActions", newActions).value(),
+        Eq(boost::system::errc::success));
+    EXPECT_THAT(
+        getProperty<std::vector<std::string>>(sut->getPath(), "ReportActions"),
+        Eq(expectedActions));
+}
+
+TEST_F(TestReport, setReportActionsWithEmptyActions)
+{
+    std::vector<std::string> newActions = {};
+    std::vector<std::string> expectedActions = {"LogToMetricReportsCollection"};
+    std::vector<std::string> currActions =
+        utils::transform(defaultParams.reportActions(),
+                         [](const auto v) { return utils::enumToString(v); });
+
+    EXPECT_THAT(newActions, Ne(currActions));
+    EXPECT_THAT(
+        setProperty(sut->getPath(), "ReportActions", newActions).value(),
+        Eq(boost::system::errc::success));
+    EXPECT_THAT(
+        getProperty<std::vector<std::string>>(sut->getPath(), "ReportActions"),
+        Eq(expectedActions));
+}
+
+TEST_F(TestReport, setReportActionsWithInvalidActions)
+{
+    std::vector<std::string> invalidActions = {"EmitsReadingsUpdate_1"};
+    EXPECT_THAT(
+        setProperty(sut->getPath(), "ReportActions", invalidActions).value(),
+        Eq(boost::system::errc::invalid_argument));
+    EXPECT_THAT(
+        getProperty<std::vector<std::string>>(sut->getPath(), "ReportActions"),
+        Eq(utils::transform(defaultParams.reportActions(), [](const auto v) {
+            return utils::enumToString(v);
+        })));
+}
+
+TEST_F(TestReport, createReportWithEmptyActions)
+{
+    std::vector<std::string> expectedActions = {"LogToMetricReportsCollection"};
+
+    sut = makeReport(ReportParams().reportId("TestId_1").reportActions({}));
+    EXPECT_THAT(
+        getProperty<std::vector<std::string>>(sut->getPath(), "ReportActions"),
+        Eq(expectedActions));
+}
+
+TEST_F(TestReport, createReportWithValidUnsortedActions)
+{
+    std::vector<std::string> newActions = {"LogToMetricReportsCollection",
+                                           "EmitsReadingsUpdate"};
+    std::vector<std::string> expectedActions = {"EmitsReadingsUpdate",
+                                                "LogToMetricReportsCollection"};
+
+    sut = makeReport(
+        ReportParams()
+            .reportId("TestId_1")
+            .reportActions(utils::transform(newActions, [](const auto& action) {
+                return utils::toReportAction(action);
+            })));
+    EXPECT_THAT(
+        getProperty<std::vector<std::string>>(sut->getPath(), "ReportActions"),
+        Eq(expectedActions));
 }
 
 TEST_F(TestReport, setEnabledWithNewValue)
