@@ -29,7 +29,7 @@ class ReportFactory : public interfaces::ReportFactory
              interfaces::ReportManager& reportManager,
              interfaces::JsonStorage& reportStorage,
              std::vector<LabeledMetricParameters> labeledMetricParams,
-             bool enabled) const override;
+             bool enabled, Readings) const override;
 
   private:
     Sensors getSensors(const std::vector<LabeledSensorInfo>& sensorPaths) const;

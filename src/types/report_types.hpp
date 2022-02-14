@@ -30,9 +30,5 @@ using LabeledMetricParameters = utils::LabeledTuple<
     utils::tstring::Id, utils::tstring::CollectionTimeScope,
     utils::tstring::CollectionDuration>;
 
-using ReadingData = std::tuple<std::string, std::string, double, uint64_t>;
-
-using Readings = std::tuple<uint64_t, std::vector<ReadingData>>;
-
 ReadingParameters
     toReadingParameters(const std::vector<LabeledMetricParameters>& labeled);

@@ -91,7 +91,7 @@ class TestReport : public Test
             params.reportUpdates(), *reportManagerMock, storageMock,
             utils::convContainer<std::shared_ptr<interfaces::Metric>>(
                 metricMocks),
-            params.enabled(), std::move(clockFakePtr));
+            params.enabled(), std::move(clockFakePtr), params.readings());
     }
 
     template <class T>
@@ -232,7 +232,9 @@ TEST_F(TestReport, settingLogToMetricReportCollectionHaveNoEffect)
 
 TEST_F(TestReport, settingPersistencyToFalseRemovesReportFromStorage)
 {
-    EXPECT_CALL(storageMock, remove(to_file_path(sut->getId())));
+    EXPECT_CALL(storageMock, store(_, _)).Times(0);
+    EXPECT_CALL(storageMock, remove(to_file_path(sut->getId())))
+        .Times(AtLeast(1));
 
     bool persistency = false;
     EXPECT_THAT(setProperty(sut->getPath(), "Persistency", persistency).value(),
@@ -256,7 +258,10 @@ TEST_F(TestReport, deletingNonExistingReportReturnInvalidRequestDescriptor)
 
 TEST_F(TestReport, deleteReportExpectThatFileIsRemoveFromStorage)
 {
-    EXPECT_CALL(storageMock, remove(to_file_path(sut->getId())));
+    EXPECT_CALL(storageMock, store(_, _)).Times(0);
+    EXPECT_CALL(storageMock, remove(to_file_path(sut->getId())))
+        .Times(AtLeast(1));
+
     auto ec = deleteReport(sut->getPath());
     EXPECT_THAT(ec, Eq(boost::system::errc::success));
 }
@@ -756,7 +761,10 @@ class TestReportInitialization : public TestReport
 {
   public:
     void SetUp() override
-    {}
+    {
+        ON_CALL(storageMock, store(to_file_path(ReportParams().reportId()), _))
+            .WillByDefault(SaveArg<1>(&storedConfiguration));
+    }
 
     void monitorProc(sdbusplus::message::message& msg)
     {
@@ -790,6 +798,7 @@ class TestReportInitialization : public TestReport
 
     std::unique_ptr<sdbusplus::bus::match_t> monitor;
     MockFunction<void()> readingsUpdated;
+    nlohmann::json storedConfiguration;
 };
 
 TEST_F(TestReportInitialization,
@@ -854,11 +863,6 @@ TEST_F(TestReportInitialization, appendLimitDeducedProperly)
 
 TEST_F(TestReportInitialization, appendLimitSetToUintMaxIsStoredCorrectly)
 {
-    nlohmann::json storedConfiguration;
-
-    EXPECT_CALL(storageMock, store(to_file_path(ReportParams().reportId()), _))
-        .WillOnce(SaveArg<1>(&storedConfiguration));
-
     sut = makeReport(
         ReportParams().appendLimit(std::numeric_limits<uint64_t>::max()));
 
@@ -881,4 +885,43 @@ TEST_F(TestReportInitialization, triggerIdsPropertyIsInitialzed)
     EXPECT_THAT(
         getProperty<std::vector<std::string>>(sut->getPath(), "TriggerIds"),
         UnorderedElementsAre("trigger1", "trigger2"));
+}
+
+TEST_F(TestReportInitialization,
+       metricValuesAreNotStoredForReportUpdatesDifferentThanAppendStopsWhenFull)
+{
+    sut = makeReport(ReportParams()
+                         .reportingType(ReportingType::periodic)
+                         .interval(1h)
+                         .reportUpdates(ReportUpdates::appendWrapsWhenFull)
+                         .readings(Readings{{}, {{}}}));
+
+    ASSERT_THAT(storedConfiguration.find("MetricValues"),
+                Eq(storedConfiguration.end()));
+}
+
+TEST_F(TestReportInitialization, metricValuesAreNotStoredForOnRequestReport)
+{
+    sut = makeReport(ReportParams()
+                         .reportingType(ReportingType::onRequest)
+                         .reportUpdates(ReportUpdates::appendStopsWhenFull)
+                         .readings(Readings{{}, {{}}}));
+
+    ASSERT_THAT(storedConfiguration.find("MetricValues"),
+                Eq(storedConfiguration.end()));
+}
+
+TEST_F(TestReportInitialization,
+       metricValuesAreStoredForNonOnRequestReportWithAppendStopsWhenFull)
+{
+    const auto readings = Readings{{}, {{}}};
+
+    sut = makeReport(ReportParams()
+                         .reportingType(ReportingType::periodic)
+                         .interval(1h)
+                         .reportUpdates(ReportUpdates::appendStopsWhenFull)
+                         .readings(readings));
+
+    ASSERT_THAT(storedConfiguration.at("MetricValues").get<LabeledReadings>(),
+                Eq(utils::toLabeledReadings(readings)));
 }

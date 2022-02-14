@@ -5,6 +5,7 @@
 #include "interfaces/metric.hpp"
 #include "interfaces/report.hpp"
 #include "interfaces/report_manager.hpp"
+#include "types/readings.hpp"
 #include "types/report_action.hpp"
 #include "types/report_types.hpp"
 #include "types/report_updates.hpp"
@@ -32,7 +33,9 @@ class Report : public interfaces::Report
            interfaces::ReportManager& reportManager,
            interfaces::JsonStorage& reportStorage,
            std::vector<std::shared_ptr<interfaces::Metric>> metrics,
-           const bool enabled, std::unique_ptr<interfaces::Clock> clock);
+           const bool enabled, std::unique_ptr<interfaces::Clock> clock,
+           Readings);
+    ~Report();
 
     Report(const Report&) = delete;
     Report(Report&&) = delete;
@@ -60,10 +63,12 @@ class Report : public interfaces::Report
     void setReportUpdates(const ReportUpdates newReportUpdates);
     static uint64_t getSensorCount(
         std::vector<std::shared_ptr<interfaces::Metric>>& metrics);
-    interfaces::JsonStorage::FilePath fileName() const;
+    interfaces::JsonStorage::FilePath reportFileName() const;
+    interfaces::JsonStorage::FilePath metricValuesFileName() const;
     std::unordered_set<std::string>
         collectTriggerIds(boost::asio::io_context& ioc) const;
     bool storeConfiguration() const;
+    bool shouldStoreMetricValues() const;
     void updateReadings();
 
     std::string id;
@@ -77,8 +82,8 @@ class Report : public interfaces::Report
     uint64_t sensorCount;
     std::optional<uint64_t> appendLimit;
     ReportUpdates reportUpdates;
-    CircularVector<ReadingData> readingsBuffer;
     Readings readings = {};
+    CircularVector<ReadingData> readingsBuffer;
     std::shared_ptr<sdbusplus::asio::object_server> objServer;
     std::unique_ptr<sdbusplus::asio::dbus_interface> reportIface;
     std::unique_ptr<sdbusplus::asio::dbus_interface> deleteIface;

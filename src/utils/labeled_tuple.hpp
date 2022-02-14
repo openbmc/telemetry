@@ -76,6 +76,11 @@ struct LabeledTuple<std::tuple<Args...>, Labels...>
         return j;
     }
 
+    const tuple_type& to_tuple() const
+    {
+        return value;
+    }
+
     void from_json(const nlohmann::json& j)
     {
         from_json_all(j, std::make_index_sequence<sizeof...(Args)>());
