@@ -4,7 +4,8 @@ template <class T>
 class CircularVector
 {
   public:
-    explicit CircularVector(size_t maxSizeIn) : maxSize(maxSizeIn)
+    explicit CircularVector(std::vector<T>& externalVec, size_t maxSizeIn) :
+        vec(externalVec), maxSize(maxSizeIn)
     {}
 
     template <class... Args>
@@ -53,7 +54,7 @@ class CircularVector
     }
 
   private:
+    std::vector<T>& vec;
     size_t maxSize = 0;
     size_t idx = 0;
-    std::vector<T> vec;
 };

@@ -108,6 +108,17 @@ class ReportParams final
         return metricParametersProperty;
     }
 
+    ReportParams& readings(Readings val)
+    {
+        readingsProperty = std::move(val);
+        return *this;
+    }
+
+    Readings readings() const
+    {
+        return readingsProperty;
+    }
+
   private:
     std::string reportIdProperty = "TestId";
     std::string reportNameProperty = "TestReport";
@@ -135,4 +146,5 @@ class ReportParams final
              CollectionTimeScope::point,
              CollectionDuration(Milliseconds(0u))}}};
     bool enabledProperty = true;
+    Readings readingsProperty = {};
 };

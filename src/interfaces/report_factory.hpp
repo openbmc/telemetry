@@ -4,6 +4,7 @@
 #include "interfaces/metric.hpp"
 #include "interfaces/report.hpp"
 #include "interfaces/report_manager.hpp"
+#include "types/readings.hpp"
 #include "types/report_action.hpp"
 #include "types/report_types.hpp"
 #include "types/report_updates.hpp"
@@ -42,7 +43,7 @@ class ReportFactory
              const ReportUpdates reportUpdates, ReportManager& reportManager,
              JsonStorage& reportStorage,
              std::vector<LabeledMetricParameters> labeledMetricParams,
-             bool enabled) const = 0;
+             bool enabled, Readings) const = 0;
 };
 
 } // namespace interfaces

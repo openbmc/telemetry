@@ -92,6 +92,7 @@ executable(
         'src/trigger_actions.cpp',
         'src/trigger_factory.cpp',
         'src/trigger_manager.cpp',
+        'src/types/readings.cpp',
         'src/types/report_types.cpp',
         'src/utils/conversion_trigger.cpp',
         'src/utils/generate_id.cpp',

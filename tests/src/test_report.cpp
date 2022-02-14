@@ -49,6 +49,7 @@ class TestReport : public Test
         std::make_unique<NiceMock<ReportManagerMock>>();
     std::unique_ptr<ReportFactoryMock> reportFactoryMock =
         std::make_unique<NiceMock<ReportFactoryMock>>();
+    nlohmann::json storedConfiguration;
     NiceMock<StorageMock> storageMock;
     std::vector<std::shared_ptr<MetricMock>> metricMocks;
     std::unique_ptr<ClockFake> clockFakePtr = std::make_unique<ClockFake>();
@@ -61,6 +62,8 @@ class TestReport : public Test
     TestReport() : messanger(DbusEnvironment::getIoc())
     {
         clockFake.system.set(systemTimestamp);
+        ON_CALL(storageMock, store(to_file_path(ReportParams().reportId()), _))
+            .WillByDefault(SaveArg<1>(&storedConfiguration));
     }
 
     void initMetricMocks(
@@ -125,7 +128,8 @@ class TestReport : public Test
             params.reportUpdates(), *reportManagerMock, storageMock,
             utils::convContainer<std::shared_ptr<interfaces::Metric>>(
                 metricMocks),
-            *reportFactoryMock, params.enabled(), std::move(clockFakePtr));
+            *reportFactoryMock, params.enabled(), std::move(clockFakePtr),
+            params.readings());
     }
 
     template <class T>
@@ -407,7 +411,9 @@ TEST_F(TestReport, settingLogToMetricReportCollectionHaveNoEffect)
 
 TEST_F(TestReport, settingPersistencyToFalseRemovesReportFromStorage)
 {
-    EXPECT_CALL(storageMock, remove(to_file_path(sut->getId())));
+    EXPECT_CALL(storageMock, store(_, _)).Times(0);
+    EXPECT_CALL(storageMock, remove(to_file_path(sut->getId())))
+        .Times(AtLeast(1));
 
     bool persistency = false;
     EXPECT_THAT(setProperty(sut->getPath(), "Persistency", persistency).value(),
@@ -431,7 +437,10 @@ TEST_F(TestReport, deletingNonExistingReportReturnInvalidRequestDescriptor)
 
 TEST_F(TestReport, deleteReportExpectThatFileIsRemoveFromStorage)
 {
-    EXPECT_CALL(storageMock, remove(to_file_path(sut->getId())));
+    EXPECT_CALL(storageMock, store(_, _)).Times(0);
+    EXPECT_CALL(storageMock, remove(to_file_path(sut->getId())))
+        .Times(AtLeast(1));
+
     auto ec = deleteReport(sut->getPath());
     EXPECT_THAT(ec, Eq(boost::system::errc::success));
 }
@@ -506,11 +515,8 @@ class TestReportStore :
     public TestReport,
     public WithParamInterface<std::pair<std::string, nlohmann::json>>
 {
-  public:
     void SetUp() override
     {}
-
-    nlohmann::json storedConfiguration;
 };
 
 INSTANTIATE_TEST_SUITE_P(
@@ -563,8 +569,7 @@ TEST_P(TestReportStore, settingPersistencyToTrueStoresReport)
         InSequence seq;
         EXPECT_CALL(storageMock, remove(to_file_path(sut->getId())));
         EXPECT_CALL(checkPoint, Call());
-        EXPECT_CALL(storageMock, store(to_file_path(sut->getId()), _))
-            .WillOnce(SaveArg<1>(&storedConfiguration));
+        EXPECT_CALL(storageMock, store(to_file_path(sut->getId()), _));
     }
 
     setProperty(sut->getPath(), "Persistency", false);
@@ -578,8 +583,8 @@ TEST_P(TestReportStore, settingPersistencyToTrueStoresReport)
 
 TEST_P(TestReportStore, reportIsSavedToStorageAfterCreated)
 {
-    EXPECT_CALL(storageMock, store(to_file_path(defaultParams().reportId()), _))
-        .WillOnce(SaveArg<1>(&storedConfiguration));
+    EXPECT_CALL(storageMock,
+                store(to_file_path(defaultParams().reportId()), _));
 
     sut = makeReport(defaultParams());
 
@@ -1069,11 +1074,6 @@ TEST_F(TestReportInitialization, appendLimitDeducedProperly)
 
 TEST_F(TestReportInitialization, appendLimitSetToUintMaxIsStoredCorrectly)
 {
-    nlohmann::json storedConfiguration;
-
-    EXPECT_CALL(storageMock, store(to_file_path(ReportParams().reportId()), _))
-        .WillOnce(SaveArg<1>(&storedConfiguration));
-
     sut = makeReport(
         ReportParams().appendLimit(std::numeric_limits<uint64_t>::max()));
 
@@ -1096,6 +1096,45 @@ TEST_F(TestReportInitialization, triggerIdsPropertyIsInitialzed)
     EXPECT_THAT(
         getProperty<std::vector<std::string>>(sut->getPath(), "TriggerIds"),
         UnorderedElementsAre("trigger1", "trigger2"));
+}
+
+TEST_F(TestReportInitialization,
+       metricValuesAreNotStoredForReportUpdatesDifferentThanAppendStopsWhenFull)
+{
+    sut = makeReport(ReportParams()
+                         .reportingType(ReportingType::periodic)
+                         .interval(1h)
+                         .reportUpdates(ReportUpdates::appendWrapsWhenFull)
+                         .readings(Readings{{}, {{}}}));
+
+    ASSERT_THAT(storedConfiguration.find("MetricValues"),
+                Eq(storedConfiguration.end()));
+}
+
+TEST_F(TestReportInitialization, metricValuesAreNotStoredForOnRequestReport)
+{
+    sut = makeReport(ReportParams()
+                         .reportingType(ReportingType::onRequest)
+                         .reportUpdates(ReportUpdates::appendStopsWhenFull)
+                         .readings(Readings{{}, {{}}}));
+
+    ASSERT_THAT(storedConfiguration.find("MetricValues"),
+                Eq(storedConfiguration.end()));
+}
+
+TEST_F(TestReportInitialization,
+       metricValuesAreStoredForNonOnRequestReportWithAppendStopsWhenFull)
+{
+    const auto readings = Readings{{}, {{}}};
+
+    sut = makeReport(ReportParams()
+                         .reportingType(ReportingType::periodic)
+                         .interval(1h)
+                         .reportUpdates(ReportUpdates::appendStopsWhenFull)
+                         .readings(readings));
+
+    ASSERT_THAT(storedConfiguration.at("MetricValues").get<LabeledReadings>(),
+                Eq(utils::toLabeledReadings(readings)));
 }
 
 class TestReportInitializationOnChangeReport : public TestReportInitialization

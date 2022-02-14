@@ -144,5 +144,45 @@ struct SensorRedfishUri
     }
 };
 
+struct MetricId
+{
+    static std::string str()
+    {
+        return "MetricId";
+    }
+};
+
+struct MetricProperty
+{
+    static std::string str()
+    {
+        return "MetricProperty";
+    }
+};
+
+struct MetricValue
+{
+    static std::string str()
+    {
+        return "MetricValue";
+    }
+};
+
+struct Timestamp
+{
+    static std::string str()
+    {
+        return "Timestamp";
+    }
+};
+
+struct Readings
+{
+    static std::string str()
+    {
+        return "Readings";
+    }
+};
+
 } // namespace tstring
 } // namespace utils

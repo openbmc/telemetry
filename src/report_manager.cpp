@@ -205,7 +205,7 @@ interfaces::Report& ReportManager::addReport(
 
     return addReport(reportId, reportName, reportingType, reportActions,
                      interval, appendLimit, reportUpdates,
-                     std::move(labeledMetricParams), enabled);
+                     std::move(labeledMetricParams), enabled, Readings{});
 }
 
 interfaces::Report& ReportManager::addReport(
@@ -214,7 +214,7 @@ interfaces::Report& ReportManager::addReport(
     const std::vector<ReportAction>& reportActions, Milliseconds interval,
     const uint64_t appendLimit, const ReportUpdates reportUpdates,
     std::vector<LabeledMetricParameters> labeledMetricParams,
-    const bool enabled)
+    const bool enabled, Readings readings)
 {
     const auto existingReportIds = utils::transform(
         reports, [](const auto& report) { return report->getId(); });
@@ -225,9 +225,10 @@ interfaces::Report& ReportManager::addReport(
     verifyAddReport(id, name, reportingType, interval, reportUpdates,
                     appendLimit, labeledMetricParams);
 
-    reports.emplace_back(reportFactory->make(
-        id, name, reportingType, reportActions, interval, appendLimit,
-        reportUpdates, *this, *reportStorage, labeledMetricParams, enabled));
+    reports.emplace_back(
+        reportFactory->make(id, name, reportingType, reportActions, interval,
+                            appendLimit, reportUpdates, *this, *reportStorage,
+                            labeledMetricParams, enabled, std::move(readings)));
     return *reports.back();
 }
 
@@ -263,10 +264,19 @@ void ReportManager::loadFromPersistent()
                 data->at("ReadingParameters")
                     .get<std::vector<LabeledMetricParameters>>();
 
+            Readings readings = {};
+
+            if (auto it = data->find("MetricValues"); it != data->end())
+            {
+                const auto labeledReadings = it->get<LabeledReadings>();
+                readings = utils::toReadings(labeledReadings);
+            }
+
             addReport(id, name, utils::toReportingType(reportingType),
                       reportActions, Milliseconds(interval), appendLimit,
                       utils::toReportUpdates(reportUpdates),
-                      std::move(readingParameters), enabled);
+                      std::move(readingParameters), enabled,
+                      std::move(readings));
         }
         catch (const std::exception& e)
         {
