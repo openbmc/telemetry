@@ -50,12 +50,14 @@ class ReportManager : public interfaces::ReportManager
         const std::vector<ReportAction>& reportActions, Milliseconds interval,
         const uint64_t appendLimit, const ReportUpdates reportUpdates,
         ReadingParameters metricParams, const bool enabled);
-    interfaces::Report& addReport(
-        const std::string& reportId, const std::string& reportName,
-        const ReportingType reportingType,
-        const std::vector<ReportAction>& reportActions, Milliseconds interval,
-        const uint64_t appendLimit, const ReportUpdates reportUpdates,
-        std::vector<LabeledMetricParameters> metricParams, const bool enabled);
+    interfaces::Report&
+        addReport(const std::string& reportId, const std::string& reportName,
+                  const ReportingType reportingType,
+                  const std::vector<ReportAction>& reportActions,
+                  Milliseconds interval, const uint64_t appendLimit,
+                  const ReportUpdates reportUpdates,
+                  std::vector<LabeledMetricParameters> metricParams,
+                  const bool enabled, Readings);
     void loadFromPersistent();
 
   public:

@@ -24,14 +24,16 @@ Report::Report(boost::asio::io_context& ioc,
                interfaces::ReportManager& reportManager,
                interfaces::JsonStorage& reportStorageIn,
                std::vector<std::shared_ptr<interfaces::Metric>> metricsIn,
-               const bool enabledIn, std::unique_ptr<interfaces::Clock> clock) :
+               const bool enabledIn, std::unique_ptr<interfaces::Clock> clock,
+               Readings readingsIn) :
     id(reportId),
     name(reportName), reportingType(reportingTypeIn), interval(intervalIn),
     reportActions(std::move(reportActionsIn)),
     sensorCount(getSensorCount(metricsIn)),
     appendLimit(deduceAppendLimit(appendLimitIn)),
-    reportUpdates(reportUpdatesIn),
-    readingsBuffer(deduceBufferSize(reportUpdates, reportingType)),
+    reportUpdates(reportUpdatesIn), readings(std::move(readingsIn)),
+    readingsBuffer(std::get<1>(readings),
+                   deduceBufferSize(reportUpdates, reportingType)),
     objServer(objServer), metrics(std::move(metricsIn)), timer(ioc),
     triggerIds(collectTriggerIds(ioc)), reportStorage(reportStorageIn),
     enabled(enabledIn), clock(std::move(clock)), messanger(ioc)
@@ -57,8 +59,11 @@ Report::Report(boost::asio::io_context& ioc,
             dbusIface.register_method("Delete", [this, &ioc, &reportManager] {
                 if (persistency)
                 {
-                    reportStorage.remove(fileName());
+                    persistency = false;
+
+                    reportIface->signal_property("Persistency");
                 }
+
                 boost::asio::post(ioc, [this, &reportManager] {
                     reportManager.removeReport(this);
                 });
@@ -113,6 +118,21 @@ Report::Report(boost::asio::io_context& ioc,
             updateReadings();
         }
     });
+}
+
+Report::~Report()
+{
+    if (persistency)
+    {
+        if (shouldStoreMetricValues())
+        {
+            storeConfiguration();
+        }
+    }
+    else
+    {
+        reportStorage.remove(reportFileName());
+    }
 }
 
 uint64_t Report::getSensorCount(
@@ -234,7 +254,7 @@ std::unique_ptr<sdbusplus::asio::dbus_interface> Report::makeReportInterface()
             }
             else
             {
-                reportStorage.remove(fileName());
+                reportStorage.remove(reportFileName());
                 persistency = false;
             }
             return 1;
@@ -361,12 +381,17 @@ void Report::updateReadings()
         }
     }
 
-    readings = {
+    std::get<0>(readings) =
         std::chrono::duration_cast<Milliseconds>(clock->systemTimestamp())
-            .count(),
-        std::vector<ReadingData>(readingsBuffer.begin(), readingsBuffer.end())};
+            .count();
 
     reportIface->signal_property("Readings");
+}
+
+bool Report::shouldStoreMetricValues() const
+{
+    return reportingType != ReportingType::onRequest &&
+           reportUpdates == ReportUpdates::appendStopsWhenFull;
 }
 
 bool Report::storeConfiguration() const
@@ -393,7 +418,12 @@ bool Report::storeConfiguration() const
                 return metric->dumpConfiguration();
             });
 
-        reportStorage.store(fileName(), data);
+        if (shouldStoreMetricValues())
+        {
+            data["MetricValues"] = utils::toLabeledReadings(readings);
+        }
+
+        reportStorage.store(reportFileName(), data);
     }
     catch (const std::exception& e)
     {
@@ -406,10 +436,16 @@ bool Report::storeConfiguration() const
     return true;
 }
 
-interfaces::JsonStorage::FilePath Report::fileName() const
+interfaces::JsonStorage::FilePath Report::reportFileName() const
 {
     return interfaces::JsonStorage::FilePath{
         std::to_string(std::hash<std::string>{}(id))};
+}
+
+interfaces::JsonStorage::FilePath Report::metricValuesFileName() const
+{
+    return interfaces::JsonStorage::FilePath{
+        std::to_string(std::hash<std::string>{}(id)) + "mv"};
 }
 
 std::unordered_set<std::string>
