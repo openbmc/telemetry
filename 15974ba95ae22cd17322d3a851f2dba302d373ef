@@ -48,6 +48,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "12793cab_5f55e6aa",
+        "filename": "src/report.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 226,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2022-02-15T10:20:27Z",
+      "side": 1,
+      "message": "Looks like this ReportActions are also not ignored when report is created. Let\u0027s handle it in separate review for consistency.",
+      "parentUuid": "0337860e_28c8ba93",
+      "range": {
+        "startLine": 226,
+        "startChar": 9,
+        "endLine": 226,
+        "endChar": 22
+      },
+      "revId": "15974ba95ae22cd17322d3a851f2dba302d373ef",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "6862d629_9d4880a0",
@@ -85,6 +109,30 @@
       "side": 1,
       "message": "+1",
       "parentUuid": "6862d629_9d4880a0",
+      "range": {
+        "startLine": 253,
+        "startChar": 20,
+        "endLine": 253,
+        "endChar": 56
+      },
+      "revId": "15974ba95ae22cd17322d3a851f2dba302d373ef",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "356ee6b7_aabd2057",
+        "filename": "src/report.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 253,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2022-02-15T10:20:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "793bd006_84b11efd",
       "range": {
         "startLine": 253,
         "startChar": 20,
@@ -142,6 +190,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "d2b85cf9_3f65dbb3",
+        "filename": "src/report.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 297,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2022-02-15T10:20:27Z",
+      "side": 1,
+      "message": "Looks like this ReportActions are also not ignored when report is created. Let\u0027s handle it in separate review for consistency.",
+      "parentUuid": "1ea6cb30_c6b9bd28",
+      "range": {
+        "startLine": 297,
+        "startChar": 9,
+        "endLine": 297,
+        "endChar": 22
+      },
+      "revId": "15974ba95ae22cd17322d3a851f2dba302d373ef",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "e3a8c23f_5282c8a6",
@@ -179,6 +251,30 @@
       "side": 1,
       "message": "+1",
       "parentUuid": "e3a8c23f_5282c8a6",
+      "range": {
+        "startLine": 360,
+        "startChar": 0,
+        "endLine": 363,
+        "endChar": 5
+      },
+      "revId": "15974ba95ae22cd17322d3a851f2dba302d373ef",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e0722403_99ff026f",
+        "filename": "src/report.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 363,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2022-02-15T10:20:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9b6346d2_d08e042d",
       "range": {
         "startLine": 360,
         "startChar": 0,
