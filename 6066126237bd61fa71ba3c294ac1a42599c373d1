@@ -41,6 +41,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "1a4ceda5_fdd73224",
+        "filename": "src/metrics/collection_data.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2022-02-16T10:22:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4e83e9da_515682f8",
+      "range": {
+        "startLine": 157,
+        "startChar": 0,
+        "endLine": 160,
+        "endChar": 59
+      },
+      "revId": "6066126237bd61fa71ba3c294ac1a42599c373d1",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "d2410b70_d0bbe85e",
@@ -54,6 +78,30 @@
       "writtenOn": "2022-02-11T13:19:23Z",
       "side": 1,
       "message": "This could be changed to method. It would come useful once change to writable properties is merged.",
+      "range": {
+        "startLine": 68,
+        "startChar": 0,
+        "endLine": 91,
+        "endChar": 5
+      },
+      "revId": "6066126237bd61fa71ba3c294ac1a42599c373d1",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "15b10418_c626a1c8",
+        "filename": "src/report.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2022-02-16T10:22:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d2410b70_d0bbe85e",
       "range": {
         "startLine": 68,
         "startChar": 0,
