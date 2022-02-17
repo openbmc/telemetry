@@ -34,7 +34,8 @@ class TestMetric : public Test
         {
             auto& metricMock =
                 result.emplace_back(std::make_shared<NiceMock<SensorMock>>());
-            ON_CALL(*metricMock, metadata()).WillByDefault(Return("metadata"));
+            ON_CALL(*metricMock, metadata())
+                .WillByDefault(Return("metadata" + std::to_string(i)));
         }
         return result;
     }
@@ -88,8 +89,7 @@ TEST_F(TestMetric, containsEmptyReadingAfterCreated)
 {
     sut = makeSut(params);
 
-    ASSERT_THAT(sut->getReadings(),
-                ElementsAre(MetricValue({"id", "metadata", 0., 0u})));
+    ASSERT_THAT(sut->getReadings(), ElementsAre());
 }
 
 TEST_F(TestMetric,
@@ -132,8 +132,7 @@ class TestMetricAfterInitialization : public TestMetric
 
 TEST_F(TestMetricAfterInitialization, containsEmptyReading)
 {
-    ASSERT_THAT(sut->getReadings(),
-                ElementsAre(MetricValue({"id", "metadata", 0., 0u})));
+    ASSERT_THAT(sut->getReadings(), ElementsAre());
 }
 
 TEST_F(TestMetricAfterInitialization, updatesMetricValuesOnSensorUpdate)
@@ -142,7 +141,7 @@ TEST_F(TestMetricAfterInitialization, updatesMetricValuesOnSensorUpdate)
 
     ASSERT_THAT(
         sut->getReadings(),
-        ElementsAre(MetricValue{"id", "metadata", 31.2,
+        ElementsAre(MetricValue{"id", "metadata0", 31.2,
                                 std::chrono::duration_cast<Milliseconds>(
                                     clockFake.system.timestamp())
                                     .count()}));
@@ -359,7 +358,7 @@ TEST_P(TestMetricCalculationFunctions, calculatesReadingValue)
     const auto readings = sut->getReadings();
 
     EXPECT_THAT(readings,
-                ElementsAre(MetricValue{"id", "metadata", expectedReading,
+                ElementsAre(MetricValue{"id", "metadata0", expectedReading,
                                         expectedTimestamp.count()}));
 }
 
@@ -379,7 +378,7 @@ TEST_P(TestMetricCalculationFunctions,
     const auto readings = sut->getReadings();
 
     EXPECT_THAT(readings,
-                ElementsAre(MetricValue{"id", "metadata", expectedReading,
+                ElementsAre(MetricValue{"id", "metadata0", expectedReading,
                                         expectedTimestamp.count()}));
 }
 
@@ -387,4 +386,73 @@ TEST_P(TestMetricCalculationFunctions, returnsIsTimerRequired)
 {
     EXPECT_THAT(sut->isTimerRequired(),
                 Eq(GetParam().expectedIsTimerRequired()));
+}
+
+class TestMetricWithMultipleSensors : public TestMetric
+{
+  public:
+    TestMetricWithMultipleSensors()
+    {
+        sensorMocks = makeSensorMocks(7u);
+
+        sut = makeSut(params);
+        sut->initialize();
+    }
+};
+
+TEST_F(TestMetricWithMultipleSensors, readingsContainsAllReadingsInOrder)
+{
+    for (size_t i = 0; i < sensorMocks.size(); ++i)
+    {
+        sut->sensorUpdated(*sensorMocks[i], Milliseconds{i + 100}, i + 10.0);
+        sut->getReadings();
+    }
+
+    clockFake.system.set(Milliseconds{72});
+
+    EXPECT_THAT(sut->getReadings(),
+                ElementsAre(MetricValue{"id", "metadata0", 10.0, 72},
+                            MetricValue{"id", "metadata1", 11.0, 72},
+                            MetricValue{"id", "metadata2", 12.0, 72},
+                            MetricValue{"id", "metadata3", 13.0, 72},
+                            MetricValue{"id", "metadata4", 14.0, 72},
+                            MetricValue{"id", "metadata5", 15.0, 72},
+                            MetricValue{"id", "metadata6", 16.0, 72}));
+}
+
+TEST_F(TestMetricWithMultipleSensors, readingsContainOnlyAvailableSensors)
+{
+    for (auto i : {5u, 3u, 6u, 0u})
+    {
+        sut->sensorUpdated(*sensorMocks[i], Milliseconds{i + 100}, i + 10.0);
+        sut->getReadings();
+    }
+
+    clockFake.system.set(Milliseconds{62});
+
+    EXPECT_THAT(sut->getReadings(),
+                ElementsAre(MetricValue{"id", "metadata5", 15.0, 62},
+                            MetricValue{"id", "metadata3", 13.0, 62},
+                            MetricValue{"id", "metadata6", 16.0, 62},
+                            MetricValue{"id", "metadata0", 10.0, 62}));
+}
+
+TEST_F(TestMetricWithMultipleSensors, readingsContainsAllReadingsOutOfOrder)
+{
+    for (auto i : {6u, 5u, 3u, 4u, 0u, 2u, 1u})
+    {
+        sut->sensorUpdated(*sensorMocks[i], Milliseconds{i + 100}, i + 10.0);
+        sut->getReadings();
+    }
+
+    clockFake.system.set(Milliseconds{52});
+
+    EXPECT_THAT(sut->getReadings(),
+                ElementsAre(MetricValue{"id", "metadata6", 16.0, 52},
+                            MetricValue{"id", "metadata5", 15.0, 52},
+                            MetricValue{"id", "metadata3", 13.0, 52},
+                            MetricValue{"id", "metadata4", 14.0, 52},
+                            MetricValue{"id", "metadata0", 10.0, 52},
+                            MetricValue{"id", "metadata2", 12.0, 52},
+                            MetricValue{"id", "metadata1", 11.0, 52}));
 }
