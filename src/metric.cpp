@@ -21,11 +21,7 @@ Metric::Metric(Sensors sensorsIn, OperationType operationTypeIn,
         metrics::makeCollectionData(sensors.size(), operationType,
                                     collectionTimeScope, collectionDuration)),
     clock(std::move(clockIn))
-{
-    readings = utils::transform(sensors, [this](const auto& sensor) {
-        return MetricValue{id, sensor->metadata(), 0.0, 0u};
-    });
-}
+{}
 
 void Metric::registerForUpdates(interfaces::MetricListener& listener)
 {
@@ -58,25 +54,40 @@ void Metric::deinitialize()
     }
 }
 
-std::vector<MetricValue> Metric::getReadings() const
+const std::vector<MetricValue>& Metric::getUpdatedReadings()
 {
     const auto steadyTimestamp = clock->steadyTimestamp();
-    const auto systemTimestamp = clock->systemTimestamp();
+    const auto systemTimestamp =
+        std::chrono::duration_cast<Milliseconds>(clock->systemTimestamp())
+            .count();
 
-    auto resultReadings = readings;
-
-    for (size_t i = 0; i < resultReadings.size(); ++i)
+    for (size_t i = 0; i < collectionAlgorithms.size(); ++i)
     {
         if (const auto value = collectionAlgorithms[i]->update(steadyTimestamp))
         {
-            resultReadings[i].timestamp =
-                std::chrono::duration_cast<Milliseconds>(systemTimestamp)
-                    .count();
-            resultReadings[i].value = *value;
+            if (i < readings.size())
+            {
+                readings[i].timestamp = systemTimestamp;
+                readings[i].value = *value;
+            }
+            else
+            {
+                if (i > readings.size())
+                {
+                    const auto idx = readings.size();
+                    std::swap(collectionAlgorithms[i],
+                              collectionAlgorithms[idx]);
+                    std::swap(sensors[i], sensors[idx]);
+                    i = idx;
+                }
+
+                readings.emplace_back(id, sensors[i]->metadata(), *value,
+                                      systemTimestamp);
+            }
         }
     }
 
-    return resultReadings;
+    return readings;
 }
 
 void Metric::sensorUpdated(interfaces::Sensor& notifier, Milliseconds timestamp,

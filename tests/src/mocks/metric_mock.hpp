@@ -11,16 +11,17 @@ class MetricMock : public interfaces::Metric
     {
         using namespace testing;
 
-        ON_CALL(*this, getReadings())
-            .WillByDefault(Return(std::vector<MetricValue>()));
+        ON_CALL(*this, getUpdatedReadings())
+            .WillByDefault(ReturnRefOfCopy(std::vector<MetricValue>()));
         ON_CALL(*this, sensorCount).WillByDefault(InvokeWithoutArgs([this] {
-            return getReadings().size();
+            return getUpdatedReadings().size();
         }));
     }
 
     MOCK_METHOD(void, initialize, (), (override));
     MOCK_METHOD(void, deinitialize, (), (override));
-    MOCK_METHOD(std::vector<MetricValue>, getReadings, (), (const, override));
+    MOCK_METHOD(const std::vector<MetricValue>&, getUpdatedReadings, (),
+                (override));
     MOCK_METHOD(LabeledMetricParameters, dumpConfiguration, (),
                 (const, override));
     MOCK_METHOD(uint64_t, sensorCount, (), (const, override));

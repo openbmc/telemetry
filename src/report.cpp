@@ -462,7 +462,7 @@ void Report::updateReadings()
     for (const auto& metric : metrics)
     {
         for (const auto& [id, metadata, value, timestamp] :
-             metric->getReadings())
+             metric->getUpdatedReadings())
         {
             if (reportUpdates == ReportUpdates::appendStopsWhenFull &&
                 readingsBuffer.isFull())

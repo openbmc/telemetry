@@ -20,7 +20,7 @@ class Metric :
 
     void initialize() override;
     void deinitialize() override;
-    std::vector<MetricValue> getReadings() const override;
+    const std::vector<MetricValue>& getUpdatedReadings() override;
     void sensorUpdated(interfaces::Sensor&, Milliseconds,
                        double value) override;
     LabeledMetricParameters dumpConfiguration() const override;
