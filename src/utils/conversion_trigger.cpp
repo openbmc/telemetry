@@ -82,6 +82,11 @@ TriggerThresholdParams
     fromLabeledThresholdParam(const std::vector<LabeledThresholdParam>& params)
 {
     namespace ts = utils::tstring;
+    if (params.empty())
+    {
+        return std::vector<numeric::ThresholdParam>();
+    }
+
     if (isFirstElementOfType<std::monostate>(params))
     {
         return std::vector<discrete::ThresholdParam>();

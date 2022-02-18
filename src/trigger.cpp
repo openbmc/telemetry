@@ -81,10 +81,7 @@ Trigger::Trigger(
                     return 1;
                 },
                 [this](const auto&) {
-                    return fromLabeledThresholdParam(
-                        utils::transform(thresholds, [](const auto& threshold) {
-                            return threshold->getThresholdParam();
-                        }));
+                    return fromLabeledThresholdParam(getLabeledThresholds());
                 });
 
             dbusIface.register_property_rw(
@@ -103,13 +100,11 @@ Trigger::Trigger(
                 },
                 [this](const auto&) {
                     return utils::fromLabeledSensorsInfo(
-                        utils::transform(sensors, [](const auto& sensor) {
-                            return sensor->getLabeledSensorInfo();
-                        }));
+                        getLabeledSensorInfo());
                 });
 
             dbusIface.register_property_rw(
-                "ReportNames", std::vector<std::string>{},
+                "ReportNames", *reportIds,
                 sdbusplus::vtable::property_::emits_change,
                 [this](auto newVal, auto& oldVal) {
                     TriggerManager::verifyReportIds(newVal);
@@ -122,16 +117,11 @@ Trigger::Trigger(
                 [this](const auto&) { return *reportIds; });
 
             dbusIface.register_property_r(
-                "Discrete", false, sdbusplus::vtable::property_::const_,
-                [this](const auto& x) {
-                    return !std::holds_alternative<
-                        numeric::LabeledThresholdParam>(
-                        thresholds.back()->getThresholdParam());
-                });
+                "Discrete", isDiscreate(), sdbusplus::vtable::property_::const_,
+                [this](const auto& x) { return isDiscreate(); });
 
             dbusIface.register_property_rw(
-                "Name", std::string(),
-                sdbusplus::vtable::property_::emits_change,
+                "Name", name, sdbusplus::vtable::property_::emits_change,
                 [this](auto newVal, auto& oldVal) {
                     name = oldVal = newVal;
                     return 1;
@@ -173,10 +163,7 @@ bool Trigger::storeConfiguration() const
 
         auto labeledThresholdParams =
             std::visit(utils::ToLabeledThresholdParamConversion(),
-                       fromLabeledThresholdParam(utils::transform(
-                           thresholds, [](const auto& threshold) {
-                               return threshold->getThresholdParam();
-                           })));
+                       fromLabeledThresholdParam(getLabeledThresholds()));
 
         data["Version"] = triggerVersion;
         data["Id"] = id;
@@ -189,9 +176,7 @@ bool Trigger::storeConfiguration() const
         data["ThresholdParams"] =
             utils::labeledThresholdParamsToJson(labeledThresholdParams);
         data["ReportIds"] = *reportIds;
-        data["Sensors"] = utils::transform(sensors, [](const auto& sensor) {
-            return sensor->getLabeledSensorInfo();
-        });
+        data["Sensors"] = getLabeledSensorInfo();
 
         triggerStorage.store(fileName, data);
     }
@@ -203,4 +188,27 @@ bool Trigger::storeConfiguration() const
         return false;
     }
     return true;
+}
+
+std::vector<LabeledSensorInfo> Trigger::getLabeledSensorInfo() const
+{
+    return utils::transform(sensors, [](const auto& sensor) {
+        return sensor->getLabeledSensorInfo();
+    });
+}
+
+std::vector<LabeledThresholdParam> Trigger::getLabeledThresholds() const
+{
+    return utils::transform(thresholds, [](const auto& threshold) {
+        return threshold->getThresholdParam();
+    });
+}
+
+bool Trigger::isDiscreate() const
+{
+    const auto labeledThresholds = getLabeledThresholds();
+
+    return utils::isFirstElementOfType<std::monostate>(labeledThresholds) ||
+           utils::isFirstElementOfType<discrete::LabeledThresholdParam>(
+               labeledThresholds);
 }

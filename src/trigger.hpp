@@ -45,6 +45,10 @@ class Trigger : public interfaces::Trigger
     bool storeConfiguration() const;
 
   private:
+    std::vector<LabeledSensorInfo> getLabeledSensorInfo() const;
+    std::vector<LabeledThresholdParam> getLabeledThresholds() const;
+    bool isDiscreate() const;
+
     std::string id;
     std::string name;
     std::vector<TriggerAction> triggerActions;
