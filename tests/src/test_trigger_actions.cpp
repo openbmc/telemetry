@@ -60,8 +60,7 @@ INSTANTIATE_TEST_SUITE_P(_, TestLogToJournalNumericThrow, getIncorrectParams());
 
 TEST_P(TestLogToJournalNumericThrow, commitAnActionExpectThrow)
 {
-    EXPECT_THROW(sut->commit("Test", Milliseconds{100'000}, commmitValue),
-                 std::runtime_error);
+    EXPECT_ANY_THROW(sut->commit("Test", Milliseconds{100'000}, commmitValue));
 }
 
 class TestLogToRedfishNumeric : public Test, public WithParamInterface<LogParam>
@@ -145,8 +144,7 @@ INSTANTIATE_TEST_SUITE_P(_, TestLogToJournalDiscreteThrow,
 
 TEST_P(TestLogToJournalDiscreteThrow, commitAnActionExpectThrow)
 {
-    EXPECT_THROW(sut->commit("Test", Milliseconds{100'000}, 90.0),
-                 std::runtime_error);
+    EXPECT_ANY_THROW(sut->commit("Test", Milliseconds{100'000}, 90.0));
 }
 
 class TestLogToRedfishDiscrete :

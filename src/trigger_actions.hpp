@@ -22,8 +22,6 @@ class LogToJournal : public interfaces::TriggerAction
   private:
     ::numeric::Type type;
     double threshold;
-
-    const char* getType() const;
 };
 
 class LogToRedfish : public interfaces::TriggerAction
@@ -62,8 +60,6 @@ class LogToJournal : public interfaces::TriggerAction
 
   private:
     ::discrete::Severity severity;
-
-    const char* getSeverity() const;
 };
 
 class LogToRedfish : public interfaces::TriggerAction

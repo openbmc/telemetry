@@ -1,6 +1,7 @@
 #include "trigger_actions.hpp"
 
 #include "messages/update_report_ind.hpp"
+#include "types/trigger_types.hpp"
 #include "utils/messanger.hpp"
 
 #include <phosphor-logging/log.hpp>
@@ -42,26 +43,10 @@ static const char* getDirection(double value, double threshold)
     throw std::runtime_error("Invalid value");
 }
 
-const char* LogToJournal::getType() const
-{
-    switch (type)
-    {
-        case ::numeric::Type::upperCritical:
-            return "UpperCritical";
-        case ::numeric::Type::lowerCritical:
-            return "LowerCritical";
-        case ::numeric::Type::upperWarning:
-            return "UpperWarning";
-        case ::numeric::Type::lowerWarning:
-            return "LowerWarning";
-    }
-    throw std::runtime_error("Invalid type");
-}
-
 void LogToJournal::commit(const std::string& sensorName, Milliseconds timestamp,
                           double value)
 {
-    std::string msg = std::string(getType()) +
+    std::string msg = ::numeric::typeToString(type) +
                       " numeric threshold condition is met on sensor " +
                       sensorName + ", recorded value " + std::to_string(value) +
                       ", timestamp " + timestampToString(timestamp) +
@@ -135,24 +120,10 @@ void fillActions(
 
 namespace discrete
 {
-const char* LogToJournal::getSeverity() const
-{
-    switch (severity)
-    {
-        case ::discrete::Severity::ok:
-            return "OK";
-        case ::discrete::Severity::warning:
-            return "Warning";
-        case ::discrete::Severity::critical:
-            return "Critical";
-    }
-    throw std::runtime_error("Invalid severity");
-}
-
 void LogToJournal::commit(const std::string& sensorName, Milliseconds timestamp,
                           double value)
 {
-    std::string msg = std::string(getSeverity()) +
+    std::string msg = ::discrete::severityToString(severity) +
                       " discrete threshold condition is met on sensor " +
                       sensorName + ", recorded value " + std::to_string(value) +
                       ", timestamp " + timestampToString(timestamp);
