@@ -44,19 +44,14 @@ assert(boost.found(),
        'environemt to point at boost build. To build a boost you can use ' +
        'script ./scripts/boost_build_1.74.0.sh')
 
-phosphor_logging = dependency(
-    'phosphor-logging',
-    fallback: ['phosphor-logging', 'phosphor_logging_dep'],
-)
-
-sdbusplus = dependency('sdbusplus', fallback: ['sdbusplus', 'sdbusplus_dep'])
+phosphor_logging = dependency('phosphor-logging')
+sdbusplus = dependency('sdbusplus')
 systemd = dependency('systemd')
 
 if cpp.has_header('nlohmann/json.hpp')
     nlohmann_json = declare_dependency()
 else
-    nlohmann_json = dependency('nlohmann_json',
-                               fallback: ['nlohmann', 'nlohmann_json_dep'])
+    nlohmann_json = dependency('nlohmann_json')
 endif
 
 add_project_arguments(
