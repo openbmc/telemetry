@@ -31,7 +31,8 @@ class Sensor final :
     std::string metadata() const override;
     std::string getName() const override;
     void registerForUpdates(
-        const std::weak_ptr<interfaces::SensorListener>& weakListener) override;
+        const std::weak_ptr<interfaces::SensorListener>& weakListener,
+        SensorRegisterBehavior behavior) override;
     void unregisterFromUpdates(
         const std::weak_ptr<interfaces::SensorListener>& weakListener) override;
 

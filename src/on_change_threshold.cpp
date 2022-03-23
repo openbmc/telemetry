@@ -1,5 +1,7 @@
 #include "on_change_threshold.hpp"
 
+#include "types/sensor_types.hpp"
+
 #include <phosphor-logging/log.hpp>
 
 OnChangeThreshold::OnChangeThreshold(
@@ -13,7 +15,8 @@ void OnChangeThreshold::initialize()
 {
     for (auto& sensor : sensors)
     {
-        sensor->registerForUpdates(weak_from_this());
+        sensor->registerForUpdates(weak_from_this(),
+                                   SensorRegisterBehavior::SkipFirstUpdate);
     }
     initialized = true;
 }
@@ -35,7 +38,8 @@ void OnChangeThreshold::updateSensors(Sensors newSensors)
 
         if (initialized)
         {
-            sensor->registerForUpdates(weak_from_this());
+            sensor->registerForUpdates(weak_from_this(),
+                                       SensorRegisterBehavior::SkipFirstUpdate);
         }
     }
 

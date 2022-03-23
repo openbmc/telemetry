@@ -3,6 +3,7 @@
 #include "mocks/sensor_mock.hpp"
 #include "mocks/trigger_action_mock.hpp"
 #include "on_change_threshold.hpp"
+#include "types/sensor_types.hpp"
 #include "utils/conv_container.hpp"
 
 #include <gmock/gmock.h>
@@ -44,10 +45,11 @@ TEST_F(TestOnChangeThreshold, initializeThresholdExpectAllSensorsAreRegistered)
 {
     for (auto& sensor : sensorMocks)
     {
-        EXPECT_CALL(*sensor,
-                    registerForUpdates(Truly([sut = sut.get()](const auto& x) {
-                        return x.lock().get() == sut;
-                    })));
+        EXPECT_CALL(*sensor, registerForUpdates(
+                                 Truly([sut = sut.get()](const auto& x) {
+                                     return x.lock().get() == sut;
+                                 }),
+                                 SensorRegisterBehavior::SkipFirstUpdate));
     }
 
     sut->initialize();

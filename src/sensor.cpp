@@ -42,8 +42,6 @@ void Sensor::async_read()
 
 void Sensor::async_read(std::shared_ptr<utils::UniqueCall::Lock> lock)
 {
-    makeSignalMonitor();
-
     sdbusplus::asio::getProperty<double>(
         *bus, sensorId.service, sensorId.path,
         "xyz.openbmc_project.Sensor.Value", "Value",
@@ -65,7 +63,8 @@ void Sensor::async_read(std::shared_ptr<utils::UniqueCall::Lock> lock)
 }
 
 void Sensor::registerForUpdates(
-    const std::weak_ptr<interfaces::SensorListener>& weakListener)
+    const std::weak_ptr<interfaces::SensorListener>& weakListener,
+    SensorRegisterBehavior behavior)
 {
     listeners.erase(
         std::remove_if(listeners.begin(), listeners.end(),
@@ -75,6 +74,13 @@ void Sensor::registerForUpdates(
     if (auto listener = weakListener.lock())
     {
         listeners.emplace_back(weakListener);
+
+        makeSignalMonitor();
+
+        if (behavior == SensorRegisterBehavior::SkipFirstUpdate)
+        {
+            return;
+        }
 
         if (value)
         {

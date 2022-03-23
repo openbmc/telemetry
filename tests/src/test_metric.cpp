@@ -4,6 +4,7 @@
 #include "mocks/metric_listener_mock.hpp"
 #include "mocks/sensor_mock.hpp"
 #include "params/metric_params.hpp"
+#include "types/sensor_types.hpp"
 #include "utils/conv_container.hpp"
 #include "utils/conversion.hpp"
 #include "utils/tstring.hpp"
@@ -67,8 +68,9 @@ TEST_F(TestMetric, subscribesForSensorDuringInitialization)
 
     EXPECT_CALL(*sensorMocks.front(),
                 registerForUpdates(Truly([sut = sut.get()](const auto& a0) {
-                    return a0.lock().get() == sut;
-                })));
+                                       return a0.lock().get() == sut;
+                                   }),
+                                   SensorRegisterBehavior::None));
 
     sut->initialize();
 }

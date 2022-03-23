@@ -4,6 +4,7 @@
 #include "sensor.hpp"
 #include "sensor_cache.hpp"
 #include "stubs/dbus_sensor_object.hpp"
+#include "types/sensor_types.hpp"
 #include "utils/clock.hpp"
 
 #include <sdbusplus/asio/property.hpp>
@@ -28,10 +29,11 @@ class TestSensor : public Test
         DbusEnvironment::synchronizeIoc();
     }
 
-    void
-        registerForUpdates(std::shared_ptr<interfaces::SensorListener> listener)
+    void registerForUpdates(
+        std::shared_ptr<interfaces::SensorListener> listener,
+        SensorRegisterBehavior behavior = SensorRegisterBehavior::None)
     {
-        sut->registerForUpdates(listener);
+        sut->registerForUpdates(listener, behavior);
         DbusEnvironment::synchronizeIoc();
     }
 
@@ -80,6 +82,16 @@ TEST_F(TestSensor, notifiesWithValueAfterRegister)
     ASSERT_TRUE(DbusEnvironment::waitForFuture("async_read"));
 }
 
+TEST_F(TestSensor, willNotNotifyWithValueAfterRegisterWithSkipFirstUpdate)
+{
+    EXPECT_CALL(*listenerMock, sensorUpdated(Ref(*sut), Ge(timestamp), 42.7))
+        .Times(0);
+
+    registerForUpdates(listenerMock, SensorRegisterBehavior::SkipFirstUpdate);
+
+    DbusEnvironment::sleepFor(3s);
+}
+
 TEST_F(TestSensor, notifiesOnceWithValueAfterRegister)
 {
     EXPECT_CALL(*listenerMock, sensorUpdated(Ref(*sut), Ge(timestamp), 42.7))
@@ -89,8 +101,8 @@ TEST_F(TestSensor, notifiesOnceWithValueAfterRegister)
             InvokeWithoutArgs(DbusEnvironment::setPromise("async_read2")));
 
     DbusEnvironment::synchronizedPost([this] {
-        sut->registerForUpdates(listenerMock);
-        sut->registerForUpdates(listenerMock2);
+        sut->registerForUpdates(listenerMock, SensorRegisterBehavior::None);
+        sut->registerForUpdates(listenerMock2, SensorRegisterBehavior::None);
     });
 
     ASSERT_TRUE(DbusEnvironment::waitForFuture("async_read"));

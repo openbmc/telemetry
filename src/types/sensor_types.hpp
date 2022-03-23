@@ -13,3 +13,9 @@ using LabeledSensorInfo =
     utils::LabeledTuple<std::tuple<std::string, std::string, std::string>,
                         utils::tstring::Service, utils::tstring::Path,
                         utils::tstring::Metadata>;
+
+enum class SensorRegisterBehavior
+{
+    None,
+    SkipFirstUpdate
+};

@@ -3,6 +3,7 @@
 #include "mocks/sensor_mock.hpp"
 #include "mocks/trigger_action_mock.hpp"
 #include "numeric_threshold.hpp"
+#include "types/sensor_types.hpp"
 #include "utils/conv_container.hpp"
 
 #include <gmock/gmock.h>
@@ -55,8 +56,9 @@ TEST_F(TestNumericThreshold, initializeThresholdExpectAllSensorsAreRegistered)
     {
         EXPECT_CALL(*sensor,
                     registerForUpdates(Truly([sut = sut.get()](const auto& x) {
-                        return x.lock().get() == sut;
-                    })));
+                                           return x.lock().get() == sut;
+                                       }),
+                                       SensorRegisterBehavior::None));
     }
 
     sut->initialize();

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "interfaces/sensor.hpp"
+#include "types/sensor_types.hpp"
 #include "utils/conv_container.hpp"
 #include "utils/generate_unique_mock_id.hpp"
 
@@ -44,7 +45,9 @@ class SensorMock : public interfaces::Sensor
     MOCK_METHOD(std::string, metadata, (), (const, override));
     MOCK_METHOD(std::string, getName, (), (const, override));
     MOCK_METHOD(void, registerForUpdates,
-                (const std::weak_ptr<interfaces::SensorListener>&), (override));
+                (const std::weak_ptr<interfaces::SensorListener>&,
+                 SensorRegisterBehavior),
+                (override));
     MOCK_METHOD(void, unregisterFromUpdates,
                 (const std::weak_ptr<interfaces::SensorListener>&), (override));
     MOCK_METHOD(LabeledSensorInfo, getLabeledSensorInfo, (), (const, override));
