@@ -140,4 +140,16 @@ nlohmann::json labeledThresholdParamsToJson(
                       labeledThresholdParams);
 }
 
+double stodStrict(const std::string& str)
+{
+    size_t pos = 0;
+    double result = std::stod(str, &pos);
+    if (pos < str.length())
+    {
+        throw std::invalid_argument(
+            "non-numeric characters at the end of string");
+    }
+    return result;
+}
+
 } // namespace utils

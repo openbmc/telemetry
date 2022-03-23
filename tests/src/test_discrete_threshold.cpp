@@ -24,7 +24,7 @@ class TestDiscreteThreshold : public Test
     std::shared_ptr<DiscreteThreshold> sut;
 
     std::shared_ptr<DiscreteThreshold>
-        makeThreshold(Milliseconds dwellTime, double thresholdValue,
+        makeThreshold(Milliseconds dwellTime, std::string thresholdValue,
                       discrete::Severity severity = discrete::Severity::ok)
     {
         std::vector<std::unique_ptr<interfaces::TriggerAction>> actions;
@@ -46,7 +46,7 @@ class TestDiscreteThreshold : public Test
                 .WillByDefault(Return(sensorNames[idx]));
         }
 
-        sut = makeThreshold(0ms, 90.0, discrete::Severity::critical);
+        sut = makeThreshold(0ms, "90.0", discrete::Severity::critical);
     }
 };
 
@@ -68,11 +68,33 @@ TEST_F(TestDiscreteThreshold, thresholdIsNotInitializeExpectNoActionCommit)
     EXPECT_CALL(actionMock, commit(_, _, _)).Times(0);
 }
 
-TEST_F(TestDiscreteThreshold, getLabeledParamsReturnsCorrectly)
+class TestDiscreteThresholdValues :
+    public TestDiscreteThreshold,
+    public WithParamInterface<std::string>
+{};
+
+INSTANTIATE_TEST_SUITE_P(_, TestDiscreteThresholdValues,
+                         Values("90", ".90", "90.123", "0.0"));
+
+TEST_P(TestDiscreteThresholdValues, thresholdValueIsNumericAndStoredCorrectly)
 {
+    sut = makeThreshold(0ms, GetParam(), discrete::Severity::critical);
     LabeledThresholdParam expected = discrete::LabeledThresholdParam(
-        "treshold name", discrete::Severity::critical, 0, std::to_string(90.0));
+        "treshold name", discrete::Severity::critical, 0, GetParam());
     EXPECT_EQ(sut->getThresholdParam(), expected);
+}
+
+class TestBadDiscreteThresholdValues :
+    public TestDiscreteThreshold,
+    public WithParamInterface<std::string>
+{};
+
+INSTANTIATE_TEST_SUITE_P(_, TestBadDiscreteThresholdValues,
+                         Values("90ad", "ab.90", "x90", "On", "Off", ""));
+
+TEST_P(TestBadDiscreteThresholdValues, throwsWhenNotNumericValues)
+{
+    EXPECT_THROW(makeThreshold(0ms, GetParam()), std::invalid_argument);
 }
 
 struct DiscreteParams
@@ -117,9 +139,9 @@ struct DiscreteParams
         return *this;
     }
 
-    DiscreteParams& ThresholdValue(double val)
+    DiscreteParams& ThresholdValue(std::string val)
     {
-        thresholdValue = val;
+        thresholdValue = std::move(val);
         return *this;
     }
 
@@ -152,7 +174,7 @@ struct DiscreteParams
 
     std::vector<UpdateParams> updates;
     std::vector<ExpectedParams> expected;
-    double thresholdValue = 0.0;
+    std::string thresholdValue = "0.0";
     Milliseconds dwellTime = 0ms;
 };
 
@@ -227,18 +249,18 @@ class TestDiscreteThresholdNoDwellTime : public TestDiscreteThresholdCommon
 
 INSTANTIATE_TEST_SUITE_P(_, TestDiscreteThresholdNoDwellTime,
                          Values(DiscreteParams()
-                                    .ThresholdValue(90.0)
+                                    .ThresholdValue("90.0")
                                     .Updates({{0, 1ms, 80.0}, {0, 2ms, 89.0}})
                                     .Expected({}),
                                 DiscreteParams()
-                                    .ThresholdValue(90.0)
+                                    .ThresholdValue("90.0")
                                     .Updates({{0, 1ms, 80.0},
                                               {0, 2ms, 90.0},
                                               {0, 3ms, 80.0},
                                               {0, 4ms, 90.0}})
                                     .Expected({{0, 2ms, 90.0}, {0, 4ms, 90.0}}),
                                 DiscreteParams()
-                                    .ThresholdValue(90.0)
+                                    .ThresholdValue("90.0")
                                     .Updates({{0, 1ms, 90.0},
                                               {0, 2ms, 99.0},
                                               {1, 3ms, 100.0},
@@ -270,17 +292,17 @@ INSTANTIATE_TEST_SUITE_P(
     _, TestDiscreteThresholdWithDwellTime,
     Values(DiscreteParams()
                .DwellTime(200ms)
-               .ThresholdValue(90.0)
+               .ThresholdValue("90.0")
                .Updates({{0, 1ms, 90.0, 100ms}, {0, 2ms, 91.0}, {0, 3ms, 90.0}})
                .Expected({{0, 3ms, 90.0, 300ms}}),
            DiscreteParams()
                .DwellTime(100ms)
-               .ThresholdValue(90.0)
+               .ThresholdValue("90.0")
                .Updates({{0, 1ms, 90.0, 100ms}})
                .Expected({{0, 1ms, 90.0, 100ms}}),
            DiscreteParams()
                .DwellTime(1000ms)
-               .ThresholdValue(90.0)
+               .ThresholdValue("90.0")
                .Updates({{0, 1ms, 90.0, 700ms},
                          {0, 1ms, 91.0, 100ms},
                          {0, 1ms, 90.0, 300ms},
@@ -288,7 +310,7 @@ INSTANTIATE_TEST_SUITE_P(
                .Expected({}),
            DiscreteParams()
                .DwellTime(200ms)
-               .ThresholdValue(90.0)
+               .ThresholdValue("90.0")
                .Updates({{0, 1ms, 90.0},
                          {1, 2ms, 89.0, 100ms},
                          {1, 3ms, 90.0, 100ms},

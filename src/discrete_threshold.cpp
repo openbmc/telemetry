@@ -1,15 +1,19 @@
 #include "discrete_threshold.hpp"
 
+#include "utils/conversion_trigger.hpp"
+
 #include <phosphor-logging/log.hpp>
 
 DiscreteThreshold::DiscreteThreshold(
     boost::asio::io_context& ioc, Sensors sensorsIn,
     std::vector<std::unique_ptr<interfaces::TriggerAction>> actionsIn,
-    Milliseconds dwellTimeIn, double thresholdValueIn,
+    Milliseconds dwellTimeIn, const std::string& thresholdValueIn,
     const std::string& nameIn, const discrete::Severity severityIn) :
     ioc(ioc),
     actions(std::move(actionsIn)), dwellTime(dwellTimeIn),
-    thresholdValue(thresholdValueIn), name(nameIn), severity(severityIn)
+    thresholdValue(thresholdValueIn),
+    numericThresholdValue(utils::stodStrict(thresholdValue)), name(nameIn),
+    severity(severityIn)
 {
     for (const auto& sensor : sensorsIn)
     {
@@ -45,17 +49,14 @@ void DiscreteThreshold::sensorUpdated(interfaces::Sensor& sensor,
     auto& details = getDetails(sensor);
     auto& [sensorName, dwell, timer] = details;
 
-    if (thresholdValue)
+    if (dwell && value != numericThresholdValue)
     {
-        if (dwell && value != thresholdValue)
-        {
-            timer.cancel();
-            dwell = false;
-        }
-        else if (value == thresholdValue)
-        {
-            startTimer(details, timestamp, value);
-        }
+        timer.cancel();
+        dwell = false;
+    }
+    else if (value == numericThresholdValue)
+    {
+        startTimer(details, timestamp, value);
     }
 }
 
@@ -100,5 +101,5 @@ void DiscreteThreshold::commit(const std::string& sensorName,
 LabeledThresholdParam DiscreteThreshold::getThresholdParam() const
 {
     return discrete::LabeledThresholdParam(name, severity, dwellTime.count(),
-                                           std::to_string(thresholdValue));
+                                           thresholdValue);
 }

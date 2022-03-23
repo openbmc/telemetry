@@ -162,8 +162,7 @@ void TriggerFactory::makeDiscreteThreshold(
 
     thresholds.emplace_back(std::make_shared<DiscreteThreshold>(
         bus->get_io_context(), sensors, std::move(actions),
-        Milliseconds(dwellTime), std::stod(thresholdValue), thresholdName,
-        severity));
+        Milliseconds(dwellTime), thresholdValue, thresholdName, severity));
 }
 
 void TriggerFactory::makeNumericThreshold(

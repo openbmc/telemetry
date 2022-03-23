@@ -55,4 +55,6 @@ bool isFirstElementOfType(const std::vector<VariantT>& collection)
     return std::holds_alternative<AlternativeT>(*collection.begin());
 }
 
+double stodStrict(const std::string& str);
+
 } // namespace utils

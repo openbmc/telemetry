@@ -24,8 +24,8 @@ class DiscreteThreshold :
     DiscreteThreshold(
         boost::asio::io_context& ioc, Sensors sensors,
         std::vector<std::unique_ptr<interfaces::TriggerAction>> actions,
-        Milliseconds dwellTime, double thresholdValue, const std::string& name,
-        const discrete::Severity severity);
+        Milliseconds dwellTime, const std::string& thresholdValue,
+        const std::string& name, const discrete::Severity severity);
     DiscreteThreshold(const DiscreteThreshold&) = delete;
     DiscreteThreshold(DiscreteThreshold&&) = delete;
 
@@ -38,7 +38,8 @@ class DiscreteThreshold :
     boost::asio::io_context& ioc;
     const std::vector<std::unique_ptr<interfaces::TriggerAction>> actions;
     const Milliseconds dwellTime;
-    const double thresholdValue;
+    const std::string thresholdValue;
+    const double numericThresholdValue;
     const std::string name;
     const discrete::Severity severity;
     bool initialized = false;
