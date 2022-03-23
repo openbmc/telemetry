@@ -64,6 +64,14 @@ TEST_F(TestOnChangeThreshold, getLabeledParamsReturnsCorrectly)
     EXPECT_EQ(sut->getThresholdParam(), expected);
 }
 
+TEST_F(TestOnChangeThreshold, firstReadingDoesNoActionCommit)
+{
+    EXPECT_CALL(actionMock, commit(_, _, _)).Times(0);
+
+    sut->initialize();
+    sut->sensorUpdated(*sensorMocks.front(), 0ms, 42);
+}
+
 struct OnChangeParams
 {
     using UpdateParams = std::tuple<size_t, Milliseconds, double>;
@@ -141,6 +149,10 @@ TEST_P(TestOnChangeThresholdUpdates, senorsIsUpdatedMultipleTimes)
     }
 
     sut->initialize();
+
+    // First reading will be skipped
+    sut->sensorUpdated(*sensorMocks.front(), 0ms, 42);
+
     for (const auto& [index, timestamp, value] : GetParam().updates)
     {
         sut->sensorUpdated(*sensorMocks[index], timestamp, value);
