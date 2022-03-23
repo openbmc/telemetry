@@ -33,6 +33,7 @@ class OnChangeThreshold :
     Sensors sensors;
     const std::vector<std::unique_ptr<interfaces::TriggerAction>> actions;
     bool initialized = false;
+    bool isFirstReading = true;
 
     void commit(const std::string&, Milliseconds, double);
 };
