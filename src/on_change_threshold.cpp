@@ -53,6 +53,12 @@ void OnChangeThreshold::updateSensors(Sensors newSensors)
 void OnChangeThreshold::sensorUpdated(interfaces::Sensor& sensor,
                                       Milliseconds timestamp, double value)
 {
+    if (isFirstReading)
+    {
+        isFirstReading = false;
+        return;
+    }
+
     commit(sensor.getName(), timestamp, value);
 }
 
