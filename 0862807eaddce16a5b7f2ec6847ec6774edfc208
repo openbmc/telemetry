@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e36b40bd_94d8486f",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2022-03-29T16:33:17Z",
+      "side": 1,
+      "message": "First solution, while looking nice, was flawed, as it would only work in controlled environment. There were still some cases where the OnChange trigger would handle first reading, and it could not be prevented without impacting performance. So it was replaced with single if statement in OnChange class. Sometimes the \u0027easiest\u0027 solution is also the best one.",
+      "revId": "0862807eaddce16a5b7f2ec6847ec6774edfc208",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
