@@ -1,5 +1,6 @@
 #include "dbus_environment.hpp"
 #include "helpers.hpp"
+#include "helpers/matchers.hpp"
 #include "mocks/sensor_mock.hpp"
 #include "mocks/trigger_action_mock.hpp"
 #include "numeric_threshold.hpp"
@@ -21,6 +22,7 @@ class TestNumericThreshold : public Test
         std::make_unique<StrictMock<TriggerActionMock>>();
     TriggerActionMock& actionMock = *actionMockPtr;
     std::shared_ptr<NumericThreshold> sut;
+    std::string triggerId = "MyTrigger";
 
     void makeThreshold(Milliseconds dwellTime, numeric::Direction direction,
                        double thresholdValue,
@@ -30,7 +32,7 @@ class TestNumericThreshold : public Test
         actions.push_back(std::move(actionMockPtr));
 
         sut = std::make_shared<NumericThreshold>(
-            DbusEnvironment::getIoc(),
+            DbusEnvironment::getIoc(), triggerId,
             utils::convContainer<std::shared_ptr<interfaces::Sensor>>(
                 sensorMocks),
             std::move(actions), dwellTime, direction, thresholdValue, type);
@@ -64,7 +66,7 @@ TEST_F(TestNumericThreshold, initializeThresholdExpectAllSensorsAreRegistered)
 
 TEST_F(TestNumericThreshold, thresholdIsNotInitializeExpectNoActionCommit)
 {
-    EXPECT_CALL(actionMock, commit(_, _, _)).Times(0);
+    EXPECT_CALL(actionMock, commit(_, _, _, _, _)).Times(0);
 }
 
 TEST_F(TestNumericThreshold, getLabeledParamsReturnsCorrectly)
@@ -208,7 +210,9 @@ TEST_P(TestNumericThresholdNoDwellTime, senorsIsUpdatedMultipleTimes)
     InSequence seq;
     for (const auto& [index, timestamp, value] : GetParam().expected)
     {
-        EXPECT_CALL(actionMock, commit(sensorNames[index], timestamp, value));
+        EXPECT_CALL(actionMock,
+                    commit(triggerId, helpers::IsNoValueOfOptionalRef(),
+                           sensorNames[index], timestamp, TriggerValue(value)));
     }
 
     sut->initialize();
@@ -311,7 +315,9 @@ TEST_P(TestNumericThresholdWithDwellTime,
     InSequence seq;
     for (const auto& [index, timestamp, value] : GetParam().expected)
     {
-        EXPECT_CALL(actionMock, commit(sensorNames[index], timestamp, value));
+        EXPECT_CALL(actionMock,
+                    commit(triggerId, helpers::IsNoValueOfOptionalRef(),
+                           sensorNames[index], timestamp, TriggerValue(value)));
     }
 
     sut->initialize();
@@ -415,7 +421,9 @@ TEST_P(TestNumericThresholdWithDwellTime2,
     InSequence seq;
     for (const auto& [index, timestamp, value] : GetParam().expected)
     {
-        EXPECT_CALL(actionMock, commit(sensorNames[index], timestamp, value));
+        EXPECT_CALL(actionMock,
+                    commit(triggerId, helpers::IsNoValueOfOptionalRef(),
+                           sensorNames[index], timestamp, TriggerValue(value)));
     }
 
     sut->initialize();

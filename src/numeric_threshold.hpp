@@ -22,7 +22,8 @@ class NumericThreshold :
 {
   public:
     NumericThreshold(
-        boost::asio::io_context& ioc, Sensors sensors,
+        boost::asio::io_context& ioc, const std::string& triggerId,
+        Sensors sensors,
         std::vector<std::unique_ptr<interfaces::TriggerAction>> actions,
         Milliseconds dwellTime, numeric::Direction direction,
         double thresholdValue, numeric::Type type);
@@ -36,6 +37,7 @@ class NumericThreshold :
 
   private:
     boost::asio::io_context& ioc;
+    const std::string& triggerId;
     const std::vector<std::unique_ptr<interfaces::TriggerAction>> actions;
     const Milliseconds dwellTime;
     const numeric::Direction direction;

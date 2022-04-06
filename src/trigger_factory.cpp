@@ -21,6 +21,7 @@ TriggerFactory::TriggerFactory(
 
 void TriggerFactory::updateDiscreteThresholds(
     std::vector<std::shared_ptr<interfaces::Threshold>>& currentThresholds,
+    const std::string& triggerId,
     const std::vector<TriggerAction>& triggerActions,
     const std::shared_ptr<std::vector<std::string>>& reportIds,
     const Sensors& sensors,
@@ -57,16 +58,16 @@ void TriggerFactory::updateDiscreteThresholds(
                 continue;
             }
 
-            makeDiscreteThreshold(newThresholds, triggerActions, reportIds,
-                                  sensors, labeledThresholdParam);
+            makeDiscreteThreshold(newThresholds, triggerId, triggerActions,
+                                  reportIds, sensors, labeledThresholdParam);
         }
     }
     else
     {
         for (const auto& labeledThresholdParam : newParams)
         {
-            makeDiscreteThreshold(newThresholds, triggerActions, reportIds,
-                                  sensors, labeledThresholdParam);
+            makeDiscreteThreshold(newThresholds, triggerId, triggerActions,
+                                  reportIds, sensors, labeledThresholdParam);
         }
     }
     if (newParams.empty())
@@ -77,8 +78,8 @@ void TriggerFactory::updateDiscreteThresholds(
         }
         else
         {
-            makeOnChangeThreshold(newThresholds, triggerActions, reportIds,
-                                  sensors);
+            makeOnChangeThreshold(newThresholds, triggerId, triggerActions,
+                                  reportIds, sensors);
         }
     }
     currentThresholds = std::move(newThresholds);
@@ -86,6 +87,7 @@ void TriggerFactory::updateDiscreteThresholds(
 
 void TriggerFactory::updateNumericThresholds(
     std::vector<std::shared_ptr<interfaces::Threshold>>& currentThresholds,
+    const std::string& triggerId,
     const std::vector<TriggerAction>& triggerActions,
     const std::shared_ptr<std::vector<std::string>>& reportIds,
     const Sensors& sensors,
@@ -112,14 +114,15 @@ void TriggerFactory::updateNumericThresholds(
             continue;
         }
 
-        makeNumericThreshold(newThresholds, triggerActions, reportIds, sensors,
-                             labeledThresholdParam);
+        makeNumericThreshold(newThresholds, triggerId, triggerActions,
+                             reportIds, sensors, labeledThresholdParam);
     }
     currentThresholds = std::move(newThresholds);
 }
 
 void TriggerFactory::updateThresholds(
     std::vector<std::shared_ptr<interfaces::Threshold>>& currentThresholds,
+    const std::string& triggerId,
     const std::vector<TriggerAction>& triggerActions,
     const std::shared_ptr<std::vector<std::string>>& reportIds,
     const Sensors& sensors,
@@ -130,21 +133,24 @@ void TriggerFactory::updateThresholds(
         const auto& labeledDiscreteThresholdParams =
             std::get<std::vector<discrete::LabeledThresholdParam>>(newParams);
 
-        updateDiscreteThresholds(currentThresholds, triggerActions, reportIds,
-                                 sensors, labeledDiscreteThresholdParams);
+        updateDiscreteThresholds(currentThresholds, triggerId, triggerActions,
+                                 reportIds, sensors,
+                                 labeledDiscreteThresholdParams);
     }
     else
     {
         const auto& labeledNumericThresholdParams =
             std::get<std::vector<numeric::LabeledThresholdParam>>(newParams);
 
-        updateNumericThresholds(currentThresholds, triggerActions, reportIds,
-                                sensors, labeledNumericThresholdParams);
+        updateNumericThresholds(currentThresholds, triggerId, triggerActions,
+                                reportIds, sensors,
+                                labeledNumericThresholdParams);
     }
 }
 
 void TriggerFactory::makeDiscreteThreshold(
     std::vector<std::shared_ptr<interfaces::Threshold>>& thresholds,
+    const std::string& triggerId,
     const std::vector<TriggerAction>& triggerActions,
     const std::shared_ptr<std::vector<std::string>>& reportIds,
     const Sensors& sensors,
@@ -152,21 +158,23 @@ void TriggerFactory::makeDiscreteThreshold(
 {
     std::vector<std::unique_ptr<interfaces::TriggerAction>> actions;
 
-    std::string thresholdName = thresholdParam.at_label<ts::UserId>();
+    const std::string& thresholdName = thresholdParam.at_label<ts::UserId>();
     discrete::Severity severity = thresholdParam.at_label<ts::Severity>();
     auto dwellTime = Milliseconds(thresholdParam.at_label<ts::DwellTime>());
-    std::string thresholdValue = thresholdParam.at_label<ts::ThresholdValue>();
+    const std::string& thresholdValue =
+        thresholdParam.at_label<ts::ThresholdValue>();
 
     action::discrete::fillActions(actions, triggerActions, severity,
                                   bus->get_io_context(), reportIds);
 
     thresholds.emplace_back(std::make_shared<DiscreteThreshold>(
-        bus->get_io_context(), sensors, std::move(actions),
+        bus->get_io_context(), triggerId, sensors, std::move(actions),
         Milliseconds(dwellTime), thresholdValue, thresholdName, severity));
 }
 
 void TriggerFactory::makeNumericThreshold(
     std::vector<std::shared_ptr<interfaces::Threshold>>& thresholds,
+    const std::string& triggerId,
     const std::vector<TriggerAction>& triggerActions,
     const std::shared_ptr<std::vector<std::string>>& reportIds,
     const Sensors& sensors,
@@ -183,12 +191,13 @@ void TriggerFactory::makeNumericThreshold(
                                  bus->get_io_context(), reportIds);
 
     thresholds.emplace_back(std::make_shared<NumericThreshold>(
-        bus->get_io_context(), sensors, std::move(actions), dwellTime,
-        direction, thresholdValue, type));
+        bus->get_io_context(), triggerId, sensors, std::move(actions),
+        dwellTime, direction, thresholdValue, type));
 }
 
 void TriggerFactory::makeOnChangeThreshold(
     std::vector<std::shared_ptr<interfaces::Threshold>>& thresholds,
+    const std::string& triggerId,
     const std::vector<TriggerAction>& triggerActions,
     const std::shared_ptr<std::vector<std::string>>& reportIds,
     const Sensors& sensors) const
@@ -198,12 +207,12 @@ void TriggerFactory::makeOnChangeThreshold(
     action::discrete::onChange::fillActions(actions, triggerActions,
                                             bus->get_io_context(), reportIds);
 
-    thresholds.emplace_back(
-        std::make_shared<OnChangeThreshold>(sensors, std::move(actions)));
+    thresholds.emplace_back(std::make_shared<OnChangeThreshold>(
+        triggerId, sensors, std::move(actions)));
 }
 
 std::unique_ptr<interfaces::Trigger> TriggerFactory::make(
-    const std::string& id, const std::string& name,
+    const std::string& idIn, const std::string& name,
     const std::vector<std::string>& triggerActionsIn,
     const std::vector<std::string>& reportIdsIn,
     interfaces::TriggerManager& triggerManager,
@@ -217,15 +226,17 @@ std::unique_ptr<interfaces::Trigger> TriggerFactory::make(
             return toTriggerAction(triggerActionStr);
         });
     std::vector<std::shared_ptr<interfaces::Threshold>> thresholds;
+    auto id = std::make_unique<const std::string>(idIn);
 
     auto reportIds = std::make_shared<std::vector<std::string>>(reportIdsIn);
 
-    updateThresholds(thresholds, triggerActions, reportIds, sensors,
+    updateThresholds(thresholds, *id, triggerActions, reportIds, sensors,
                      labeledThresholdParams);
 
     return std::make_unique<Trigger>(
-        bus->get_io_context(), objServer, id, name, triggerActions, reportIds,
-        std::move(thresholds), triggerManager, triggerStorage, *this, sensors);
+        bus->get_io_context(), objServer, std::move(id), name, triggerActions,
+        reportIds, std::move(thresholds), triggerManager, triggerStorage, *this,
+        sensors);
 }
 
 Sensors TriggerFactory::getSensors(

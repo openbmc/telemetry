@@ -3,13 +3,15 @@
 #include <phosphor-logging/log.hpp>
 
 NumericThreshold::NumericThreshold(
-    boost::asio::io_context& ioc, Sensors sensorsIn,
+    boost::asio::io_context& ioc, const std::string& triggerIdIn,
+    Sensors sensorsIn,
     std::vector<std::unique_ptr<interfaces::TriggerAction>> actionsIn,
     Milliseconds dwellTimeIn, numeric::Direction directionIn,
     double thresholdValueIn, numeric::Type typeIn) :
     ioc(ioc),
-    actions(std::move(actionsIn)), dwellTime(dwellTimeIn),
-    direction(directionIn), thresholdValue(thresholdValueIn), type(typeIn)
+    triggerId(triggerIdIn), actions(std::move(actionsIn)),
+    dwellTime(dwellTimeIn), direction(directionIn),
+    thresholdValue(thresholdValueIn), type(typeIn)
 {
     for (const auto& sensor : sensorsIn)
     {
@@ -97,7 +99,7 @@ void NumericThreshold::commit(const std::string& sensorName,
 {
     for (const auto& action : actions)
     {
-        action->commit(sensorName, timestamp, value);
+        action->commit(triggerId, std::nullopt, sensorName, timestamp, value);
     }
 }
 

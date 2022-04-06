@@ -5,15 +5,16 @@
 #include <phosphor-logging/log.hpp>
 
 DiscreteThreshold::DiscreteThreshold(
-    boost::asio::io_context& ioc, Sensors sensorsIn,
+    boost::asio::io_context& ioc, const std::string& triggerIdIn,
+    Sensors sensorsIn,
     std::vector<std::unique_ptr<interfaces::TriggerAction>> actionsIn,
     Milliseconds dwellTimeIn, const std::string& thresholdValueIn,
     const std::string& nameIn, const discrete::Severity severityIn) :
     ioc(ioc),
-    actions(std::move(actionsIn)), dwellTime(dwellTimeIn),
-    thresholdValue(thresholdValueIn),
-    numericThresholdValue(utils::stodStrict(thresholdValue)), name(nameIn),
-    severity(severityIn)
+    triggerId(triggerIdIn), actions(std::move(actionsIn)),
+    dwellTime(dwellTimeIn), thresholdValue(thresholdValueIn),
+    numericThresholdValue(utils::stodStrict(thresholdValue)),
+    severity(severityIn), name(getNonEmptyName(nameIn))
 {
     for (const auto& sensor : sensorsIn)
     {
@@ -94,7 +95,8 @@ void DiscreteThreshold::commit(const std::string& sensorName,
 {
     for (const auto& action : actions)
     {
-        action->commit(sensorName, timestamp, value);
+        action->commit(triggerId, std::cref(name), sensorName, timestamp,
+                       thresholdValue);
     }
 }
 
@@ -102,4 +104,13 @@ LabeledThresholdParam DiscreteThreshold::getThresholdParam() const
 {
     return discrete::LabeledThresholdParam(name, severity, dwellTime.count(),
                                            thresholdValue);
+}
+
+std::string DiscreteThreshold::getNonEmptyName(const std::string& nameIn) const
+{
+    if (nameIn.empty())
+    {
+        return discrete::severityToString(severity) + " condition";
+    }
+    return nameIn;
 }

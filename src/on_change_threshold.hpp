@@ -19,7 +19,7 @@ class OnChangeThreshold :
 {
   public:
     OnChangeThreshold(
-        Sensors sensors,
+        const std::string& triggerId, Sensors sensors,
         std::vector<std::unique_ptr<interfaces::TriggerAction>> actions);
     ~OnChangeThreshold()
     {}
@@ -30,6 +30,7 @@ class OnChangeThreshold :
     void updateSensors(Sensors newSensors) override;
 
   private:
+    const std::string& triggerId;
     Sensors sensors;
     const std::vector<std::unique_ptr<interfaces::TriggerAction>> actions;
     bool initialized = false;

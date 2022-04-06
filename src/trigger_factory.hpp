@@ -34,6 +34,7 @@ class TriggerFactory : public interfaces::TriggerFactory
 
     void updateThresholds(
         std::vector<std::shared_ptr<interfaces::Threshold>>& currentThresholds,
+        const std::string& triggerId,
         const std::vector<TriggerAction>& triggerActions,
         const std::shared_ptr<std::vector<std::string>>& reportIds,
         const Sensors& sensors,
@@ -57,6 +58,7 @@ class TriggerFactory : public interfaces::TriggerFactory
 
     void updateDiscreteThresholds(
         std::vector<std::shared_ptr<interfaces::Threshold>>& currentThresholds,
+        const std::string& triggerId,
         const std::vector<TriggerAction>& triggerActions,
         const std::shared_ptr<std::vector<std::string>>& reportIds,
         const Sensors& sensors,
@@ -64,6 +66,7 @@ class TriggerFactory : public interfaces::TriggerFactory
 
     void updateNumericThresholds(
         std::vector<std::shared_ptr<interfaces::Threshold>>& currentThresholds,
+        const std::string& triggerId,
         const std::vector<TriggerAction>& triggerActions,
         const std::shared_ptr<std::vector<std::string>>& reportIds,
         const Sensors& sensors,
@@ -71,6 +74,7 @@ class TriggerFactory : public interfaces::TriggerFactory
 
     void makeDiscreteThreshold(
         std::vector<std::shared_ptr<interfaces::Threshold>>& thresholds,
+        const std::string& triggerId,
         const std::vector<TriggerAction>& triggerActions,
         const std::shared_ptr<std::vector<std::string>>& reportIds,
         const Sensors& sensors,
@@ -78,6 +82,7 @@ class TriggerFactory : public interfaces::TriggerFactory
 
     void makeNumericThreshold(
         std::vector<std::shared_ptr<interfaces::Threshold>>& thresholds,
+        const std::string& triggerId,
         const std::vector<TriggerAction>& triggerActions,
         const std::shared_ptr<std::vector<std::string>>& reportIds,
         const Sensors& sensors,
@@ -85,6 +90,7 @@ class TriggerFactory : public interfaces::TriggerFactory
 
     void makeOnChangeThreshold(
         std::vector<std::shared_ptr<interfaces::Threshold>>& thresholds,
+        const std::string& triggerId,
         const std::vector<TriggerAction>& triggerActions,
         const std::shared_ptr<std::vector<std::string>>& reportIds,
         const Sensors& sensors) const;

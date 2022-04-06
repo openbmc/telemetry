@@ -1,6 +1,7 @@
 #include "dbus_environment.hpp"
 #include "discrete_threshold.hpp"
 #include "helpers.hpp"
+#include "helpers/matchers.hpp"
 #include "mocks/sensor_mock.hpp"
 #include "mocks/trigger_action_mock.hpp"
 #include "types/duration_types.hpp"
@@ -22,19 +23,21 @@ class TestDiscreteThreshold : public Test
         std::make_unique<StrictMock<TriggerActionMock>>();
     TriggerActionMock& actionMock = *actionMockPtr;
     std::shared_ptr<DiscreteThreshold> sut;
+    std::string triggerId = "MyTrigger";
 
     std::shared_ptr<DiscreteThreshold>
         makeThreshold(Milliseconds dwellTime, std::string thresholdValue,
-                      discrete::Severity severity = discrete::Severity::ok)
+                      discrete::Severity severity = discrete::Severity::ok,
+                      std::string thresholdName = "treshold name")
     {
         std::vector<std::unique_ptr<interfaces::TriggerAction>> actions;
         actions.push_back(std::move(actionMockPtr));
 
         return std::make_shared<DiscreteThreshold>(
-            DbusEnvironment::getIoc(),
+            DbusEnvironment::getIoc(), triggerId,
             utils::convContainer<std::shared_ptr<interfaces::Sensor>>(
                 sensorMocks),
-            std::move(actions), dwellTime, thresholdValue, "treshold name",
+            std::move(actions), dwellTime, thresholdValue, thresholdName,
             severity);
     }
 
@@ -65,7 +68,7 @@ TEST_F(TestDiscreteThreshold, initializeThresholdExpectAllSensorsAreRegistered)
 
 TEST_F(TestDiscreteThreshold, thresholdIsNotInitializeExpectNoActionCommit)
 {
-    EXPECT_CALL(actionMock, commit(_, _, _)).Times(0);
+    EXPECT_CALL(actionMock, commit(_, _, _, _, _)).Times(0);
 }
 
 class TestDiscreteThresholdValues :
@@ -95,6 +98,30 @@ INSTANTIATE_TEST_SUITE_P(_, TestBadDiscreteThresholdValues,
 TEST_P(TestBadDiscreteThresholdValues, throwsWhenNotNumericValues)
 {
     EXPECT_THROW(makeThreshold(0ms, GetParam()), std::invalid_argument);
+}
+
+class TestDiscreteThresholdInit : public TestDiscreteThreshold
+{
+    void SetUp() override
+    {}
+};
+
+TEST_F(TestDiscreteThresholdInit, nonEmptyNameIsNotChanged)
+{
+    auto sut = makeThreshold(0ms, "12.3", discrete::Severity::ok, "non-empty");
+    EXPECT_EQ(
+        std::get<discrete::LabeledThresholdParam>(sut->getThresholdParam())
+            .at_label<utils::tstring::UserId>(),
+        "non-empty");
+}
+
+TEST_F(TestDiscreteThresholdInit, emptyNameIsChanged)
+{
+    auto sut = makeThreshold(0ms, "12.3", discrete::Severity::ok, "");
+    EXPECT_FALSE(
+        std::get<discrete::LabeledThresholdParam>(sut->getThresholdParam())
+            .at_label<utils::tstring::UserId>()
+            .empty());
 }
 
 struct DiscreteParams
@@ -191,7 +218,7 @@ class TestDiscreteThresholdCommon :
         }
     }
 
-    void testBodySensorIsUpdatedMultipleTimes()
+    void testBodySensorIsUpdatedMultipleTimes(std::string thresholdValue)
     {
         std::vector<std::chrono::time_point<std::chrono::high_resolution_clock>>
             timestamps(sensorMocks.size());
@@ -204,7 +231,10 @@ class TestDiscreteThresholdCommon :
              GetParam().expected)
         {
             EXPECT_CALL(actionMock,
-                        commit(sensorNames[index], timestamp, value))
+                        commit(triggerId,
+                               helpers::IsValueOfOptionalRefEq("treshold name"),
+                               sensorNames[index], timestamp,
+                               TriggerValue(thresholdValue)))
                 .WillOnce(DoAll(
                     InvokeWithoutArgs([idx = index, &timestamps] {
                         timestamps[idx] =
@@ -270,7 +300,7 @@ INSTANTIATE_TEST_SUITE_P(_, TestDiscreteThresholdNoDwellTime,
 
 TEST_P(TestDiscreteThresholdNoDwellTime, senorsIsUpdatedMultipleTimes)
 {
-    testBodySensorIsUpdatedMultipleTimes();
+    testBodySensorIsUpdatedMultipleTimes(GetParam().thresholdValue);
 }
 
 class TestDiscreteThresholdWithDwellTime : public TestDiscreteThresholdCommon
@@ -321,5 +351,5 @@ INSTANTIATE_TEST_SUITE_P(
 
 TEST_P(TestDiscreteThresholdWithDwellTime, senorsIsUpdatedMultipleTimes)
 {
-    testBodySensorIsUpdatedMultipleTimes();
+    testBodySensorIsUpdatedMultipleTimes(GetParam().thresholdValue);
 }

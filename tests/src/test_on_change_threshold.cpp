@@ -1,5 +1,6 @@
 #include "dbus_environment.hpp"
 #include "helpers.hpp"
+#include "helpers/matchers.hpp"
 #include "mocks/sensor_mock.hpp"
 #include "mocks/trigger_action_mock.hpp"
 #include "on_change_threshold.hpp"
@@ -21,6 +22,7 @@ class TestOnChangeThreshold : public Test
         std::make_unique<StrictMock<TriggerActionMock>>();
     TriggerActionMock& actionMock = *actionMockPtr;
     std::shared_ptr<OnChangeThreshold> sut;
+    std::string triggerId = "MyTrigger";
 
     void SetUp() override
     {
@@ -34,6 +36,7 @@ class TestOnChangeThreshold : public Test
         }
 
         sut = std::make_shared<OnChangeThreshold>(
+            triggerId,
             utils::convContainer<std::shared_ptr<interfaces::Sensor>>(
                 sensorMocks),
             std::move(actions));
@@ -55,7 +58,7 @@ TEST_F(TestOnChangeThreshold, initializeThresholdExpectAllSensorsAreRegistered)
 
 TEST_F(TestOnChangeThreshold, thresholdIsNotInitializeExpectNoActionCommit)
 {
-    EXPECT_CALL(actionMock, commit(_, _, _)).Times(0);
+    EXPECT_CALL(actionMock, commit(_, _, _, _, _)).Times(0);
 }
 
 TEST_F(TestOnChangeThreshold, getLabeledParamsReturnsCorrectly)
@@ -66,7 +69,7 @@ TEST_F(TestOnChangeThreshold, getLabeledParamsReturnsCorrectly)
 
 TEST_F(TestOnChangeThreshold, firstReadingDoesNoActionCommit)
 {
-    EXPECT_CALL(actionMock, commit(_, _, _)).Times(0);
+    EXPECT_CALL(actionMock, commit(_, _, _, _, _)).Times(0);
 
     sut->initialize();
     sut->sensorUpdated(*sensorMocks.front(), 0ms, 42);
@@ -145,7 +148,9 @@ TEST_P(TestOnChangeThresholdUpdates, senorsIsUpdatedMultipleTimes)
     InSequence seq;
     for (const auto& [index, timestamp, value] : GetParam().expected)
     {
-        EXPECT_CALL(actionMock, commit(sensorNames[index], timestamp, value));
+        EXPECT_CALL(actionMock,
+                    commit(triggerId, helpers::IsNoValueOfOptionalRef(),
+                           sensorNames[index], timestamp, TriggerValue(value)));
     }
 
     sut->initialize();
