@@ -29,8 +29,6 @@ class NumericThreshold :
         Milliseconds dwellTime, numeric::Direction direction,
         double thresholdValue, numeric::Type type,
         std::unique_ptr<interfaces::Clock> clock);
-    ~NumericThreshold()
-    {}
 
     void initialize() override;
     void sensorUpdated(interfaces::Sensor&, Milliseconds, double) override;

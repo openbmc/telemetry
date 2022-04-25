@@ -122,10 +122,10 @@ class ReportParams final
   private:
     std::string reportIdProperty = "TestId";
     std::string reportNameProperty = "TestReport";
-    ReportingType reportingTypeProperty = ReportingType::onRequest;
+    ReportingType reportingTypeProperty = ReportingType::onChange;
     std::vector<ReportAction> reportActionsProperty = {
         ReportAction::logToMetricReportsCollection};
-    Milliseconds intervalProperty = ReportManager::minInterval;
+    Milliseconds intervalProperty{};
     uint64_t appendLimitProperty = 123;
     ReportUpdates reportUpdatesProperty = ReportUpdates::overwrite;
     std::vector<LabeledMetricParameters> metricParametersProperty{
