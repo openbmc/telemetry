@@ -205,7 +205,7 @@ TEST_F(TestReportManager, DISABLED_failToAddReportWithInvalidInterval)
         .Times(0);
 
     reportParams.reportingType(ReportingType::periodic);
-    reportParams.interval(reportParams.interval() - 1ms);
+    reportParams.interval(ReportManager::minInterval - 1ms);
 
     auto [ec, path] = addReport(reportParams);
 
