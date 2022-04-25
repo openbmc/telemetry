@@ -25,6 +25,9 @@ using namespace std::literals::string_literals;
 using namespace std::chrono_literals;
 namespace tstring = utils::tstring;
 
+using ErrorMessageDbusType = std::tuple<std::string, std::string>;
+using ErrorMessagesDbusType = std::vector<ErrorMessageDbusType>;
+
 constexpr Milliseconds systemTimestamp = 55ms;
 
 namespace
@@ -148,6 +151,26 @@ class TestReport : public Test
                                                property, newValue);
     }
 
+    template <class T>
+    struct ChangePropertyParams
+    {
+        Matcher<T> valueBefore = _;
+        T newValue;
+        Matcher<boost::system::error_code> ec =
+            Eq(boost::system::errc::success);
+        Matcher<T> valueAfter = Eq(newValue);
+    };
+
+    template <class T>
+    static void changeProperty(const std::string& path,
+                               const std::string& property,
+                               ChangePropertyParams<T> p)
+    {
+        ASSERT_THAT(getProperty<T>(path, property), p.valueBefore);
+        ASSERT_THAT(setProperty<T>(path, property, p.newValue), p.ec);
+        EXPECT_THAT(getProperty<T>(path, property), p.valueAfter);
+    }
+
     boost::system::error_code call(const std::string& path,
                                    const std::string& interface,
                                    const std::string& method)
@@ -169,6 +192,13 @@ class TestReport : public Test
     boost::system::error_code deleteReport(const std::string& path)
     {
         return call(path, Report::deleteIfaceName, "Delete");
+    }
+
+    static std::pair<std::string, std::vector<std::string>>
+        makeStateDetail(const std::string& detailType,
+                        std::vector<std::string> detailArgs)
+    {
+        return make_pair(detailType, detailArgs);
     }
 };
 
@@ -209,7 +239,10 @@ TEST_F(TestReport, verifyIfPropertiesHaveValidValue)
                 Eq(defaultParams().reportName()));
     EXPECT_THAT(
         getProperty<std::vector<std::string>>(sut->getPath(), "TriggerIds"),
-        Eq(std::vector<std::string>()));
+        IsEmpty());
+    EXPECT_THAT(
+        getProperty<ErrorMessagesDbusType>(sut->getPath(), "ErrorMessages"),
+        IsEmpty());
 }
 
 TEST_F(TestReport, readingsAreInitialyEmpty)
@@ -244,25 +277,23 @@ TEST_F(TestReport, setReadingParametersWithNewParams)
 
 TEST_F(TestReport, setReportingTypeWithValidNewType)
 {
-    std::string newType = "Periodic";
-    std::string currType = utils::enumToString(defaultParams().reportingType());
-
-    EXPECT_THAT(newType, Ne(currType));
-    EXPECT_THAT(setProperty(sut->getPath(), "ReportingType", newType).value(),
-                Eq(boost::system::errc::success));
-    EXPECT_THAT(getProperty<std::string>(sut->getPath(), "ReportingType"),
-                Eq(newType));
+    changeProperty<std::string>(
+        sut->getPath(), "ReportingType",
+        {.valueBefore = Not(Eq(utils::enumToString(ReportingType::onRequest))),
+         .newValue = utils::enumToString(ReportingType::onRequest)});
 }
 
 TEST_F(TestReport, setReportingTypeWithInvalidType)
 {
-    std::string newType = "Periodic_ABC";
-    std::string prevType = utils::enumToString(defaultParams().reportingType());
+    const std::string currentValue =
+        utils::enumToString(defaultParams().reportingType());
 
-    EXPECT_THAT(setProperty(sut->getPath(), "ReportingType", newType).value(),
-                Eq(boost::system::errc::invalid_argument));
-    EXPECT_THAT(getProperty<std::string>(sut->getPath(), "ReportingType"),
-                Eq(prevType));
+    changeProperty<std::string>(
+        sut->getPath(), "ReportingType",
+        {.valueBefore = Eq(currentValue),
+         .newValue = "Periodic_ABC",
+         .ec = Eq(boost::system::errc::invalid_argument),
+         .valueAfter = Eq(currentValue)});
 }
 
 TEST_F(TestReport, setReportActionsWithValidNewActions)
@@ -369,7 +400,7 @@ TEST_F(TestReport, setEnabledWithNewValue)
 
 TEST_F(TestReport, setIntervalWithValidValue)
 {
-    uint64_t newValue = defaultParams().interval().count() + 1;
+    uint64_t newValue = ReportManager::minInterval.count() * 42;
     EXPECT_THAT(setProperty(sut->getPath(), "Interval", newValue).value(),
                 Eq(boost::system::errc::success));
     EXPECT_THAT(getProperty<uint64_t>(sut->getPath(), "Interval"),
@@ -380,11 +411,100 @@ TEST_F(
     TestReport,
     settingIntervalWithInvalidValueDoesNotChangePropertyAndReturnsInvalidArgument)
 {
-    uint64_t newValue = defaultParams().interval().count() - 1;
+    uint64_t newValue = ReportManager::minInterval.count() - 1;
     EXPECT_THAT(setProperty(sut->getPath(), "Interval", newValue).value(),
                 Eq(boost::system::errc::invalid_argument));
     EXPECT_THAT(getProperty<uint64_t>(sut->getPath(), "Interval"),
                 Eq(defaultParams().interval().count()));
+}
+
+TEST_F(TestReport, settingInvalidReportingTypeCreatesErrorMessage)
+{
+    auto report = makeReport(defaultParams()
+                                 .reportId("report2")
+                                 .reportingType(ReportingType::onRequest)
+                                 .interval(Milliseconds{0}));
+
+    EXPECT_THAT(
+        setProperty<std::string>(report->getPath(), "ReportingType", "Periodic")
+            .value(),
+        Eq(boost::system::errc::success));
+
+    EXPECT_THAT(getProperty<std::string>(report->getPath(), "ReportingType"),
+                Eq("Periodic"));
+    EXPECT_THAT(
+        getProperty<ErrorMessagesDbusType>(report->getPath(), "ErrorMessages"),
+        UnorderedElementsAre(
+            ErrorMessageDbusType(
+                utils::enumToString(ErrorType::propertyConflict), "Interval"),
+            ErrorMessageDbusType(
+                utils::enumToString(ErrorType::propertyConflict),
+                "ReportingType")));
+}
+
+TEST_F(TestReport, settingValidReportingTypeRemovesErrors)
+{
+    auto report = makeReport(defaultParams()
+                                 .reportId("report2")
+                                 .reportingType(ReportingType::onRequest)
+                                 .interval(Milliseconds{0}));
+
+    EXPECT_THAT(
+        setProperty<std::string>(report->getPath(), "ReportingType", "Periodic")
+            .value(),
+        Eq(boost::system::errc::success));
+    EXPECT_THAT(setProperty<std::string>(report->getPath(), "ReportingType",
+                                         "OnRequest")
+                    .value(),
+                Eq(boost::system::errc::success));
+
+    EXPECT_THAT(getProperty<std::string>(report->getPath(), "ReportingType"),
+                Eq("OnRequest"));
+    EXPECT_THAT(
+        getProperty<ErrorMessagesDbusType>(report->getPath(), "ErrorMessages"),
+        IsEmpty());
+}
+
+TEST_F(TestReport, settingInvalidIntervalDisablesReport)
+{
+    auto report = makeReport(defaultParams()
+                                 .reportId("report2")
+                                 .reportingType(ReportingType::periodic)
+                                 .interval(ReportManager::minInterval));
+
+    EXPECT_THAT(setProperty<uint64_t>(report->getPath(), "Interval", 0).value(),
+                Eq(boost::system::errc::success));
+
+    EXPECT_THAT(getProperty<uint64_t>(report->getPath(), "Interval"), Eq(0u));
+    EXPECT_THAT(
+        getProperty<ErrorMessagesDbusType>(report->getPath(), "ErrorMessages"),
+        UnorderedElementsAre(
+            ErrorMessageDbusType(
+                utils::enumToString(ErrorType::propertyConflict), "Interval"),
+            ErrorMessageDbusType(
+                utils::enumToString(ErrorType::propertyConflict),
+                "ReportingType")));
+}
+
+TEST_F(TestReport, settingValidIntervalEnablesReport)
+{
+    auto report = makeReport(defaultParams()
+                                 .reportId("report2")
+                                 .reportingType(ReportingType::periodic)
+                                 .interval(ReportManager::minInterval));
+
+    EXPECT_THAT(setProperty<uint64_t>(report->getPath(), "Interval", 0).value(),
+                Eq(boost::system::errc::success));
+    EXPECT_THAT(setProperty<uint64_t>(report->getPath(), "Interval",
+                                      ReportManager::minInterval.count())
+                    .value(),
+                Eq(boost::system::errc::success));
+
+    EXPECT_THAT(getProperty<uint64_t>(report->getPath(), "Interval"),
+                Eq(ReportManager::minInterval.count()));
+    EXPECT_THAT(
+        getProperty<ErrorMessagesDbusType>(report->getPath(), "ErrorMessages"),
+        IsEmpty());
 }
 
 TEST_F(TestReport, settingEmitsReadingsUpdateHaveNoEffect)
@@ -651,7 +771,9 @@ INSTANTIATE_TEST_SUITE_P(
     _, TestReportAllReportTypes,
     Values(defaultParams().reportingType(ReportingType::onRequest),
            defaultParams().reportingType(ReportingType::onChange),
-           defaultParams().reportingType(ReportingType::periodic)));
+           defaultParams()
+               .reportingType(ReportingType::periodic)
+               .interval(ReportManager::minInterval)));
 
 TEST_P(TestReportAllReportTypes, returnPropertValueOfReportType)
 {
@@ -778,8 +900,9 @@ class TestReportPeriodicReport : public TestReport
 {
     void SetUp() override
     {
-        sut =
-            makeReport(defaultParams().reportingType(ReportingType::periodic));
+        sut = makeReport(defaultParams()
+                             .reportingType(ReportingType::periodic)
+                             .interval(ReportManager::minInterval));
     }
 };
 
@@ -1040,16 +1163,16 @@ TEST_F(TestReportInitialization,
             InvokeWithoutArgs(DbusEnvironment::setPromise("readingsUpdated")));
 
     const auto elapsed = DbusEnvironment::measureTime([this] {
-        sut =
-            makeReport(defaultParams()
-                           .reportingType(ReportingType::periodic)
-                           .reportActions({ReportAction::emitsReadingsUpdate}));
+        sut = makeReport(defaultParams()
+                             .reportingType(ReportingType::periodic)
+                             .reportActions({ReportAction::emitsReadingsUpdate})
+                             .interval(ReportManager::minInterval));
         makeMonitor();
         EXPECT_TRUE(DbusEnvironment::waitForFuture("readingsUpdated"));
     });
 
-    EXPECT_THAT(elapsed, AllOf(Ge(defaultParams().interval()),
-                               Lt(defaultParams().interval() * 2)));
+    EXPECT_THAT(elapsed, AllOf(Ge(ReportManager::minInterval),
+                               Lt(ReportManager::minInterval * 2)));
 }
 
 TEST_F(TestReportInitialization,
