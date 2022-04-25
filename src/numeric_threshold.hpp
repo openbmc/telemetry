@@ -26,8 +26,8 @@ class NumericThreshold :
         std::vector<std::unique_ptr<interfaces::TriggerAction>> actions,
         Milliseconds dwellTime, numeric::Direction direction,
         double thresholdValue, numeric::Type type);
-    ~NumericThreshold()
-    {}
+    NumericThreshold(const NumericThreshold&) = delete;
+    NumericThreshold(NumericThreshold&&) = delete;
 
     void initialize() override;
     void sensorUpdated(interfaces::Sensor&, Milliseconds, double) override;
@@ -55,6 +55,8 @@ class NumericThreshold :
             sensorName(name),
             prevValue(prevValue), dwell(dwell), timer(ioc)
         {}
+        ThresholdDetail(const ThresholdDetail&) = delete;
+        ThresholdDetail(ThresholdDetail&&) = delete;
     };
     using SensorDetails =
         std::unordered_map<std::shared_ptr<interfaces::Sensor>,
