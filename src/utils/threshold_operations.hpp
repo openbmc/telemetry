@@ -7,7 +7,7 @@
 struct ThresholdOperations
 {
     template <typename ThresholdType>
-    void initialize(ThresholdType* thresholdPtr)
+    static void initialize(ThresholdType* thresholdPtr)
     {
         for ([[maybe_unused]] auto& [sensor, detail] :
              thresholdPtr->sensorDetails)
@@ -18,7 +18,7 @@ struct ThresholdOperations
     }
 
     template <typename ThresholdType>
-    typename ThresholdType::ThresholdDetail&
+    static typename ThresholdType::ThresholdDetail&
         getDetails(ThresholdType* thresholdPtr,
                    const interfaces::Sensor& sensor)
     {
@@ -30,7 +30,7 @@ struct ThresholdOperations
     }
 
     template <typename ThresholdType>
-    void updateSensors(ThresholdType* thresholdPtr, Sensors newSensors)
+    static void updateSensors(ThresholdType* thresholdPtr, Sensors newSensors)
     {
         typename ThresholdType::SensorDetails newSensorDetails;
         typename ThresholdType::SensorDetails oldSensorDetails =

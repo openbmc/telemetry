@@ -369,7 +369,7 @@ TEST_F(TestReport, setEnabledWithNewValue)
 
 TEST_F(TestReport, setIntervalWithValidValue)
 {
-    uint64_t newValue = defaultParams().interval().count() + 1;
+    uint64_t newValue = ReportManager::minInterval.count() * 42;
     EXPECT_THAT(setProperty(sut->getPath(), "Interval", newValue).value(),
                 Eq(boost::system::errc::success));
     EXPECT_THAT(getProperty<uint64_t>(sut->getPath(), "Interval"),
@@ -380,11 +380,86 @@ TEST_F(
     TestReport,
     settingIntervalWithInvalidValueDoesNotChangePropertyAndReturnsInvalidArgument)
 {
-    uint64_t newValue = defaultParams().interval().count() - 1;
+    uint64_t newValue = ReportManager::minInterval.count() - 1;
     EXPECT_THAT(setProperty(sut->getPath(), "Interval", newValue).value(),
                 Eq(boost::system::errc::invalid_argument));
     EXPECT_THAT(getProperty<uint64_t>(sut->getPath(), "Interval"),
                 Eq(defaultParams().interval().count()));
+}
+
+TEST_F(TestReport, settingInvalidReportingTypeDisablesReport)
+{
+    auto report = makeReport(defaultParams()
+                                 .reportId("report2")
+                                 .reportingType(ReportingType::onRequest)
+                                 .interval(Milliseconds{0}));
+
+    EXPECT_THAT(
+        setProperty<std::string>(report->getPath(), "ReportingType", "Periodic")
+            .value(),
+        Eq(boost::system::errc::success));
+
+    EXPECT_THAT(getProperty<std::string>(report->getPath(), "ReportingType"),
+                Eq("Periodic"));
+    EXPECT_THAT(getProperty<std::string>(report->getPath(), "State"),
+                Eq("Disabled"));
+}
+
+TEST_F(TestReport, settingValidReportingTypeEnablesReport)
+{
+    auto report = makeReport(defaultParams()
+                                 .reportId("report2")
+                                 .reportingType(ReportingType::onRequest)
+                                 .interval(Milliseconds{0}));
+
+    EXPECT_THAT(
+        setProperty<std::string>(report->getPath(), "ReportingType", "Periodic")
+            .value(),
+        Eq(boost::system::errc::success));
+    EXPECT_THAT(setProperty<std::string>(report->getPath(), "ReportingType",
+                                         "OnRequest")
+                    .value(),
+                Eq(boost::system::errc::success));
+
+    EXPECT_THAT(getProperty<std::string>(report->getPath(), "ReportingType"),
+                Eq("OnRequest"));
+    EXPECT_THAT(getProperty<std::string>(report->getPath(), "State"),
+                Eq("Enabled"));
+}
+
+TEST_F(TestReport, settingInvalidIntervalDisablesReport)
+{
+    auto report = makeReport(defaultParams()
+                                 .reportId("report2")
+                                 .reportingType(ReportingType::periodic)
+                                 .interval(ReportManager::minInterval));
+
+    EXPECT_THAT(setProperty<uint64_t>(report->getPath(), "Interval", 0).value(),
+                Eq(boost::system::errc::success));
+
+    EXPECT_THAT(getProperty<uint64_t>(report->getPath(), "Interval"), Eq(0u));
+    EXPECT_THAT(getProperty<std::string>(report->getPath(), "State"),
+                Eq("Disabled"));
+}
+
+TEST_F(TestReport, settingValidIntervalEnablesReport)
+{
+    auto report = makeReport(defaultParams()
+                                 .reportId("report2")
+                                 .reportingType(ReportingType::periodic)
+                                 .interval(ReportManager::minInterval));
+
+    EXPECT_THAT(setProperty<uint64_t>(report->getPath(), "Interval", 0).value(),
+                Eq(boost::system::errc::success));
+    EXPECT_THAT(setProperty<uint64_t>(report->getPath(), "Interval",
+                                      ReportManager::minInterval.count())
+                    .value(),
+                Eq(boost::system::errc::success));
+
+    EXPECT_THAT(getProperty<uint64_t>(report->getPath(), "Interval"),
+                Eq(ReportManager::minInterval.count()));
+    EXPECT_THAT(getProperty<std::string>(report->getPath(), "State"),
+                Eq("Enabled"));
 }
 
 TEST_F(TestReport, settingEmitsReadingsUpdateHaveNoEffect)

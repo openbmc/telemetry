@@ -39,7 +39,7 @@ Report::Report(boost::asio::io_context& ioc,
                    deduceBufferSize(reportUpdates, reportingType)),
     objServer(objServer), metrics(std::move(metricsIn)), timer(ioc),
     triggerIds(collectTriggerIds(ioc)), reportStorage(reportStorageIn),
-    enabled(enabledIn), clock(std::move(clock)), messanger(ioc)
+    clock(std::move(clock)), messanger(ioc)
 {
     readingParameters =
         toReadingParameters(utils::transform(metrics, [](const auto& metric) {
@@ -75,18 +75,10 @@ Report::Report(boost::asio::io_context& ioc,
             });
         });
 
-    persistency = storeConfiguration();
+    state.set<ReportFlags::enabled, ReportFlags::valid>(enabledIn, isValid());
+
     reportIface = makeReportInterface(reportFactory);
-
-    updateReportingType(reportingType);
-
-    if (enabled)
-    {
-        for (auto& metric : this->metrics)
-        {
-            metric->initialize();
-        }
-    }
+    persistency = storeConfiguration();
 
     messanger.on_receive<messages::TriggerPresenceChangedInd>(
         [this](const auto& msg) {
@@ -134,6 +126,37 @@ Report::~Report()
     else
     {
         reportStorage.remove(reportFileName());
+    }
+}
+
+void Report::activate()
+{
+    for (auto& metric : this->metrics)
+    {
+        metric->initialize();
+    }
+
+    scheduleTimer();
+
+    if (reportIface)
+    {
+        reportIface->signal_property("State");
+    }
+}
+
+void Report::deactivate()
+{
+    for (auto& metric : metrics)
+    {
+        metric->deinitialize();
+    }
+
+    unregisterFromMetrics = nullptr;
+    timer.cancel();
+
+    if (reportIface)
+    {
+        reportIface->signal_property("State");
     }
 }
 
@@ -200,70 +223,73 @@ std::unique_ptr<sdbusplus::asio::dbus_interface>
 {
     auto dbusIface =
         objServer->add_unique_interface(getPath(), reportIfaceName);
-    dbusIface->register_property_rw(
-        "Enabled", enabled, sdbusplus::vtable::property_::emits_change,
-        [this](bool newVal, const auto&) {
-            if (newVal != enabled)
+    dbusIface->register_property_rw<bool>(
+        "Enabled", sdbusplus::vtable::property_::emits_change,
+        [this](bool newVal, auto& oldValue) {
+            if (newVal != state.get<ReportFlags::enabled>())
             {
-                if (true == newVal && ReportingType::periodic == reportingType)
-                {
-                    scheduleTimerForPeriodicReport(interval);
-                }
-                if (newVal)
-                {
-                    for (auto& metric : metrics)
-                    {
-                        metric->initialize();
-                    }
-                }
-                else
-                {
-                    for (auto& metric : metrics)
-                    {
-                        metric->deinitialize();
-                    }
-                }
+                state.set<ReportFlags::enabled>(oldValue = newVal);
 
-                enabled = newVal;
                 persistency = storeConfiguration();
             }
             return 1;
         },
-        [this](const auto&) { return enabled; });
-    dbusIface->register_property_rw(
-        "Interval", interval.count(),
-        sdbusplus::vtable::property_::emits_change,
-        [this](uint64_t newVal, auto&) {
-            if (Milliseconds newValT{newVal};
-                newValT >= ReportManager::minInterval)
+        [this](const auto&) { return state.get<ReportFlags::enabled>(); });
+    dbusIface->register_property_r<std::string>(
+        "State", sdbusplus::vtable::property_::emits_change,
+        [this](const auto&) {
+            if (state.isActive())
             {
-                if (newValT != interval)
-                {
-                    interval = newValT;
-                    persistency = storeConfiguration();
-                }
-                return 1;
+                return "Enabled";
             }
-            throw sdbusplus::exception::SdBusError(
-                static_cast<int>(std::errc::invalid_argument),
-                "Invalid interval");
+            else
+            {
+                return "Disabled";
+            }
+        });
+    dbusIface->register_property_rw<uint64_t>(
+        "Interval", sdbusplus::vtable::property_::emits_change,
+        [this](uint64_t newVal, auto& oldVal) {
+            const Milliseconds newValT{newVal};
+            if (newValT < ReportManager::minInterval &&
+                newValT != Milliseconds{0})
+            {
+                throw sdbusplus::exception::SdBusError(
+                    static_cast<int>(std::errc::invalid_argument),
+                    "Invalid interval");
+            }
+
+            if (newValT != interval)
+            {
+                oldVal = newVal;
+                interval = newValT;
+
+                if (state.set<ReportFlags::valid>(isValid()) ==
+                    StateEvent::active)
+                {
+                    scheduleTimer();
+                }
+
+                persistency = storeConfiguration();
+            }
+            return 1;
         },
         [this](const auto&) { return interval.count(); });
-    dbusIface->register_property_rw(
-        "Persistency", persistency, sdbusplus::vtable::property_::emits_change,
-        [this](bool newVal, const auto&) {
+    dbusIface->register_property_rw<bool>(
+        "Persistency", sdbusplus::vtable::property_::emits_change,
+        [this](bool newVal, auto& oldVal) {
             if (newVal == persistency)
             {
                 return 1;
             }
             if (newVal)
             {
-                persistency = storeConfiguration();
+                persistency = oldVal = storeConfiguration();
             }
             else
             {
                 reportStorage.remove(reportFileName());
-                persistency = false;
+                persistency = oldVal = false;
             }
             return 1;
         },
@@ -272,27 +298,24 @@ std::unique_ptr<sdbusplus::asio::dbus_interface>
     dbusIface->register_property_r("Readings", readings,
                                    sdbusplus::vtable::property_::emits_change,
                                    [this](const auto&) { return readings; });
-    dbusIface->register_property_rw(
-        "ReportingType", std::string(),
-        sdbusplus::vtable::property_::emits_change,
+    dbusIface->register_property_rw<std::string>(
+        "ReportingType", sdbusplus::vtable::property_::emits_change,
         [this](auto newVal, auto& oldVal) {
             ReportingType tmp = utils::toReportingType(newVal);
             if (tmp != reportingType)
             {
-                if (tmp == ReportingType::periodic)
+                reportingType = tmp;
+                oldVal = std::move(newVal);
+
+                if (state.set<ReportFlags::valid>(isValid()) ==
+                    StateEvent::active)
                 {
-                    if (interval < ReportManager::minInterval)
-                    {
-                        throw sdbusplus::exception::SdBusError(
-                            static_cast<int>(std::errc::invalid_argument),
-                            "Invalid interval");
-                    }
+                    scheduleTimer();
                 }
 
-                updateReportingType(tmp);
-                setReadingBuffer(reportUpdates);
                 persistency = storeConfiguration();
-                oldVal = std::move(newVal);
+
+                setReadingBuffer(reportUpdates);
             }
             return 1;
         },
@@ -305,7 +328,8 @@ std::unique_ptr<sdbusplus::asio::dbus_interface>
         "ReadingParametersFutureVersion", readingParameters,
         sdbusplus::vtable::property_::emits_change,
         [this, &reportFactory](auto newVal, auto& oldVal) {
-            reportFactory.updateMetrics(metrics, enabled, newVal);
+            reportFactory.updateMetrics(
+                metrics, state.get<ReportFlags::enabled>(), newVal);
             readingParameters = toReadingParameters(
                 utils::transform(metrics, [](const auto& metric) {
                     return metric->dumpConfiguration();
@@ -315,23 +339,22 @@ std::unique_ptr<sdbusplus::asio::dbus_interface>
             return 1;
         },
         [this](const auto&) { return readingParameters; });
-    dbusIface->register_property_r(
-        "EmitsReadingsUpdate", bool{}, sdbusplus::vtable::property_::none,
+    dbusIface->register_property_r<bool>(
+        "EmitsReadingsUpdate", sdbusplus::vtable::property_::none,
         [this](const auto&) {
             return reportActions.contains(ReportAction::emitsReadingsUpdate);
         });
-    dbusIface->register_property_r("Name", std::string{},
-                                   sdbusplus::vtable::property_::const_,
-                                   [this](const auto&) { return name; });
-    dbusIface->register_property_r(
-        "LogToMetricReportsCollection", bool{},
-        sdbusplus::vtable::property_::const_, [this](const auto&) {
+    dbusIface->register_property_r<std::string>(
+        "Name", sdbusplus::vtable::property_::const_,
+        [this](const auto&) { return name; });
+    dbusIface->register_property_r<bool>(
+        "LogToMetricReportsCollection", sdbusplus::vtable::property_::const_,
+        [this](const auto&) {
             return reportActions.contains(
                 ReportAction::logToMetricReportsCollection);
         });
-    dbusIface->register_property_rw(
-        "ReportActions", std::vector<std::string>{},
-        sdbusplus::vtable::property_::emits_change,
+    dbusIface->register_property_rw<std::vector<std::string>>(
+        "ReportActions", sdbusplus::vtable::property_::emits_change,
         [this](auto newVal, auto& oldVal) {
             auto tmp = utils::transform<std::unordered_set>(
                 newVal, [](const auto& reportAction) {
@@ -420,11 +443,6 @@ void Report::timerProcForOnChangeReport(boost::system::error_code ec,
 
 void Report::scheduleTimerForPeriodicReport(Milliseconds timerInterval)
 {
-    if (!enabled)
-    {
-        return;
-    }
-
     timer.expires_after(timerInterval);
     timer.async_wait([this](boost::system::error_code ec) {
         timerProcForPeriodicReport(ec, *this);
@@ -433,11 +451,6 @@ void Report::scheduleTimerForPeriodicReport(Milliseconds timerInterval)
 
 void Report::scheduleTimerForOnChangeReport()
 {
-    if (!enabled)
-    {
-        return;
-    }
-
     constexpr Milliseconds timerInterval{100};
 
     timer.expires_after(timerInterval);
@@ -448,7 +461,7 @@ void Report::scheduleTimerForOnChangeReport()
 
 void Report::updateReadings()
 {
-    if (!enabled)
+    if (!state.isActive())
     {
         return;
     }
@@ -461,17 +474,19 @@ void Report::updateReadings()
 
     for (const auto& metric : metrics)
     {
+        if (!state.isActive())
+        {
+            break;
+        }
+
         for (const auto& [id, metadata, value, timestamp] :
              metric->getUpdatedReadings())
         {
             if (reportUpdates == ReportUpdates::appendStopsWhenFull &&
                 readingsBuffer.isFull())
             {
-                enabled = false;
-                for (auto& m : metrics)
-                {
-                    m->deinitialize();
-                }
+                state.set<ReportFlags::enabled>(false);
+                reportIface->signal_property("Enabled");
                 break;
             }
             readingsBuffer.emplace(id, metadata, value, timestamp);
@@ -500,7 +515,7 @@ bool Report::storeConfiguration() const
     {
         nlohmann::json data;
 
-        data["Enabled"] = enabled;
+        data["Enabled"] = state.get<ReportFlags::enabled>();
         data["Version"] = reportVersion;
         data["Id"] = id;
         data["Name"] = name;
@@ -568,37 +583,37 @@ void Report::metricUpdated()
     updateReadings();
 }
 
-void Report::updateReportingType(ReportingType newReportingType)
+void Report::scheduleTimer()
 {
-    if (reportingType != newReportingType)
-    {
-        timer.cancel();
-        unregisterFromMetrics = nullptr;
-    }
-
-    reportingType = newReportingType;
-
     switch (reportingType)
     {
         case ReportingType::periodic:
         {
+            unregisterFromMetrics = nullptr;
             scheduleTimerForPeriodicReport(interval);
             break;
         }
         case ReportingType::onChange:
         {
-            unregisterFromMetrics = [this] {
+            if (!unregisterFromMetrics)
+            {
+                unregisterFromMetrics = [this] {
+                    for (auto& metric : metrics)
+                    {
+                        metric->unregisterFromUpdates(*this);
+                    }
+                };
+
                 for (auto& metric : metrics)
                 {
-                    metric->unregisterFromUpdates(*this);
+                    metric->registerForUpdates(*this);
                 }
-            };
+            }
 
             bool isTimerRequired = false;
 
             for (auto& metric : metrics)
             {
-                metric->registerForUpdates(*this);
                 if (metric->isTimerRequired())
                 {
                     isTimerRequired = true;
@@ -609,9 +624,28 @@ void Report::updateReportingType(ReportingType newReportingType)
             {
                 scheduleTimerForOnChangeReport();
             }
+            else
+            {
+                timer.cancel();
+            }
             break;
         }
         default:
+            unregisterFromMetrics = nullptr;
+            timer.cancel();
             break;
     }
+}
+
+bool Report::isValid() const
+{
+    if (reportingType == ReportingType::periodic)
+    {
+        if (interval < ReportManager::minInterval)
+        {
+            return false;
+        }
+    }
+
+    return true;
 }

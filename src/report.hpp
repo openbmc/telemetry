@@ -7,6 +7,7 @@
 #include "interfaces/report.hpp"
 #include "interfaces/report_factory.hpp"
 #include "interfaces/report_manager.hpp"
+#include "state.hpp"
 #include "types/readings.hpp"
 #include "types/report_action.hpp"
 #include "types/report_types.hpp"
@@ -81,6 +82,9 @@ class Report : public interfaces::Report, public interfaces::MetricListener
 
     void metricUpdated() override;
 
+    void activate();
+    void deactivate();
+
   private:
     std::unique_ptr<sdbusplus::asio::dbus_interface>
         makeReportInterface(const interfaces::ReportFactory& reportFactory);
@@ -104,7 +108,8 @@ class Report : public interfaces::Report, public interfaces::MetricListener
     bool storeConfiguration() const;
     bool shouldStoreMetricValues() const;
     void updateReadings();
-    void updateReportingType(ReportingType);
+    void scheduleTimer();
+    bool isValid() const;
 
     std::string id;
     std::string name;
@@ -127,11 +132,12 @@ class Report : public interfaces::Report, public interfaces::MetricListener
     std::unordered_set<std::string> triggerIds;
 
     interfaces::JsonStorage& reportStorage;
-    bool enabled;
     std::unique_ptr<interfaces::Clock> clock;
     utils::Messanger messanger;
     std::optional<OnChangeContext> onChangeContext;
     utils::Ensure<std::function<void()>> unregisterFromMetrics;
+    State<ReportFlags, Report, ReportFlags::enabled, ReportFlags::valid> state{
+        *this};
 
   public:
     static constexpr const char* reportIfaceName =

@@ -21,8 +21,8 @@ class OnChangeThreshold :
     OnChangeThreshold(
         Sensors sensors,
         std::vector<std::unique_ptr<interfaces::TriggerAction>> actions);
-    ~OnChangeThreshold()
-    {}
+    OnChangeThreshold(const OnChangeThreshold&) = delete;
+    OnChangeThreshold(OnChangeThreshold&&) = delete;
 
     void initialize() override;
     void sensorUpdated(interfaces::Sensor&, Milliseconds, double) override;
