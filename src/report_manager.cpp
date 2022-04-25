@@ -154,7 +154,9 @@ void ReportManager::verifyAddReport(
             "Append limit out of range");
     }
 
-    if (reportingType == ReportingType::periodic && interval < minInterval)
+    if ((reportingType == ReportingType::periodic && interval < minInterval) ||
+        (reportingType != ReportingType::periodic &&
+         interval != Milliseconds{0}))
     {
         throw sdbusplus::exception::SdBusError(
             static_cast<int>(std::errc::invalid_argument), "Invalid interval");
