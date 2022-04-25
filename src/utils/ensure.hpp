@@ -53,6 +53,11 @@ struct Ensure
 
     Ensure& operator=(const Ensure&) = delete;
 
+    explicit operator bool() const
+    {
+        return static_cast<bool>(functor);
+    }
+
   private:
     void clear()
     {

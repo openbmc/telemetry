@@ -369,7 +369,7 @@ TEST_F(TestReport, setEnabledWithNewValue)
 
 TEST_F(TestReport, setIntervalWithValidValue)
 {
-    uint64_t newValue = defaultParams().interval().count() + 1;
+    uint64_t newValue = ReportManager::minInterval.count() * 42;
     EXPECT_THAT(setProperty(sut->getPath(), "Interval", newValue).value(),
                 Eq(boost::system::errc::success));
     EXPECT_THAT(getProperty<uint64_t>(sut->getPath(), "Interval"),
@@ -380,11 +380,25 @@ TEST_F(
     TestReport,
     settingIntervalWithInvalidValueDoesNotChangePropertyAndReturnsInvalidArgument)
 {
-    uint64_t newValue = defaultParams().interval().count() - 1;
+    uint64_t newValue = ReportManager::minInterval.count() - 1;
     EXPECT_THAT(setProperty(sut->getPath(), "Interval", newValue).value(),
                 Eq(boost::system::errc::invalid_argument));
     EXPECT_THAT(getProperty<uint64_t>(sut->getPath(), "Interval"),
                 Eq(defaultParams().interval().count()));
+}
+
+TEST_F(TestReport, settingZeroIntervalInvalidatesPeriodicReport)
+{
+    auto report = makeReport(defaultParams()
+                                 .reportId("report2")
+                                 .reportingType(ReportingType::periodic)
+                                 .interval(ReportManager::minInterval));
+
+    const uint64_t newValue = 0;
+    EXPECT_THAT(setProperty(report->getPath(), "Interval", newValue).value(),
+                Eq(boost::system::errc::success));
+    EXPECT_THAT(getProperty<uint64_t>(report->getPath(), "Interval"),
+                Eq(newValue));
 }
 
 TEST_F(TestReport, settingEmitsReadingsUpdateHaveNoEffect)

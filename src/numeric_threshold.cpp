@@ -19,18 +19,18 @@ NumericThreshold::NumericThreshold(
 
 void NumericThreshold::initialize()
 {
-    ThresholdOperations().initialize(this);
+    ThresholdOperations::initialize(this);
 }
 
 void NumericThreshold::updateSensors(Sensors newSensors)
 {
-    ThresholdOperations().updateSensors(this, std::move(newSensors));
+    ThresholdOperations::updateSensors(this, std::move(newSensors));
 }
 
 NumericThreshold::ThresholdDetail&
     NumericThreshold::getDetails(const interfaces::Sensor& sensor)
 {
-    return ThresholdOperations().getDetails(this, sensor);
+    return ThresholdOperations::getDetails(this, sensor);
 }
 
 std::shared_ptr<NumericThreshold::ThresholdDetail>
