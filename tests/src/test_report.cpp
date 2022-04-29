@@ -170,6 +170,13 @@ class TestReport : public Test
     {
         return call(path, Report::deleteIfaceName, "Delete");
     }
+
+    static std::pair<std::string, std::vector<std::string>>
+        makeStateDetail(const std::string& detailType,
+                        std::vector<std::string> detailArgs)
+    {
+        return make_pair(detailType, detailArgs);
+    }
 };
 
 TEST_F(TestReport, returnsId)
@@ -210,6 +217,10 @@ TEST_F(TestReport, verifyIfPropertiesHaveValidValue)
     EXPECT_THAT(
         getProperty<std::vector<std::string>>(sut->getPath(), "TriggerIds"),
         Eq(std::vector<std::string>()));
+    EXPECT_THAT(getProperty<std::string>(sut->getPath(), "State"),
+                Eq("Enabled"));
+    EXPECT_THAT(getProperty<StateDetails>(sut->getPath(), "StateDetails"),
+                IsEmpty());
 }
 
 TEST_F(TestReport, readingsAreInitialyEmpty)
@@ -403,6 +414,9 @@ TEST_F(TestReport, settingInvalidReportingTypeDisablesReport)
                 Eq("Periodic"));
     EXPECT_THAT(getProperty<std::string>(report->getPath(), "State"),
                 Eq("Disabled"));
+    EXPECT_THAT(getProperty<StateDetails>(report->getPath(), "StateDetails"),
+                Contains(makeStateDetail(state_details::PropertyConflict,
+                                         {"Interval", "ReportingType"})));
 }
 
 TEST_F(TestReport, settingValidReportingTypeEnablesReport)
@@ -425,6 +439,8 @@ TEST_F(TestReport, settingValidReportingTypeEnablesReport)
                 Eq("OnRequest"));
     EXPECT_THAT(getProperty<std::string>(report->getPath(), "State"),
                 Eq("Enabled"));
+    EXPECT_THAT(getProperty<StateDetails>(report->getPath(), "StateDetails"),
+                IsEmpty());
 }
 
 TEST_F(TestReport, settingInvalidIntervalDisablesReport)
@@ -440,6 +456,9 @@ TEST_F(TestReport, settingInvalidIntervalDisablesReport)
     EXPECT_THAT(getProperty<uint64_t>(report->getPath(), "Interval"), Eq(0u));
     EXPECT_THAT(getProperty<std::string>(report->getPath(), "State"),
                 Eq("Disabled"));
+    EXPECT_THAT(getProperty<StateDetails>(report->getPath(), "StateDetails"),
+                Contains(makeStateDetail(state_details::PropertyConflict,
+                                         {"Interval", "ReportingType"})));
 }
 
 TEST_F(TestReport, settingValidIntervalEnablesReport)
@@ -460,6 +479,8 @@ TEST_F(TestReport, settingValidIntervalEnablesReport)
                 Eq(ReportManager::minInterval.count()));
     EXPECT_THAT(getProperty<std::string>(report->getPath(), "State"),
                 Eq("Enabled"));
+    EXPECT_THAT(getProperty<StateDetails>(report->getPath(), "StateDetails"),
+                IsEmpty());
 }
 
 TEST_F(TestReport, settingEmitsReadingsUpdateHaveNoEffect)

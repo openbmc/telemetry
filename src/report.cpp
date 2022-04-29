@@ -75,7 +75,8 @@ Report::Report(boost::asio::io_context& ioc,
             });
         });
 
-    state.set<ReportFlags::enabled, ReportFlags::valid>(enabledIn, isValid());
+    state.set<ReportFlags::enabled, ReportFlags::valid>(
+        enabledIn, isValid(std::ref(stateDetails)));
 
     reportIface = makeReportInterface(reportFactory);
     persistency = storeConfiguration();
@@ -141,6 +142,7 @@ void Report::activate()
     if (reportIface)
     {
         reportIface->signal_property("State");
+        reportIface->signal_property("StateDetails");
     }
 }
 
@@ -157,6 +159,7 @@ void Report::deactivate()
     if (reportIface)
     {
         reportIface->signal_property("State");
+        reportIface->signal_property("StateDetails");
     }
 }
 
@@ -247,6 +250,9 @@ std::unique_ptr<sdbusplus::asio::dbus_interface>
                 return "Disabled";
             }
         });
+    dbusIface->register_property_r<StateDetails>(
+        "StateDetails", sdbusplus::vtable::property_::emits_change,
+        [this](const auto&) { return stateDetails; });
     dbusIface->register_property_rw<uint64_t>(
         "Interval", sdbusplus::vtable::property_::emits_change,
         [this](uint64_t newVal, auto& oldVal) {
@@ -264,8 +270,8 @@ std::unique_ptr<sdbusplus::asio::dbus_interface>
                 oldVal = newVal;
                 interval = newValT;
 
-                if (state.set<ReportFlags::valid>(isValid()) ==
-                    StateEvent::active)
+                if (state.set<ReportFlags::valid>(
+                        isValid(std::ref(stateDetails))) == StateEvent::active)
                 {
                     scheduleTimer();
                 }
@@ -307,8 +313,8 @@ std::unique_ptr<sdbusplus::asio::dbus_interface>
                 reportingType = tmp;
                 oldVal = std::move(newVal);
 
-                if (state.set<ReportFlags::valid>(isValid()) ==
-                    StateEvent::active)
+                if (state.set<ReportFlags::valid>(
+                        isValid(std::ref(stateDetails))) == StateEvent::active)
                 {
                     scheduleTimer();
                 }
@@ -637,12 +643,28 @@ void Report::scheduleTimer()
     }
 }
 
-bool Report::isValid() const
+bool Report::isValid(
+    std::optional<std::reference_wrapper<StateDetails>> details) const
 {
+    if (details)
+    {
+        StateDetails().swap(details->get());
+    }
+
     if (reportingType == ReportingType::periodic)
     {
         if (interval < ReportManager::minInterval)
         {
+            if (details)
+            {
+                details->get().emplace_back(
+                    std::make_pair<std::string, std::vector<std::string>>(
+                        state_details::PropertyConflict,
+                        {"Interval", "ReportingType"}));
+                details->get().emplace_back(
+                    std::make_pair<std::string, std::vector<std::string>>(
+                        state_details::IncorrectValue, {"Interval"}));
+            }
             return false;
         }
     }

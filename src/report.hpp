@@ -109,7 +109,8 @@ class Report : public interfaces::Report, public interfaces::MetricListener
     bool shouldStoreMetricValues() const;
     void updateReadings();
     void scheduleTimer();
-    bool isValid() const;
+    bool isValid(
+        std::optional<std::reference_wrapper<StateDetails>> details) const;
 
     std::string id;
     std::string name;
@@ -138,6 +139,7 @@ class Report : public interfaces::Report, public interfaces::MetricListener
     utils::Ensure<std::function<void()>> unregisterFromMetrics;
     State<ReportFlags, Report, ReportFlags::enabled, ReportFlags::valid> state{
         *this};
+    StateDetails stateDetails;
 
   public:
     static constexpr const char* reportIfaceName =

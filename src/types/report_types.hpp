@@ -30,5 +30,14 @@ using LabeledMetricParameters = utils::LabeledTuple<
     utils::tstring::Id, utils::tstring::CollectionTimeScope,
     utils::tstring::CollectionDuration>;
 
+using StateDetails =
+    std::vector<std::pair<std::string, std::vector<std::string>>>;
+
+namespace state_details
+{
+constexpr const char* PropertyConflict = "PropertyConflict";
+constexpr const char* IncorrectValue = "IncorrectValue";
+} // namespace state_details
+
 ReadingParameters
     toReadingParameters(const std::vector<LabeledMetricParameters>& labeled);
