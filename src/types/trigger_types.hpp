@@ -13,8 +13,8 @@
 
 enum class TriggerAction
 {
-    LogToLogService = 0,
-    RedfishEvent,
+    LogToJournal = 0,
+    LogToRedfishEventLog,
     UpdateReport,
 };
 
@@ -22,8 +22,9 @@ namespace details
 {
 constexpr std::array<std::pair<std::string_view, TriggerAction>, 3>
     convDataTriggerAction = {
-        std::make_pair("LogToLogService", TriggerAction::LogToLogService),
-        std::make_pair("RedfishEvent", TriggerAction::RedfishEvent),
+        std::make_pair("LogToJournal", TriggerAction::LogToJournal),
+        std::make_pair("LogToRedfishEventLog",
+                       TriggerAction::LogToRedfishEventLog),
         std::make_pair("UpdateReport", TriggerAction::UpdateReport)};
 }
 
@@ -159,4 +160,20 @@ inline bool
 {
     return std::holds_alternative<std::vector<discrete::LabeledThresholdParam>>(
         params);
+}
+
+using TriggerId = std::unique_ptr<const std::string>;
+using TriggerValue = std::variant<double, std::string>;
+using ThresholdName = std::optional<std::reference_wrapper<const std::string>>;
+
+inline std::string triggerValueToString(TriggerValue val)
+{
+    if (auto* doubleVal = std::get_if<double>(&val); doubleVal != nullptr)
+    {
+        return std::to_string(*doubleVal);
+    }
+    else
+    {
+        return std::get<std::string>(val);
+    }
 }

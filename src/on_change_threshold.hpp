@@ -1,5 +1,6 @@
 #pragma once
 
+#include "interfaces/clock.hpp"
 #include "interfaces/sensor.hpp"
 #include "interfaces/sensor_listener.hpp"
 #include "interfaces/threshold.hpp"
@@ -19,8 +20,9 @@ class OnChangeThreshold :
 {
   public:
     OnChangeThreshold(
-        Sensors sensors,
-        std::vector<std::unique_ptr<interfaces::TriggerAction>> actions);
+        const std::string& triggerId, Sensors sensors,
+        std::vector<std::unique_ptr<interfaces::TriggerAction>> actions,
+        std::unique_ptr<interfaces::Clock> clock);
     ~OnChangeThreshold()
     {}
 
@@ -30,10 +32,12 @@ class OnChangeThreshold :
     void updateSensors(Sensors newSensors) override;
 
   private:
+    const std::string& triggerId;
     Sensors sensors;
     const std::vector<std::unique_ptr<interfaces::TriggerAction>> actions;
     bool initialized = false;
     bool isFirstReading = true;
+    std::unique_ptr<interfaces::Clock> clock;
 
-    void commit(const std::string&, Milliseconds, double);
+    void commit(const std::string&, double);
 };

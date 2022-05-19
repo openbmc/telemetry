@@ -3,13 +3,16 @@
 #include <phosphor-logging/log.hpp>
 
 NumericThreshold::NumericThreshold(
-    boost::asio::io_context& ioc, Sensors sensorsIn,
+    boost::asio::io_context& ioc, const std::string& triggerIdIn,
+    Sensors sensorsIn,
     std::vector<std::unique_ptr<interfaces::TriggerAction>> actionsIn,
     Milliseconds dwellTimeIn, numeric::Direction directionIn,
-    double thresholdValueIn, numeric::Type typeIn) :
+    double thresholdValueIn, numeric::Type typeIn,
+    std::unique_ptr<interfaces::Clock> clockIn) :
     ioc(ioc),
-    actions(std::move(actionsIn)), dwellTime(dwellTimeIn),
-    direction(directionIn), thresholdValue(thresholdValueIn), type(typeIn)
+    triggerId(triggerIdIn), actions(std::move(actionsIn)),
+    dwellTime(dwellTimeIn), direction(directionIn),
+    thresholdValue(thresholdValueIn), type(typeIn), clock(std::move(clockIn))
 {
     for (const auto& sensor : sensorsIn)
     {
@@ -57,14 +60,14 @@ void NumericThreshold::sensorUpdated(interfaces::Sensor& sensor,
         (direction == numeric::Direction::increasing && increasing) ||
         (direction == numeric::Direction::either && (increasing || decreasing)))
     {
-        startTimer(details, timestamp, value);
+        startTimer(details, value);
     }
 
     prevValue = value;
 }
 
 void NumericThreshold::startTimer(NumericThreshold::ThresholdDetail& details,
-                                  Milliseconds timestamp, double value)
+                                  double value)
 {
     const auto& sensorName = details.sensorName;
     auto& dwell = details.dwell;
@@ -72,13 +75,13 @@ void NumericThreshold::startTimer(NumericThreshold::ThresholdDetail& details,
 
     if (dwellTime == Milliseconds::zero())
     {
-        commit(sensorName, timestamp, value);
+        commit(sensorName, value);
     }
     else
     {
         dwell = true;
         timer.expires_after(dwellTime);
-        timer.async_wait([this, &sensorName, &dwell, timestamp,
+        timer.async_wait([this, &sensorName, &dwell,
                           value](const boost::system::error_code ec) {
             if (ec)
             {
@@ -86,18 +89,18 @@ void NumericThreshold::startTimer(NumericThreshold::ThresholdDetail& details,
                     "Timer has been canceled");
                 return;
             }
-            commit(sensorName, timestamp, value);
+            commit(sensorName, value);
             dwell = false;
         });
     }
 }
 
-void NumericThreshold::commit(const std::string& sensorName,
-                              Milliseconds timestamp, double value)
+void NumericThreshold::commit(const std::string& sensorName, double value)
 {
+    Milliseconds timestamp = clock->systemTimestamp();
     for (const auto& action : actions)
     {
-        action->commit(sensorName, timestamp, value);
+        action->commit(triggerId, std::nullopt, sensorName, timestamp, value);
     }
 }
 

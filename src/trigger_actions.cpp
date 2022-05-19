@@ -2,11 +2,14 @@
 
 #include "messages/update_report_ind.hpp"
 #include "types/trigger_types.hpp"
+#include "utils/clock.hpp"
 #include "utils/messanger.hpp"
 
 #include <phosphor-logging/log.hpp>
 
 #include <ctime>
+#include <iomanip>
+#include <sstream>
 
 namespace action
 {
@@ -15,15 +18,12 @@ namespace
 {
 std::string timestampToString(Milliseconds timestamp)
 {
-    std::time_t t = static_cast<time_t>(timestamp.count());
-    std::array<char, sizeof("YYYY-MM-DDThh:mm:ssZ")> buf = {};
-    size_t size =
-        std::strftime(buf.data(), buf.size(), "%FT%TZ", std::gmtime(&t));
-    if (size == 0)
-    {
-        throw std::runtime_error("Failed to parse timestamp to string");
-    }
-    return std::string(buf.data(), size);
+    std::time_t t = static_cast<time_t>(
+        std::chrono::duration_cast<std::chrono::seconds>(timestamp).count());
+    std::stringstream ss;
+    ss << std::put_time(std::gmtime(&t), "%FT%T.") << std::setw(3)
+       << std::setfill('0') << timestamp.count() % 1000 << 'Z';
+    return ss.str();
 }
 } // namespace
 
@@ -43,44 +43,60 @@ static const char* getDirection(double value, double threshold)
     throw std::runtime_error("Invalid value");
 }
 
-void LogToJournal::commit(const std::string& sensorName, Milliseconds timestamp,
-                          double value)
+void LogToJournal::commit(const std::string& triggerId,
+                          const ThresholdName thresholdNameInIn,
+                          const std::string& sensorName,
+                          const Milliseconds timestamp,
+                          const TriggerValue triggerValue)
 {
-    std::string msg = ::numeric::typeToString(type) +
-                      " numeric threshold condition is met on sensor " +
-                      sensorName + ", recorded value " + std::to_string(value) +
-                      ", timestamp " + timestampToString(timestamp) +
-                      ", direction " +
-                      std::string(getDirection(value, threshold));
+    double value = std::get<double>(triggerValue);
+    std::string thresholdName = ::numeric::typeToString(type);
+    auto direction = getDirection(value, threshold);
+
+    std::string msg = "Numeric threshold '" + thresholdName + "' of trigger '" +
+                      triggerId + "' is crossed on sensor " + sensorName +
+                      ", recorded value: " + std::to_string(value) +
+                      ", crossing direction: " + direction +
+                      ", timestamp: " + timestampToString(timestamp);
 
     phosphor::logging::log<phosphor::logging::level::INFO>(msg.c_str());
 }
 
-const char* LogToRedfish::getMessageId() const
+const char* LogToRedfishEventLog::getRedfishMessageId() const
 {
     switch (type)
     {
         case ::numeric::Type::upperCritical:
-            return "OpenBMC.0.1.0.NumericThresholdUpperCritical";
+            return redfish_message_ids::TriggerNumericCritical;
         case ::numeric::Type::lowerCritical:
-            return "OpenBMC.0.1.0.NumericThresholdLowerCritical";
+            return redfish_message_ids::TriggerNumericCritical;
         case ::numeric::Type::upperWarning:
-            return "OpenBMC.0.1.0.NumericThresholdUpperWarning";
+            return redfish_message_ids::TriggerNumericWarning;
         case ::numeric::Type::lowerWarning:
-            return "OpenBMC.0.1.0.NumericThresholdLowerWarning";
+            return redfish_message_ids::TriggerNumericWarning;
     }
     throw std::runtime_error("Invalid type");
 }
 
-void LogToRedfish::commit(const std::string& sensorName, Milliseconds timestamp,
-                          double value)
+void LogToRedfishEventLog::commit(const std::string& triggerId,
+                                  const ThresholdName thresholdNameInIn,
+                                  const std::string& sensorName,
+                                  const Milliseconds timestamp,
+                                  const TriggerValue triggerValue)
 {
+    double value = std::get<double>(triggerValue);
+    std::string thresholdName = ::numeric::typeToString(type);
+    auto direction = getDirection(value, threshold);
+    auto timestampStr = timestampToString(timestamp);
+
     phosphor::logging::log<phosphor::logging::level::INFO>(
-        "Threshold value is exceeded",
-        phosphor::logging::entry("REDFISH_MESSAGE_ID=%s", getMessageId()),
-        phosphor::logging::entry("REDFISH_MESSAGE_ARGS=%s,%f,%llu,%s",
-                                 sensorName.c_str(), value, timestamp.count(),
-                                 getDirection(value, threshold)));
+        "Logging numeric trigger action to Redfish Event Log.",
+        phosphor::logging::entry("REDFISH_MESSAGE_ID=%s",
+                                 getRedfishMessageId()),
+        phosphor::logging::entry("REDFISH_MESSAGE_ARGS=%s,%s,%s,%f,%s,%s",
+                                 thresholdName.c_str(), triggerId.c_str(),
+                                 sensorName.c_str(), value, direction,
+                                 timestampStr.c_str()));
 }
 
 void fillActions(
@@ -94,16 +110,16 @@ void fillActions(
     {
         switch (actionType)
         {
-            case TriggerAction::LogToLogService:
+            case TriggerAction::LogToJournal:
             {
                 actionsIf.emplace_back(
                     std::make_unique<LogToJournal>(type, thresholdValue));
                 break;
             }
-            case TriggerAction::RedfishEvent:
+            case TriggerAction::LogToRedfishEventLog:
             {
-                actionsIf.emplace_back(
-                    std::make_unique<LogToRedfish>(type, thresholdValue));
+                actionsIf.emplace_back(std::make_unique<LogToRedfishEventLog>(
+                    type, thresholdValue));
                 break;
             }
             case TriggerAction::UpdateReport:
@@ -120,39 +136,55 @@ void fillActions(
 
 namespace discrete
 {
-void LogToJournal::commit(const std::string& sensorName, Milliseconds timestamp,
-                          double value)
+
+void LogToJournal::commit(const std::string& triggerId,
+                          const ThresholdName thresholdNameIn,
+                          const std::string& sensorName,
+                          const Milliseconds timestamp,
+                          const TriggerValue triggerValue)
 {
-    std::string msg = ::discrete::severityToString(severity) +
-                      " discrete threshold condition is met on sensor " +
-                      sensorName + ", recorded value " + std::to_string(value) +
-                      ", timestamp " + timestampToString(timestamp);
+    auto value = std::get<std::string>(triggerValue);
+
+    std::string msg = "Discrete condition '" + thresholdNameIn->get() +
+                      "' of trigger '" + triggerId + "' is met on sensor " +
+                      sensorName + ", recorded value: " + value +
+                      ", severity: " + ::discrete::severityToString(severity) +
+                      ", timestamp: " + timestampToString(timestamp);
 
     phosphor::logging::log<phosphor::logging::level::INFO>(msg.c_str());
 }
 
-const char* LogToRedfish::getMessageId() const
+const char* LogToRedfishEventLog::getRedfishMessageId() const
 {
     switch (severity)
     {
         case ::discrete::Severity::ok:
-            return "OpenBMC.0.1.0.DiscreteThresholdOk";
+            return redfish_message_ids::TriggerDiscreteOK;
         case ::discrete::Severity::warning:
-            return "OpenBMC.0.1.0.DiscreteThresholdWarning";
+            return redfish_message_ids::TriggerDiscreteWarning;
         case ::discrete::Severity::critical:
-            return "OpenBMC.0.1.0.DiscreteThresholdCritical";
+            return redfish_message_ids::TriggerDiscreteCritical;
     }
     throw std::runtime_error("Invalid severity");
 }
 
-void LogToRedfish::commit(const std::string& sensorName, Milliseconds timestamp,
-                          double value)
+void LogToRedfishEventLog::commit(const std::string& triggerId,
+                                  const ThresholdName thresholdNameIn,
+                                  const std::string& sensorName,
+                                  const Milliseconds timestamp,
+                                  const TriggerValue triggerValue)
 {
+    auto value = std::get<std::string>(triggerValue);
+    auto timestampStr = timestampToString(timestamp);
+
     phosphor::logging::log<phosphor::logging::level::INFO>(
-        "Discrete treshold condition is met",
-        phosphor::logging::entry("REDFISH_MESSAGE_ID=%s", getMessageId()),
-        phosphor::logging::entry("REDFISH_MESSAGE_ARGS=%s,%f,%llu",
-                                 sensorName.c_str(), value, timestamp.count()));
+        "Logging discrete trigger action to Redfish Event Log.",
+        phosphor::logging::entry("REDFISH_MESSAGE_ID=%s",
+                                 getRedfishMessageId()),
+        phosphor::logging::entry("REDFISH_MESSAGE_ARGS=%s,%s,%s,%s,%s",
+                                 thresholdNameIn->get().c_str(),
+                                 triggerId.c_str(), sensorName.c_str(),
+                                 value.c_str(), timestampStr.c_str()));
 }
 
 void fillActions(
@@ -166,16 +198,16 @@ void fillActions(
     {
         switch (actionType)
         {
-            case TriggerAction::LogToLogService:
+            case TriggerAction::LogToJournal:
             {
                 actionsIf.emplace_back(
                     std::make_unique<LogToJournal>(severity));
                 break;
             }
-            case TriggerAction::RedfishEvent:
+            case TriggerAction::LogToRedfishEventLog:
             {
                 actionsIf.emplace_back(
-                    std::make_unique<LogToRedfish>(severity));
+                    std::make_unique<LogToRedfishEventLog>(severity));
                 break;
             }
             case TriggerAction::UpdateReport:
@@ -190,25 +222,38 @@ void fillActions(
 
 namespace onChange
 {
-void LogToJournal::commit(const std::string& sensorName, Milliseconds timestamp,
-                          double value)
+void LogToJournal::commit(const std::string& triggerId,
+                          const ThresholdName thresholdNameIn,
+                          const std::string& sensorName,
+                          const Milliseconds timestamp,
+                          const TriggerValue triggerValue)
 {
-    std::string msg = "Value changed on sensor " + sensorName +
-                      ", recorded value " + std::to_string(value) +
-                      ", timestamp " + timestampToString(timestamp);
+    auto value = triggerValueToString(triggerValue);
+    std::string msg = "Discrete condition 'OnChange' of trigger '" + triggerId +
+                      "' is met on sensor: " + sensorName +
+                      ", recorded value: " + value +
+                      ", timestamp: " + timestampToString(timestamp);
 
     phosphor::logging::log<phosphor::logging::level::INFO>(msg.c_str());
 }
 
-void LogToRedfish::commit(const std::string& sensorName, Milliseconds timestamp,
-                          double value)
+void LogToRedfishEventLog::commit(const std::string& triggerId,
+                                  const ThresholdName thresholdNameIn,
+                                  const std::string& sensorName,
+                                  const Milliseconds timestamp,
+                                  const TriggerValue triggerValue)
 {
-    const char* messageId = "OpenBMC.0.1.0.DiscreteThresholdOnChange";
+    auto value = triggerValueToString(triggerValue);
+    auto timestampStr = timestampToString(timestamp);
+
     phosphor::logging::log<phosphor::logging::level::INFO>(
-        "Uncondtional discrete threshold triggered",
-        phosphor::logging::entry("REDFISH_MESSAGE_ID=%s", messageId),
-        phosphor::logging::entry("REDFISH_MESSAGE_ARGS=%s,%f,%llu",
-                                 sensorName.c_str(), value, timestamp.count()));
+        "Logging onChange discrete trigger action to Redfish Event Log.",
+        phosphor::logging::entry("REDFISH_MESSAGE_ID=%s",
+                                 redfish_message_ids::TriggerDiscreteOK),
+        phosphor::logging::entry("REDFISH_MESSAGE_ARGS=%s,%s,%s,%s,%s",
+                                 "OnChange", triggerId.c_str(),
+                                 sensorName.c_str(), value.c_str(),
+                                 timestampStr.c_str()));
 }
 
 void fillActions(
@@ -221,14 +266,15 @@ void fillActions(
     {
         switch (actionType)
         {
-            case TriggerAction::LogToLogService:
+            case TriggerAction::LogToJournal:
             {
                 actionsIf.emplace_back(std::make_unique<LogToJournal>());
                 break;
             }
-            case TriggerAction::RedfishEvent:
+            case TriggerAction::LogToRedfishEventLog:
             {
-                actionsIf.emplace_back(std::make_unique<LogToRedfish>());
+                actionsIf.emplace_back(
+                    std::make_unique<LogToRedfishEventLog>());
                 break;
             }
             case TriggerAction::UpdateReport:
@@ -243,7 +289,11 @@ void fillActions(
 } // namespace onChange
 } // namespace discrete
 
-void UpdateReport::commit(const std::string&, Milliseconds, double)
+void UpdateReport::commit(const std::string& triggerId,
+                          const ThresholdName thresholdNameIn,
+                          const std::string& sensorName,
+                          const Milliseconds timestamp,
+                          const TriggerValue triggerValue)
 {
     if (reportIds->empty())
     {

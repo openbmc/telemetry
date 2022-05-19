@@ -14,18 +14,18 @@
 Trigger::Trigger(
     boost::asio::io_context& ioc,
     const std::shared_ptr<sdbusplus::asio::object_server>& objServer,
-    const std::string& idIn, const std::string& nameIn,
+    TriggerId&& idIn, const std::string& nameIn,
     const std::vector<TriggerAction>& triggerActionsIn,
     const std::shared_ptr<std::vector<std::string>> reportIdsIn,
     std::vector<std::shared_ptr<interfaces::Threshold>>&& thresholdsIn,
     interfaces::TriggerManager& triggerManager,
     interfaces::JsonStorage& triggerStorageIn,
     const interfaces::TriggerFactory& triggerFactory, Sensors sensorsIn) :
-    id(idIn),
+    id(std::move(idIn)),
     name(nameIn), triggerActions(std::move(triggerActionsIn)),
-    path(triggerDir + id), reportIds(std::move(reportIdsIn)),
+    path(triggerDir + *id), reportIds(std::move(reportIdsIn)),
     thresholds(std::move(thresholdsIn)),
-    fileName(std::to_string(std::hash<std::string>{}(id))),
+    fileName(std::to_string(std::hash<std::string>{}(*id))),
     triggerStorage(triggerStorageIn), sensors(std::move(sensorsIn)),
     messanger(ioc)
 {
@@ -37,7 +37,7 @@ Trigger::Trigger(
                     triggerStorage.remove(fileName);
                 }
                 messanger.send(messages::TriggerPresenceChangedInd{
-                    messages::Presence::Removed, id, {}});
+                    messages::Presence::Removed, *id, {}});
                 boost::asio::post(ioc, [this, &triggerManager] {
                     triggerManager.removeTrigger(this);
                 });
@@ -74,9 +74,9 @@ Trigger::Trigger(
                 [this, &triggerFactory](auto newVal, auto& oldVal) {
                     auto newThresholdParams = std::visit(
                         utils::ToLabeledThresholdParamConversion(), newVal);
-                    triggerFactory.updateThresholds(thresholds, triggerActions,
-                                                    reportIds, sensors,
-                                                    newThresholdParams);
+                    triggerFactory.updateThresholds(
+                        thresholds, *id, triggerActions, reportIds, sensors,
+                        newThresholdParams);
                     oldVal = std::move(newVal);
                     return 1;
                 },
@@ -110,7 +110,7 @@ Trigger::Trigger(
                     TriggerManager::verifyReportIds(newVal);
                     *reportIds = newVal;
                     messanger.send(messages::TriggerPresenceChangedInd{
-                        messages::Presence::Exist, id, *reportIds});
+                        messages::Presence::Exist, *id, *reportIds});
                     oldVal = std::move(newVal);
                     return 1;
                 },
@@ -147,12 +147,12 @@ Trigger::Trigger(
         [this](const auto& msg) {
             if (utils::contains(*reportIds, msg.reportId))
             {
-                messanger.send(messages::CollectTriggerIdResp{id});
+                messanger.send(messages::CollectTriggerIdResp{*id});
             }
         });
 
     messanger.send(messages::TriggerPresenceChangedInd{
-        messages::Presence::Exist, id, *reportIds});
+        messages::Presence::Exist, *id, *reportIds});
 }
 
 bool Trigger::storeConfiguration() const
@@ -166,7 +166,7 @@ bool Trigger::storeConfiguration() const
                        fromLabeledThresholdParam(getLabeledThresholds()));
 
         data["Version"] = triggerVersion;
-        data["Id"] = id;
+        data["Id"] = *id;
         data["Name"] = name;
         data["ThresholdParamsDiscriminator"] = labeledThresholdParams.index();
         data["TriggerActions"] =

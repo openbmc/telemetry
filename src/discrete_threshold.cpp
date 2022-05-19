@@ -5,15 +5,18 @@
 #include <phosphor-logging/log.hpp>
 
 DiscreteThreshold::DiscreteThreshold(
-    boost::asio::io_context& ioc, Sensors sensorsIn,
+    boost::asio::io_context& ioc, const std::string& triggerIdIn,
+    Sensors sensorsIn,
     std::vector<std::unique_ptr<interfaces::TriggerAction>> actionsIn,
     Milliseconds dwellTimeIn, const std::string& thresholdValueIn,
-    const std::string& nameIn, const discrete::Severity severityIn) :
+    const std::string& nameIn, const discrete::Severity severityIn,
+    std::unique_ptr<interfaces::Clock> clockIn) :
     ioc(ioc),
-    actions(std::move(actionsIn)), dwellTime(dwellTimeIn),
-    thresholdValue(thresholdValueIn),
-    numericThresholdValue(utils::stodStrict(thresholdValue)), name(nameIn),
-    severity(severityIn)
+    triggerId(triggerIdIn), actions(std::move(actionsIn)),
+    dwellTime(dwellTimeIn), thresholdValue(thresholdValueIn),
+    numericThresholdValue(utils::stodStrict(thresholdValue)),
+    severity(severityIn), name(getNonEmptyName(nameIn)),
+    clock(std::move(clockIn))
 {
     for (const auto& sensor : sensorsIn)
     {
@@ -56,12 +59,12 @@ void DiscreteThreshold::sensorUpdated(interfaces::Sensor& sensor,
     }
     else if (value == numericThresholdValue)
     {
-        startTimer(details, timestamp, value);
+        startTimer(details, value);
     }
 }
 
 void DiscreteThreshold::startTimer(DiscreteThreshold::ThresholdDetail& details,
-                                   Milliseconds timestamp, double value)
+                                   double value)
 {
     const auto& sensorName = details.sensorName;
     auto& dwell = details.dwell;
@@ -69,13 +72,13 @@ void DiscreteThreshold::startTimer(DiscreteThreshold::ThresholdDetail& details,
 
     if (dwellTime == Milliseconds::zero())
     {
-        commit(sensorName, timestamp, value);
+        commit(sensorName, value);
     }
     else
     {
         dwell = true;
         timer.expires_after(dwellTime);
-        timer.async_wait([this, &sensorName, &dwell, timestamp,
+        timer.async_wait([this, &sensorName, &dwell,
                           value](const boost::system::error_code ec) {
             if (ec)
             {
@@ -83,18 +86,19 @@ void DiscreteThreshold::startTimer(DiscreteThreshold::ThresholdDetail& details,
                     "Timer has been canceled");
                 return;
             }
-            commit(sensorName, timestamp, value);
+            commit(sensorName, value);
             dwell = false;
         });
     }
 }
 
-void DiscreteThreshold::commit(const std::string& sensorName,
-                               Milliseconds timestamp, double value)
+void DiscreteThreshold::commit(const std::string& sensorName, double value)
 {
+    Milliseconds timestamp = clock->systemTimestamp();
     for (const auto& action : actions)
     {
-        action->commit(sensorName, timestamp, value);
+        action->commit(triggerId, std::cref(name), sensorName, timestamp,
+                       thresholdValue);
     }
 }
 
@@ -102,4 +106,13 @@ LabeledThresholdParam DiscreteThreshold::getThresholdParam() const
 {
     return discrete::LabeledThresholdParam(name, severity, dwellTime.count(),
                                            thresholdValue);
+}
+
+std::string DiscreteThreshold::getNonEmptyName(const std::string& nameIn) const
+{
+    if (nameIn.empty())
+    {
+        return discrete::severityToString(severity) + " condition";
+    }
+    return nameIn;
 }
