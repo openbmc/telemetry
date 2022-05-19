@@ -3,10 +3,12 @@
 #include <phosphor-logging/log.hpp>
 
 OnChangeThreshold::OnChangeThreshold(
-    Sensors sensorsIn,
-    std::vector<std::unique_ptr<interfaces::TriggerAction>> actionsIn) :
-    sensors(std::move(sensorsIn)),
-    actions(std::move(actionsIn))
+    const std::string& triggerIdIn, Sensors sensorsIn,
+    std::vector<std::unique_ptr<interfaces::TriggerAction>> actionsIn,
+    std::unique_ptr<interfaces::Clock> clockIn) :
+    triggerId(triggerIdIn),
+    sensors(std::move(sensorsIn)), actions(std::move(actionsIn)),
+    clock(std::move(clockIn))
 {}
 
 void OnChangeThreshold::initialize()
@@ -59,15 +61,15 @@ void OnChangeThreshold::sensorUpdated(interfaces::Sensor& sensor,
         return;
     }
 
-    commit(sensor.getName(), timestamp, value);
+    commit(sensor.getName(), value);
 }
 
-void OnChangeThreshold::commit(const std::string& sensorName,
-                               Milliseconds timestamp, double value)
+void OnChangeThreshold::commit(const std::string& sensorName, double value)
 {
+    Milliseconds timestamp = clock->systemTimestamp();
     for (const auto& action : actions)
     {
-        action->commit(sensorName, timestamp, value);
+        action->commit(triggerId, std::nullopt, sensorName, timestamp, value);
     }
 }
 

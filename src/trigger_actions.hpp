@@ -8,6 +8,19 @@
 namespace action
 {
 
+namespace redfish_message_ids
+{
+constexpr const char* TriggerNumericWarning =
+    "OpenBMC.0.1.TriggerNumericWarning";
+constexpr const char* TriggerNumericCritical =
+    "OpenBMC.0.1.TriggerNumericCritical";
+constexpr const char* TriggerDiscreteOK = "OpenBMC.0.1.TriggerDiscreteOK";
+constexpr const char* TriggerDiscreteWarning =
+    "OpenBMC.0.1.TriggerDiscreteWarning";
+constexpr const char* TriggerDiscreteCritical =
+    "OpenBMC.0.1.TriggerDiscreteCritical";
+} // namespace redfish_message_ids
+
 namespace numeric
 {
 class LogToJournal : public interfaces::TriggerAction
@@ -16,28 +29,31 @@ class LogToJournal : public interfaces::TriggerAction
     LogToJournal(::numeric::Type type, double val) : type(type), threshold(val)
     {}
 
-    void commit(const std::string& id, Milliseconds timestamp,
-                double value) override;
+    void commit(const std::string& triggerId, const ThresholdName thresholdName,
+                const std::string& sensorName, const Milliseconds timestamp,
+                const TriggerValue value) override;
 
   private:
-    ::numeric::Type type;
-    double threshold;
+    const ::numeric::Type type;
+    const double threshold;
 };
 
-class LogToRedfish : public interfaces::TriggerAction
+class LogToRedfishEventLog : public interfaces::TriggerAction
 {
   public:
-    LogToRedfish(::numeric::Type type, double val) : type(type), threshold(val)
+    LogToRedfishEventLog(::numeric::Type type, double val) :
+        type(type), threshold(val)
     {}
 
-    void commit(const std::string& id, Milliseconds timestamp,
-                double value) override;
+    void commit(const std::string& triggerId, const ThresholdName thresholdName,
+                const std::string& sensorName, const Milliseconds timestamp,
+                const TriggerValue value) override;
 
   private:
-    ::numeric::Type type;
-    double threshold;
+    const ::numeric::Type type;
+    const double threshold;
 
-    const char* getMessageId() const;
+    const char* getRedfishMessageId() const;
 };
 
 void fillActions(
@@ -55,26 +71,29 @@ class LogToJournal : public interfaces::TriggerAction
     explicit LogToJournal(::discrete::Severity severity) : severity(severity)
     {}
 
-    void commit(const std::string& id, Milliseconds timestamp,
-                double value) override;
+    void commit(const std::string& triggerId, const ThresholdName thresholdName,
+                const std::string& sensorName, const Milliseconds timestamp,
+                const TriggerValue value) override;
 
   private:
-    ::discrete::Severity severity;
+    const ::discrete::Severity severity;
 };
 
-class LogToRedfish : public interfaces::TriggerAction
+class LogToRedfishEventLog : public interfaces::TriggerAction
 {
   public:
-    explicit LogToRedfish(::discrete::Severity severity) : severity(severity)
+    explicit LogToRedfishEventLog(::discrete::Severity severity) :
+        severity(severity)
     {}
 
-    void commit(const std::string& id, Milliseconds timestamp,
-                double value) override;
+    void commit(const std::string& triggerId, const ThresholdName thresholdName,
+                const std::string& sensorName, const Milliseconds timestamp,
+                const TriggerValue value) override;
 
   private:
-    ::discrete::Severity severity;
+    const ::discrete::Severity severity;
 
-    const char* getMessageId() const;
+    const char* getRedfishMessageId() const;
 };
 
 void fillActions(
@@ -91,18 +110,20 @@ class LogToJournal : public interfaces::TriggerAction
     LogToJournal()
     {}
 
-    void commit(const std::string& id, Milliseconds timestamp,
-                double value) override;
+    void commit(const std::string& triggerId, const ThresholdName thresholdName,
+                const std::string& sensorName, const Milliseconds timestamp,
+                const TriggerValue value) override;
 };
 
-class LogToRedfish : public interfaces::TriggerAction
+class LogToRedfishEventLog : public interfaces::TriggerAction
 {
   public:
-    LogToRedfish()
+    LogToRedfishEventLog()
     {}
 
-    void commit(const std::string& id, Milliseconds timestamp,
-                double value) override;
+    void commit(const std::string& triggerId, const ThresholdName thresholdName,
+                const std::string& sensorName, const Milliseconds timestamp,
+                const TriggerValue value) override;
 };
 
 void fillActions(
@@ -122,8 +143,9 @@ class UpdateReport : public interfaces::TriggerAction
         reportIds(std::move(ids))
     {}
 
-    void commit(const std::string& id, Milliseconds timestamp,
-                double value) override;
+    void commit(const std::string& triggerId, const ThresholdName thresholdName,
+                const std::string& sensorName, const Milliseconds timestamp,
+                const TriggerValue value) override;
 
   private:
     boost::asio::io_context& ioc;

@@ -1,5 +1,6 @@
 #include "dbus_environment.hpp"
 #include "helpers.hpp"
+#include "mocks/clock_mock.hpp"
 #include "mocks/sensor_mock.hpp"
 #include "mocks/trigger_action_mock.hpp"
 #include "on_change_threshold.hpp"
@@ -21,6 +22,9 @@ class TestOnChangeThreshold : public Test
         std::make_unique<StrictMock<TriggerActionMock>>();
     TriggerActionMock& actionMock = *actionMockPtr;
     std::shared_ptr<OnChangeThreshold> sut;
+    std::string triggerId = "MyTrigger";
+    std::unique_ptr<NiceMock<ClockMock>> clockMockPtr =
+        std::make_unique<NiceMock<ClockMock>>();
 
     void SetUp() override
     {
@@ -34,9 +38,10 @@ class TestOnChangeThreshold : public Test
         }
 
         sut = std::make_shared<OnChangeThreshold>(
+            triggerId,
             utils::convContainer<std::shared_ptr<interfaces::Sensor>>(
                 sensorMocks),
-            std::move(actions));
+            std::move(actions), std::move(clockMockPtr));
     }
 };
 
@@ -55,7 +60,7 @@ TEST_F(TestOnChangeThreshold, initializeThresholdExpectAllSensorsAreRegistered)
 
 TEST_F(TestOnChangeThreshold, thresholdIsNotInitializeExpectNoActionCommit)
 {
-    EXPECT_CALL(actionMock, commit(_, _, _)).Times(0);
+    EXPECT_CALL(actionMock, commit(_, _, _, _, _)).Times(0);
 }
 
 TEST_F(TestOnChangeThreshold, getLabeledParamsReturnsCorrectly)
@@ -66,7 +71,7 @@ TEST_F(TestOnChangeThreshold, getLabeledParamsReturnsCorrectly)
 
 TEST_F(TestOnChangeThreshold, firstReadingDoesNoActionCommit)
 {
-    EXPECT_CALL(actionMock, commit(_, _, _)).Times(0);
+    EXPECT_CALL(actionMock, commit(_, _, _, _, _)).Times(0);
 
     sut->initialize();
     sut->sensorUpdated(*sensorMocks.front(), 0ms, 42);
@@ -74,8 +79,8 @@ TEST_F(TestOnChangeThreshold, firstReadingDoesNoActionCommit)
 
 struct OnChangeParams
 {
-    using UpdateParams = std::tuple<size_t, Milliseconds, double>;
-    using ExpectedParams = std::tuple<size_t, Milliseconds, double>;
+    using UpdateParams = std::tuple<size_t, double>;
+    using ExpectedParams = std::tuple<size_t, double>;
 
     OnChangeParams& Updates(std::vector<UpdateParams> val)
     {
@@ -91,21 +96,17 @@ struct OnChangeParams
 
     friend void PrintTo(const OnChangeParams& o, std::ostream* os)
     {
-        *os << "{ Updates: ";
-        for (const auto& [index, timestamp, value] : o.updates)
+        *os << "{ Updates: [ ";
+        for (const auto& [index, value] : o.updates)
         {
-            *os << "{ SensorIndex: " << index
-                << ", Timestamp: " << timestamp.count() << ", Value: " << value
-                << " }, ";
+            *os << "{ SensorIndex: " << index << ", Value: " << value << " }, ";
         }
-        *os << "Expected: ";
-        for (const auto& [index, timestamp, value] : o.expected)
+        *os << " ] Expected: [ ";
+        for (const auto& [index, value] : o.expected)
         {
-            *os << "{ SensorIndex: " << index
-                << ", Timestamp: " << timestamp.count() << ", Value: " << value
-                << " }, ";
+            *os << "{ SensorIndex: " << index << ", Value: " << value << " }, ";
         }
-        *os << " }";
+        *os << " ] }";
     }
 
     std::vector<UpdateParams> updates;
@@ -119,33 +120,28 @@ class TestOnChangeThresholdUpdates :
 
 INSTANTIATE_TEST_SUITE_P(
     _, TestOnChangeThresholdUpdates,
-    Values(
-        OnChangeParams().Updates({{0, 1ms, 80.0}}).Expected({{0, 1ms, 80.0}}),
-        OnChangeParams()
-            .Updates({{0, 1ms, 80.0}, {1, 2ms, 81.0}})
-            .Expected({{0, 1ms, 80.0}, {1, 2ms, 81.0}}),
-        OnChangeParams()
-            .Updates({{0, 1ms, 80.0}, {0, 2ms, 90.0}})
-            .Expected({{0, 1ms, 80.0}, {0, 2ms, 90.0}}),
-        OnChangeParams()
-            .Updates({{0, 1ms, 80.0}, {1, 2ms, 90.0}, {0, 3ms, 90.0}})
-            .Expected({{0, 1ms, 80.0}, {1, 2ms, 90.0}, {0, 3ms, 90.0}}),
-        OnChangeParams()
-            .Updates({{0, 1ms, 80.0},
-                      {1, 2ms, 80.0},
-                      {1, 3ms, 90.0},
-                      {0, 4ms, 90.0}})
-            .Expected({{0, 1ms, 80.0},
-                       {1, 2ms, 80.0},
-                       {1, 3ms, 90.0},
-                       {0, 4ms, 90.0}})));
+    Values(OnChangeParams().Updates({{0, 80.0}}).Expected({{0, 80.0}}),
+           OnChangeParams()
+               .Updates({{0, 80.0}, {1, 81.0}})
+               .Expected({{0, 80.0}, {1, 81.0}}),
+           OnChangeParams()
+               .Updates({{0, 80.0}, {0, 90.0}})
+               .Expected({{0, 80.0}, {0, 90.0}}),
+           OnChangeParams()
+               .Updates({{0, 80.0}, {1, 90.0}, {0, 90.0}})
+               .Expected({{0, 80.0}, {1, 90.0}, {0, 90.0}}),
+           OnChangeParams()
+               .Updates({{0, 80.0}, {1, 80.0}, {1, 90.0}, {0, 90.0}})
+               .Expected({{0, 80.0}, {1, 80.0}, {1, 90.0}, {0, 90.0}})));
 
 TEST_P(TestOnChangeThresholdUpdates, senorsIsUpdatedMultipleTimes)
 {
     InSequence seq;
-    for (const auto& [index, timestamp, value] : GetParam().expected)
+    for (const auto& [index, value] : GetParam().expected)
     {
-        EXPECT_CALL(actionMock, commit(sensorNames[index], timestamp, value));
+        EXPECT_CALL(actionMock,
+                    commit(triggerId, Eq(std::nullopt), sensorNames[index], _,
+                           TriggerValue(value)));
     }
 
     sut->initialize();
@@ -153,8 +149,8 @@ TEST_P(TestOnChangeThresholdUpdates, senorsIsUpdatedMultipleTimes)
     // First reading will be skipped
     sut->sensorUpdated(*sensorMocks.front(), 0ms, 42);
 
-    for (const auto& [index, timestamp, value] : GetParam().updates)
+    for (const auto& [index, value] : GetParam().updates)
     {
-        sut->sensorUpdated(*sensorMocks[index], timestamp, value);
+        sut->sensorUpdated(*sensorMocks[index], 42ms, value);
     }
 }

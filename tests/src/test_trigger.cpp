@@ -21,7 +21,7 @@
 using namespace testing;
 using namespace std::literals::string_literals;
 
-static constexpr size_t expectedTriggerVersion = 1;
+static constexpr size_t expectedTriggerVersion = 2;
 
 class TestTrigger : public Test
 {
@@ -78,9 +78,11 @@ class TestTrigger : public Test
         thresholdMocks =
             ThresholdMock::makeThresholds(params.thresholdParams());
 
+        auto id = std::make_unique<const std::string>(params.id());
+
         return std::make_unique<Trigger>(
             DbusEnvironment::getIoc(), DbusEnvironment::getObjServer(),
-            params.id(), params.name(), params.triggerActions(),
+            std::move(id), params.name(), params.triggerActions(),
             std::make_shared<std::vector<std::string>>(
                 params.reportIds().begin(), params.reportIds().end()),
             std::vector<std::shared_ptr<interfaces::Threshold>>(thresholdMocks),
@@ -224,7 +226,7 @@ TEST_F(TestTrigger, setPropertySensors)
 
 TEST_F(TestTrigger, setPropertyThresholds)
 {
-    EXPECT_CALL(*triggerFactoryMockPtr, updateThresholds(_, _, _, _, _));
+    EXPECT_CALL(*triggerFactoryMockPtr, updateThresholds(_, _, _, _, _, _));
     TriggerThresholdParams newThresholds =
         std::vector<discrete::ThresholdParam>(
             {std::make_tuple("discrete threshold", "OK", 10, "12.3")});
