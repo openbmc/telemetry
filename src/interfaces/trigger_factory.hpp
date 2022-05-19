@@ -40,6 +40,7 @@ class TriggerFactory
 
     virtual void updateThresholds(
         std::vector<std::shared_ptr<interfaces::Threshold>>& currentThresholds,
+        const std::string& triggerId,
         const std::vector<::TriggerAction>& triggerActions,
         const std::shared_ptr<std::vector<std::string>>& reportIds,
         const Sensors& sensors,
