@@ -1086,7 +1086,7 @@ TEST_F(TestReportInitialization, triggerIdsPropertyIsInitialzed)
     for (const auto& triggerId : {"trigger1", "trigger2"})
     {
         messanger.on_receive<messages::CollectTriggerIdReq>(
-            [&](const auto& msg) {
+            [this, triggerId](const auto& msg) {
                 messanger.send(messages::CollectTriggerIdResp{triggerId});
             });
     }
