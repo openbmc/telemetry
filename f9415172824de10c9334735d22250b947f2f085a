@@ -22,6 +22,30 @@
       },
       "revId": "f9415172824de10c9334735d22250b947f2f085a",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c9acc55f_554815ab",
+        "filename": "src/report.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 647,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2022-05-25T08:20:32Z",
+      "side": 1,
+      "message": "My idea was to create complete interface for this function, when it may come handy when we just want to validate report and fail reason is not needed. But you are right, currently there is no such use. Should I remove it?",
+      "parentUuid": "1415142c_547e5738",
+      "range": {
+        "startLine": 647,
+        "startChar": 4,
+        "endLine": 647,
+        "endChar": 40
+      },
+      "revId": "f9415172824de10c9334735d22250b947f2f085a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
