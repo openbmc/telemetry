@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "1415142c_547e5738",
+        "filename": "src/report.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 647,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2022-05-25T07:30:25Z",
+      "side": 1,
+      "message": "Why optional? I can\u0027t find any place where details is not passed.",
+      "range": {
+        "startLine": 647,
+        "startChar": 4,
+        "endLine": 647,
+        "endChar": 40
+      },
+      "revId": "f9415172824de10c9334735d22250b947f2f085a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
