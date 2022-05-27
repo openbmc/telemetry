@@ -2,6 +2,7 @@
 
 #include <sdbusplus/exception.hpp>
 
+#include <algorithm>
 #include <system_error>
 
 namespace utils
