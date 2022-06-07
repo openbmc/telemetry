@@ -43,14 +43,15 @@ DiscreteThreshold::ThresholdDetail&
 std::shared_ptr<DiscreteThreshold::ThresholdDetail>
     DiscreteThreshold::makeDetails(const std::string& sensorName)
 {
-    return std::make_shared<ThresholdDetail>(sensorName, false, ioc);
+    return std::make_shared<ThresholdDetail>(sensorName, ioc);
 }
 
 void DiscreteThreshold::sensorUpdated(interfaces::Sensor& sensor,
                                       Milliseconds timestamp, double value)
 {
     auto& details = getDetails(sensor);
-    auto& [sensorName, dwell, timer] = details;
+    auto& dwell = details.dwell;
+    auto& timer = details.timer;
 
     if (dwell && value != numericThresholdValue)
     {
@@ -66,7 +67,7 @@ void DiscreteThreshold::sensorUpdated(interfaces::Sensor& sensor,
 void DiscreteThreshold::startTimer(DiscreteThreshold::ThresholdDetail& details,
                                    double value)
 {
-    const auto& sensorName = details.sensorName;
+    auto& sensorName = details.getSensorName();
     auto& dwell = details.dwell;
     auto& timer = details.timer;
 

@@ -39,37 +39,60 @@ NumericThreshold::ThresholdDetail&
 std::shared_ptr<NumericThreshold::ThresholdDetail>
     NumericThreshold::makeDetails(const std::string& sensorName)
 {
-    return std::make_shared<ThresholdDetail>(sensorName, thresholdValue, false,
-                                             ioc);
+    return std::make_shared<ThresholdDetail>(sensorName, ioc);
 }
 
 void NumericThreshold::sensorUpdated(interfaces::Sensor& sensor,
                                      Milliseconds timestamp, double value)
 {
     auto& details = getDetails(sensor);
-    auto& [sensorName, prevValue, dwell, timer] = details;
-    bool decreasing = thresholdValue < prevValue && thresholdValue > value;
-    bool increasing = thresholdValue > prevValue && thresholdValue < value;
+    auto& prevValue = details.prevValue;
+    auto& prevDirection = details.prevDirection;
+    auto& dwell = details.dwell;
+    auto& timer = details.timer;
 
-    if (dwell && (increasing || decreasing))
+    if (!prevValue)
+    {
+        prevValue = value;
+        return;
+    }
+
+    bool crossedDecreasing =
+        thresholdValue < prevValue && thresholdValue > value;
+    bool crossedIncreasing =
+        thresholdValue > prevValue && thresholdValue < value;
+
+    if (!crossedDecreasing && !crossedIncreasing && thresholdValue == prevValue)
+    {
+        crossedDecreasing = prevDirection == numeric::Direction::decreasing &&
+                            thresholdValue > value;
+        crossedIncreasing = prevDirection == numeric::Direction::increasing &&
+                            thresholdValue < value;
+    }
+
+    if (dwell && (crossedIncreasing || crossedDecreasing))
     {
         timer.cancel();
         dwell = false;
     }
-    if ((direction == numeric::Direction::decreasing && decreasing) ||
-        (direction == numeric::Direction::increasing && increasing) ||
-        (direction == numeric::Direction::either && (increasing || decreasing)))
+    if ((direction == numeric::Direction::decreasing && crossedDecreasing) ||
+        (direction == numeric::Direction::increasing && crossedIncreasing) ||
+        (direction == numeric::Direction::either &&
+         (crossedIncreasing || crossedDecreasing)))
     {
         startTimer(details, value);
     }
 
+    prevDirection = value > prevValue   ? numeric::Direction::increasing
+                    : value < prevValue ? numeric::Direction::decreasing
+                                        : numeric::Direction::either;
     prevValue = value;
 }
 
 void NumericThreshold::startTimer(NumericThreshold::ThresholdDetail& details,
                                   double value)
 {
-    const auto& sensorName = details.sensorName;
+    auto& sensorName = details.getSensorName();
     auto& dwell = details.dwell;
     auto& timer = details.timer;
 
