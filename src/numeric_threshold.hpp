@@ -50,15 +50,14 @@ class NumericThreshold :
 
     struct ThresholdDetail
     {
-        std::string sensorName;
-        double prevValue;
-        bool dwell;
+        const std::string sensorName;
+        std::optional<double> prevValue = std::nullopt;
+        numeric::Direction prevDirection = numeric::Direction::either;
+        bool dwell = false;
         boost::asio::steady_timer timer;
 
-        ThresholdDetail(const std::string& name, double prevValue, bool dwell,
-                        boost::asio::io_context& ioc) :
-            sensorName(name),
-            prevValue(prevValue), dwell(dwell), timer(ioc)
+        ThresholdDetail(const std::string& name, boost::asio::io_context& ioc) :
+            sensorName(name), timer(ioc)
         {}
         ThresholdDetail(const ThresholdDetail&) = delete;
         ThresholdDetail(ThresholdDetail&&) = delete;

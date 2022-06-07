@@ -51,14 +51,12 @@ class DiscreteThreshold :
 
     struct ThresholdDetail
     {
-        std::string sensorName;
-        bool dwell;
+        const std::string sensorName;
+        bool dwell = false;
         boost::asio::steady_timer timer;
 
-        ThresholdDetail(const std::string& name, bool dwell,
-                        boost::asio::io_context& ioc) :
-            sensorName(name),
-            dwell(dwell), timer(ioc)
+        ThresholdDetail(const std::string& name, boost::asio::io_context& ioc) :
+            sensorName(name), timer(ioc)
         {}
         ThresholdDetail(const ThresholdDetail&) = delete;
         ThresholdDetail(ThresholdDetail&&) = delete;
