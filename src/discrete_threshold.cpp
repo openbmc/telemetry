@@ -43,7 +43,7 @@ DiscreteThreshold::ThresholdDetail&
 std::shared_ptr<DiscreteThreshold::ThresholdDetail>
     DiscreteThreshold::makeDetails(const std::string& sensorName)
 {
-    return std::make_shared<ThresholdDetail>(sensorName, false, ioc);
+    return std::make_shared<ThresholdDetail>(sensorName, ioc);
 }
 
 void DiscreteThreshold::sensorUpdated(interfaces::Sensor& sensor,

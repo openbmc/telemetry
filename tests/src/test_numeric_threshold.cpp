@@ -320,7 +320,43 @@ INSTANTIATE_TEST_SUITE_P(_, TestNumericThresholdNoDwellTime,
                                     .Direction(numeric::Direction::either)
                                     .InitialValues({100.0, 80.0})
                                     .Updates({{0, 85.0}, {1, 91.0}})
-                                    .Expected({{0, 85.0}, {1, 91.0}})));
+                                    .Expected({{0, 85.0}, {1, 91.0}}),
+                                NumericParams()
+                                    .ThresholdValue(30.0)
+                                    .Direction(numeric::Direction::decreasing)
+                                    .InitialValues({40.0})
+                                    .Updates({{0, 30.0}, {0, 20.0}})
+                                    .Expected({{0, 20.0}}),
+                                NumericParams()
+                                    .ThresholdValue(30.0)
+                                    .Direction(numeric::Direction::decreasing)
+                                    .InitialValues({20.0})
+                                    .Updates({{0, 30.0}, {0, 20.0}})
+                                    .Expected({}),
+                                NumericParams()
+                                    .ThresholdValue(30.0)
+                                    .Direction(numeric::Direction::either)
+                                    .InitialValues({20.0})
+                                    .Updates({{0, 30.0}, {0, 20.0}})
+                                    .Expected({}),
+                                NumericParams()
+                                    .ThresholdValue(30.0)
+                                    .Direction(numeric::Direction::increasing)
+                                    .InitialValues({20.0})
+                                    .Updates({{0, 30.0}, {0, 40.0}})
+                                    .Expected({{0, 40.0}}),
+                                NumericParams()
+                                    .ThresholdValue(30.0)
+                                    .Direction(numeric::Direction::increasing)
+                                    .InitialValues({40.0})
+                                    .Updates({{0, 30.0}, {0, 40.0}})
+                                    .Expected({}),
+                                NumericParams()
+                                    .ThresholdValue(30.0)
+                                    .Direction(numeric::Direction::either)
+                                    .InitialValues({40.0})
+                                    .Updates({{0, 30.0}, {0, 40.0}})
+                                    .Expected({})));
 
 TEST_P(TestNumericThresholdNoDwellTime, senorsIsUpdatedMultipleTimes)
 {
