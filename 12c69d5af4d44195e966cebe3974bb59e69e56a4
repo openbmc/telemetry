@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "844204a5_773b929f",
+        "filename": "src/numeric_threshold.hpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2022-06-07T11:36:12Z",
+      "side": 1,
+      "message": "Please move those and any other threshold changes to other commit. This is not related to this change and creates unnecessary merge conflicts. Additionally, changes done here are not consistent, and should be done for discrete threshold too.",
+      "range": {
+        "startLine": 29,
+        "startChar": 4,
+        "endLine": 30,
+        "endChar": 50
+      },
+      "revId": "12c69d5af4d44195e966cebe3974bb59e69e56a4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "9fd7f1fe_fecd4ee1",
+        "filename": "src/report.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 249,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2022-06-07T11:36:12Z",
+      "side": 1,
+      "message": "I would rename this property to IsActive and change type to bool. In my opinion the logic for translating it to \"Enabled\" or \"Disabled\" should be done by the frontend.",
+      "range": {
+        "startLine": 239,
+        "startChar": 0,
+        "endLine": 249,
+        "endChar": 11
+      },
+      "revId": "12c69d5af4d44195e966cebe3974bb59e69e56a4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
