@@ -1,5 +1,7 @@
 #include "utils/generate_id.hpp"
 
+#include "utils/dbus_path_utils.hpp"
+
 #include <sdbusplus/exception.hpp>
 
 #include <algorithm>
@@ -9,9 +11,6 @@ namespace utils
 {
 namespace details
 {
-
-static constexpr std::string_view allowedCharactersInId =
-    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_/";
 
 size_t countDigits(size_t value)
 {
@@ -55,12 +54,13 @@ std::string generateId(std::string_view id, std::string_view name,
 
     std::string strippedId(name);
     strippedId.erase(
-        std::remove_if(strippedId.begin(), strippedId.end(),
-                       [](char c) {
-                           return c == '/' ||
-                                  details::allowedCharactersInId.find(c) ==
-                                      std::string_view::npos;
-                       }),
+        std::remove_if(
+            strippedId.begin(), strippedId.end(),
+            [](char c) {
+                return c == '/' ||
+                       utils::constants::allowedCharactersInPath.find(c) ==
+                           std::string_view::npos;
+            }),
         strippedId.end());
     strippedId = std::string(id) + strippedId;
 
@@ -92,7 +92,7 @@ std::string generateId(std::string_view id, std::string_view name,
 
 void verifyIdCharacters(std::string_view id)
 {
-    if (id.find_first_not_of(details::allowedCharactersInId) !=
+    if (id.find_first_not_of(utils::constants::allowedCharactersInPath) !=
         std::string::npos)
     {
         throw sdbusplus::exception::SdBusError(

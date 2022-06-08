@@ -90,6 +90,7 @@ executable(
         'src/types/readings.cpp',
         'src/types/report_types.cpp',
         'src/utils/conversion_trigger.cpp',
+        'src/utils/dbus_path_utils.cpp',
         'src/utils/generate_id.cpp',
         'src/utils/messanger_service.cpp',
     ],

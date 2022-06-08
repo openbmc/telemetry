@@ -1,5 +1,7 @@
 #include "dbus_sensor_object.hpp"
 
+#include "helpers.hpp"
+
 #include <boost/asio.hpp>
 #include <sdbusplus/asio/connection.hpp>
 #include <sdbusplus/asio/object_server.hpp>

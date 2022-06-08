@@ -13,6 +13,7 @@
 #include "types/report_updates.hpp"
 #include "types/reporting_type.hpp"
 #include "utils/circular_vector.hpp"
+#include "utils/dbus_path_utils.hpp"
 #include "utils/ensure.hpp"
 #include "utils/messanger.hpp"
 
@@ -76,7 +77,7 @@ class Report : public interfaces::Report, public interfaces::MetricListener
 
     std::string getPath() const override
     {
-        return reportDir + id;
+        return path.str;
     }
 
     void metricUpdated() override;
@@ -107,6 +108,7 @@ class Report : public interfaces::Report, public interfaces::MetricListener
     void updateReportingType(ReportingType);
 
     std::string id;
+    const sdbusplus::message::object_path path;
     std::string name;
     ReportingType reportingType;
     Milliseconds interval;
@@ -136,8 +138,6 @@ class Report : public interfaces::Report, public interfaces::MetricListener
   public:
     static constexpr const char* reportIfaceName =
         "xyz.openbmc_project.Telemetry.Report";
-    static constexpr const char* reportDir =
-        "/xyz/openbmc_project/Telemetry/Reports/";
     static constexpr const char* deleteIfaceName =
         "xyz.openbmc_project.Object.Delete";
     static constexpr size_t reportVersion = 6;

@@ -1,4 +1,5 @@
 #include "dbus_environment.hpp"
+#include "helpers.hpp"
 #include "messages/update_report_ind.hpp"
 #include "trigger_actions.hpp"
 #include "utils/messanger.hpp"

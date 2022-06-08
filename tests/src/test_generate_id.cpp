@@ -1,3 +1,4 @@
+#include "helpers.hpp"
 #include "utils/generate_id.hpp"
 
 #include <sdbusplus/exception.hpp>
