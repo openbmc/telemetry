@@ -4,6 +4,7 @@
 #include "interfaces/trigger_factory.hpp"
 #include "interfaces/trigger_manager.hpp"
 #include "trigger.hpp"
+#include "utils/dbus_path_utils.hpp"
 
 #include <sdbusplus/asio/object_server.hpp>
 
@@ -49,7 +50,7 @@ class TriggerManager : public interfaces::TriggerManager
     static constexpr size_t maxTriggers{TELEMETRY_MAX_TRIGGERS};
     static constexpr size_t maxTriggerIdLength{
         TELEMETRY_MAX_DBUS_PATH_LENGTH -
-        std::string_view(Trigger::triggerDir).length()};
+        utils::constants::triggerDirStr.length()};
     static constexpr const char* triggerManagerIfaceName =
         "xyz.openbmc_project.Telemetry.TriggerManager";
     static constexpr const char* triggerManagerPath =

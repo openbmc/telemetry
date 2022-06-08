@@ -7,6 +7,7 @@
 #include "types/trigger_types.hpp"
 #include "utils/contains.hpp"
 #include "utils/conversion_trigger.hpp"
+#include "utils/dbus_path_utils.hpp"
 #include "utils/transform.hpp"
 
 #include <phosphor-logging/log.hpp>
@@ -22,9 +23,9 @@ Trigger::Trigger(
     interfaces::JsonStorage& triggerStorageIn,
     const interfaces::TriggerFactory& triggerFactory, Sensors sensorsIn) :
     id(std::move(idIn)),
+    path(utils::pathAppend(utils::constants::triggerDirPath, *id)),
     name(nameIn), triggerActions(std::move(triggerActionsIn)),
-    path(triggerDir + *id), reportIds(std::move(reportIdsIn)),
-    thresholds(std::move(thresholdsIn)),
+    reportIds(std::move(reportIdsIn)), thresholds(std::move(thresholdsIn)),
     fileName(std::to_string(std::hash<std::string>{}(*id))),
     triggerStorage(triggerStorageIn), sensors(std::move(sensorsIn)),
     messanger(ioc)
@@ -104,17 +105,27 @@ Trigger::Trigger(
                 });
 
             dbusIface.register_property_rw(
-                "ReportNames", *reportIds,
+                "Reports", std::vector<sdbusplus::message::object_path>(),
                 sdbusplus::vtable::property_::emits_change,
                 [this](auto newVal, auto& oldVal) {
-                    TriggerManager::verifyReportIds(newVal);
-                    *reportIds = newVal;
+                    auto newReportIds = utils::transform<std::vector>(
+                        newVal, [](const auto& path) {
+                            return utils::reportPathToId(path);
+                        });
+                    TriggerManager::verifyReportIds(newReportIds);
+                    *reportIds = newReportIds;
                     messanger.send(messages::TriggerPresenceChangedInd{
                         messages::Presence::Exist, *id, *reportIds});
                     oldVal = std::move(newVal);
                     return 1;
                 },
-                [this](const auto&) { return *reportIds; });
+                [this](const auto&) {
+                    return utils::transform<std::vector>(
+                        *reportIds, [](const auto& id) {
+                            return utils::pathAppend(
+                                utils::constants::reportDirPath, id);
+                        });
+                });
 
             dbusIface.register_property_r(
                 "Discrete", isDiscreate(), sdbusplus::vtable::property_::const_,
