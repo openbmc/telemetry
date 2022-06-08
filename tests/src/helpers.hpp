@@ -5,3 +5,4 @@
 #include "helpers/labeled_tuple_helpers.hpp"
 #include "helpers/metric_value_helpers.hpp"
 #include "helpers/types/duration_types_helpers.hpp"
+#include "helpers/types/object_path_helpers.hpp"

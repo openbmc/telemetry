@@ -1,5 +1,7 @@
 #include "dbus_environment.hpp"
 
+#include "helpers.hpp"
+
 #include <future>
 #include <thread>
 

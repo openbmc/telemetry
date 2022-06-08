@@ -10,6 +10,7 @@
 #include "utils/transform.hpp"
 
 using namespace testing;
+using sdbusplus::message::object_path;
 
 class TestTriggerManager : public Test
 {
@@ -33,7 +34,7 @@ class TestTriggerManager : public Test
             utils::transform(
                 params.triggerActions(),
                 [](const auto& action) { return actionToString(action); }),
-            sensorInfos, params.reportIds(),
+            sensorInfos, params.reports(),
             std::visit(utils::FromLabeledThresholdParamConversion(),
                        params.thresholdParams()));
         return DbusEnvironment::waitForFuture(addTriggerPromise.get_future());
@@ -130,6 +131,38 @@ TEST_F(TestTriggerManager, DISABLED_failToAddTriggerWithDuplicatesInReportsIds)
 
     auto [ec, path] = addTrigger(
         TriggerParams().reportIds({"trigger1", "trigger2", "trigger1"}));
+    EXPECT_THAT(ec.value(), Eq(boost::system::errc::invalid_argument));
+    EXPECT_THAT(path, Eq(std::string()));
+}
+
+TEST_F(TestTriggerManager, addTriggerWithProperReportPaths)
+{
+    auto [ec, path] = addTrigger(TriggerParams().reports(
+        {object_path("/xyz/openbmc_project/Telemetry/Reports/MyReport"),
+         object_path(
+             "/xyz/openbmc_project/Telemetry/Reports/MyPrefix/MyReport")}));
+    EXPECT_THAT(ec.value(), Eq(boost::system::errc::success));
+    EXPECT_THAT(path, Eq(triggerMock.getPath()));
+}
+
+TEST_F(TestTriggerManager, DISABLED_failToAddTriggerWithBadReportsPath)
+{
+    triggerFactoryMock.expectMake(std::nullopt, Ref(*sut), Ref(storageMock))
+        .Times(0);
+
+    auto [ec, path] = addTrigger(TriggerParams().reports(
+        {object_path("/xyz/openbmc_project/Telemetry/NotReports/MyReport")}));
+    EXPECT_THAT(ec.value(), Eq(boost::system::errc::invalid_argument));
+    EXPECT_THAT(path, Eq(std::string()));
+}
+
+TEST_F(TestTriggerManager, DISABLED_failToAddTriggerWithTooManyReportPrefixes)
+{
+    triggerFactoryMock.expectMake(std::nullopt, Ref(*sut), Ref(storageMock))
+        .Times(0);
+
+    auto [ec, path] = addTrigger(TriggerParams().reports({object_path(
+        "/xyz/openbmc_project/Telemetry/Reports/P1/P2/MyReport")}));
     EXPECT_THAT(ec.value(), Eq(boost::system::errc::invalid_argument));
     EXPECT_THAT(path, Eq(std::string()));
 }

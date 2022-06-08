@@ -1,16 +1,29 @@
 #pragma once
 
+#include "report.hpp"
 #include "types/duration_types.hpp"
 #include "types/trigger_types.hpp"
+#include "utils/dbus_path_utils.hpp"
+#include "utils/transform.hpp"
 
 #include <sdbusplus/message.hpp>
 
 #include <chrono>
 #include <utility>
 
+using sdbusplus::message::object_path;
+
 class TriggerParams
 {
   public:
+    TriggerParams()
+    {
+        reportsProperty =
+            utils::transform(reportIdsProperty, [](const auto& id) {
+                return utils::pathAppend(utils::constants::reportDirPath, id);
+            });
+    }
+
     TriggerParams& id(std::string val)
     {
         idProperty = std::move(val);
@@ -57,6 +70,21 @@ class TriggerParams
     TriggerParams& reportIds(std::vector<std::string> val)
     {
         reportIdsProperty = std::move(val);
+        reportsProperty = utils::transform<std::vector>(
+            reportIdsProperty, [](const auto& id) {
+                return utils::pathAppend(utils::constants::reportDirPath, id);
+            });
+        return *this;
+    }
+
+    const std::vector<object_path>& reports() const
+    {
+        return reportsProperty;
+    }
+
+    TriggerParams& reports(std::vector<object_path> val)
+    {
+        reportsProperty = std::move(val);
         return *this;
     }
 
@@ -79,7 +107,9 @@ class TriggerParams
     std::vector<LabeledSensorInfo> labeledSensorsProperty = {
         {"service1", "/xyz/openbmc_project/sensors/temperature/BMC_Temp",
          "metadata1"}};
-    std::vector<std::string> reportIdsProperty = {"Report1"};
+    std::vector<std::string> reportIdsProperty = {"Report1",
+                                                  "Prefixed/Report2"};
+    std::vector<object_path> reportsProperty;
     LabeledTriggerThresholdParams labeledThresholdsProperty =
         std::vector<numeric::LabeledThresholdParam>{
             numeric::LabeledThresholdParam{numeric::Type::lowerCritical,

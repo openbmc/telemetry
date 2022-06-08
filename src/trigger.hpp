@@ -10,6 +10,7 @@
 
 #include <boost/asio/io_context.hpp>
 #include <sdbusplus/asio/object_server.hpp>
+#include <sdbusplus/message.hpp>
 
 #include <memory>
 
@@ -39,7 +40,7 @@ class Trigger : public interfaces::Trigger
 
     std::string getPath() const override
     {
-        return path;
+        return path.str;
     }
 
     bool storeConfiguration() const;
@@ -50,9 +51,9 @@ class Trigger : public interfaces::Trigger
     bool isDiscreate() const;
 
     const TriggerId id;
+    const sdbusplus::message::object_path path;
     std::string name;
     std::vector<TriggerAction> triggerActions;
-    std::string path;
     bool persistent = false;
     std::shared_ptr<std::vector<std::string>> reportIds;
     std::unique_ptr<sdbusplus::asio::dbus_interface> deleteIface;
@@ -67,8 +68,6 @@ class Trigger : public interfaces::Trigger
   public:
     static constexpr const char* triggerIfaceName =
         "xyz.openbmc_project.Telemetry.Trigger";
-    static constexpr const char* triggerDir =
-        "/xyz/openbmc_project/Telemetry/Triggers/";
     static constexpr const char* deleteIfaceName =
         "xyz.openbmc_project.Object.Delete";
     static constexpr size_t triggerVersion = 2;
