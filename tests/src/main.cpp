@@ -1,4 +1,5 @@
 #include "dbus_environment.hpp"
+#include "helpers.hpp"
 
 #include <gmock/gmock.h>
 

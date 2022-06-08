@@ -1,3 +1,4 @@
+#include "helpers.hpp"
 #include "utils/ensure.hpp"
 
 #include <gmock/gmock.h>

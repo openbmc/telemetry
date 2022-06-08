@@ -6,6 +6,7 @@
 #include "interfaces/report_manager.hpp"
 #include "interfaces/trigger_manager.hpp"
 #include "report.hpp"
+#include "utils/dbus_path_utils.hpp"
 
 #include <systemd/sd-bus-protocol.h>
 
@@ -65,7 +66,7 @@ class ReportManager : public interfaces::ReportManager
     static constexpr size_t maxNumberMetrics{TELEMETRY_MAX_READING_PARAMS};
     static constexpr size_t maxReportIdLength{
         TELEMETRY_MAX_DBUS_PATH_LENGTH -
-        std::string_view(Report::reportDir).length()};
+        utils::constants::reportDirStr.length()};
     static constexpr Milliseconds minInterval{TELEMETRY_MIN_INTERVAL};
     static constexpr size_t maxAppendLimit{TELEMETRY_MAX_APPEND_LIMIT};
     static constexpr const char* reportManagerIfaceName =
