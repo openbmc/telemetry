@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "93cbe9a5_986788be",
+        "filename": "src/numeric_threshold.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2022-06-08T13:13:04Z",
+      "side": 1,
+      "message": "const member variable is rather discuraged because it prevents compiler optimizations and can be replaced by better encapsulation techniques like private member with getter.",
+      "range": {
+        "startLine": 53,
+        "startChar": 8,
+        "endLine": 53,
+        "endChar": 14
+      },
+      "revId": "e3008894691113a2ca71176ffb183487107dba50",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
