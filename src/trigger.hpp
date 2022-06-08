@@ -10,6 +10,7 @@
 
 #include <boost/asio/io_context.hpp>
 #include <sdbusplus/asio/object_server.hpp>
+#include <sdbusplus/message.hpp>
 
 #include <memory>
 
@@ -72,4 +73,5 @@ class Trigger : public interfaces::Trigger
     static constexpr const char* deleteIfaceName =
         "xyz.openbmc_project.Object.Delete";
     static constexpr size_t triggerVersion = 2;
+    static const sdbusplus::message::object_path triggerDirPath;
 };

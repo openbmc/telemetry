@@ -19,6 +19,7 @@
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/steady_timer.hpp>
 #include <sdbusplus/asio/object_server.hpp>
+#include <sdbusplus/message.hpp>
 
 #include <chrono>
 #include <memory>
@@ -141,4 +142,5 @@ class Report : public interfaces::Report, public interfaces::MetricListener
     static constexpr const char* deleteIfaceName =
         "xyz.openbmc_project.Object.Delete";
     static constexpr size_t reportVersion = 6;
+    static const sdbusplus::message::object_path reportDirPath;
 };

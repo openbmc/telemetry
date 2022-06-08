@@ -9,6 +9,7 @@
 #include "mocks/trigger_factory_mock.hpp"
 #include "mocks/trigger_manager_mock.hpp"
 #include "params/trigger_params.hpp"
+#include "report.hpp"
 #include "trigger.hpp"
 #include "trigger_manager.hpp"
 #include "utils/conversion_trigger.hpp"
@@ -20,6 +21,7 @@
 
 using namespace testing;
 using namespace std::literals::string_literals;
+using sdbusplus::message::object_path;
 
 static constexpr size_t expectedTriggerVersion = 2;
 
@@ -138,8 +140,8 @@ TEST_F(TestTrigger, checkIfPropertiesAreSet)
     EXPECT_THAT((getProperty<SensorsInfo>(sut->getPath(), "Sensors")),
                 Eq(utils::fromLabeledSensorsInfo(triggerParams.sensors())));
     EXPECT_THAT(
-        getProperty<std::vector<std::string>>(sut->getPath(), "ReportNames"),
-        Eq(triggerParams.reportIds()));
+        getProperty<std::vector<object_path>>(sut->getPath(), "Reports"),
+        Eq(triggerParams.reports()));
     EXPECT_THAT(
         getProperty<bool>(sut->getPath(), "Discrete"),
         Eq(isTriggerThresholdDiscrete(triggerParams.thresholdParams())));
@@ -165,47 +167,78 @@ TEST_F(TestTrigger, setPropertyNameToCorrectValue)
 
 TEST_F(TestTrigger, setPropertyReportNames)
 {
-    std::vector<std::string> newNames = {"abc", "one", "two"};
-    EXPECT_THAT(setProperty(sut->getPath(), "ReportNames", newNames),
+    std::vector<object_path> newNames = {
+        Report::reportDirPath / "abc", Report::reportDirPath / "one",
+        Report::reportDirPath / "prefix" / "two"};
+    EXPECT_THAT(setProperty(sut->getPath(), "Reports", newNames),
                 Eq(boost::system::errc::success));
     EXPECT_THAT(
-        getProperty<std::vector<std::string>>(sut->getPath(), "ReportNames"),
+        getProperty<std::vector<object_path>>(sut->getPath(), "Reports"),
         Eq(newNames));
 }
 
 TEST_F(TestTrigger, sendsUpdateWhenReportNamesChanges)
 {
-    const std::vector<std::string> newPropertyVal = {"abc", "one", "two"};
+    std::vector<object_path> newPropertyVal = {Report::reportDirPath / "abc",
+                                               Report::reportDirPath / "one",
+                                               Report::reportDirPath / "two"};
 
     EXPECT_CALL(triggerPresenceChanged,
                 Call(FieldsAre(messages::Presence::Exist, triggerParams.id(),
-                               UnorderedElementsAreArray(newPropertyVal))));
+                               UnorderedElementsAre("abc", "one", "two"))));
 
-    EXPECT_THAT(setProperty(sut->getPath(), "ReportNames", newPropertyVal),
+    EXPECT_THAT(setProperty(sut->getPath(), "Reports", newPropertyVal),
                 Eq(boost::system::errc::success));
 }
 
 TEST_F(TestTrigger, sendsUpdateWhenReportNamesChangesToSameValue)
 {
-    const std::vector<std::string> newPropertyVal = triggerParams.reportIds();
+    const std::vector<object_path> newPropertyVal = triggerParams.reports();
 
     EXPECT_CALL(
         triggerPresenceChanged,
         Call(FieldsAre(messages::Presence::Exist, triggerParams.id(),
                        UnorderedElementsAreArray(triggerParams.reportIds()))));
 
-    EXPECT_THAT(setProperty(sut->getPath(), "ReportNames", newPropertyVal),
+    EXPECT_THAT(setProperty(sut->getPath(), "Reports", newPropertyVal),
                 Eq(boost::system::errc::success));
 }
 
 TEST_F(TestTrigger,
        DISABLED_settingPropertyReportNamesThrowsExceptionWhenDuplicateReportIds)
 {
-    std::vector<std::string> newPropertyVal{"report1", "report2", "report1"};
+    std::vector<object_path> newPropertyVal{Report::reportDirPath / "report1",
+                                            Report::reportDirPath / "report2",
+                                            Report::reportDirPath / "report1"};
 
     EXPECT_CALL(triggerPresenceChanged, Call(_)).Times(0);
 
-    EXPECT_THAT(setProperty(sut->getPath(), "ReportNames", newPropertyVal),
+    EXPECT_THAT(setProperty(sut->getPath(), "Reports", newPropertyVal),
+                Eq(boost::system::errc::invalid_argument));
+}
+
+TEST_F(
+    TestTrigger,
+    DISABLED_settingPropertyReportNamesThrowsExceptionWhenReportWithTooManyPrefixes)
+{
+    std::vector<object_path> newPropertyVal{
+        object_path("/xyz/openbmc_project/Telemetry/Reports/P1/P2/MyReport")};
+
+    EXPECT_CALL(triggerPresenceChanged, Call(_)).Times(0);
+
+    EXPECT_THAT(setProperty(sut->getPath(), "Reports", newPropertyVal),
+                Eq(boost::system::errc::invalid_argument));
+}
+
+TEST_F(TestTrigger,
+       DISABLED_settingPropertyReportNamesThrowsExceptionWhenReportWithBadPath)
+{
+    std::vector<object_path> newPropertyVal{
+        object_path("/xyz/openbmc_project/Telemetry/NotReports/MyReport")};
+
+    EXPECT_CALL(triggerPresenceChanged, Call(_)).Times(0);
+
+    EXPECT_THAT(setProperty(sut->getPath(), "Reports", newPropertyVal),
                 Eq(boost::system::errc::invalid_argument));
 }
 
@@ -218,8 +251,8 @@ TEST_F(TestTrigger, setPropertySensors)
             std::dynamic_pointer_cast<NiceMock<ThresholdMock>>(threshold);
         EXPECT_CALL(*thresholdMockPtr, updateSensors(_));
     }
-    SensorsInfo newSensors({std::make_pair(
-        sdbusplus::message::object_path("/abc/def"), "metadata")});
+    SensorsInfo newSensors(
+        {std::make_pair(object_path("/abc/def"), "metadata")});
     EXPECT_THAT(setProperty(sut->getPath(), "Sensors", newSensors),
                 Eq(boost::system::errc::success));
 }

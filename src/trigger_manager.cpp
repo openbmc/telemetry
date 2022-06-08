@@ -1,5 +1,6 @@
 #include "trigger_manager.hpp"
 
+#include "report.hpp"
 #include "trigger.hpp"
 #include "types/trigger_types.hpp"
 #include "utils/conversion_trigger.hpp"
@@ -23,12 +24,13 @@ TriggerManager::TriggerManager(
         triggerManagerPath, triggerManagerIfaceName, [this](auto& iface) {
             iface.register_method(
                 "AddTrigger",
-                [this](boost::asio::yield_context& yield, const std::string& id,
-                       const std::string& name,
-                       const std::vector<std::string>& triggerActions,
-                       const SensorsInfo& sensors,
-                       const std::vector<std::string>& reportIds,
-                       const TriggerThresholdParamsExt& thresholds) {
+                [this](
+                    boost::asio::yield_context& yield, const std::string& id,
+                    const std::string& name,
+                    const std::vector<std::string>& triggerActions,
+                    const SensorsInfo& sensors,
+                    const std::vector<sdbusplus::message::object_path>& reports,
+                    const TriggerThresholdParamsExt& thresholds) {
                     LabeledTriggerThresholdParams
                         labeledTriggerThresholdParams = std::visit(
                             utils::ToLabeledThresholdParamConversion(),
@@ -36,6 +38,10 @@ TriggerManager::TriggerManager(
 
                     std::vector<LabeledSensorInfo> labeledSensorsInfo =
                         triggerFactory->getLabeledSensorsInfo(yield, sensors);
+
+                    auto reportIds = utils::transform<std::vector>(
+                        reports,
+                        [](const auto& item) { return reportPathToId(item); });
 
                     return addTrigger(id, name, triggerActions,
                                       labeledSensorsInfo, reportIds,
@@ -63,6 +69,22 @@ void TriggerManager::verifyReportIds(
             static_cast<int>(std::errc::invalid_argument),
             "Duplicate element in ReportIds");
     }
+}
+
+std::string
+    TriggerManager::reportPathToId(const sdbusplus::message::object_path& path)
+{
+    const sdbusplus::message::object_path& parent = path.parent_path();
+    if (parent == Report::reportDirPath)
+    {
+        return path.filename();
+    }
+    if (parent.parent_path() == Report::reportDirPath)
+    {
+        return parent.filename() + "/" + path.filename();
+    }
+    throw sdbusplus::exception::SdBusError(
+        static_cast<int>(std::errc::invalid_argument), "Invalid path prefix");
 }
 
 void TriggerManager::verifyAddTrigger(

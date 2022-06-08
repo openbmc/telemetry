@@ -4,9 +4,11 @@
 #include "messages/trigger_presence_changed_ind.hpp"
 #include "messages/update_report_ind.hpp"
 #include "report_manager.hpp"
+#include "trigger.hpp"
 #include "utils/clock.hpp"
 #include "utils/contains.hpp"
 #include "utils/ensure.hpp"
+#include "utils/path_append.hpp"
 #include "utils/transform.hpp"
 
 #include <phosphor-logging/log.hpp>
@@ -110,7 +112,7 @@ Report::Report(boost::asio::io_context& ioc,
 
             if (triggerIds.size() != oldSize)
             {
-                reportIface->signal_property("TriggerIds");
+                reportIface->signal_property("Triggers");
             }
         });
 
@@ -367,10 +369,13 @@ std::unique_ptr<sdbusplus::asio::dbus_interface>
         },
         [this](const auto&) { return utils::enumToString(reportUpdates); });
     dbusIface->register_property_r(
-        "TriggerIds", std::vector<std::string>{},
+        "Triggers", std::vector<sdbusplus::message::object_path>{},
         sdbusplus::vtable::property_::emits_change, [this](const auto&) {
-            return std::vector<std::string>(triggerIds.begin(),
-                                            triggerIds.end());
+            return utils::transform<std::vector>(
+                triggerIds, [](const auto& triggerId) {
+                    return utils::pathAppend(Trigger::triggerDirPath,
+                                             triggerId);
+                });
         });
     dbusIface->register_method("Update", [this] {
         if (reportingType == ReportingType::onRequest)
@@ -615,3 +620,6 @@ void Report::updateReportingType(ReportingType newReportingType)
             break;
     }
 }
+
+const sdbusplus::message::object_path Report::reportDirPath =
+    sdbusplus::message::object_path(Report::reportDir).parent_path();

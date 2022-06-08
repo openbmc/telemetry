@@ -26,6 +26,8 @@ class TriggerManager : public interfaces::TriggerManager
     void removeTrigger(const interfaces::Trigger* trigger) override;
 
     static void verifyReportIds(const std::vector<std::string>& newReportIds);
+    static std::string
+        reportPathToId(const sdbusplus::message::object_path& path);
 
   private:
     std::unique_ptr<interfaces::TriggerFactory> triggerFactory;

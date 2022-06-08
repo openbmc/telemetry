@@ -11,6 +11,7 @@
 #include "params/report_params.hpp"
 #include "report.hpp"
 #include "report_manager.hpp"
+#include "trigger.hpp"
 #include "utils/clock.hpp"
 #include "utils/contains.hpp"
 #include "utils/conv_container.hpp"
@@ -23,6 +24,7 @@
 using namespace testing;
 using namespace std::literals::string_literals;
 using namespace std::chrono_literals;
+using sdbusplus::message::object_path;
 namespace tstring = utils::tstring;
 
 constexpr Milliseconds systemTimestamp = 55ms;
@@ -208,8 +210,8 @@ TEST_F(TestReport, verifyIfPropertiesHaveValidValue)
     EXPECT_THAT(getProperty<std::string>(sut->getPath(), "Name"),
                 Eq(defaultParams().reportName()));
     EXPECT_THAT(
-        getProperty<std::vector<std::string>>(sut->getPath(), "TriggerIds"),
-        Eq(std::vector<std::string>()));
+        getProperty<std::vector<object_path>>(sut->getPath(), "Triggers"),
+        Eq(std::vector<object_path>()));
 }
 
 TEST_F(TestReport, readingsAreInitialyEmpty)
@@ -461,8 +463,9 @@ TEST_F(TestReport, updatesTriggerIdWhenTriggerIsAdded)
         {"someOtherReport", defaultParams().reportId()}});
 
     EXPECT_THAT(
-        getProperty<std::vector<std::string>>(sut->getPath(), "TriggerIds"),
-        UnorderedElementsAre("trigger1", "trigger3"));
+        getProperty<std::vector<object_path>>(sut->getPath(), "Triggers"),
+        UnorderedElementsAre(Trigger::triggerDirPath / "trigger1",
+                             Trigger::triggerDirPath / "trigger3"));
 }
 
 TEST_F(TestReport, updatesTriggerIdWhenTriggerIsRemoved)
@@ -484,8 +487,8 @@ TEST_F(TestReport, updatesTriggerIdWhenTriggerIsRemoved)
         messages::Presence::Removed, "trigger1", {defaultParams().reportId()}});
 
     EXPECT_THAT(
-        getProperty<std::vector<std::string>>(sut->getPath(), "TriggerIds"),
-        UnorderedElementsAre("trigger3"));
+        getProperty<std::vector<object_path>>(sut->getPath(), "Triggers"),
+        UnorderedElementsAre(Trigger::triggerDirPath / "trigger3"));
 }
 
 TEST_F(TestReport, updatesTriggerIdWhenTriggerIsModified)
@@ -507,8 +510,9 @@ TEST_F(TestReport, updatesTriggerIdWhenTriggerIsModified)
         messages::Presence::Exist, "trigger3", {defaultParams().reportId()}});
 
     EXPECT_THAT(
-        getProperty<std::vector<std::string>>(sut->getPath(), "TriggerIds"),
-        UnorderedElementsAre("trigger1", "trigger3"));
+        getProperty<std::vector<object_path>>(sut->getPath(), "Triggers"),
+        UnorderedElementsAre(Trigger::triggerDirPath / "trigger1",
+                             Trigger::triggerDirPath / "trigger3"));
 }
 
 class TestReportStore :
@@ -1094,8 +1098,9 @@ TEST_F(TestReportInitialization, triggerIdsPropertyIsInitialzed)
     sut = makeReport(ReportParams());
 
     EXPECT_THAT(
-        getProperty<std::vector<std::string>>(sut->getPath(), "TriggerIds"),
-        UnorderedElementsAre("trigger1", "trigger2"));
+        getProperty<std::vector<object_path>>(sut->getPath(), "Triggers"),
+        UnorderedElementsAre(Trigger::triggerDirPath / "trigger1",
+                             Trigger::triggerDirPath / "trigger2"));
 }
 
 TEST_F(TestReportInitialization,

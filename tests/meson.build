@@ -43,6 +43,7 @@ test(
             'src/test_metric.cpp',
             'src/test_numeric_threshold.cpp',
             'src/test_on_change_threshold.cpp',
+            'src/test_path_append.cpp',
             'src/test_persistent_json_storage.cpp',
             'src/test_report.cpp',
             'src/test_report_manager.cpp',

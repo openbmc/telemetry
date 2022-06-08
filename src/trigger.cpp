@@ -2,11 +2,13 @@
 
 #include "messages/collect_trigger_id.hpp"
 #include "messages/trigger_presence_changed_ind.hpp"
+#include "report.hpp"
 #include "trigger_manager.hpp"
 #include "types/report_types.hpp"
 #include "types/trigger_types.hpp"
 #include "utils/contains.hpp"
 #include "utils/conversion_trigger.hpp"
+#include "utils/path_append.hpp"
 #include "utils/transform.hpp"
 
 #include <phosphor-logging/log.hpp>
@@ -104,17 +106,26 @@ Trigger::Trigger(
                 });
 
             dbusIface.register_property_rw(
-                "ReportNames", *reportIds,
+                "Reports", std::vector<sdbusplus::message::object_path>(),
                 sdbusplus::vtable::property_::emits_change,
                 [this](auto newVal, auto& oldVal) {
-                    TriggerManager::verifyReportIds(newVal);
-                    *reportIds = newVal;
+                    auto newReportIds = utils::transform<std::vector>(
+                        newVal, [](const auto& path) {
+                            return TriggerManager::reportPathToId(path);
+                        });
+                    TriggerManager::verifyReportIds(newReportIds);
+                    *reportIds = newReportIds;
                     messanger.send(messages::TriggerPresenceChangedInd{
                         messages::Presence::Exist, *id, *reportIds});
                     oldVal = std::move(newVal);
                     return 1;
                 },
-                [this](const auto&) { return *reportIds; });
+                [this](const auto&) {
+                    return utils::transform<std::vector>(
+                        *reportIds, [](const auto& id) {
+                            return utils::pathAppend(Report::reportDirPath, id);
+                        });
+                });
 
             dbusIface.register_property_r(
                 "Discrete", isDiscreate(), sdbusplus::vtable::property_::const_,
@@ -212,3 +223,6 @@ bool Trigger::isDiscreate() const
            utils::isFirstElementOfType<discrete::LabeledThresholdParam>(
                labeledThresholds);
 }
+
+const sdbusplus::message::object_path Trigger::triggerDirPath =
+    sdbusplus::message::object_path(Trigger::triggerDir).parent_path();
