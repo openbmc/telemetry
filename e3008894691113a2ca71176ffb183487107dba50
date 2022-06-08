@@ -22,6 +22,30 @@
       },
       "revId": "e3008894691113a2ca71176ffb183487107dba50",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "167051cd_85d55564",
+        "filename": "src/numeric_threshold.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2022-06-08T13:17:25Z",
+      "side": 1,
+      "message": "As an alternative you can delete copy/move constructor and operator\u003d then there will be no reason to avoid this const.",
+      "parentUuid": "93cbe9a5_986788be",
+      "range": {
+        "startLine": 53,
+        "startChar": 8,
+        "endLine": 53,
+        "endChar": 14
+      },
+      "revId": "e3008894691113a2ca71176ffb183487107dba50",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
