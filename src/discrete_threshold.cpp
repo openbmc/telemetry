@@ -26,18 +26,18 @@ DiscreteThreshold::DiscreteThreshold(
 
 void DiscreteThreshold::initialize()
 {
-    ThresholdOperations().initialize(this);
+    ThresholdOperations::initialize(this);
 }
 
 void DiscreteThreshold::updateSensors(Sensors newSensors)
 {
-    ThresholdOperations().updateSensors(this, std::move(newSensors));
+    ThresholdOperations::updateSensors(this, std::move(newSensors));
 }
 
 DiscreteThreshold::ThresholdDetail&
     DiscreteThreshold::getDetails(const interfaces::Sensor& sensor)
 {
-    return ThresholdOperations().getDetails(this, sensor);
+    return ThresholdOperations::getDetails(this, sensor);
 }
 
 std::shared_ptr<DiscreteThreshold::ThresholdDetail>
