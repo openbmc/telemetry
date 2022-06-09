@@ -60,6 +60,8 @@ class DiscreteThreshold :
             sensorName(name),
             dwell(dwell), timer(ioc)
         {}
+        ThresholdDetail(const ThresholdDetail&) = delete;
+        ThresholdDetail(ThresholdDetail&&) = delete;
     };
     using SensorDetails =
         std::unordered_map<std::shared_ptr<interfaces::Sensor>,
