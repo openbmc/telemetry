@@ -24,6 +24,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "c7a44ece_226ca63a",
+        "filename": "src/numeric_threshold.hpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2022-06-09T11:22:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "844204a5_773b929f",
+      "range": {
+        "startLine": 29,
+        "startChar": 4,
+        "endLine": 30,
+        "endChar": 50
+      },
+      "revId": "12c69d5af4d44195e966cebe3974bb59e69e56a4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "9fd7f1fe_fecd4ee1",
@@ -37,6 +61,30 @@
       "writtenOn": "2022-06-07T11:36:12Z",
       "side": 1,
       "message": "I would rename this property to IsActive and change type to bool. In my opinion the logic for translating it to \"Enabled\" or \"Disabled\" should be done by the frontend.",
+      "range": {
+        "startLine": 239,
+        "startChar": 0,
+        "endLine": 249,
+        "endChar": 11
+      },
+      "revId": "12c69d5af4d44195e966cebe3974bb59e69e56a4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "3bd7bc37_323673e6",
+        "filename": "src/report.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 249,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2022-06-09T11:22:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9fd7f1fe_fecd4ee1",
       "range": {
         "startLine": 239,
         "startChar": 0,
