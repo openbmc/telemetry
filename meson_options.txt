@@ -1,11 +1,11 @@
 option('buildtest', type: 'boolean', value: true, description: 'Build tests')
-option('max-reports', type: 'integer', min: 1, value: 10,
+option('max-reports', type: 'integer', min: 0, value: 10,
        description: 'Max number of Reports')
-option('max-reading-parameters', type: 'integer', min: 1, value: 200,
+option('max-reading-parameters', type: 'integer', min: 0, value: 200,
        description: 'Max number of metric properties in single report')
 option('min-interval', type: 'integer', min: 1, value: 1000,
        description: 'Minimal value of interval in milliseconds')
-option('max-triggers', type: 'integer', min: 1, value: 10,
+option('max-triggers', type: 'integer', min: 0, value: 10,
        description: 'Max number of Triggers')
 option('max-dbus-path-length', type: 'integer', min: 1, value: 4095,
        description: 'Max length of dbus object path')
