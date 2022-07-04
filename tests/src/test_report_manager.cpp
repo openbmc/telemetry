@@ -12,10 +12,14 @@
 #include "utils/string_utils.hpp"
 #include "utils/transform.hpp"
 #include "utils/tstring.hpp"
+#include "utils/variant_utils.hpp"
 
 using namespace testing;
 using namespace std::string_literals;
 using namespace std::chrono_literals;
+
+using AddReportFutureVersionVariantForSet =
+    utils::WithoutMonostate<AddReportFutureVersionVariant>;
 
 class TestReportManager : public Test
 {
@@ -53,10 +57,10 @@ class TestReportManager : public Test
         DbusEnvironment::synchronizeIoc();
     }
 
-    template <class... Args>
-    requires(sizeof...(Args) > 1)
-        std::pair<boost::system::error_code, std::string> addReport(
-            Args&&... args)
+    std::pair<boost::system::error_code, std::string>
+        addReport(const std::vector<
+                  std::pair<std::string, AddReportFutureVersionVariantForSet>>&
+                      properties)
     {
         std::promise<std::pair<boost::system::error_code, std::string>>
             addReportPromise;
@@ -67,22 +71,32 @@ class TestReportManager : public Test
             },
             DbusEnvironment::serviceName(), ReportManager::reportManagerPath,
             ReportManager::reportManagerIfaceName, "AddReportFutureVersion",
-            std::forward<Args>(args)...);
+            properties);
         return DbusEnvironment::waitForFuture(addReportPromise.get_future());
     }
 
     auto addReport(const ReportParams& params)
     {
-        return addReport(params.reportId(), params.reportName(),
-                         utils::enumToString(params.reportingType()),
-                         utils::enumToString(params.reportUpdates()),
-                         params.appendLimit(),
-                         utils::transform(params.reportActions(),
-                                          [](const auto v) {
-                                              return utils::enumToString(v);
-                                          }),
-                         params.interval().count(),
-                         toReadingParameters(params.metricParameters()));
+        std::vector<std::pair<std::string, AddReportFutureVersionVariantForSet>>
+            properties;
+
+        properties.emplace_back("Id", params.reportId());
+        properties.emplace_back("Name", params.reportName());
+        properties.emplace_back("ReportingType",
+                                utils::enumToString(params.reportingType()));
+        properties.emplace_back("ReportUpdates",
+                                utils::enumToString(params.reportUpdates()));
+        properties.emplace_back("AppendLimit", params.appendLimit());
+        properties.emplace_back(
+            "ReportActions",
+            utils::transform(params.reportActions(), [](const auto v) {
+                return utils::enumToString(v);
+            }));
+        properties.emplace_back("Interval", params.interval().count());
+        properties.emplace_back("MetricParams",
+                                toReadingParameters(params.metricParameters()));
+
+        return addReport(properties);
     }
 
     template <class T>
@@ -120,6 +134,23 @@ TEST_F(TestReportManager, addReport)
         .WillOnce(Return(ByMove(std::move(reportMockPtr))));
 
     auto [ec, path] = addReport(reportParams);
+    EXPECT_THAT(ec.value(), Eq(boost::system::errc::success));
+    EXPECT_THAT(path, Eq(reportMock.getPath()));
+}
+
+TEST_F(TestReportManager, addReportWithOnlyDefaultParams)
+{
+    EXPECT_CALL(reportFactoryMock, convertMetricParams(_, _));
+    EXPECT_CALL(reportFactoryMock,
+                make("Report"s, "Report"s, ReportingType::onRequest,
+                     std::vector<ReportAction>{}, Milliseconds{}, 0,
+                     ReportUpdates::overwrite, _, _,
+                     std::vector<LabeledMetricParameters>{}, true, Readings{}))
+        .WillOnce(Return(ByMove(std::move(reportMockPtr))));
+
+    auto [ec, path] = addReport(
+        std::vector<
+            std::pair<std::string, AddReportFutureVersionVariantForSet>>{});
     EXPECT_THAT(ec.value(), Eq(boost::system::errc::success));
     EXPECT_THAT(path, Eq(reportMock.getPath()));
 }
@@ -350,12 +381,8 @@ TEST_F(TestReportManager, DISABLED_failToAddReportWithInvalidReportingType)
     reportFactoryMock.expectMake(std::nullopt, Ref(*sut), Ref(storageMock))
         .Times(0);
 
-    auto [ec, path] = addReport(
-        reportParams.reportName(), "InvalidReportingType",
-        utils::transform(reportParams.reportActions(),
-                         [](const auto v) { return utils::enumToString(v); }),
-        reportParams.interval().count(),
-        toReadingParameters(reportParams.metricParameters()));
+    auto [ec, path] = addReport({{"Name", reportParams.reportName()},
+                                 {"ReportingType", "InvalidReportingType"}});
 
     EXPECT_THAT(ec.value(), Eq(boost::system::errc::invalid_argument));
     EXPECT_THAT(path, Eq(std::string()));
