@@ -21,6 +21,8 @@
 
 #include <sdbusplus/exception.hpp>
 
+#include <ranges>
+
 using namespace testing;
 using namespace std::literals::string_literals;
 using namespace std::chrono_literals;
@@ -945,11 +947,30 @@ class TestReportWithReportUpdatesAndLimit :
     public TestReport,
     public WithParamInterface<ReportUpdatesReportParams>
 {
+  public:
     void SetUp() override
+    {}
+
+    void changeReport(ReportingType rt, Milliseconds interval)
     {
-        sut = makeReport(ReportParams(GetParam().reportParams)
-                             .reportingType(ReportingType::periodic)
-                             .interval(std::chrono::hours(1000)));
+        setProperty<std::string>(sut->getPath(), "ReportingType",
+                                 utils::enumToString(rt));
+        setProperty<uint64_t>(sut->getPath(), "Interval", interval.count());
+    }
+
+    auto readings()
+    {
+        auto [timestamp, readings] =
+            getProperty<Readings>(sut->getPath(), "Readings");
+        return readings;
+    }
+
+    void updateReportFourTimes()
+    {
+        for (int i = 0; i < 4; i++)
+        {
+            messanger.send(messages::UpdateReportInd{{sut->getId()}});
+        }
     }
 };
 
@@ -1043,22 +1064,57 @@ INSTANTIATE_TEST_SUITE_P(
             std::vector<ReadingData>{
                 {std::make_tuple("a"s, "b"s, 17.1, 114u),
                  std::make_tuple("aa"s, "bb"s, 42.0, 74u)}},
-            true}));
+            true},
+        ReportUpdatesReportParams{
+            defaultParams()
+                .reportUpdates(ReportUpdates::appendStopsWhenFull)
+                .appendLimit(std::numeric_limits<uint64_t>::max()),
+            std::vector<ReadingData>{
+                {std::make_tuple("a"s, "b"s, 17.1, 114u),
+                 std::make_tuple("aa"s, "bb"s, 42.0, 74u)}},
+            false}));
 
 TEST_P(TestReportWithReportUpdatesAndLimit,
        readingsAreUpdatedAfterIntervalExpires)
 {
-    for (int i = 0; i < 4; i++)
-    {
-        messanger.send(messages::UpdateReportInd{{sut->getId()}});
-    }
+    sut = makeReport(ReportParams(GetParam().reportParams)
+                         .reportingType(ReportingType::periodic)
+                         .interval(std::chrono::hours(1000)));
 
-    const auto [timestamp, readings] =
-        getProperty<Readings>(sut->getPath(), "Readings");
-    const auto enabled = getProperty<bool>(sut->getPath(), "Enabled");
+    updateReportFourTimes();
 
-    EXPECT_THAT(readings, ElementsAreArray(GetParam().expectedReadings));
-    EXPECT_EQ(enabled, GetParam().expectedEnabled);
+    EXPECT_THAT(readings(), ElementsAreArray(GetParam().expectedReadings));
+    EXPECT_THAT(getProperty<bool>(sut->getPath(), "Enabled"),
+                Eq(GetParam().expectedEnabled));
+}
+
+TEST_P(TestReportWithReportUpdatesAndLimit,
+       appendLimitIsRespectedAfterChangingToPeriodic)
+{
+    sut = makeReport(ReportParams(GetParam().reportParams)
+                         .reportingType(ReportingType::onRequest)
+                         .interval(std::chrono::hours(0)));
+
+    changeReport(ReportingType::periodic, std::chrono::hours(1000));
+    updateReportFourTimes();
+
+    EXPECT_THAT(readings(), ElementsAreArray(GetParam().expectedReadings));
+    EXPECT_THAT(getProperty<bool>(sut->getPath(), "Enabled"),
+                Eq(GetParam().expectedEnabled));
+}
+
+TEST_P(TestReportWithReportUpdatesAndLimit,
+       appendLimitIsIgnoredAfterChangingToOnRequest)
+{
+    sut = makeReport(ReportParams(GetParam().reportParams)
+                         .reportingType(ReportingType::periodic)
+                         .interval(std::chrono::hours(1000)));
+
+    changeReport(ReportingType::onRequest, Milliseconds{0});
+    updateReportFourTimes();
+
+    EXPECT_THAT(readings(), SizeIs(2u));
+    EXPECT_THAT(getProperty<bool>(sut->getPath(), "Enabled"), Eq(true));
 }
 
 class TestReportInitialization : public TestReport

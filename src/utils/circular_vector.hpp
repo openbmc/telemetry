@@ -53,6 +53,11 @@ class CircularVector
         return vec.end();
     }
 
+    size_t size() const
+    {
+        return maxSize;
+    }
+
   private:
     std::vector<T>& vec;
     size_t maxSize = 0;

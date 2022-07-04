@@ -204,12 +204,11 @@ uint64_t Report::deduceBufferSize(const ReportUpdates reportUpdatesIn,
 
 void Report::setReadingBuffer(const ReportUpdates newReportUpdates)
 {
-    if (reportingType != ReportingType::onRequest &&
-        (reportUpdates == ReportUpdates::overwrite ||
-         newReportUpdates == ReportUpdates::overwrite))
+    const auto newBufferSize =
+        deduceBufferSize(newReportUpdates, reportingType);
+    if (readingsBuffer.size() != newBufferSize)
     {
-        readingsBuffer.clearAndResize(
-            deduceBufferSize(newReportUpdates, reportingType));
+        readingsBuffer.clearAndResize(newBufferSize);
     }
 }
 
