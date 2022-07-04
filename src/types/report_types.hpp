@@ -13,6 +13,7 @@
 #include <string>
 #include <tuple>
 #include <type_traits>
+#include <variant>
 #include <vector>
 
 using ReadingParametersPastVersion =
@@ -29,6 +30,10 @@ using LabeledMetricParameters = utils::LabeledTuple<
     utils::tstring::SensorPath, utils::tstring::OperationType,
     utils::tstring::Id, utils::tstring::CollectionTimeScope,
     utils::tstring::CollectionDuration>;
+
+using AddReportFutureVersionVariant =
+    std::variant<std::monostate, bool, uint64_t, std::string,
+                 std::vector<std::string>, ReadingParameters>;
 
 ReadingParameters
     toReadingParameters(const std::vector<LabeledMetricParameters>& labeled);
