@@ -4,6 +4,7 @@
 #include "utils/conversion.hpp"
 #include "utils/labeled_tuple.hpp"
 #include "utils/tstring.hpp"
+#include "utils/variant_utils.hpp"
 
 #include <string>
 #include <tuple>
@@ -144,8 +145,7 @@ using TriggerThresholdParamsExt =
                  std::vector<discrete::ThresholdParam>>;
 
 using TriggerThresholdParams =
-    std::variant<std::vector<numeric::ThresholdParam>,
-                 std::vector<discrete::ThresholdParam>>;
+    utils::WithoutMonostate<TriggerThresholdParamsExt>;
 
 using LabeledTriggerThresholdParams =
     std::variant<std::vector<numeric::LabeledThresholdParam>,
