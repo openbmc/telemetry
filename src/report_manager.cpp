@@ -8,7 +8,9 @@
 
 #include <phosphor-logging/log.hpp>
 #include <sdbusplus/exception.hpp>
+#include <sdbusplus/unpack_properties.hpp>
 
+#include <optional>
 #include <stdexcept>
 #include <system_error>
 
@@ -102,24 +104,46 @@ ReportManager::ReportManager(
                 "AddReportFutureVersion",
                 [this](
                     boost::asio::yield_context& yield,
-                    const std::string& reportId, const std::string& reportName,
-                    const std::string& reportingType,
-                    const std::string& reportUpdates,
-                    const uint64_t appendLimit,
-                    const std::vector<std::string>& reportActions,
-                    const uint64_t interval, ReadingParameters metricParams) {
-                    constexpr auto enabledDefault = true;
-                    return addReport(yield, reportId, reportName,
-                                     utils::toReportingType(reportingType),
-                                     utils::transform(
-                                         reportActions,
-                                         [](const auto& reportAction) {
-                                             return utils::toReportAction(
-                                                 reportAction);
-                                         }),
-                                     Milliseconds(interval), appendLimit,
-                                     utils::toReportUpdates(reportUpdates),
-                                     std::move(metricParams), enabledDefault)
+                    const std::vector<
+                        std::pair<std::string, AddReportFutureVersionVariant>>&
+                        properties) {
+                    std::optional<std::string> reportId;
+                    std::optional<std::string> reportName;
+                    std::optional<std::string> reportingType;
+                    std::optional<std::vector<std::string>> reportActions;
+                    std::optional<uint64_t> interval;
+                    std::optional<uint64_t> appendLimit;
+                    std::optional<std::string> reportUpdates;
+                    std::optional<ReadingParameters> metricParams;
+                    std::optional<bool> enabled;
+
+                    sdbusplus::unpackProperties(
+                        properties, "Id", reportId, "Name", reportName,
+                        "ReportingType", reportingType, "ReportActions",
+                        reportActions, "Interval", interval, "AppendLimit",
+                        appendLimit, "ReportUpdates", reportUpdates,
+                        "MetricParams", metricParams, "Enabled", enabled);
+
+                    return addReport(
+                               yield, reportId.value_or(""),
+                               reportName.value_or(""),
+                               utils::toReportingType(
+                                   reportingType.value_or(utils::enumToString(
+                                       ReportingType::onRequest))),
+                               utils::transform(
+                                   reportActions.value_or(
+                                       std::vector<std::string>{}),
+                                   [](const auto& reportAction) {
+                                       return utils::toReportAction(
+                                           reportAction);
+                                   }),
+                               Milliseconds(interval.value_or(0)),
+                               appendLimit.value_or(0),
+                               utils::toReportUpdates(
+                                   reportUpdates.value_or(utils::enumToString(
+                                       ReportUpdates::overwrite))),
+                               metricParams.value_or(ReadingParameters{}),
+                               enabled.value_or(true))
                         .getPath();
                 });
         });
