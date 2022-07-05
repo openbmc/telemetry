@@ -30,10 +30,10 @@ class ReportFactory
     virtual std::vector<LabeledMetricParameters>
         convertMetricParams(const ReadingParameters& metricParams) const = 0;
 
-    virtual void
-        updateMetrics(std::vector<std::shared_ptr<interfaces::Metric>>& metrics,
-                      bool enabled,
-                      const ReadingParameters& metricParams) const = 0;
+    virtual void updateMetrics(
+        std::vector<std::shared_ptr<interfaces::Metric>>& metrics, bool enabled,
+        const std::vector<LabeledMetricParameters>& labeledMetricParams)
+        const = 0;
 
     virtual std::unique_ptr<interfaces::Report>
         make(const std::string& id, const std::string& name,

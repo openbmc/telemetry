@@ -56,7 +56,7 @@ class ReportFactoryMock : public interfaces::ReportFactory
 
     MOCK_METHOD(void, updateMetrics,
                 (std::vector<std::shared_ptr<interfaces::Metric>> & metrics,
-                 bool enabled, const ReadingParameters&),
+                 bool enabled, const std::vector<LabeledMetricParameters>&),
                 (const, override));
 
     MOCK_METHOD(std::unique_ptr<interfaces::Report>, make,

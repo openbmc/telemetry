@@ -331,8 +331,12 @@ std::unique_ptr<sdbusplus::asio::dbus_interface>
         "ReadingParametersFutureVersion", readingParameters,
         sdbusplus::vtable::property_::emits_change,
         [this, &reportFactory](auto newVal, auto& oldVal) {
-            reportFactory.updateMetrics(
-                metrics, state.get<ReportFlags::enabled>(), newVal);
+            auto labeledMetricParams =
+                reportFactory.convertMetricParams(newVal);
+            ReportManager::verifyMetricParameters(labeledMetricParams);
+            reportFactory.updateMetrics(metrics,
+                                        state.get<ReportFlags::enabled>(),
+                                        labeledMetricParams);
             readingParameters = toReadingParameters(
                 utils::transform(metrics, [](const auto& metric) {
                     return metric->dumpConfiguration();

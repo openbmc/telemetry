@@ -27,6 +27,8 @@ class TriggerManager : public interfaces::TriggerManager
     void removeTrigger(const interfaces::Trigger* trigger) override;
 
     static void verifyReportIds(const std::vector<std::string>& newReportIds);
+    static void verifyThresholdParams(
+        const LabeledTriggerThresholdParams& thresholdParams);
 
   private:
     std::unique_ptr<interfaces::TriggerFactory> triggerFactory;
@@ -34,9 +36,9 @@ class TriggerManager : public interfaces::TriggerManager
     std::unique_ptr<sdbusplus::asio::dbus_interface> managerIface;
     std::vector<std::unique_ptr<interfaces::Trigger>> triggers;
 
-    void verifyAddTrigger(const std::string& triggerId,
-                          const std::string& triggerName,
-                          const std::vector<std::string>& newReportIds) const;
+    void verifyAddTrigger(
+        const std::vector<std::string>& reportIds,
+        const LabeledTriggerThresholdParams& thresholdParams) const;
 
     interfaces::Trigger&
         addTrigger(const std::string& triggerId, const std::string& triggerName,
@@ -48,9 +50,6 @@ class TriggerManager : public interfaces::TriggerManager
 
   public:
     static constexpr size_t maxTriggers{TELEMETRY_MAX_TRIGGERS};
-    static constexpr size_t maxTriggerIdLength{
-        TELEMETRY_MAX_DBUS_PATH_LENGTH -
-        utils::constants::triggerDirStr.length()};
     static constexpr const char* triggerManagerIfaceName =
         "xyz.openbmc_project.Telemetry.TriggerManager";
     static constexpr const char* triggerManagerPath =

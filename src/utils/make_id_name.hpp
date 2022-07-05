@@ -7,8 +7,7 @@
 namespace utils
 {
 
-void verifyIdCharacters(std::string_view id);
-std::pair<std::string, std::string> generateId(
+std::pair<std::string, std::string> makeIdName(
     std::string_view id, std::string_view name, std::string_view defaultName,
     const std::vector<std::string>& conflictIds, const size_t maxLength);
 

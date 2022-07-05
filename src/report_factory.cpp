@@ -49,9 +49,8 @@ std::unique_ptr<interfaces::Report> ReportFactory::make(
 
 void ReportFactory::updateMetrics(
     std::vector<std::shared_ptr<interfaces::Metric>>& metrics, bool enabled,
-    const ReadingParameters& metricParams) const
+    const std::vector<LabeledMetricParameters>& labeledMetricParams) const
 {
-    auto labeledMetricParams = convertMetricParams(metricParams);
     std::vector<std::shared_ptr<interfaces::Metric>> oldMetrics = metrics;
     std::vector<std::shared_ptr<interfaces::Metric>> newMetrics;
 

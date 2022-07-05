@@ -6,6 +6,7 @@
 #include "sensor_cache.hpp"
 #include "trigger_factory.hpp"
 #include "trigger_manager.hpp"
+#include "utils/dbus_path_utils.hpp"
 
 #include <sdbusplus/asio/connection.hpp>
 #include <sdbusplus/asio/object_server.hpp>

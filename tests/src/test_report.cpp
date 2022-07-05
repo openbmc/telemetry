@@ -277,6 +277,29 @@ TEST_F(TestReport, setReadingParametersWithNewParams)
                 Eq(newParams));
 }
 
+TEST_F(TestReport, setReadingParametersWithTooLongMetricId)
+{
+    const ReadingParameters currentValue =
+        toReadingParameters(defaultParams().metricParameters());
+
+    ReadingParameters newParams = toReadingParameters(
+        std::vector<LabeledMetricParameters>{{LabeledMetricParameters{
+            {LabeledSensorInfo{"Service",
+                               "/xyz/openbmc_project/sensors/power/psu",
+                               "NewMetadata123"}},
+            OperationType::avg,
+            std::string(utils::constants::maxIdNameLength + 1, 'z'),
+            CollectionTimeScope::startup,
+            CollectionDuration(250ms)}}});
+
+    changeProperty<ReadingParameters>(
+        sut->getPath(), "ReadingParametersFutureVersion",
+        {.valueBefore = Eq(currentValue),
+         .newValue = newParams,
+         .ec = Eq(boost::system::errc::invalid_argument),
+         .valueAfter = Eq(currentValue)});
+}
+
 TEST_F(TestReport, setReportingTypeWithValidNewType)
 {
     changeProperty<std::string>(
