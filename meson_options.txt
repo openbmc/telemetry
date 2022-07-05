@@ -7,7 +7,11 @@ option('min-interval', type: 'integer', min: 1, value: 1000,
        description: 'Minimal value of interval in milliseconds')
 option('max-triggers', type: 'integer', min: 0, value: 10,
        description: 'Max number of Triggers')
-option('max-dbus-path-length', type: 'integer', min: 1, value: 4095,
+option('max-dbus-path-length', type: 'integer', min: 256, value: 4095,
        description: 'Max length of dbus object path')
 option('max-append-limit', type: 'integer', min: 0, value: 256,
        description: 'Max AppendLimit value')
+option('max-id-name-length', type: 'integer', min: 32, value: 256,
+       description: 'Max length of any "id" or "name" type field.')
+option('max-prefix-length', type: 'integer', min: 32, value: 256,
+       description: 'Max length of dbus prefix for any object.')

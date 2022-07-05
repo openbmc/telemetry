@@ -24,10 +24,10 @@ class ReportFactory : public interfaces::ReportFactory
     std::vector<LabeledMetricParameters> convertMetricParams(
         const ReadingParameters& metricParams) const override;
 
-    void
-        updateMetrics(std::vector<std::shared_ptr<interfaces::Metric>>& metrics,
-                      bool enabled,
-                      const ReadingParameters& metricParams) const override;
+    void updateMetrics(
+        std::vector<std::shared_ptr<interfaces::Metric>>& metrics, bool enabled,
+        const std::vector<LabeledMetricParameters>& labeledMetricParams)
+        const override;
 
     std::unique_ptr<interfaces::Report>
         make(const std::string& reportId, const std::string& name,

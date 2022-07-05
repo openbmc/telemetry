@@ -4,8 +4,9 @@
 #include "types/trigger_types.hpp"
 #include "utils/conversion_trigger.hpp"
 #include "utils/dbus_path_utils.hpp"
-#include "utils/generate_id.hpp"
+#include "utils/make_id_name.hpp"
 #include "utils/transform.hpp"
+#include "utils/tstring.hpp"
 
 #include <phosphor-logging/log.hpp>
 
@@ -72,9 +73,32 @@ void TriggerManager::verifyReportIds(
     }
 }
 
+void TriggerManager::verifyThresholdParams(
+    const LabeledTriggerThresholdParams& thresholdParams)
+{
+    namespace ts = utils::tstring;
+
+    if (auto discreteParams =
+            std::get_if<std::vector<discrete::LabeledThresholdParam>>(
+                &thresholdParams);
+        discreteParams != nullptr)
+    {
+        for (auto discreteParam : *discreteParams)
+        {
+            if (discreteParam.at_label<ts::UserId>().length() >
+                utils::constants::maxIdNameLength)
+            {
+                throw sdbusplus::exception::SdBusError(
+                    static_cast<int>(std::errc::invalid_argument),
+                    "UserId too long");
+            }
+        }
+    }
+}
+
 void TriggerManager::verifyAddTrigger(
-    const std::string& triggerId, const std::string& triggerName,
-    const std::vector<std::string>& newReportIds) const
+    const std::vector<std::string>& reportIds,
+    const LabeledTriggerThresholdParams& thresholdParams) const
 {
     if (triggers.size() >= maxTriggers)
     {
@@ -83,18 +107,8 @@ void TriggerManager::verifyAddTrigger(
             "Reached maximal trigger count");
     }
 
-    utils::verifyIdCharacters(triggerId);
-
-    for (const auto& trigger : triggers)
-    {
-        if (trigger->getId() == triggerId)
-        {
-            throw sdbusplus::exception::SdBusError(
-                static_cast<int>(std::errc::file_exists), "Duplicate trigger");
-        }
-    }
-
-    verifyReportIds(newReportIds);
+    verifyReportIds(reportIds);
+    verifyThresholdParams(thresholdParams);
 }
 
 interfaces::Trigger& TriggerManager::addTrigger(
@@ -107,11 +121,10 @@ interfaces::Trigger& TriggerManager::addTrigger(
     const auto existingTriggerIds = utils::transform(
         triggers, [](const auto& trigger) { return trigger->getId(); });
 
-    auto [id, name] =
-        utils::generateId(triggerIdIn, triggerNameIn, triggerNameDefault,
-                          existingTriggerIds, maxTriggerIdLength);
+    auto [id, name] = utils::makeIdName(triggerIdIn, triggerNameIn,
+                                        triggerNameDefault, existingTriggerIds);
 
-    verifyAddTrigger(id, name, reportIds);
+    verifyAddTrigger(reportIds, labeledThresholdParams);
 
     triggers.emplace_back(triggerFactory->make(
         id, name, triggerActions, reportIds, *this, *triggerStorage,

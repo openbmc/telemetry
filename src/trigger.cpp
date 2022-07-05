@@ -75,6 +75,7 @@ Trigger::Trigger(
                 [this, &triggerFactory](auto newVal, auto& oldVal) {
                     auto newThresholdParams = std::visit(
                         utils::ToLabeledThresholdParamConversion(), newVal);
+                    TriggerManager::verifyThresholdParams(newThresholdParams);
                     triggerFactory.updateThresholds(
                         thresholds, *id, triggerActions, reportIds, sensors,
                         newThresholdParams);
@@ -134,6 +135,12 @@ Trigger::Trigger(
             dbusIface.register_property_rw(
                 "Name", name, sdbusplus::vtable::property_::emits_change,
                 [this](auto newVal, auto& oldVal) {
+                    if (newVal.length() > utils::constants::maxIdNameLength)
+                    {
+                        throw sdbusplus::exception::SdBusError(
+                            static_cast<int>(std::errc::invalid_argument),
+                            "Name is too long");
+                    }
                     name = oldVal = newVal;
                     return 1;
                 },

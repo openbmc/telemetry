@@ -24,9 +24,9 @@ class TriggerParams
             });
     }
 
-    TriggerParams& id(std::string val)
+    TriggerParams& id(std::string_view val)
     {
-        idProperty = std::move(val);
+        idProperty = val;
         return *this;
     }
 
@@ -35,9 +35,9 @@ class TriggerParams
         return idProperty;
     }
 
-    TriggerParams& name(std::string val)
+    TriggerParams& name(std::string_view val)
     {
-        nameProperty = std::move(val);
+        nameProperty = val;
         return *this;
     }
 

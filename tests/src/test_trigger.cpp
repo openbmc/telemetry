@@ -12,7 +12,9 @@
 #include "trigger.hpp"
 #include "trigger_manager.hpp"
 #include "utils/conversion_trigger.hpp"
+#include "utils/dbus_path_utils.hpp"
 #include "utils/messanger.hpp"
+#include "utils/string_utils.hpp"
 #include "utils/transform.hpp"
 #include "utils/tstring.hpp"
 
@@ -111,6 +113,26 @@ class TestTrigger : public Test
     {
         return DbusEnvironment::setProperty<T>(path, Trigger::triggerIfaceName,
                                                property, newValue);
+    }
+
+    template <class T>
+    struct ChangePropertyParams
+    {
+        Matcher<T> valueBefore = _;
+        T newValue;
+        Matcher<boost::system::error_code> ec =
+            Eq(boost::system::errc::success);
+        Matcher<T> valueAfter = Eq(newValue);
+    };
+
+    template <class T>
+    static void changeProperty(const std::string& path,
+                               const std::string& property,
+                               ChangePropertyParams<T> p)
+    {
+        ASSERT_THAT(getProperty<T>(path, property), p.valueBefore);
+        ASSERT_THAT(setProperty<T>(path, property, p.newValue), p.ec);
+        EXPECT_THAT(getProperty<T>(path, property), p.valueAfter);
     }
 
     boost::system::error_code deleteTrigger(const std::string& path)
@@ -233,6 +255,34 @@ TEST_F(
                 Eq(boost::system::errc::invalid_argument));
 }
 
+TEST_F(
+    TestTrigger,
+    DISABLED_settingPropertyReportNamesThrowsExceptionWhenReportWithTooLongPrefix)
+{
+    std::vector<object_path> newPropertyVal{
+        object_path("/xyz/openbmc_project/Telemetry/Reports/" +
+                    utils::string_utils::getTooLongPrefix() + "/MyReport")};
+
+    EXPECT_CALL(triggerPresenceChanged, Call(_)).Times(0);
+
+    EXPECT_THAT(setProperty(sut->getPath(), "Reports", newPropertyVal),
+                Eq(boost::system::errc::invalid_argument));
+}
+
+TEST_F(
+    TestTrigger,
+    DISABLED_settingPropertyReportNamesThrowsExceptionWhenReportWithTooLongId)
+{
+    std::vector<object_path> newPropertyVal{
+        object_path("/xyz/openbmc_project/Telemetry/Reports/Prefix/" +
+                    utils::string_utils::getTooLongId())};
+
+    EXPECT_CALL(triggerPresenceChanged, Call(_)).Times(0);
+
+    EXPECT_THAT(setProperty(sut->getPath(), "Reports", newPropertyVal),
+                Eq(boost::system::errc::invalid_argument));
+}
+
 TEST_F(TestTrigger,
        DISABLED_settingPropertyReportNamesThrowsExceptionWhenReportWithBadPath)
 {
@@ -268,6 +318,36 @@ TEST_F(TestTrigger, setPropertyThresholds)
             {std::make_tuple("discrete threshold", "OK", 10, "12.3")});
     EXPECT_THAT(setProperty(sut->getPath(), "Thresholds", newThresholds),
                 Eq(boost::system::errc::success));
+}
+
+TEST_F(TestTrigger, setThresholdParamsWithTooLongDiscreteName)
+{
+    const TriggerThresholdParams currentValue =
+        std::visit(utils::FromLabeledThresholdParamConversion(),
+                   triggerParams.thresholdParams());
+
+    TriggerThresholdParams newThresholds =
+        std::vector<discrete::ThresholdParam>({std::make_tuple(
+            utils::string_utils::getTooLongName(), "OK", 10, "12.3")});
+
+    changeProperty<TriggerThresholdParams>(
+        sut->getPath(), "Thresholds",
+        {.valueBefore = Eq(currentValue),
+         .newValue = newThresholds,
+         .ec = Eq(boost::system::errc::invalid_argument),
+         .valueAfter = Eq(currentValue)});
+}
+
+TEST_F(TestTrigger, setNameTooLong)
+{
+    std::string currentValue = TriggerParams().name();
+
+    changeProperty<std::string>(
+        sut->getPath(), "Name",
+        {.valueBefore = Eq(currentValue),
+         .newValue = utils::string_utils::getTooLongName(),
+         .ec = Eq(boost::system::errc::invalid_argument),
+         .valueAfter = Eq(currentValue)});
 }
 
 TEST_F(TestTrigger, checkIfNumericCoversionsAreGood)

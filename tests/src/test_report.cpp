@@ -16,6 +16,7 @@
 #include "utils/conv_container.hpp"
 #include "utils/dbus_path_utils.hpp"
 #include "utils/messanger.hpp"
+#include "utils/string_utils.hpp"
 #include "utils/transform.hpp"
 #include "utils/tstring.hpp"
 
@@ -275,6 +276,29 @@ TEST_F(TestReport, setReadingParametersWithNewParams)
     EXPECT_THAT(getProperty<ReadingParameters>(
                     sut->getPath(), "ReadingParametersFutureVersion"),
                 Eq(newParams));
+}
+
+TEST_F(TestReport, setReadingParametersWithTooLongMetricId)
+{
+    const ReadingParameters currentValue =
+        toReadingParameters(defaultParams().metricParameters());
+
+    ReadingParameters newParams = toReadingParameters(
+        std::vector<LabeledMetricParameters>{{LabeledMetricParameters{
+            {LabeledSensorInfo{"Service",
+                               "/xyz/openbmc_project/sensors/power/psu",
+                               "NewMetadata123"}},
+            OperationType::avg,
+            utils::string_utils::getTooLongId(),
+            CollectionTimeScope::startup,
+            CollectionDuration(250ms)}}});
+
+    changeProperty<ReadingParameters>(
+        sut->getPath(), "ReadingParametersFutureVersion",
+        {.valueBefore = Eq(currentValue),
+         .newValue = newParams,
+         .ec = Eq(boost::system::errc::invalid_argument),
+         .valueAfter = Eq(currentValue)});
 }
 
 TEST_F(TestReport, setReportingTypeWithValidNewType)

@@ -9,9 +9,9 @@
 class ReportParams final
 {
   public:
-    ReportParams& reportId(std::string val)
+    ReportParams& reportId(std::string_view val)
     {
-        reportIdProperty = std::move(val);
+        reportIdProperty = val;
         return *this;
     }
 
@@ -20,9 +20,9 @@ class ReportParams final
         return reportIdProperty;
     }
 
-    ReportParams& reportName(std::string val)
+    ReportParams& reportName(std::string_view val)
     {
-        reportNameProperty = std::move(val);
+        reportNameProperty = val;
         return *this;
     }
 

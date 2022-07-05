@@ -3,7 +3,8 @@
 #include "report.hpp"
 #include "types/report_types.hpp"
 #include "utils/conversion.hpp"
-#include "utils/generate_id.hpp"
+#include "utils/dbus_path_utils.hpp"
+#include "utils/make_id_name.hpp"
 #include "utils/transform.hpp"
 
 #include <phosphor-logging/log.hpp>
@@ -45,10 +46,6 @@ ReportManager::ReportManager(
             dbusIface.register_property_r(
                 "MaxReports", size_t{}, sdbusplus::vtable::property_::const_,
                 [](const auto&) { return maxReports; });
-            dbusIface.register_property_r(
-                "MaxReportIdLength", size_t{},
-                sdbusplus::vtable::property_::const_,
-                [](const auto&) { return maxReportIdLength; });
             dbusIface.register_property_r(
                 "MinInterval", uint64_t{}, sdbusplus::vtable::property_::const_,
                 [](const auto&) -> uint64_t { return minInterval.count(); });
@@ -133,12 +130,31 @@ void ReportManager::removeReport(const interfaces::Report* report)
         reports.end());
 }
 
+void ReportManager::verifyMetricParameters(
+    const std::vector<LabeledMetricParameters>& readingParams)
+{
+    namespace ts = utils::tstring;
+
+    for (auto readingParam : readingParams)
+    {
+        if (readingParam.at_label<ts::Id>().length() >
+            utils::constants::maxIdNameLength)
+        {
+            throw sdbusplus::exception::SdBusError(
+                static_cast<int>(std::errc::invalid_argument),
+                "MetricId too long");
+        }
+    }
+}
+
 void ReportManager::verifyAddReport(
     const std::string& reportId, const std::string& reportName,
     const ReportingType reportingType, Milliseconds interval,
     const ReportUpdates reportUpdates, const uint64_t appendLimit,
     const std::vector<LabeledMetricParameters>& readingParams)
 {
+    namespace ts = utils::tstring;
+
     if (reports.size() >= maxReports)
     {
         throw sdbusplus::exception::SdBusError(
@@ -178,10 +194,10 @@ void ReportManager::verifyAddReport(
             "Too many reading parameters");
     }
 
+    verifyMetricParameters(readingParams);
+
     try
     {
-        namespace ts = utils::tstring;
-
         for (const LabeledMetricParameters& item : readingParams)
         {
             utils::toOperationType(
@@ -221,8 +237,8 @@ interfaces::Report& ReportManager::addReport(
     const auto existingReportIds = utils::transform(
         reports, [](const auto& report) { return report->getId(); });
 
-    auto [id, name] = utils::generateId(reportId, reportName, reportNameDefault,
-                                        existingReportIds, maxReportIdLength);
+    auto [id, name] = utils::makeIdName(reportId, reportName, reportNameDefault,
+                                        existingReportIds);
 
     verifyAddReport(id, name, reportingType, interval, reportUpdates,
                     appendLimit, labeledMetricParams);
