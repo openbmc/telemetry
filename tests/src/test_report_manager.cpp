@@ -9,6 +9,7 @@
 #include "report_manager.hpp"
 #include "utils/conversion.hpp"
 #include "utils/transform.hpp"
+#include "utils/tstring.hpp"
 
 using namespace testing;
 using namespace std::string_literals;
@@ -162,7 +163,7 @@ TEST_F(TestReportManager, nameIsUsedToGenerateIdWhenIdIsNamespace)
 
 TEST_F(TestReportManager, addReportWithMaxLengthId)
 {
-    std::string reportId(ReportManager::maxReportIdLength, 'z');
+    std::string reportId(utils::constants::maxIdNameLength, 'z');
     reportParams.reportId(reportId);
     reportFactoryMock.expectMake(reportParams, Ref(*sut), Ref(storageMock));
 
@@ -172,13 +173,147 @@ TEST_F(TestReportManager, addReportWithMaxLengthId)
     EXPECT_THAT(path, Eq("/"s + reportId));
 }
 
-TEST_F(TestReportManager, DISABLED_failToAddReportWithTooLongName)
+TEST_F(TestReportManager, addReportWithMaxLengthPrefix)
+{
+    std::string reportId =
+        std::string(utils::constants::maxPrefixLength, 'z') + "/MyId";
+    reportParams.reportId(reportId);
+    reportFactoryMock.expectMake(reportParams, Ref(*sut), Ref(storageMock));
+
+    auto [ec, path] = addReport(reportParams);
+
+    EXPECT_THAT(ec.value(), Eq(boost::system::errc::success));
+    EXPECT_THAT(path, Eq("/"s + reportId));
+}
+
+TEST_F(TestReportManager, addReportWithMaxLengthName)
+{
+    reportParams.reportName(
+        std::string(utils::constants::maxIdNameLength, 'z'));
+    reportFactoryMock.expectMake(reportParams, Ref(*sut), Ref(storageMock));
+
+    auto [ec, path] = addReport(reportParams);
+
+    EXPECT_THAT(ec.value(), Eq(boost::system::errc::success));
+    EXPECT_THAT(path, Eq("/"s + reportParams.reportId()));
+}
+
+TEST_F(TestReportManager, addReportWithMaxLengthMetricId)
+{
+    namespace ts = utils::tstring;
+    std::vector<LabeledMetricParameters> newMetricParams{
+        {LabeledMetricParameters{
+            {LabeledSensorInfo{"Service",
+                               "/xyz/openbmc_project/sensors/power/p1",
+                               "metadata1"}},
+            OperationType::avg,
+            std::string(utils::constants::maxIdNameLength, 'z'),
+            CollectionTimeScope::point,
+            CollectionDuration(Milliseconds(0u))}}};
+
+    reportParams.metricParameters(newMetricParams);
+    reportFactoryMock.expectMake(reportParams, Ref(*sut), Ref(storageMock));
+
+    auto [ec, path] = addReport(reportParams);
+
+    EXPECT_THAT(ec.value(), Eq(boost::system::errc::success));
+    EXPECT_THAT(path, Eq("/"s + reportParams.reportId()));
+}
+
+TEST_F(TestReportManager, DISABLED_failToAddReportWithTooLongFullId)
 {
     reportFactoryMock.expectMake(std::nullopt, Ref(*sut), Ref(storageMock))
         .Times(0);
 
     reportParams.reportId(
-        std::string(ReportManager::maxReportIdLength + 1, 'z'));
+        std::string(utils::constants::maxReportFullIdLength + 1, 'z'));
+
+    auto [ec, path] = addReport(reportParams);
+
+    EXPECT_THAT(ec.value(), Eq(boost::system::errc::invalid_argument));
+    EXPECT_THAT(path, Eq(std::string()));
+}
+
+TEST_F(TestReportManager, DISABLED_failToAddReportWithTooLongId)
+{
+    reportFactoryMock.expectMake(std::nullopt, Ref(*sut), Ref(storageMock))
+        .Times(0);
+
+    reportParams.reportId(
+        std::string(utils::constants::maxIdNameLength + 1, 'z'));
+
+    auto [ec, path] = addReport(reportParams);
+
+    EXPECT_THAT(ec.value(), Eq(boost::system::errc::invalid_argument));
+    EXPECT_THAT(path, Eq(std::string()));
+}
+
+TEST_F(TestReportManager, DISABLED_failToAddReportWithTooLongPrefix)
+{
+    reportFactoryMock.expectMake(std::nullopt, Ref(*sut), Ref(storageMock))
+        .Times(0);
+
+    reportParams.reportId(
+        std::string(utils::constants::maxPrefixLength + 1, 'z') + "/MyId");
+
+    auto [ec, path] = addReport(reportParams);
+
+    EXPECT_THAT(ec.value(), Eq(boost::system::errc::invalid_argument));
+    EXPECT_THAT(path, Eq(std::string()));
+}
+
+TEST_F(TestReportManager, DISABLED_failToAddReportWithTooManyPrefixes)
+{
+    reportFactoryMock.expectMake(std::nullopt, Ref(*sut), Ref(storageMock))
+        .Times(0);
+
+    std::string reportId;
+    for (size_t i = 0; i < utils::constants::maxPrefixesInId + 1; i++)
+    {
+        reportId += "prefix/";
+    }
+    reportId += "MyId";
+
+    reportParams.reportId(reportId);
+
+    auto [ec, path] = addReport(reportParams);
+
+    EXPECT_THAT(ec.value(), Eq(boost::system::errc::invalid_argument));
+    EXPECT_THAT(path, Eq(std::string()));
+}
+
+TEST_F(TestReportManager, DISABLED_failToAddReportWithTooLongName)
+{
+    reportFactoryMock.expectMake(std::nullopt, Ref(*sut), Ref(storageMock))
+        .Times(0);
+
+    reportParams.reportName(
+        std::string(utils::constants::maxIdNameLength + 1, 'z'));
+
+    auto [ec, path] = addReport(reportParams);
+
+    EXPECT_THAT(ec.value(), Eq(boost::system::errc::invalid_argument));
+    EXPECT_THAT(path, Eq(std::string()));
+}
+
+TEST_F(TestReportManager, DISABLED_failToAddReportWithTooLongMetricId)
+{
+    namespace ts = utils::tstring;
+
+    std::vector<LabeledMetricParameters> newMetricParams{
+        {LabeledMetricParameters{
+            {LabeledSensorInfo{"Service",
+                               "/xyz/openbmc_project/sensors/power/p1",
+                               "metadata1"}},
+            OperationType::avg,
+            std::string(utils::constants::maxIdNameLength + 1, 'z'),
+            CollectionTimeScope::point,
+            CollectionDuration(Milliseconds(0u))}}};
+
+    reportFactoryMock.expectMake(std::nullopt, Ref(*sut), Ref(storageMock))
+        .Times(0);
+
+    reportParams.metricParameters(newMetricParams);
 
     auto [ec, path] = addReport(reportParams);
 

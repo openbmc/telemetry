@@ -113,6 +113,26 @@ class TestTrigger : public Test
                                                property, newValue);
     }
 
+    template <class T>
+    struct ChangePropertyParams
+    {
+        Matcher<T> valueBefore = _;
+        T newValue;
+        Matcher<boost::system::error_code> ec =
+            Eq(boost::system::errc::success);
+        Matcher<T> valueAfter = Eq(newValue);
+    };
+
+    template <class T>
+    static void changeProperty(const std::string& path,
+                               const std::string& property,
+                               ChangePropertyParams<T> p)
+    {
+        ASSERT_THAT(getProperty<T>(path, property), p.valueBefore);
+        ASSERT_THAT(setProperty<T>(path, property, p.newValue), p.ec);
+        EXPECT_THAT(getProperty<T>(path, property), p.valueAfter);
+    }
+
     boost::system::error_code deleteTrigger(const std::string& path)
     {
         std::promise<boost::system::error_code> methodPromise;
@@ -233,6 +253,34 @@ TEST_F(
                 Eq(boost::system::errc::invalid_argument));
 }
 
+TEST_F(
+    TestTrigger,
+    DISABLED_settingPropertyReportNamesThrowsExceptionWhenReportWithTooLongPrefix)
+{
+    std::vector<object_path> newPropertyVal{object_path(
+        "/xyz/openbmc_project/Telemetry/Reports/" +
+        std::string(utils::constants::maxPrefixLength + 1, 'z') + "/MyReport")};
+
+    EXPECT_CALL(triggerPresenceChanged, Call(_)).Times(0);
+
+    EXPECT_THAT(setProperty(sut->getPath(), "Reports", newPropertyVal),
+                Eq(boost::system::errc::invalid_argument));
+}
+
+TEST_F(
+    TestTrigger,
+    DISABLED_settingPropertyReportNamesThrowsExceptionWhenReportWithTooLongId)
+{
+    std::vector<object_path> newPropertyVal{
+        object_path("/xyz/openbmc_project/Telemetry/Reports/Prefix/" +
+                    std::string(utils::constants::maxIdNameLength + 1, 'z'))};
+
+    EXPECT_CALL(triggerPresenceChanged, Call(_)).Times(0);
+
+    EXPECT_THAT(setProperty(sut->getPath(), "Reports", newPropertyVal),
+                Eq(boost::system::errc::invalid_argument));
+}
+
 TEST_F(TestTrigger,
        DISABLED_settingPropertyReportNamesThrowsExceptionWhenReportWithBadPath)
 {
@@ -268,6 +316,25 @@ TEST_F(TestTrigger, setPropertyThresholds)
             {std::make_tuple("discrete threshold", "OK", 10, "12.3")});
     EXPECT_THAT(setProperty(sut->getPath(), "Thresholds", newThresholds),
                 Eq(boost::system::errc::success));
+}
+
+TEST_F(TestTrigger, setThresholdParamsWithTooLongDiscreteName)
+{
+    const TriggerThresholdParams currentValue =
+        std::visit(utils::FromLabeledThresholdParamConversion(),
+                   triggerParams.thresholdParams());
+
+    TriggerThresholdParams newThresholds =
+        std::vector<discrete::ThresholdParam>({std::make_tuple(
+            std::string(utils::constants::maxIdNameLength + 1, 'z'), "OK", 10,
+            "12.3")});
+
+    changeProperty<TriggerThresholdParams>(
+        sut->getPath(), "Thresholds",
+        {.valueBefore = Eq(currentValue),
+         .newValue = newThresholds,
+         .ec = Eq(boost::system::errc::invalid_argument),
+         .valueAfter = Eq(currentValue)});
 }
 
 TEST_F(TestTrigger, checkIfNumericCoversionsAreGood)

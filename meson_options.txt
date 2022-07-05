@@ -11,3 +11,7 @@ option('max-dbus-path-length', type: 'integer', min: 1, value: 4095,
        description: 'Max length of dbus object path')
 option('max-append-limit', type: 'integer', min: 0, value: 256,
        description: 'Max AppendLimit value')
+option('max-id-name-length', type: 'integer', min: 0, value: 256,
+       description: 'Max length of any "id" or "name" type field. Set 0 to disable limit.')
+option('max-prefix-length', type: 'integer', min: 0, value: 256,
+       description: 'Max length of dbus prefix for any object. Set 0 to disable limit.')

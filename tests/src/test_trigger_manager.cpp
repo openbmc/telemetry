@@ -11,10 +11,12 @@
 
 using namespace testing;
 using sdbusplus::message::object_path;
+using namespace std::literals::string_literals;
 
 class TestTriggerManager : public Test
 {
   public:
+    TriggerParams triggerParams;
     std::pair<boost::system::error_code, std::string>
         addTrigger(const TriggerParams& params)
     {
@@ -207,33 +209,159 @@ TEST_F(TestTriggerManager, addTriggerWithoutIdTwice)
 
 TEST_F(TestTriggerManager, addTriggerWithoutIdAndWithLongNameTwice)
 {
-    addTrigger(TriggerParams().id("").name(
-        std::string(2 * TriggerManager::maxTriggerIdLength, 'z')));
+    std::string longName(utils::constants::maxIdNameLength, 'z');
+    addTrigger(TriggerParams().id("").name(longName));
 
-    auto [ec, path] = addTrigger(TriggerParams().id("").name(
-        std::string(2 * TriggerManager::maxTriggerIdLength, 'z')));
+    auto [ec, path] = addTrigger(TriggerParams().id("").name(longName));
     EXPECT_THAT(ec.value(), Eq(boost::system::errc::success));
     EXPECT_THAT(path, Not(Eq("")));
 }
 
 TEST_F(TestTriggerManager, addTriggerWithMaxLengthId)
 {
-    auto triggerId = std::string(TriggerManager::maxTriggerIdLength, 'z');
-    auto triggerParams = TriggerParams().id(triggerId);
-
-    triggerFactoryMock.expectMake(triggerParams, Ref(*sut), Ref(storageMock))
-        .WillOnce(Return(ByMove(std::move(triggerMockPtr))));
+    std::string reportId(utils::constants::maxIdNameLength, 'z');
+    triggerParams.id(reportId);
+    triggerFactoryMock.expectMake(triggerParams, Ref(*sut), Ref(storageMock));
 
     auto [ec, path] = addTrigger(triggerParams);
 
     EXPECT_THAT(ec.value(), Eq(boost::system::errc::success));
-    EXPECT_THAT(path, Eq(triggerMock.getPath()));
+    EXPECT_THAT(path, Eq("/"s + reportId));
+}
+
+TEST_F(TestTriggerManager, addTriggerWithMaxLengthPrefix)
+{
+    std::string reportId =
+        std::string(utils::constants::maxPrefixLength, 'z') + "/MyId";
+    triggerParams.id(reportId);
+    triggerFactoryMock.expectMake(triggerParams, Ref(*sut), Ref(storageMock));
+
+    auto [ec, path] = addTrigger(triggerParams);
+
+    EXPECT_THAT(ec.value(), Eq(boost::system::errc::success));
+    EXPECT_THAT(path, Eq("/"s + reportId));
+}
+
+TEST_F(TestTriggerManager, addTriggerWithMaxLengthName)
+{
+    triggerParams.name(std::string(utils::constants::maxIdNameLength, 'z'));
+    triggerFactoryMock.expectMake(triggerParams, Ref(*sut), Ref(storageMock));
+
+    auto [ec, path] = addTrigger(triggerParams);
+
+    EXPECT_THAT(ec.value(), Eq(boost::system::errc::success));
+    EXPECT_THAT(path, Eq("/"s + triggerParams.id()));
+}
+
+TEST_F(TestTriggerManager, addTriggerWithMaxLengthDiscreteThresholdName)
+{
+    namespace ts = utils::tstring;
+
+    triggerParams =
+        TriggerParams()
+            .id("DiscreteTrigger")
+            .name("My Discrete Trigger")
+            .thresholdParams(std::vector<discrete::LabeledThresholdParam>{
+                discrete::LabeledThresholdParam{
+                    std::string(utils::constants::maxIdNameLength, 'z'),
+                    discrete::Severity::warning, Milliseconds(10).count(),
+                    "15.2"}});
+
+    triggerFactoryMock.expectMake(triggerParams, Ref(*sut), Ref(storageMock));
+
+    auto [ec, path] = addTrigger(triggerParams);
+
+    EXPECT_THAT(ec.value(), Eq(boost::system::errc::success));
+    EXPECT_THAT(path, Eq("/"s + triggerParams.id()));
+}
+
+TEST_F(TestTriggerManager, DISABLED_failToAddTriggerWithTooLongFullId)
+{
+    triggerFactoryMock.expectMake(std::nullopt, Ref(*sut), Ref(storageMock))
+        .Times(0);
+
+    triggerParams.id(
+        std::string(utils::constants::maxReportFullIdLength + 1, 'z'));
+
+    auto [ec, path] = addTrigger(triggerParams);
+
+    EXPECT_THAT(ec.value(), Eq(boost::system::errc::invalid_argument));
+    EXPECT_THAT(path, Eq(std::string()));
 }
 
 TEST_F(TestTriggerManager, DISABLED_failToAddTriggerWithTooLongId)
 {
-    auto triggerId = std::string(TriggerManager::maxTriggerIdLength + 1, 'z');
-    auto triggerParams = TriggerParams().id(triggerId);
+    triggerFactoryMock.expectMake(std::nullopt, Ref(*sut), Ref(storageMock))
+        .Times(0);
+
+    triggerParams.id(std::string(utils::constants::maxIdNameLength + 1, 'z'));
+
+    auto [ec, path] = addTrigger(triggerParams);
+
+    EXPECT_THAT(ec.value(), Eq(boost::system::errc::invalid_argument));
+    EXPECT_THAT(path, Eq(std::string()));
+}
+
+TEST_F(TestTriggerManager, DISABLED_failToAddTriggerWithTooLongPrefix)
+{
+    triggerFactoryMock.expectMake(std::nullopt, Ref(*sut), Ref(storageMock))
+        .Times(0);
+
+    triggerParams.id(std::string(utils::constants::maxPrefixLength + 1, 'z') +
+                     "/MyId");
+
+    auto [ec, path] = addTrigger(triggerParams);
+
+    EXPECT_THAT(ec.value(), Eq(boost::system::errc::invalid_argument));
+    EXPECT_THAT(path, Eq(std::string()));
+}
+
+TEST_F(TestTriggerManager, DISABLED_failToAddTriggerWithTooManyPrefixes)
+{
+    triggerFactoryMock.expectMake(std::nullopt, Ref(*sut), Ref(storageMock))
+        .Times(0);
+
+    std::string reportId;
+    for (size_t i = 0; i < utils::constants::maxPrefixesInId + 1; i++)
+    {
+        reportId += "prefix/";
+    }
+    reportId += "MyId";
+
+    triggerParams.id(reportId);
+
+    auto [ec, path] = addTrigger(triggerParams);
+
+    EXPECT_THAT(ec.value(), Eq(boost::system::errc::invalid_argument));
+    EXPECT_THAT(path, Eq(std::string()));
+}
+
+TEST_F(TestTriggerManager, DISABLED_failToAddTriggerWithTooLongName)
+{
+    triggerFactoryMock.expectMake(std::nullopt, Ref(*sut), Ref(storageMock))
+        .Times(0);
+
+    triggerParams.name(std::string(utils::constants::maxIdNameLength + 1, 'z'));
+
+    auto [ec, path] = addTrigger(triggerParams);
+
+    EXPECT_THAT(ec.value(), Eq(boost::system::errc::invalid_argument));
+    EXPECT_THAT(path, Eq(std::string()));
+}
+
+TEST_F(TestTriggerManager, DISABLED_failToAddTriggerWithTooLongMetricId)
+{
+    namespace ts = utils::tstring;
+
+    triggerParams =
+        TriggerParams()
+            .id("DiscreteTrigger")
+            .name("My Discrete Trigger")
+            .thresholdParams(std::vector<discrete::LabeledThresholdParam>{
+                discrete::LabeledThresholdParam{
+                    std::string(utils::constants::maxIdNameLength + 1, 'z'),
+                    discrete::Severity::warning, Milliseconds(10).count(),
+                    "15.2"}});
 
     triggerFactoryMock.expectMake(std::nullopt, Ref(*sut), Ref(storageMock))
         .Times(0);

@@ -33,6 +33,9 @@ class ReportManager : public interfaces::ReportManager
 
     void removeReport(const interfaces::Report* report) override;
 
+    static void verifyMetricParameters(
+        const std::vector<LabeledMetricParameters>& readingParams);
+
   private:
     std::unique_ptr<interfaces::ReportFactory> reportFactory;
     std::unique_ptr<interfaces::JsonStorage> reportStorage;
@@ -64,9 +67,6 @@ class ReportManager : public interfaces::ReportManager
   public:
     static constexpr size_t maxReports{TELEMETRY_MAX_REPORTS};
     static constexpr size_t maxNumberMetrics{TELEMETRY_MAX_READING_PARAMS};
-    static constexpr size_t maxReportIdLength{
-        TELEMETRY_MAX_DBUS_PATH_LENGTH -
-        utils::constants::reportDirStr.length()};
     static constexpr Milliseconds minInterval{TELEMETRY_MIN_INTERVAL};
     static constexpr size_t maxAppendLimit{TELEMETRY_MAX_APPEND_LIMIT};
     static constexpr const char* reportManagerIfaceName =

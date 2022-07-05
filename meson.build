@@ -64,6 +64,8 @@ add_project_arguments(
         get_option('max-dbus-path-length').to_string(),
     '-DTELEMETRY_MAX_APPEND_LIMIT=' +
         get_option('max-append-limit').to_string(),
+    '-DTELEMETRY_MAX_ID_NAME_LENGTH=' + get_option('max-id-name-length').to_string(),
+    '-DTELEMETRY_MAX_PREFIX_LENGTH=' + get_option('max-prefix-length').to_string(), 
     language: 'cpp'
 )
 
@@ -91,7 +93,7 @@ executable(
         'src/types/report_types.cpp',
         'src/utils/conversion_trigger.cpp',
         'src/utils/dbus_path_utils.cpp',
-        'src/utils/generate_id.cpp',
+        'src/utils/make_id_name.cpp',
         'src/utils/messanger_service.cpp',
     ],
     dependencies: [

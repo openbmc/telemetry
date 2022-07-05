@@ -75,6 +75,7 @@ Trigger::Trigger(
                 [this, &triggerFactory](auto newVal, auto& oldVal) {
                     auto newThresholdParams = std::visit(
                         utils::ToLabeledThresholdParamConversion(), newVal);
+                    TriggerManager::verifyThresholdParams(newThresholdParams);
                     triggerFactory.updateThresholds(
                         thresholds, *id, triggerActions, reportIds, sensors,
                         newThresholdParams);
