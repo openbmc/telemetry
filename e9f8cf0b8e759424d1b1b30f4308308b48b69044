@@ -33,6 +33,29 @@
       "message": "Type in title of commit",
       "revId": "e9f8cf0b8e759424d1b1b30f4308308b48b69044",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "bf8c7424_88d61463",
+        "filename": "src/utils/variant_utils.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2022-07-06T08:21:45Z",
+      "side": 1,
+      "message": "nit: Currently this only applies to UTs, and should be moved to tests, but there is 1 use case in main telemetry code - see trigger_types.hpp (TriggerThresholdParams / TriggerThresholdParamsExt)",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 1,
+        "endChar": 1
+      },
+      "revId": "e9f8cf0b8e759424d1b1b30f4308308b48b69044",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
