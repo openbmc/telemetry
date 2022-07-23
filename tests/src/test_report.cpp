@@ -1069,7 +1069,7 @@ class TestReportInitialization : public TestReport
         initMetricMocks(defaultParams().metricParameters());
     }
 
-    void monitorProc(sdbusplus::message::message& msg)
+    void monitorProc(sdbusplus::message_t& msg)
     {
         std::string iface;
         std::vector<std::pair<std::string, std::variant<Readings>>>

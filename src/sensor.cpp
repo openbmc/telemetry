@@ -136,13 +136,13 @@ void Sensor::makeSignalMonitor()
 
     signalMonitor = std::make_unique<sdbusplus::bus::match_t>(
         *bus, param,
-        [weakSelf = weak_from_this()](sdbusplus::message::message& message) {
+        [weakSelf = weak_from_this()](sdbusplus::message_t& message) {
             signalProc(weakSelf, message);
         });
 }
 
 void Sensor::signalProc(const std::weak_ptr<Sensor>& weakSelf,
-                        sdbusplus::message::message& message)
+                        sdbusplus::message_t& message)
 {
     if (auto self = weakSelf.lock())
     {

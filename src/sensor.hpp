@@ -40,7 +40,7 @@ class Sensor final :
   private:
     static std::optional<double> readValue(const ValueVariant& v);
     static void signalProc(const std::weak_ptr<Sensor>& weakSelf,
-                           sdbusplus::message::message&);
+                           sdbusplus::message_t&);
 
     void async_read();
     void async_read(std::shared_ptr<utils::UniqueCall::Lock>);
