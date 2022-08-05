@@ -108,11 +108,35 @@ executable(
     pie: true,
 )
 
+service_wants = ''
+if get_option('service-wants').length() > 0
+    service_wants = '\nWants=' + ' '.join(get_option('service-wants'))
+endif
+
+service_requires = ''
+if get_option('service-requires').length() > 0
+    service_requires = '\nRequires=' + ' '.join(get_option('service-requires'))
+endif
+
+service_before = ''
+if get_option('service-before').length() > 0
+    service_before = '\nBefore=' + ' '.join(get_option('service-before'))
+endif
+
+service_after = ''
+if get_option('service-after').length() > 0
+    service_after = ' ' + ' '.join(get_option('service-after'))
+endif
+
 configure_file(
     input: 'xyz.openbmc_project.Telemetry.service.in',
     output: 'xyz.openbmc_project.Telemetry.service',
     configuration: {
         'bindir': get_option('prefix') / get_option('bindir'),
+        'wants': service_wants,
+        'requires': service_requires,
+        'before': service_before,
+        'after': service_after
     },
     install: true,
     install_dir: systemd.get_variable(pkgconfig: 'systemdsystemunitdir'),

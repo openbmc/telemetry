@@ -1,6 +1,6 @@
 [Unit]
-Description=Telemetry
-After=dbus.service
+Description=Telemetry@wants@@requires@@before@
+After=dbus.service@after@
 
 [Service]
 ExecStart=@bindir@/telemetry

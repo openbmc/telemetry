@@ -15,3 +15,7 @@ option('max-id-name-length', type: 'integer', min: 32, value: 256,
        description: 'Max length of any "id" or "name" type field.')
 option('max-prefix-length', type: 'integer', min: 32, value: 256,
        description: 'Max length of dbus prefix for any object.')
+option('service-wants', type: 'array', value: [])
+option('service-requires', type: 'array', value: [])
+option('service-before', type: 'array', value: [])
+option('service-after', type: 'array', value: [])
