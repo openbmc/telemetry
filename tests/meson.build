@@ -40,6 +40,7 @@ test(
             'src/test_detached_timer.cpp',
             'src/test_discrete_threshold.cpp',
             'src/test_ensure.cpp',
+            'src/test_labeled_tuple.cpp',
             'src/test_make_id_name.cpp',
             'src/test_metric.cpp',
             'src/test_numeric_threshold.cpp',
