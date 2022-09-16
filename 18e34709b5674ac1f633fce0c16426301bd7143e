@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "8233b751_cb6c68c9",
+        "filename": "src/utils/labeled_tuple.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 215,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2022-09-16T09:47:03Z",
+      "side": 1,
+      "message": "use fold expression:\n\nbool eq(auto a, auto b) {\n    return a \u003d\u003d b;\n}\n\nbool compare(const auto\u0026 t0, const auto\u0026 t1) {\n  return std::apply([\u0026](auto\u0026\u0026... x) {\n    return std::apply([\u0026](auto\u0026\u0026... y) {\n      return (true \u0026\u0026 ... \u0026\u0026 eq(x, y));\n    }, t1);\n  }, t0);\n}\n\nint main() {\n    auto t0 \u003d std::make_tuple(1,2);\n    auto t1 \u003d std::make_tuple(2,2);\n    std::cout \u003c\u003c std::boolalpha \u003c\u003c compare(t0, t1);\n    return 0;\n}",
+      "range": {
+        "startLine": 214,
+        "startChar": 20,
+        "endLine": 215,
+        "endChar": 27
+      },
+      "revId": "18e34709b5674ac1f633fce0c16426301bd7143e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
