@@ -17,6 +17,12 @@ enum class CollectionTimeScope : uint32_t
 namespace utils
 {
 
+template <>
+struct EnumTraits<CollectionTimeScope>
+{
+    static constexpr auto propertyName = ConstexprString{"CollectionTimeScope"};
+};
+
 constexpr std::array<std::pair<std::string_view, CollectionTimeScope>, 3>
     convDataCollectionTimeScope = {
         {std::make_pair<std::string_view, CollectionTimeScope>(

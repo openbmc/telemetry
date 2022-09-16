@@ -30,7 +30,7 @@ class ScenarioNameProvided : public ScenarioBase
 TEST_F(ScenarioNameProvided, throwsWhenProvidedNameIsTooLong)
 {
     EXPECT_THROW(this->makeIdName("", getTooLongName()),
-                 sdbusplus::exception::SdBusError);
+                 errors::InvalidArgument);
 }
 
 class TestMakeIdNameNameProvided : public ScenarioNameProvided
@@ -95,13 +95,11 @@ TYPED_TEST_SUITE(TestMakeIdName, TestScenarios);
 TYPED_TEST(TestMakeIdName, throwsWhenProvidedIdContainsIncorrectCharacters)
 {
     EXPECT_THROW(this->makeIdName("Id%@%!@%!%()%fooo/Id", "name"),
-                 sdbusplus::exception::SdBusError);
+                 errors::InvalidArgument);
     EXPECT_THROW(this->makeIdName("Id/Id%@%!@%!%()%fooo", "name"),
-                 sdbusplus::exception::SdBusError);
-    EXPECT_THROW(this->makeIdName("/123", "trigger"),
-                 sdbusplus::exception::SdBusError);
-    EXPECT_THROW(this->makeIdName("/123/", "trigger"),
-                 sdbusplus::exception::SdBusError);
+                 errors::InvalidArgument);
+    EXPECT_THROW(this->makeIdName("/123", "trigger"), errors::InvalidArgument);
+    EXPECT_THROW(this->makeIdName("/123/", "trigger"), errors::InvalidArgument);
 }
 
 TYPED_TEST(TestMakeIdName, throwsWhenProvidedIdContainsTooLongSegment)
@@ -109,37 +107,33 @@ TYPED_TEST(TestMakeIdName, throwsWhenProvidedIdContainsTooLongSegment)
     std::string longPrefix = getTooLongPrefix();
     std::string longSuffix = getTooLongId();
     EXPECT_THROW(this->makeIdName(longPrefix + "/", "name"),
-                 sdbusplus::exception::SdBusError);
+                 errors::InvalidArgument);
     EXPECT_THROW(this->makeIdName(longPrefix + "/Id", "name"),
-                 sdbusplus::exception::SdBusError);
+                 errors::InvalidArgument);
     EXPECT_THROW(this->makeIdName(longPrefix + "/" + longSuffix, "name"),
-                 sdbusplus::exception::SdBusError);
+                 errors::InvalidArgument);
     EXPECT_THROW(this->makeIdName("Prefix/" + longSuffix, "name"),
-                 sdbusplus::exception::SdBusError);
-    EXPECT_THROW(this->makeIdName(longSuffix, "name"),
-                 sdbusplus::exception::SdBusError);
+                 errors::InvalidArgument);
+    EXPECT_THROW(this->makeIdName(longSuffix, "name"), errors::InvalidArgument);
 }
 
 TYPED_TEST(TestMakeIdName, throwsWhenProvidedIdOrPrefixTooLong)
 {
     EXPECT_THROW(this->makeIdName(getTooLongId(), "name"),
-                 sdbusplus::exception::SdBusError);
+                 errors::InvalidArgument);
     EXPECT_THROW(this->makeIdName(getTooLongPrefix() + "/Id", "name"),
-                 sdbusplus::exception::SdBusError);
+                 errors::InvalidArgument);
     EXPECT_THROW(this->makeIdName("Prefix/" + getTooLongId(), "trigger"),
-                 sdbusplus::exception::SdBusError);
+                 errors::InvalidArgument);
 }
 
 TYPED_TEST(TestMakeIdName, throwsWhenIdContainsMoreThanOneSlash)
 {
-    EXPECT_THROW(this->makeIdName("/12/", "name"),
-                 sdbusplus::exception::SdBusError);
-    EXPECT_THROW(this->makeIdName("12//", "name"),
-                 sdbusplus::exception::SdBusError);
-    EXPECT_THROW(this->makeIdName("12//123", "name"),
-                 sdbusplus::exception::SdBusError);
+    EXPECT_THROW(this->makeIdName("/12/", "name"), errors::InvalidArgument);
+    EXPECT_THROW(this->makeIdName("12//", "name"), errors::InvalidArgument);
+    EXPECT_THROW(this->makeIdName("12//123", "name"), errors::InvalidArgument);
     EXPECT_THROW(this->makeIdName("12/12/123", "name"),
-                 sdbusplus::exception::SdBusError);
+                 errors::InvalidArgument);
 }
 
 TYPED_TEST(TestMakeIdName, usesNameWhenThereAreConflicts)

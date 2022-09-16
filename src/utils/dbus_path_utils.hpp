@@ -1,5 +1,7 @@
 #pragma once
 
+#include "errors.hpp"
+
 #include <sdbusplus/message.hpp>
 
 #include <algorithm>
@@ -53,9 +55,7 @@ inline void verifyIdCharacters(std::string_view id)
     if (id.find_first_not_of(utils::constants::allowedCharactersInPath) !=
         std::string::npos)
     {
-        throw sdbusplus::exception::SdBusError(
-            static_cast<int>(std::errc::invalid_argument),
-            "Invalid character in id");
+        throw errors::InvalidArgument("Id", "Invalid character.");
     }
 }
 

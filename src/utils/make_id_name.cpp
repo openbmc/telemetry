@@ -93,8 +93,7 @@ std::pair<std::string, std::string>
 {
     if (name.length() > constants::maxIdNameLength)
     {
-        throw sdbusplus::exception::SdBusError(
-            static_cast<int>(std::errc::invalid_argument), "Name too long");
+        throw errors::InvalidArgument("Name", "Too long.");
     }
 
     if (name.empty() && !id.ends_with('/'))

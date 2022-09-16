@@ -51,23 +51,17 @@ void verifyIdPrefixes(std::string_view id)
     {
         if (pos_start == pos_end)
         {
-            throw sdbusplus::exception::SdBusError(
-                static_cast<int>(std::errc::invalid_argument),
-                "Invalid prefixes in id");
+            throw errors::InvalidArgument("Id", "Invalid prefixes in id.");
         }
 
         if (++prefix_cnt > constants::maxPrefixesInId)
         {
-            throw sdbusplus::exception::SdBusError(
-                static_cast<int>(std::errc::invalid_argument),
-                "Too many prefixes");
+            throw errors::InvalidArgument("Id", "Too many prefixes.");
         }
 
         if (pos_end - pos_start > constants::maxPrefixLength)
         {
-            throw sdbusplus::exception::SdBusError(
-                static_cast<int>(std::errc::invalid_argument),
-                "Prefix too long");
+            throw errors::InvalidArgument("Id", "Prefix too long.");
         }
 
         pos_start = pos_end + 1;
@@ -75,8 +69,7 @@ void verifyIdPrefixes(std::string_view id)
 
     if (id.length() - pos_start > constants::maxIdNameLength)
     {
-        throw sdbusplus::exception::SdBusError(
-            static_cast<int>(std::errc::invalid_argument), "Id too long");
+        throw errors::InvalidArgument("Id", "Too long.");
     }
 }
 } // namespace utils
