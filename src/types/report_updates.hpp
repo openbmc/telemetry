@@ -22,12 +22,7 @@ namespace utils
 template <>
 struct EnumTraits<ReportUpdates>
 {
-    [[noreturn]] static void throwConversionError()
-    {
-        throw sdbusplus::exception::SdBusError(
-            static_cast<int>(std::errc::invalid_argument),
-            "Invalid ReportUpdates");
-    }
+    static constexpr auto propertyName = ConstexprString{"ReportUpdates"};
 };
 
 constexpr auto convDataReportUpdates =

@@ -40,9 +40,7 @@ class DataInterval : public CollectionData
     {
         if (duration.t.count() == 0)
         {
-            throw sdbusplus::exception::SdBusError(
-                static_cast<int>(std::errc::invalid_argument),
-                "Invalid CollectionDuration");
+            throw errors::InvalidArgument("CollectionDuration");
         }
     }
 

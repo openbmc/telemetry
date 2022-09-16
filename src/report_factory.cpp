@@ -159,9 +159,7 @@ std::vector<LabeledMetricParameters>
 
         if (sensorParameters.size() != sensorPaths.size())
         {
-            throw sdbusplus::exception::SdBusError(
-                static_cast<int>(std::errc::invalid_argument),
-                "Could not find service for provided sensors");
+            throw errors::InvalidArgument("MetricParams", "Service not found.");
         }
 
         if (operationType.empty())
