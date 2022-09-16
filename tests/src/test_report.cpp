@@ -85,7 +85,8 @@ class TestReport : public Test
 
         std::vector<MetricValue> readings{{MetricValue{"a", "b", 17.1, 114},
                                            MetricValue{"aa", "bb", 42.0, 74}}};
-        readings.resize(metricParameters.size());
+
+        ASSERT_THAT(readings.size(), Ge(metricParameters.size()));
 
         for (size_t i = 0; i < metricParameters.size(); ++i)
         {

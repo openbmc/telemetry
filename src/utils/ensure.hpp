@@ -18,11 +18,7 @@ struct Ensure
     Ensure(F functor) : functor(std::move(functor))
     {}
 
-    Ensure(Ensure&& other) : functor(std::move(other.functor))
-    {
-        other.functor = std::nullopt;
-    }
-
+    Ensure(Ensure&& other) = delete;
     Ensure(const Ensure&) = delete;
 
     ~Ensure()
@@ -38,12 +34,7 @@ struct Ensure
         return *this;
     }
 
-    Ensure& operator=(Ensure&& other)
-    {
-        clear();
-        std::swap(functor, other.functor);
-        return *this;
-    }
+    Ensure& operator=(Ensure&& other) = delete;
 
     Ensure& operator=(std::nullptr_t)
     {
