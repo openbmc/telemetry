@@ -137,9 +137,8 @@ Trigger::Trigger(
                 [this](auto newVal, auto& oldVal) {
                     if (newVal.length() > utils::constants::maxIdNameLength)
                     {
-                        throw sdbusplus::exception::SdBusError(
-                            static_cast<int>(std::errc::invalid_argument),
-                            "Name is too long");
+                        throw errors::InvalidArgument("Name",
+                                                      "Name is too long.");
                     }
                     name = oldVal = newVal;
                     return 1;

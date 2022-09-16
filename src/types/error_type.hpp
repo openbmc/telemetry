@@ -17,6 +17,12 @@ enum class ErrorType : uint32_t
 namespace utils
 {
 
+template <>
+struct EnumTraits<ErrorType>
+{
+    static constexpr auto propertyName = ConstexprString{"ErrorType"};
+};
+
 constexpr auto convDataErrorType =
     std::array{std::make_pair<std::string_view, ErrorType>(
         "PropertyConflict", ErrorType::propertyConflict)};

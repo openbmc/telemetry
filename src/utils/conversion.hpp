@@ -1,5 +1,7 @@
 #pragma once
 
+#include "errors.hpp"
+
 #include <sdbusplus/exception.hpp>
 
 #include <algorithm>
@@ -10,16 +12,32 @@
 namespace utils
 {
 
-template <class T>
-struct EnumTraits
+template <size_t N>
+struct ConstexprString
 {
-    [[noreturn]] static void throwConversionError()
+    constexpr ConstexprString(const char (&data)[N]) : s()
     {
-        throw sdbusplus::exception::SdBusError(
-            static_cast<int>(std::errc::invalid_argument),
-            "Invalid enum value");
+        for (size_t i = 0; i < N; ++i)
+        {
+            s[i] = data[i];
+        }
     }
+
+    constexpr operator std::string_view() const
+    {
+        return {s.data(), s.size()};
+    }
+
+    std::array<char, N> s;
 };
+
+[[noreturn]] inline void throwConversionError(std::string_view propertyName)
+{
+    throw errors::InvalidArgument(propertyName, "Cannot convert.");
+}
+
+template <class T>
+struct EnumTraits;
 
 template <class T, T first, T last>
 inline T toEnum(std::underlying_type_t<T> x)
@@ -27,7 +45,7 @@ inline T toEnum(std::underlying_type_t<T> x)
     if (x < static_cast<std::underlying_type_t<T>>(first) ||
         x > static_cast<std::underlying_type_t<T>>(last))
     {
-        EnumTraits<T>::throwConversionError();
+        throwConversionError(EnumTraits<T>::propertyName);
     }
     return static_cast<T>(x);
 }
@@ -77,7 +95,7 @@ inline T toEnum(const std::array<std::pair<std::string_view, T>, N>& data,
         [&value](const auto& item) { return item.first == value; });
     if (it == std::end(data))
     {
-        EnumTraits<T>::throwConversionError();
+        throwConversionError(EnumTraits<T>::propertyName);
     }
     return it->second;
 }
@@ -92,7 +110,7 @@ inline std::string_view
         [value](const auto& item) { return item.second == value; });
     if (it == std::end(data))
     {
-        EnumTraits<T>::throwConversionError();
+        throwConversionError(EnumTraits<T>::propertyName);
     }
     return it->first;
 }
