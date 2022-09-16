@@ -88,9 +88,7 @@ void TriggerManager::verifyThresholdParams(
             if (discreteParam.at_label<ts::UserId>().length() >
                 utils::constants::maxIdNameLength)
             {
-                throw sdbusplus::exception::SdBusError(
-                    static_cast<int>(std::errc::invalid_argument),
-                    "UserId too long");
+                throw errors::InvalidArgument("Id", "UserId too long.");
             }
         }
     }

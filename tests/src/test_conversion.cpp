@@ -38,6 +38,17 @@ class TestConversion : public Test
              std::make_pair<std::string_view, Enum>("two", Enum::two)}};
 };
 
+namespace utils
+{
+
+template <>
+struct EnumTraits<TestConversion::Enum>
+{
+    static constexpr auto propertyName = ConstexprString{"Enum"};
+};
+
+} // namespace utils
+
 TEST_F(TestConversion, passValueInRangeExpectToGetValidOutput)
 {
     EXPECT_EQ(toEnum(0), Enum::zero);
@@ -46,8 +57,8 @@ TEST_F(TestConversion, passValueInRangeExpectToGetValidOutput)
 
 TEST_F(TestConversion, passInvalidValueExpectToThrowException)
 {
-    EXPECT_THROW(toEnum(-1), sdbusplus::exception::SdBusError);
-    EXPECT_THROW(toEnum(3), sdbusplus::exception::SdBusError);
+    EXPECT_THROW(toEnum(-1), errors::InvalidArgument);
+    EXPECT_THROW(toEnum(3), errors::InvalidArgument);
 }
 
 TEST_F(TestConversion, convertsToUnderlyingType)
@@ -73,11 +84,10 @@ TEST_F(TestConversion, convertsStringToEnum)
 
 TEST_F(TestConversion, enumToStringThrowsWhenUknownEnumPassed)
 {
-    EXPECT_THROW(enumToString(static_cast<Enum>(77)),
-                 sdbusplus::exception::SdBusError);
+    EXPECT_THROW(enumToString(static_cast<Enum>(77)), errors::InvalidArgument);
 }
 
 TEST_F(TestConversion, toEnumThrowsWhenUknownStringPassed)
 {
-    EXPECT_THROW(toEnum("four"), sdbusplus::exception::SdBusError);
+    EXPECT_THROW(toEnum("four"), errors::InvalidArgument);
 }
