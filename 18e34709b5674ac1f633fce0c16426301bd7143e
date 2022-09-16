@@ -22,6 +22,30 @@
       },
       "revId": "18e34709b5674ac1f633fce0c16426301bd7143e",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "76c5f203_91dc5714",
+        "filename": "src/utils/labeled_tuple.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 215,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2022-09-16T14:32:58Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8233b751_cb6c68c9",
+      "range": {
+        "startLine": 214,
+        "startChar": 20,
+        "endLine": 215,
+        "endChar": 27
+      },
+      "revId": "18e34709b5674ac1f633fce0c16426301bd7143e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
