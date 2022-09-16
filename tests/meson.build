@@ -25,6 +25,7 @@ test(
             '../src/sensor_cache.cpp',
             '../src/trigger.cpp',
             '../src/trigger_actions.cpp',
+            '../src/errors.cpp',
             '../src/trigger_factory.cpp',
             '../src/trigger_manager.cpp',
             '../src/types/readings.cpp',

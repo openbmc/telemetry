@@ -94,7 +94,7 @@ class TestReportManager : public Test
                 return utils::enumToString(v);
             }));
         properties.emplace_back("Interval", params.interval().count());
-        properties.emplace_back("MetricParams",
+        properties.emplace_back("ReadingParameters",
                                 toReadingParameters(params.metricParameters()));
 
         return addReport(properties);
@@ -157,7 +157,7 @@ TEST_F(TestReportManager, addReportWithOnlyDefaultParams)
     EXPECT_CALL(reportFactoryMock, convertMetricParams(_, _));
     EXPECT_CALL(reportFactoryMock,
                 make("Report"s, "Report"s, ReportingType::onRequest,
-                     std::vector<ReportAction>{}, Milliseconds{}, 0,
+                     std::vector<ReportAction>{}, Milliseconds{}, 256,
                      ReportUpdates::overwrite, _, _,
                      std::vector<LabeledMetricParameters>{}, true, Readings{}))
         .WillOnce(Return(ByMove(std::move(reportMockPtr))));
@@ -432,7 +432,7 @@ TEST_F(TestReportManager,
 
     auto [ec, path] = addReport(reportParams);
 
-    EXPECT_THAT(ec.value(), Eq(boost::system::errc::argument_list_too_long));
+    EXPECT_THAT(ec.value(), Eq(boost::system::errc::invalid_argument));
     EXPECT_THAT(path, Eq(std::string()));
 }
 
@@ -457,7 +457,7 @@ TEST_F(TestReportManager, DISABLED_failToAddReportWithMoreMetricsThanExpected)
 
     auto [ec, path] = addReport(reportParams);
 
-    EXPECT_THAT(ec.value(), Eq(boost::system::errc::argument_list_too_long));
+    EXPECT_THAT(ec.value(), Eq(boost::system::errc::invalid_argument));
     EXPECT_THAT(path, Eq(std::string()));
 }
 

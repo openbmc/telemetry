@@ -63,6 +63,7 @@ executable(
         'src/discrete_threshold.cpp',
         'src/main.cpp',
         'src/metric.cpp',
+        'src/errors.cpp',
         'src/metrics/collection_data.cpp',
         'src/metrics/collection_function.cpp',
         'src/numeric_threshold.cpp',

@@ -1,5 +1,6 @@
 #include "report.hpp"
 
+#include "errors.hpp"
 #include "messages/collect_trigger_id.hpp"
 #include "messages/trigger_presence_changed_ind.hpp"
 #include "messages/update_report_ind.hpp"
@@ -144,7 +145,7 @@ void Report::activate()
 
     if (reportIface)
     {
-        reportIface->signal_property("errors");
+        reportIface->signal_property("ErrorMessages");
     }
 }
 
@@ -160,7 +161,7 @@ void Report::deactivate()
 
     if (reportIface)
     {
-        reportIface->signal_property("Errors");
+        reportIface->signal_property("ErrorMessages");
     }
 }
 
@@ -266,9 +267,7 @@ std::unique_ptr<sdbusplus::asio::dbus_interface>
             if (newValT < ReportManager::minInterval &&
                 newValT != Milliseconds{0})
             {
-                throw sdbusplus::exception::SdBusError(
-                    static_cast<int>(std::errc::invalid_argument),
-                    "Invalid interval");
+                throw errors::InvalidArgument("Interval");
             }
 
             if (newValT != interval)

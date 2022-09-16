@@ -17,6 +17,12 @@ enum class OperationType : uint32_t
 namespace utils
 {
 
+template <>
+struct EnumTraits<OperationType>
+{
+    static constexpr auto propertyName = ConstexprString{"OperationType"};
+};
+
 constexpr std::array<std::pair<std::string_view, OperationType>, 4>
     convDataOperationType = {{std::make_pair<std::string_view, OperationType>(
                                   "Maximum", OperationType::max),
