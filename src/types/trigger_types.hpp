@@ -177,3 +177,32 @@ inline std::string triggerValueToString(TriggerValue val)
         return std::get<std::string>(val);
     }
 }
+
+namespace utils
+{
+
+template <>
+struct EnumTraits<TriggerAction>
+{
+    static constexpr auto propertyName = ConstexprString{"TriggerAction"};
+};
+
+template <>
+struct EnumTraits<discrete::Severity>
+{
+    static constexpr auto propertyName = ConstexprString{"discrete::Severity"};
+};
+
+template <>
+struct EnumTraits<numeric::Type>
+{
+    static constexpr auto propertyName = ConstexprString{"numeric::Type"};
+};
+
+template <>
+struct EnumTraits<numeric::Direction>
+{
+    static constexpr auto propertyName = ConstexprString{"numeric::Direction"};
+};
+
+} // namespace utils

@@ -1,5 +1,6 @@
 #include "report.hpp"
 
+#include "errors.hpp"
 #include "messages/collect_trigger_id.hpp"
 #include "messages/trigger_presence_changed_ind.hpp"
 #include "messages/update_report_ind.hpp"
@@ -254,9 +255,7 @@ std::unique_ptr<sdbusplus::asio::dbus_interface>
             if (newValT < ReportManager::minInterval &&
                 newValT != Milliseconds{0})
             {
-                throw sdbusplus::exception::SdBusError(
-                    static_cast<int>(std::errc::invalid_argument),
-                    "Invalid interval");
+                throw errors::InvalidArgument("Interval");
             }
 
             if (newValT != interval)

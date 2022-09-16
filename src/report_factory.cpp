@@ -118,6 +118,7 @@ std::vector<LabeledMetricParameters> ReportFactory::convertMetricParams(
     {
         return {};
     }
+
     auto tree = utils::getSubTreeSensors(yield, bus);
     return getMetricParamsFromSensorTree(metricParams, tree);
 }
@@ -129,6 +130,7 @@ std::vector<LabeledMetricParameters> ReportFactory::convertMetricParams(
     {
         return {};
     }
+
     auto tree = utils::getSubTreeSensors(bus);
     return getMetricParamsFromSensorTree(metricParams, tree);
 }
@@ -138,52 +140,67 @@ std::vector<LabeledMetricParameters>
         const ReadingParameters& metricParams,
         const std::vector<utils::SensorTree>& tree) const
 {
-    return utils::transform(metricParams, [&tree](const auto& item) {
-        auto [sensorPaths, operationType, id, collectionTimeScope,
-              collectionDuration] = item;
+    try
+    {
+        return utils::transform(metricParams, [&tree](const auto& item) {
+            auto [sensorPaths, operationType, id, collectionTimeScope,
+                  collectionDuration] = item;
 
-        std::vector<LabeledSensorInfo> sensorParameters;
+            std::vector<LabeledSensorInfo> sensorParameters;
 
-        for (const auto& [sensorPath, metadata] : sensorPaths)
-        {
-            auto it = std::find_if(
-                tree.begin(), tree.end(),
-                [path = sensorPath](const auto& v) { return v.first == path; });
-
-            if (it != tree.end() && it->second.size() == 1)
+            for (const auto& [sensorPath, metadata] : sensorPaths)
             {
-                const auto& [service, ifaces] = it->second.front();
-                sensorParameters.emplace_back(service, sensorPath, metadata);
+                auto it = std::find_if(tree.begin(), tree.end(),
+                                       [path = sensorPath](const auto& v) {
+                                           return v.first == path;
+                                       });
+
+                if (it != tree.end() && it->second.size() == 1)
+                {
+                    const auto& [service, ifaces] = it->second.front();
+                    sensorParameters.emplace_back(service, sensorPath,
+                                                  metadata);
+                }
             }
+
+            if (sensorParameters.size() != sensorPaths.size())
+            {
+                throw errors::InvalidArgument("ReadingParameters",
+                                              "Service not found.");
+            }
+
+            if (operationType.empty())
+            {
+                operationType = utils::enumToString(OperationType::avg);
+            }
+            else if (operationType == "SINGLE")
+            {
+                operationType = utils::enumToString(OperationType::avg);
+                collectionTimeScope =
+                    utils::enumToString(CollectionTimeScope::point);
+            }
+
+            if (collectionTimeScope.empty())
+            {
+                collectionTimeScope =
+                    utils::enumToString(CollectionTimeScope::point);
+            }
+
+            return LabeledMetricParameters(
+                std::move(sensorParameters),
+                utils::toOperationType(operationType), id,
+                utils::toCollectionTimeScope(collectionTimeScope),
+                CollectionDuration(Milliseconds(collectionDuration)));
+        });
+    }
+    catch (const errors::InvalidArgument& e)
+    {
+        if (e.propertyName == "ReadingParameters")
+        {
+            throw;
         }
 
-        if (sensorParameters.size() != sensorPaths.size())
-        {
-            throw sdbusplus::exception::SdBusError(
-                static_cast<int>(std::errc::invalid_argument),
-                "Could not find service for provided sensors");
-        }
-
-        if (operationType.empty())
-        {
-            operationType = utils::enumToString(OperationType::avg);
-        }
-        else if (operationType == "SINGLE")
-        {
-            operationType = utils::enumToString(OperationType::avg);
-            collectionTimeScope =
-                utils::enumToString(CollectionTimeScope::point);
-        }
-
-        if (collectionTimeScope.empty())
-        {
-            collectionTimeScope =
-                utils::enumToString(CollectionTimeScope::point);
-        }
-
-        return LabeledMetricParameters(
-            std::move(sensorParameters), utils::toOperationType(operationType),
-            id, utils::toCollectionTimeScope(collectionTimeScope),
-            CollectionDuration(Milliseconds(collectionDuration)));
-    });
+        using namespace std::literals::string_literals;
+        throw errors::InvalidArgument("ReadingParameters."s + e.propertyName);
+    }
 }

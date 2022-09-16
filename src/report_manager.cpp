@@ -112,14 +112,28 @@ ReportManager::ReportManager(
                     std::optional<uint64_t> appendLimit;
                     std::optional<std::string> reportUpdates;
                     std::optional<ReadingParameters> metricParams;
+                    std::optional<ReadingParameters> readingParameters;
                     std::optional<bool> enabled;
 
-                    sdbusplus::unpackProperties(
-                        properties, "Id", reportId, "Name", reportName,
-                        "ReportingType", reportingType, "ReportActions",
-                        reportActions, "Interval", interval, "AppendLimit",
-                        appendLimit, "ReportUpdates", reportUpdates,
-                        "MetricParams", metricParams, "Enabled", enabled);
+                    try
+                    {
+                        sdbusplus::unpackProperties(
+                            properties, "Id", reportId, "Name", reportName,
+                            "ReportingType", reportingType, "ReportActions",
+                            reportActions, "Interval", interval, "AppendLimit",
+                            appendLimit, "ReportUpdates", reportUpdates,
+                            "MetricParams", metricParams, "Enabled", enabled,
+                            "ReadingParameters", readingParameters);
+                    }
+                    catch (const sdbusplus::exception::UnpackPropertyError& e)
+                    {
+                        throw errors::InvalidArgument(e.propertyName);
+                    }
+
+                    if (readingParameters == std::nullopt)
+                    {
+                        readingParameters = metricParams;
+                    }
 
                     return addReport(
                                yield, reportId.value_or(""),
@@ -135,11 +149,11 @@ ReportManager::ReportManager(
                                            reportAction);
                                    }),
                                Milliseconds(interval.value_or(0)),
-                               appendLimit.value_or(0),
+                               appendLimit.value_or(maxAppendLimit),
                                utils::toReportUpdates(
                                    reportUpdates.value_or(utils::enumToString(
                                        ReportUpdates::overwrite))),
-                               metricParams.value_or(ReadingParameters{}),
+                               readingParameters.value_or(ReadingParameters{}),
                                enabled.value_or(true))
                         .getPath();
                 });
@@ -164,9 +178,7 @@ void ReportManager::verifyMetricParameters(
         if (readingParam.at_label<ts::Id>().length() >
             utils::constants::maxIdNameLength)
         {
-            throw sdbusplus::exception::SdBusError(
-                static_cast<int>(std::errc::invalid_argument),
-                "MetricId too long");
+            throw errors::InvalidArgument("ReadingParameters.Id", "Too long.");
         }
     }
 }
@@ -189,17 +201,14 @@ void ReportManager::verifyAddReport(
     if (appendLimit > maxAppendLimit &&
         appendLimit != std::numeric_limits<uint64_t>::max())
     {
-        throw sdbusplus::exception::SdBusError(
-            static_cast<int>(std::errc::invalid_argument),
-            "Append limit out of range");
+        throw errors::InvalidArgument("AppendLimit", "Out of range.");
     }
 
     if ((reportingType == ReportingType::periodic && interval < minInterval) ||
         (reportingType != ReportingType::periodic &&
          interval != Milliseconds{0}))
     {
-        throw sdbusplus::exception::SdBusError(
-            static_cast<int>(std::errc::invalid_argument), "Invalid interval");
+        throw errors::InvalidArgument("Interval");
     }
 
     size_t metricCount = 0;
@@ -213,25 +222,15 @@ void ReportManager::verifyAddReport(
     if (readingParams.size() > maxNumberMetrics ||
         metricCount > maxNumberMetrics)
     {
-        throw sdbusplus::exception::SdBusError(
-            static_cast<int>(std::errc::argument_list_too_long),
-            "Too many reading parameters");
+        throw errors::InvalidArgument("MetricParams", "Too many.");
     }
 
     verifyMetricParameters(readingParams);
 
-    try
+    for (const LabeledMetricParameters& item : readingParams)
     {
-        for (const LabeledMetricParameters& item : readingParams)
-        {
-            utils::toOperationType(
-                utils::toUnderlying(item.at_label<ts::OperationType>()));
-        }
-    }
-    catch (const std::exception& e)
-    {
-        throw sdbusplus::exception::SdBusError(
-            static_cast<int>(std::errc::invalid_argument), e.what());
+        utils::toOperationType(
+            utils::toUnderlying(item.at_label<ts::OperationType>()));
     }
 }
 

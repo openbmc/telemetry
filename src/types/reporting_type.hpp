@@ -22,12 +22,7 @@ namespace utils
 template <>
 struct EnumTraits<ReportingType>
 {
-    [[noreturn]] static void throwConversionError()
-    {
-        throw sdbusplus::exception::SdBusError(
-            static_cast<int>(std::errc::invalid_argument),
-            "Invalid reportingType");
-    }
+    static constexpr auto propertyName = ConstexprString{"ReportingType"};
 };
 
 constexpr std::array<std::pair<std::string_view, ReportingType>, 3>
