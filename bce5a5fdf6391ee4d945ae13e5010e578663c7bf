@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b833f734_d3aa7c32",
+        "filename": "src/metrics/collection_data.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2022-09-16T14:00:51Z",
+      "side": 1,
+      "message": "We don\u0027t have such property, shouldn\u0027t we use \"MetricParams\" or \"ReadingParamaters\" as this value is part of one of those?",
+      "range": {
+        "startLine": 43,
+        "startChar": 42,
+        "endLine": 43,
+        "endChar": 62
+      },
+      "revId": "bce5a5fdf6391ee4d945ae13e5010e578663c7bf",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c15b1403_44a0985a",
+        "filename": "src/report_manager.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2022-09-16T14:00:51Z",
+      "side": 1,
+      "message": "This function is also used to validate updates of \"ReadingParametersFutureVersion\".\nThere is small inconsistency, as this property is named \"MetricParams\" in AddReport and \"ReadingParameters\" once exposed as dbus property. Shouldn\u0027t we do something about that?",
+      "range": {
+        "startLine": 174,
+        "startChar": 43,
+        "endLine": 174,
+        "endChar": 55
+      },
+      "revId": "bce5a5fdf6391ee4d945ae13e5010e578663c7bf",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "3d78df6f_c059639d",
+        "filename": "src/trigger_manager.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2022-09-16T14:00:51Z",
+      "side": 1,
+      "message": "This error is not for Id property, but for ThresholdParams (discrete threshold contains user defined name).",
+      "range": {
+        "startLine": 91,
+        "startChar": 47,
+        "endLine": 91,
+        "endChar": 49
+      },
+      "revId": "bce5a5fdf6391ee4d945ae13e5010e578663c7bf",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ed26ad79_d397993d",
+        "filename": "src/utils/make_id_name.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2022-09-16T14:00:51Z",
+      "side": 1,
+      "message": "should be \"Name\"",
+      "range": {
+        "startLine": 96,
+        "startChar": 39,
+        "endLine": 96,
+        "endChar": 41
+      },
+      "revId": "bce5a5fdf6391ee4d945ae13e5010e578663c7bf",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
