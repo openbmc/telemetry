@@ -118,6 +118,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "5324adda_aa3c6200",
+        "filename": "src/trigger_manager.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1000678
+      },
+      "writtenOn": "2022-09-22T07:20:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3d78df6f_c059639d",
+      "range": {
+        "startLine": 91,
+        "startChar": 47,
+        "endLine": 91,
+        "endChar": 49
+      },
+      "revId": "bce5a5fdf6391ee4d945ae13e5010e578663c7bf",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "ed26ad79_d397993d",
