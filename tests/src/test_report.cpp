@@ -109,6 +109,10 @@ class TestReport : public Test
             metricMocks.emplace_back(std::make_shared<NiceMock<MetricMock>>());
             ON_CALL(*metricMocks[i], dumpConfiguration())
                 .WillByDefault(Return(metricParameters[i]));
+            ON_CALL(*metricMocks[i], sensorCount())
+                .WillByDefault(Return(metricParameters[i]
+                                          .at_label<tstring::SensorPath>()
+                                          .size()));
         }
 
         return utils::convContainer<std::shared_ptr<interfaces::Metric>>(
@@ -279,6 +283,34 @@ TEST_F(TestReport, setReadingParametersWithNewParams)
     EXPECT_THAT(getProperty<ReadingParameters>(
                     sut->getPath(), "ReadingParametersFutureVersion"),
                 Eq(newParams));
+}
+
+TEST_F(TestReport, setReadingParametersWithNewParamsUpdatesSensorCount)
+{
+    auto report =
+        makeReport(ReportParams()
+                       .appendLimit(std::numeric_limits<uint64_t>::max())
+                       .reportId("DefaultAppendLimit"));
+
+    ReadingParameters newParams = toReadingParameters(
+        std::vector<LabeledMetricParameters>{{LabeledMetricParameters{
+            {LabeledSensorInfo{"Service",
+                               "/xyz/openbmc_project/sensors/power/psu",
+                               "NewMetadata123"}},
+            OperationType::avg,
+            "NewMetricId123",
+            CollectionTimeScope::startup,
+            CollectionDuration(250ms)}}});
+    auto metrics = getMetricsFromReadingParams(newParams);
+
+    EXPECT_CALL(*reportFactoryMock, updateMetrics(_, _, _))
+        .WillOnce(SetArgReferee<0>(metrics));
+    EXPECT_THAT(setProperty(report->getPath(), "ReadingParametersFutureVersion",
+                            newParams)
+                    .value(),
+                Eq(boost::system::errc::success));
+    EXPECT_THAT(getProperty<uint64_t>(report->getPath(), "AppendLimit"),
+                Eq(1ull));
 }
 
 TEST_F(TestReport, setReadingParametersWithTooLongMetricId)

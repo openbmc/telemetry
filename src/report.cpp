@@ -221,6 +221,18 @@ void Report::setReportUpdates(const ReportUpdates newReportUpdates)
     }
 }
 
+void Report::updateSensorCount(const uint64_t newSensorCount)
+{
+    if (sensorCount != newSensorCount)
+    {
+        sensorCount = newSensorCount;
+        if (!appendLimit.has_value())
+        {
+            reportIface->signal_property("AppendLimit");
+        }
+    }
+}
+
 std::unique_ptr<sdbusplus::asio::dbus_interface>
     Report::makeReportInterface(const interfaces::ReportFactory& reportFactory)
 {
@@ -340,6 +352,8 @@ std::unique_ptr<sdbusplus::asio::dbus_interface>
                 utils::transform(metrics, [](const auto& metric) {
                     return metric->dumpConfiguration();
                 }));
+            updateSensorCount(getSensorCount(metrics));
+            setReadingBuffer(reportUpdates);
             persistency = storeConfiguration();
             oldVal = std::move(newVal);
             return 1;

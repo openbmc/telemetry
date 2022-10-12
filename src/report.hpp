@@ -102,6 +102,7 @@ class Report : public interfaces::Report, public interfaces::MetricListener
                               const ReportingType reportingTypeIn) const;
     void setReadingBuffer(const ReportUpdates newReportUpdates);
     void setReportUpdates(const ReportUpdates newReportUpdates);
+    void updateSensorCount(const uint64_t newSensorCount);
     static uint64_t getSensorCount(
         const std::vector<std::shared_ptr<interfaces::Metric>>& metrics);
     interfaces::JsonStorage::FilePath reportFileName() const;
