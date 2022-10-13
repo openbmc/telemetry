@@ -114,6 +114,8 @@ fabric.properties
 ### Meson ###
 # subproject directories
 /subprojects/*
+!/subprojects/packagefiles/
+!/subprojects/boost.wrap
 !/subprojects/googletest.wrap
 !/subprojects/nlohmann.wrap
 !/subprojects/phosphor-logging.wrap

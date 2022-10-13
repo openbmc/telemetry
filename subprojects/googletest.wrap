@@ -1,3 +1,3 @@
 [wrap-git]
 url = https://github.com/google/googletest
-revision = e2239ee6043f73722e7aa812a459f54a28552929
+revision = HEAD
