@@ -5,9 +5,6 @@ project(
     default_options: [
         'buildtype=debugoptimized',
         'cpp_std=c++20',
-        # TODO: Without RTTI telemetry does not build using Boost 1.74.0
-        # https://github.com/chriskohlhoff/asio/issues/533
-        #'cpp_rtti=false',
         'warning_level=3',
         'werror=true',
         'b_lto=true',
@@ -15,40 +12,31 @@ project(
     license: 'Apache-2.0',
 )
 
-summary({'Fast build with link-time optimizer disabled':
-            not get_option('b_lto')}, section: 'General')
-
-cpp = meson.get_compiler('cpp')
+cxx = meson.get_compiler('cpp')
 add_project_arguments(
-    cpp.get_supported_arguments([
+    cxx.get_supported_arguments([
         '-DBOOST_ASIO_DISABLE_THREADS',
         '-DBOOST_ALL_NO_LIB',
         '-DBOOST_SYSTEM_NO_DEPRECATED',
         '-DBOOST_ASIO_NO_DEPRECATED',
         '-DBOOST_NO_RTTI',
         '-DBOOST_NO_TYPEID',
-        # TODO: Removed below arg after upgrade to Boost 1.75
-        '-DBOOST_ALLOW_DEPRECATED_HEADERS',
         '-Wno-unused-parameter',
     ]),
     language: 'cpp'
 )
 
-boost = dependency(
-    'boost',
-    version: '>=1.74.0',
-    required: false,
-    modules: ['coroutine'])
-assert(boost.found(),
-       'Missing Boost 1.74.0 or higher, as WA you can set BOOST_ROOT ' +
-       'environemt to point at boost build. To build a boost you can use ' +
-       'script ./scripts/boost_build_1.74.0.sh')
+boost_version = '>=1.79.0'
+boost_modules = ['coroutine', 'context']
+boost = dependency('boost',
+    version: boost_version, 
+    modules: boost_modules)
 
 phosphor_logging = dependency('phosphor-logging')
 sdbusplus = dependency('sdbusplus')
 systemd = dependency('systemd')
 
-if cpp.has_header('nlohmann/json.hpp')
+if cxx.has_header('nlohmann/json.hpp')
     nlohmann_json = declare_dependency()
 else
     nlohmann_json = dependency('nlohmann_json')
