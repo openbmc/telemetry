@@ -9,10 +9,7 @@ namespace detail
 {
 
 template <class T>
-concept has_member_reserve = requires(T t)
-{
-    t.reserve(size_t{});
-};
+concept has_member_reserve = requires(T t) { t.reserve(size_t{}); };
 
 } // namespace detail
 

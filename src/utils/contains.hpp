@@ -8,16 +8,12 @@ namespace detail
 {
 
 template <class T>
-concept HasMemberFind = requires(T container)
-{
-    container.find(container.begin()->first);
-};
+concept HasMemberFind =
+    requires(T container) { container.find(container.begin()->first); };
 
 template <class T>
-concept HasMemberContains = requires(T container)
-{
-    container.contains(*container.begin());
-};
+concept HasMemberContains =
+    requires(T container) { container.contains(*container.begin()); };
 
 } // namespace detail
 
