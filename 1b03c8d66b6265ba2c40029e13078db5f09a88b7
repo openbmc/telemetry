@@ -1,0 +1,7 @@
+Verified+1: OpenBMC CI <openbmcbump-ci@yahoo.com>
+Code-Review+2: Krzysztof Grobelny <krzysztof.grobelny@intel.com>
+Submitted-by: Szymon Dompke <szymon.dompke@intel.com>
+Submitted-at: Fri, 14 Oct 2022 08:47:00 +0000
+Reviewed-on: https://gerrit.openbmc.org/c/openbmc/telemetry/+/57917
+Project: openbmc/telemetry
+Branch: refs/heads/master
