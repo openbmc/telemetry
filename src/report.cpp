@@ -48,16 +48,6 @@ Report::Report(boost::asio::io_context& ioc,
             return metric->dumpConfiguration();
         }));
 
-    readingParametersPastVersion =
-        utils::transform(readingParameters, [](const auto& item) {
-            const auto& [sensorData, operationType, id, collectionTimeScope,
-                         collectionDuration] = item;
-
-            return ReadingParametersPastVersion::value_type(
-                std::get<0>(sensorData.front()), operationType, id,
-                std::get<1>(sensorData.front()));
-        });
-
     reportActions.insert(ReportAction::logToMetricReportsCollection);
 
     deleteIface = objServer->add_unique_interface(
@@ -77,7 +67,7 @@ Report::Report(boost::asio::io_context& ioc,
             });
         });
 
-    errorMessages = verify();
+    auto errorMessages = verify(reportingType, interval);
     state.set<ReportFlags::enabled, ReportFlags::valid>(enabledIn,
                                                         errorMessages.empty());
 
@@ -135,17 +125,12 @@ Report::~Report()
 
 void Report::activate()
 {
-    for (auto& metric : this->metrics)
+    for (auto& metric : metrics)
     {
         metric->initialize();
     }
 
     scheduleTimer();
-
-    if (reportIface)
-    {
-        reportIface->signal_property("ErrorMessages");
-    }
 }
 
 void Report::deactivate()
@@ -157,11 +142,6 @@ void Report::deactivate()
 
     unregisterFromMetrics = nullptr;
     timer.cancel();
-
-    if (reportIface)
-    {
-        reportIface->signal_property("ErrorMessages");
-    }
 }
 
 uint64_t Report::getMetricCount(
@@ -225,41 +205,59 @@ std::unique_ptr<sdbusplus::asio::dbus_interface>
             return 1;
         },
         [this](const auto&) { return state.get<ReportFlags::enabled>(); });
-    dbusIface->register_property_r<
-        std::vector<std::tuple<std::string, std::string>>>(
-        "ErrorMessages", sdbusplus::vtable::property_::emits_change,
-        [this](const auto&) {
-            return utils::transform(errorMessages, [](const auto& em) {
-                return std::tuple<std::string, std::string>(
-                    utils::enumToString(em.error), em.arg0);
-            });
-        });
-    dbusIface->register_property_rw<uint64_t>(
-        "Interval", sdbusplus::vtable::property_::emits_change,
-        [this](uint64_t newVal, auto& oldVal) {
-            const Milliseconds newValT{newVal};
-            if (newValT < ReportManager::minInterval &&
-                newValT != Milliseconds{0})
+    dbusIface->register_method(
+        "SetReportingProperties",
+        [this](std::string newReportingType, uint64_t newInterval) {
+            ReportingType newReportingTypeT = reportingType;
+
+            if (!newReportingType.empty())
             {
-                throw errors::InvalidArgument("Interval");
+                newReportingTypeT = utils::toReportingType(newReportingType);
             }
 
-            if (newValT != interval)
-            {
-                oldVal = newVal;
-                interval = newValT;
+            Milliseconds newIntervalT = interval;
 
-                errorMessages = verify();
-                if (state.set<ReportFlags::valid>(errorMessages.empty()) ==
-                    StateEvent::active)
+            if (newInterval != std::numeric_limits<uint64_t>::max())
+            {
+                newIntervalT = Milliseconds(newInterval);
+            }
+
+            auto errorMessages = verify(newReportingTypeT, newIntervalT);
+
+            if (!errorMessages.empty())
+            {
+                if (newIntervalT != interval)
                 {
-                    scheduleTimer();
+                    throw errors::InvalidArgument("Interval");
                 }
 
-                persistency = storeConfiguration();
+                throw errors::InvalidArgument("ReportingType");
             }
-            return 1;
-        },
+
+            if (reportingType != newReportingTypeT)
+            {
+                reportingType = newReportingTypeT;
+                reportIface->signal_property("ReportingType");
+            }
+
+            if (interval != newIntervalT)
+            {
+                interval = newIntervalT;
+                reportIface->signal_property("Interval");
+            }
+
+            if (state.set<ReportFlags::valid>(errorMessages.empty()) ==
+                StateEvent::active)
+            {
+                scheduleTimer();
+            }
+
+            persistency = storeConfiguration();
+
+            setReadingBuffer(reportUpdates);
+        });
+    dbusIface->register_property_r<uint64_t>(
+        "Interval", sdbusplus::vtable::property_::emits_change,
         [this](const auto&) { return interval.count(); });
     dbusIface->register_property_rw<bool>(
         "Persistency", sdbusplus::vtable::property_::emits_change,
@@ -284,40 +282,15 @@ std::unique_ptr<sdbusplus::asio::dbus_interface>
     dbusIface->register_property_r("Readings", readings,
                                    sdbusplus::vtable::property_::emits_change,
                                    [this](const auto&) { return readings; });
-    dbusIface->register_property_rw<std::string>(
+    dbusIface->register_property_r<std::string>(
         "ReportingType", sdbusplus::vtable::property_::emits_change,
-        [this](auto newVal, auto& oldVal) {
-            ReportingType tmp = utils::toReportingType(newVal);
-            if (tmp != reportingType)
-            {
-                reportingType = tmp;
-                oldVal = std::move(newVal);
-
-                errorMessages = verify();
-                if (state.set<ReportFlags::valid>(errorMessages.empty()) ==
-                    StateEvent::active)
-                {
-                    scheduleTimer();
-                }
-
-                persistency = storeConfiguration();
-
-                setReadingBuffer(reportUpdates);
-            }
-            return 1;
-        },
         [this](const auto&) { return utils::enumToString(reportingType); });
-    dbusIface->register_property_r(
-        "ReadingParameters", readingParametersPastVersion,
-        sdbusplus::vtable::property_::const_,
-        [this](const auto&) { return readingParametersPastVersion; });
     dbusIface->register_property_rw(
-        "ReadingParametersFutureVersion", readingParameters,
+        "ReadingParameters", readingParameters,
         sdbusplus::vtable::property_::emits_change,
         [this, &reportFactory](auto newVal, auto& oldVal) {
             auto labeledMetricParams =
                 reportFactory.convertMetricParams(newVal);
-            ReportManager::verifyMetricParameters(labeledMetricParams);
             reportFactory.updateMetrics(metrics,
                                         state.get<ReportFlags::enabled>(),
                                         labeledMetricParams);
@@ -474,7 +447,7 @@ void Report::updateReadings()
             break;
         }
 
-        for (const auto& [id, metadata, value, timestamp] :
+        for (const auto& [metadata, value, timestamp] :
              metric->getUpdatedReadings())
         {
             if (reportUpdates == ReportUpdates::appendStopsWhenFull &&
@@ -484,7 +457,7 @@ void Report::updateReadings()
                 reportIface->signal_property("Enabled");
                 break;
             }
-            readingsBuffer.emplace(id, metadata, value, timestamp);
+            readingsBuffer.emplace(metadata, value, timestamp);
         }
     }
 
@@ -631,8 +604,14 @@ void Report::scheduleTimer()
     }
 }
 
-std::vector<ErrorMessage> Report::verify() const
+std::vector<ErrorMessage> Report::verify(ReportingType reportingType,
+                                         Milliseconds interval)
 {
+    if (interval != Milliseconds{0} && interval < ReportManager::minInterval)
+    {
+        throw errors::InvalidArgument("Interval");
+    }
+
     std::vector<ErrorMessage> result;
 
     if ((reportingType == ReportingType::periodic &&

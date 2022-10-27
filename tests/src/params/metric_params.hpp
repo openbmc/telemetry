@@ -24,17 +24,6 @@ class MetricParams final
         return operationTypeProperty;
     }
 
-    MetricParams& id(std::string val)
-    {
-        idProperty = std::move(val);
-        return *this;
-    }
-
-    const std::string& id() const
-    {
-        return idProperty;
-    }
-
     MetricParams& collectionTimeScope(CollectionTimeScope val)
     {
         collectionTimeScopeProperty = val;
@@ -92,7 +81,6 @@ class MetricParams final
 
   private:
     OperationType operationTypeProperty = {};
-    std::string idProperty = "MetricId";
     CollectionTimeScope collectionTimeScopeProperty = {};
     CollectionDuration collectionDurationProperty =
         CollectionDuration(Milliseconds(0u));

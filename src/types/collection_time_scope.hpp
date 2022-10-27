@@ -26,11 +26,16 @@ struct EnumTraits<CollectionTimeScope>
 constexpr std::array<std::pair<std::string_view, CollectionTimeScope>, 3>
     convDataCollectionTimeScope = {
         {std::make_pair<std::string_view, CollectionTimeScope>(
-             "Point", CollectionTimeScope::point),
+             "xyz.openbmc_project.Telemetry.Report.CollectionTimescope.Point",
+             CollectionTimeScope::point),
          std::make_pair<std::string_view, CollectionTimeScope>(
-             "Interval", CollectionTimeScope::interval),
+             "xyz.openbmc_project.Telemetry.Report.CollectionTimescope."
+             "Interval",
+             CollectionTimeScope::interval),
          std::make_pair<std::string_view, CollectionTimeScope>(
-             "StartupInterval", CollectionTimeScope::startup)}};
+             "xyz.openbmc_project.Telemetry.Report.CollectionTimescope."
+             "StartupInterval",
+             CollectionTimeScope::startup)}};
 
 inline CollectionTimeScope
     toCollectionTimeScope(std::underlying_type_t<CollectionTimeScope> value)

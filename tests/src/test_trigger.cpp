@@ -314,8 +314,9 @@ TEST_F(TestTrigger, setPropertyThresholds)
 {
     EXPECT_CALL(*triggerFactoryMockPtr, updateThresholds(_, _, _, _, _, _));
     TriggerThresholdParams newThresholds =
-        std::vector<discrete::ThresholdParam>(
-            {std::make_tuple("discrete threshold", "OK", 10, "12.3")});
+        std::vector<discrete::ThresholdParam>({std::make_tuple(
+            "discrete threshold", utils::enumToString(discrete::Severity::ok),
+            10, "12.3")});
     EXPECT_THAT(setProperty(sut->getPath(), "Thresholds", newThresholds),
                 Eq(boost::system::errc::success));
 }
@@ -328,7 +329,8 @@ TEST_F(TestTrigger, setThresholdParamsWithTooLongDiscreteName)
 
     TriggerThresholdParams newThresholds =
         std::vector<discrete::ThresholdParam>({std::make_tuple(
-            utils::string_utils::getTooLongName(), "OK", 10, "12.3")});
+            utils::string_utils::getTooLongName(),
+            utils::enumToString(discrete::Severity::ok), 10, "12.3")});
 
     changeProperty<TriggerThresholdParams>(
         sut->getPath(), "Thresholds",

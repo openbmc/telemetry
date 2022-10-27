@@ -83,8 +83,8 @@ class TestReport : public Test
         }
         metricMocks.resize(metricParameters.size());
 
-        std::vector<MetricValue> readings{{MetricValue{"a", "b", 17.1, 114},
-                                           MetricValue{"aa", "bb", 42.0, 74}}};
+        std::vector<MetricValue> readings{
+            {MetricValue{"b", 17.1, 114}, MetricValue{"bb", 42.0, 74}}};
 
         ASSERT_THAT(readings.size(), Ge(metricParameters.size()));
 
@@ -159,6 +159,16 @@ class TestReport : public Test
     {
         return DbusEnvironment::setProperty<T>(path, Report::reportIfaceName,
                                                property, newValue);
+    }
+
+    template <class... Args>
+    static boost::system::error_code callMethod(const std::string& path,
+                                                const std::string& method,
+                                                Args&&... args)
+    {
+        return DbusEnvironment::callMethod(path, Report::reportIfaceName,
+                                           "SetReportingProperties",
+                                           std::forward<Args>(args)...);
     }
 
     template <class T>
@@ -242,16 +252,13 @@ TEST_F(TestReport, verifyIfPropertiesHaveValidValue)
         getProperty<bool>(sut->getPath(), "LogToMetricReportsCollection"),
         Eq(utils::contains(defaultParams().reportActions(),
                            ReportAction::logToMetricReportsCollection)));
-    EXPECT_THAT(getProperty<ReadingParameters>(
-                    sut->getPath(), "ReadingParametersFutureVersion"),
-                Eq(toReadingParameters(defaultParams().metricParameters())));
+    EXPECT_THAT(
+        getProperty<ReadingParameters>(sut->getPath(), "ReadingParameters"),
+        Eq(toReadingParameters(defaultParams().metricParameters())));
     EXPECT_THAT(getProperty<std::string>(sut->getPath(), "Name"),
                 Eq(defaultParams().reportName()));
     EXPECT_THAT(
         getProperty<std::vector<object_path>>(sut->getPath(), "Triggers"),
-        IsEmpty());
-    EXPECT_THAT(
-        getProperty<ErrorMessagesDbusType>(sut->getPath(), "ErrorMessages"),
         IsEmpty());
 }
 
@@ -269,7 +276,6 @@ TEST_F(TestReport, setReadingParametersWithNewParams)
                                "/xyz/openbmc_project/sensors/power/psu",
                                "NewMetadata123"}},
             OperationType::avg,
-            "NewMetricId123",
             CollectionTimeScope::startup,
             CollectionDuration(250ms)}}});
     auto metrics = getMetricsFromReadingParams(newParams);
@@ -277,61 +283,17 @@ TEST_F(TestReport, setReadingParametersWithNewParams)
     EXPECT_CALL(*reportFactoryMock, updateMetrics(_, _, _))
         .WillOnce(SetArgReferee<0>(metrics));
     EXPECT_THAT(
-        setProperty(sut->getPath(), "ReadingParametersFutureVersion", newParams)
-            .value(),
+        setProperty(sut->getPath(), "ReadingParameters", newParams).value(),
         Eq(boost::system::errc::success));
-    EXPECT_THAT(getProperty<ReadingParameters>(
-                    sut->getPath(), "ReadingParametersFutureVersion"),
-                Eq(newParams));
-}
-
-TEST_F(TestReport, setReadingParametersWithTooLongMetricId)
-{
-    const ReadingParameters currentValue =
-        toReadingParameters(defaultParams().metricParameters());
-
-    ReadingParameters newParams = toReadingParameters(
-        std::vector<LabeledMetricParameters>{{LabeledMetricParameters{
-            {LabeledSensorInfo{"Service",
-                               "/xyz/openbmc_project/sensors/power/psu",
-                               "NewMetadata123"}},
-            OperationType::avg,
-            utils::string_utils::getTooLongId(),
-            CollectionTimeScope::startup,
-            CollectionDuration(250ms)}}});
-
-    changeProperty<ReadingParameters>(
-        sut->getPath(), "ReadingParametersFutureVersion",
-        {.valueBefore = Eq(currentValue),
-         .newValue = newParams,
-         .ec = Eq(boost::system::errc::invalid_argument),
-         .valueAfter = Eq(currentValue)});
-}
-
-TEST_F(TestReport, setReportingTypeWithValidNewType)
-{
-    changeProperty<std::string>(
-        sut->getPath(), "ReportingType",
-        {.valueBefore = Not(Eq(utils::enumToString(ReportingType::onRequest))),
-         .newValue = utils::enumToString(ReportingType::onRequest)});
-}
-
-TEST_F(TestReport, setReportingTypeWithInvalidType)
-{
-    const std::string currentValue =
-        utils::enumToString(defaultParams().reportingType());
-
-    changeProperty<std::string>(
-        sut->getPath(), "ReportingType",
-        {.valueBefore = Eq(currentValue),
-         .newValue = "Periodic_ABC",
-         .ec = Eq(boost::system::errc::invalid_argument),
-         .valueAfter = Eq(currentValue)});
+    EXPECT_THAT(
+        getProperty<ReadingParameters>(sut->getPath(), "ReadingParameters"),
+        Eq(newParams));
 }
 
 TEST_F(TestReport, setReportActionsWithValidNewActions)
 {
-    std::vector<std::string> newActions = {"EmitsReadingsUpdate"};
+    std::vector<std::string> newActions = {
+        utils::enumToString(ReportAction::emitsReadingsUpdate)};
     std::vector<std::string> currActions =
         utils::transform(defaultParams().reportActions(),
                          [](const auto v) { return utils::enumToString(v); });
@@ -342,16 +304,19 @@ TEST_F(TestReport, setReportActionsWithValidNewActions)
         Eq(boost::system::errc::success));
     EXPECT_THAT(
         getProperty<std::vector<std::string>>(sut->getPath(), "ReportActions"),
-        UnorderedElementsAre("EmitsReadingsUpdate",
-                             "LogToMetricReportsCollection"));
+        UnorderedElementsAre(
+            utils::enumToString(ReportAction::emitsReadingsUpdate),
+            utils::enumToString(ReportAction::logToMetricReportsCollection)));
 }
 
 TEST_F(TestReport, setReportActionsWithValidUnsortedActions)
 {
-    std::vector<std::string> newActions = {"LogToMetricReportsCollection",
-                                           "EmitsReadingsUpdate"};
-    std::vector<std::string> expectedActions = {"EmitsReadingsUpdate",
-                                                "LogToMetricReportsCollection"};
+    std::vector<std::string> newActions = {
+        utils::enumToString(ReportAction::logToMetricReportsCollection),
+        utils::enumToString(ReportAction::emitsReadingsUpdate)};
+    std::vector<std::string> expectedActions = {
+        utils::enumToString(ReportAction::emitsReadingsUpdate),
+        utils::enumToString(ReportAction::logToMetricReportsCollection)};
     std::vector<std::string> currActions =
         utils::transform(defaultParams().reportActions(),
                          [](const auto v) { return utils::enumToString(v); });
@@ -368,7 +333,8 @@ TEST_F(TestReport, setReportActionsWithValidUnsortedActions)
 TEST_F(TestReport, setReportActionsWithEmptyActions)
 {
     std::vector<std::string> newActions = {};
-    std::vector<std::string> expectedActions = {"LogToMetricReportsCollection"};
+    std::vector<std::string> expectedActions = {
+        utils::enumToString(ReportAction::logToMetricReportsCollection)};
     std::vector<std::string> currActions =
         utils::transform(defaultParams().reportActions(),
                          [](const auto v) { return utils::enumToString(v); });
@@ -397,7 +363,8 @@ TEST_F(TestReport, setReportActionsWithInvalidActions)
 
 TEST_F(TestReport, createReportWithEmptyActions)
 {
-    std::vector<std::string> expectedActions = {"LogToMetricReportsCollection"};
+    std::vector<std::string> expectedActions = {
+        utils::enumToString(ReportAction::logToMetricReportsCollection)};
 
     sut = makeReport(ReportParams().reportId("TestId_1").reportActions({}));
     EXPECT_THAT(
@@ -407,10 +374,12 @@ TEST_F(TestReport, createReportWithEmptyActions)
 
 TEST_F(TestReport, createReportWithValidUnsortedActions)
 {
-    std::vector<std::string> newActions = {"LogToMetricReportsCollection",
-                                           "EmitsReadingsUpdate"};
-    std::vector<std::string> expectedActions = {"EmitsReadingsUpdate",
-                                                "LogToMetricReportsCollection"};
+    std::vector<std::string> newActions = {
+        utils::enumToString(ReportAction::logToMetricReportsCollection),
+        utils::enumToString(ReportAction::emitsReadingsUpdate)};
+    std::vector<std::string> expectedActions = {
+        utils::enumToString(ReportAction::emitsReadingsUpdate),
+        utils::enumToString(ReportAction::logToMetricReportsCollection)};
 
     sut = makeReport(
         ReportParams()
@@ -431,113 +400,75 @@ TEST_F(TestReport, setEnabledWithNewValue)
     EXPECT_THAT(getProperty<bool>(sut->getPath(), "Enabled"), Eq(newValue));
 }
 
-TEST_F(TestReport, setIntervalWithValidValue)
+TEST_F(TestReport, setReportingPropertiesWithValidValues)
 {
     uint64_t newValue = ReportManager::minInterval.count() * 42;
-    EXPECT_THAT(setProperty(sut->getPath(), "Interval", newValue).value(),
+    EXPECT_THAT(callMethod(sut->getPath(), "SetReportingProperties",
+                           utils::enumToString(ReportingType::periodic),
+                           newValue),
                 Eq(boost::system::errc::success));
     EXPECT_THAT(getProperty<uint64_t>(sut->getPath(), "Interval"),
                 Eq(newValue));
 }
 
-TEST_F(
-    TestReport,
-    settingIntervalWithInvalidValueDoesNotChangePropertyAndReturnsInvalidArgument)
+TEST_F(TestReport, failsToSetInvalidInterval)
 {
     uint64_t newValue = ReportManager::minInterval.count() - 1;
-    EXPECT_THAT(setProperty(sut->getPath(), "Interval", newValue).value(),
-                Eq(boost::system::errc::invalid_argument));
+
+    EXPECT_THAT(
+        callMethod(sut->getPath(), "SetReportingProperties", "", newValue),
+        Eq(boost::system::errc::invalid_argument));
+
     EXPECT_THAT(getProperty<uint64_t>(sut->getPath(), "Interval"),
                 Eq(defaultParams().interval().count()));
 }
 
-TEST_F(TestReport, settingInvalidReportingTypeCreatesErrorMessage)
+TEST_F(TestReport, failsToSetIncompatibleInterval)
 {
     auto report = makeReport(defaultParams()
                                  .reportId("report2")
                                  .reportingType(ReportingType::onRequest)
                                  .interval(Milliseconds{0}));
 
-    EXPECT_THAT(
-        setProperty<std::string>(report->getPath(), "ReportingType", "Periodic")
-            .value(),
-        Eq(boost::system::errc::success));
-
-    EXPECT_THAT(getProperty<std::string>(report->getPath(), "ReportingType"),
-                Eq("Periodic"));
-    EXPECT_THAT(
-        getProperty<ErrorMessagesDbusType>(report->getPath(), "ErrorMessages"),
-        UnorderedElementsAre(
-            ErrorMessageDbusType(
-                utils::enumToString(ErrorType::propertyConflict), "Interval"),
-            ErrorMessageDbusType(
-                utils::enumToString(ErrorType::propertyConflict),
-                "ReportingType")));
-}
-
-TEST_F(TestReport, settingValidReportingTypeRemovesErrors)
-{
-    auto report = makeReport(defaultParams()
-                                 .reportId("report2")
-                                 .reportingType(ReportingType::onRequest)
-                                 .interval(Milliseconds{0}));
+    uint64_t newValue = ReportManager::minInterval.count();
 
     EXPECT_THAT(
-        setProperty<std::string>(report->getPath(), "ReportingType", "Periodic")
-            .value(),
-        Eq(boost::system::errc::success));
-    EXPECT_THAT(setProperty<std::string>(report->getPath(), "ReportingType",
-                                         "OnRequest")
-                    .value(),
-                Eq(boost::system::errc::success));
-
-    EXPECT_THAT(getProperty<std::string>(report->getPath(), "ReportingType"),
-                Eq("OnRequest"));
-    EXPECT_THAT(
-        getProperty<ErrorMessagesDbusType>(report->getPath(), "ErrorMessages"),
-        IsEmpty());
-}
-
-TEST_F(TestReport, settingInvalidIntervalDisablesReport)
-{
-    auto report = makeReport(defaultParams()
-                                 .reportId("report2")
-                                 .reportingType(ReportingType::periodic)
-                                 .interval(ReportManager::minInterval));
-
-    EXPECT_THAT(setProperty<uint64_t>(report->getPath(), "Interval", 0).value(),
-                Eq(boost::system::errc::success));
-
-    EXPECT_THAT(getProperty<uint64_t>(report->getPath(), "Interval"), Eq(0u));
-    EXPECT_THAT(
-        getProperty<ErrorMessagesDbusType>(report->getPath(), "ErrorMessages"),
-        UnorderedElementsAre(
-            ErrorMessageDbusType(
-                utils::enumToString(ErrorType::propertyConflict), "Interval"),
-            ErrorMessageDbusType(
-                utils::enumToString(ErrorType::propertyConflict),
-                "ReportingType")));
-}
-
-TEST_F(TestReport, settingValidIntervalEnablesReport)
-{
-    auto report = makeReport(defaultParams()
-                                 .reportId("report2")
-                                 .reportingType(ReportingType::periodic)
-                                 .interval(ReportManager::minInterval));
-
-    EXPECT_THAT(setProperty<uint64_t>(report->getPath(), "Interval", 0).value(),
-                Eq(boost::system::errc::success));
-    EXPECT_THAT(setProperty<uint64_t>(report->getPath(), "Interval",
-                                      ReportManager::minInterval.count())
-                    .value(),
-                Eq(boost::system::errc::success));
+        callMethod(report->getPath(), "SetReportingProperties", "", newValue),
+        Eq(boost::system::errc::invalid_argument));
 
     EXPECT_THAT(getProperty<uint64_t>(report->getPath(), "Interval"),
-                Eq(ReportManager::minInterval.count()));
-    EXPECT_THAT(
-        getProperty<ErrorMessagesDbusType>(report->getPath(), "ErrorMessages"),
-        IsEmpty());
+                Eq(defaultParams().interval().count()));
+}
+
+TEST_F(TestReport, failsToSetInvalidReportingType)
+{
+    auto report = makeReport(defaultParams()
+                                 .reportId("report2")
+                                 .reportingType(ReportingType::onRequest)
+                                 .interval(Milliseconds{0}));
+
+    EXPECT_THAT(callMethod(sut->getPath(), "SetReportingProperties", "XYZ",
+                           std::numeric_limits<uint64_t>::max()),
+                Eq(boost::system::errc::invalid_argument));
+
+    EXPECT_THAT(getProperty<std::string>(report->getPath(), "ReportingType"),
+                Eq(utils::enumToString(ReportingType::onRequest)));
+}
+
+TEST_F(TestReport, failsToSetIncompatibleReportingType)
+{
+    auto report = makeReport(defaultParams()
+                                 .reportId("report2")
+                                 .reportingType(ReportingType::onRequest)
+                                 .interval(Milliseconds{0}));
+
+    EXPECT_THAT(callMethod(sut->getPath(), "SetReportingProperties",
+                           utils::enumToString(ReportingType::periodic),
+                           std::numeric_limits<uint64_t>::max()),
+                Eq(boost::system::errc::invalid_argument));
+
+    EXPECT_THAT(getProperty<std::string>(report->getPath(), "ReportingType"),
+                Eq(utils::enumToString(ReportingType::onRequest)));
 }
 
 TEST_F(TestReport, settingEmitsReadingsUpdateHaveNoEffect)
@@ -702,7 +633,6 @@ INSTANTIATE_TEST_SUITE_P(
                       "/xyz/openbmc_project/sensors/power/p1"},
                      {tstring::Metadata::str(), "metadata1"}}}},
                   {tstring::OperationType::str(), OperationType::avg},
-                  {tstring::Id::str(), "MetricId1"},
                   {tstring::CollectionTimeScope::str(),
                    CollectionTimeScope::point},
                   {tstring::CollectionDuration::str(), 0}},
@@ -712,7 +642,6 @@ INSTANTIATE_TEST_SUITE_P(
                       "/xyz/openbmc_project/sensors/power/p2"},
                      {tstring::Metadata::str(), "metadata2"}}}},
                   {tstring::OperationType::str(), OperationType::avg},
-                  {tstring::Id::str(), "MetricId2"},
                   {tstring::CollectionTimeScope::str(),
                    CollectionTimeScope::point},
                   {tstring::CollectionDuration::str(), 0}}}))));
@@ -880,9 +809,8 @@ TEST_F(TestReportOnRequestType, updatesReadingWhenUpdateIsCalled)
     const auto [timestamp, readings] =
         getProperty<Readings>(sut->getPath(), "Readings");
 
-    EXPECT_THAT(readings,
-                ElementsAre(std::make_tuple("a"s, "b"s, 17.1, 114u),
-                            std::make_tuple("aa"s, "bb"s, 42.0, 74u)));
+    EXPECT_THAT(readings, ElementsAre(std::make_tuple("b"s, 17.1, 114u),
+                                      std::make_tuple("bb"s, 42.0, 74u)));
 }
 
 class TestReportNonOnRequestType :
@@ -895,10 +823,13 @@ class TestReportNonOnRequestType :
     }
 };
 
-INSTANTIATE_TEST_SUITE_P(
-    _, TestReportNonOnRequestType,
-    Values(defaultParams().reportingType(ReportingType::periodic),
-           defaultParams().reportingType(ReportingType::onChange)));
+INSTANTIATE_TEST_SUITE_P(_, TestReportNonOnRequestType,
+                         Values(defaultParams()
+                                    .reportingType(ReportingType::periodic)
+                                    .interval(ReportManager::minInterval * 10),
+                                defaultParams()
+                                    .reportingType(ReportingType::onChange)
+                                    .interval(Milliseconds(0))));
 
 TEST_P(TestReportNonOnRequestType, readingsAreNotUpdateOnUpdateCall)
 {
@@ -961,9 +892,8 @@ TEST_F(TestReportPeriodicReport, readingsAreUpdatedAfterIntervalExpires)
     const auto [timestamp, readings] =
         getProperty<Readings>(sut->getPath(), "Readings");
 
-    EXPECT_THAT(readings,
-                ElementsAre(std::make_tuple("a"s, "b"s, 17.1, 114u),
-                            std::make_tuple("aa"s, "bb"s, 42.0, 74u)));
+    EXPECT_THAT(readings, ElementsAre(std::make_tuple("b"s, 17.1, 114u),
+                                      std::make_tuple("bb"s, 42.0, 74u)));
 }
 
 struct ReportUpdatesReportParams
@@ -983,9 +913,8 @@ class TestReportWithReportUpdatesAndLimit :
 
     void changeReport(ReportingType rt, Milliseconds interval)
     {
-        setProperty<std::string>(sut->getPath(), "ReportingType",
-                                 utils::enumToString(rt));
-        setProperty<uint64_t>(sut->getPath(), "Interval", interval.count());
+        callMethod(sut->getPath(), "SetReportingProperties",
+                   utils::enumToString(rt), interval.count());
     }
 
     auto readings()
@@ -1011,21 +940,20 @@ INSTANTIATE_TEST_SUITE_P(
             defaultParams()
                 .reportUpdates(ReportUpdates::appendWrapsWhenFull)
                 .appendLimit(5),
-            std::vector<ReadingData>{{std::make_tuple("aa"s, "bb"s, 42.0, 74u),
-                                      std::make_tuple("a"s, "b"s, 17.1, 114u),
-                                      std::make_tuple("aa"s, "bb"s, 42.0, 74u),
-                                      std::make_tuple("aa"s, "bb"s, 42.0, 74u),
-                                      std::make_tuple("a"s, "b"s, 17.1, 114u)}},
+            std::vector<ReadingData>{{std::make_tuple("bb"s, 42.0, 74u),
+                                      std::make_tuple("b"s, 17.1, 114u),
+                                      std::make_tuple("bb"s, 42.0, 74u),
+                                      std::make_tuple("bb"s, 42.0, 74u),
+                                      std::make_tuple("b"s, 17.1, 114u)}},
             true},
         ReportUpdatesReportParams{
             defaultParams()
                 .reportUpdates(ReportUpdates::appendWrapsWhenFull)
                 .appendLimit(4),
-            std::vector<ReadingData>{
-                {std::make_tuple("a"s, "b"s, 17.1, 114u),
-                 std::make_tuple("aa"s, "bb"s, 42.0, 74u),
-                 std::make_tuple("a"s, "b"s, 17.1, 114u),
-                 std::make_tuple("aa"s, "bb"s, 42.0, 74u)}},
+            std::vector<ReadingData>{{std::make_tuple("b"s, 17.1, 114u),
+                                      std::make_tuple("bb"s, 42.0, 74u),
+                                      std::make_tuple("b"s, 17.1, 114u),
+                                      std::make_tuple("bb"s, 42.0, 74u)}},
             true},
         ReportUpdatesReportParams{
             defaultParams()
@@ -1036,35 +964,33 @@ INSTANTIATE_TEST_SUITE_P(
             defaultParams()
                 .reportUpdates(ReportUpdates::appendStopsWhenFull)
                 .appendLimit(10),
-            std::vector<ReadingData>{
-                {std::make_tuple("a"s, "b"s, 17.1, 114u),
-                 std::make_tuple("aa"s, "bb"s, 42.0, 74u),
-                 std::make_tuple("a"s, "b"s, 17.1, 114u),
-                 std::make_tuple("aa"s, "bb"s, 42.0, 74u),
-                 std::make_tuple("a"s, "b"s, 17.1, 114u),
-                 std::make_tuple("aa"s, "bb"s, 42.0, 74u),
-                 std::make_tuple("a"s, "b"s, 17.1, 114u),
-                 std::make_tuple("aa"s, "bb"s, 42.0, 74u)}},
+            std::vector<ReadingData>{{std::make_tuple("b"s, 17.1, 114u),
+                                      std::make_tuple("bb"s, 42.0, 74u),
+                                      std::make_tuple("b"s, 17.1, 114u),
+                                      std::make_tuple("bb"s, 42.0, 74u),
+                                      std::make_tuple("b"s, 17.1, 114u),
+                                      std::make_tuple("bb"s, 42.0, 74u),
+                                      std::make_tuple("b"s, 17.1, 114u),
+                                      std::make_tuple("bb"s, 42.0, 74u)}},
             true},
         ReportUpdatesReportParams{
             defaultParams()
                 .reportUpdates(ReportUpdates::appendStopsWhenFull)
                 .appendLimit(5),
-            std::vector<ReadingData>{{std::make_tuple("a"s, "b"s, 17.1, 114u),
-                                      std::make_tuple("aa"s, "bb"s, 42.0, 74u),
-                                      std::make_tuple("a"s, "b"s, 17.1, 114u),
-                                      std::make_tuple("aa"s, "bb"s, 42.0, 74u),
-                                      std::make_tuple("a"s, "b"s, 17.1, 114u)}},
+            std::vector<ReadingData>{{std::make_tuple("b"s, 17.1, 114u),
+                                      std::make_tuple("bb"s, 42.0, 74u),
+                                      std::make_tuple("b"s, 17.1, 114u),
+                                      std::make_tuple("bb"s, 42.0, 74u),
+                                      std::make_tuple("b"s, 17.1, 114u)}},
             false},
         ReportUpdatesReportParams{
             defaultParams()
                 .reportUpdates(ReportUpdates::appendStopsWhenFull)
                 .appendLimit(4),
-            std::vector<ReadingData>{
-                {std::make_tuple("a"s, "b"s, 17.1, 114u),
-                 std::make_tuple("aa"s, "bb"s, 42.0, 74u),
-                 std::make_tuple("a"s, "b"s, 17.1, 114u),
-                 std::make_tuple("aa"s, "bb"s, 42.0, 74u)}},
+            std::vector<ReadingData>{{std::make_tuple("b"s, 17.1, 114u),
+                                      std::make_tuple("bb"s, 42.0, 74u),
+                                      std::make_tuple("b"s, 17.1, 114u),
+                                      std::make_tuple("bb"s, 42.0, 74u)}},
             false},
         ReportUpdatesReportParams{
             defaultParams()
@@ -1075,33 +1001,29 @@ INSTANTIATE_TEST_SUITE_P(
             defaultParams()
                 .reportUpdates(ReportUpdates::overwrite)
                 .appendLimit(500),
-            std::vector<ReadingData>{
-                {std::make_tuple("a"s, "b"s, 17.1, 114u),
-                 std::make_tuple("aa"s, "bb"s, 42.0, 74u)}},
+            std::vector<ReadingData>{{std::make_tuple("b"s, 17.1, 114u),
+                                      std::make_tuple("bb"s, 42.0, 74u)}},
             true},
         ReportUpdatesReportParams{
             defaultParams()
                 .reportUpdates(ReportUpdates::overwrite)
                 .appendLimit(1),
-            std::vector<ReadingData>{
-                {std::make_tuple("a"s, "b"s, 17.1, 114u),
-                 std::make_tuple("aa"s, "bb"s, 42.0, 74u)}},
+            std::vector<ReadingData>{{std::make_tuple("b"s, 17.1, 114u),
+                                      std::make_tuple("bb"s, 42.0, 74u)}},
             true},
         ReportUpdatesReportParams{
             defaultParams()
                 .reportUpdates(ReportUpdates::overwrite)
                 .appendLimit(0),
-            std::vector<ReadingData>{
-                {std::make_tuple("a"s, "b"s, 17.1, 114u),
-                 std::make_tuple("aa"s, "bb"s, 42.0, 74u)}},
+            std::vector<ReadingData>{{std::make_tuple("b"s, 17.1, 114u),
+                                      std::make_tuple("bb"s, 42.0, 74u)}},
             true},
         ReportUpdatesReportParams{
             defaultParams()
                 .reportUpdates(ReportUpdates::appendStopsWhenFull)
                 .appendLimit(2u),
-            std::vector<ReadingData>{
-                {std::make_tuple("a"s, "b"s, 17.1, 114u),
-                 std::make_tuple("aa"s, "bb"s, 42.0, 74u)}},
+            std::vector<ReadingData>{{std::make_tuple("b"s, 17.1, 114u),
+                                      std::make_tuple("bb"s, 42.0, 74u)}},
             false}));
 
 TEST_P(TestReportWithReportUpdatesAndLimit,
@@ -1274,7 +1196,8 @@ TEST_F(TestReportInitialization,
 
     sut = makeReport(defaultParams()
                          .reportingType(ReportingType::periodic)
-                         .reportActions({}));
+                         .reportActions({})
+                         .interval(Milliseconds(1000)));
     makeMonitor();
     DbusEnvironment::sleepFor(defaultParams().interval() * 2);
 }

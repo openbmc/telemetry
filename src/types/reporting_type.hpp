@@ -26,12 +26,16 @@ struct EnumTraits<ReportingType>
 };
 
 constexpr std::array<std::pair<std::string_view, ReportingType>, 3>
-    convDataReportingType = {{std::make_pair<std::string_view, ReportingType>(
-                                  "Periodic", ReportingType::periodic),
-                              std::make_pair<std::string_view, ReportingType>(
-                                  "OnRequest", ReportingType::onRequest),
-                              std::make_pair<std::string_view, ReportingType>(
-                                  "OnChange", ReportingType::onChange)}};
+    convDataReportingType = {
+        {std::make_pair<std::string_view, ReportingType>(
+             "xyz.openbmc_project.Telemetry.Report.ReportingType.OnChange",
+             ReportingType::onChange),
+         std::make_pair<std::string_view, ReportingType>(
+             "xyz.openbmc_project.Telemetry.Report.ReportingType.OnRequest",
+             ReportingType::onRequest),
+         std::make_pair<std::string_view, ReportingType>(
+             "xyz.openbmc_project.Telemetry.Report.ReportingType.Periodic",
+             ReportingType::periodic)}};
 
 inline ReportingType
     toReportingType(std::underlying_type_t<ReportingType> value)

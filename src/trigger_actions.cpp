@@ -4,6 +4,7 @@
 #include "types/trigger_types.hpp"
 #include "utils/clock.hpp"
 #include "utils/messanger.hpp"
+#include "utils/to_short_enum.hpp"
 
 #include <phosphor-logging/log.hpp>
 
@@ -53,11 +54,12 @@ void LogToJournal::commit(const std::string& triggerId,
     std::string thresholdName = ::numeric::typeToString(type);
     auto direction = getDirection(value, threshold);
 
-    std::string msg = "Numeric threshold '" + thresholdName + "' of trigger '" +
-                      triggerId + "' is crossed on sensor " + sensorName +
-                      ", recorded value: " + std::to_string(value) +
-                      ", crossing direction: " + direction +
-                      ", timestamp: " + timestampToString(timestamp);
+    std::string msg =
+        "Numeric threshold '" + std::string(utils::toShortEnum(thresholdName)) +
+        "' of trigger '" + triggerId + "' is crossed on sensor " + sensorName +
+        ", recorded value: " + std::to_string(value) +
+        ", crossing direction: " + std::string(utils::toShortEnum(direction)) +
+        ", timestamp: " + timestampToString(timestamp);
 
     phosphor::logging::log<phosphor::logging::level::INFO>(msg.c_str());
 }
@@ -145,11 +147,12 @@ void LogToJournal::commit(const std::string& triggerId,
 {
     auto value = std::get<std::string>(triggerValue);
 
-    std::string msg = "Discrete condition '" + thresholdNameIn->get() +
-                      "' of trigger '" + triggerId + "' is met on sensor " +
-                      sensorName + ", recorded value: " + value +
-                      ", severity: " + ::discrete::severityToString(severity) +
-                      ", timestamp: " + timestampToString(timestamp);
+    std::string msg =
+        "Discrete condition '" + thresholdNameIn->get() + "' of trigger '" +
+        triggerId + "' is met on sensor " + sensorName +
+        ", recorded value: " + value + ", severity: " +
+        std::string(utils::toShortEnum(utils::enumToString(severity))) +
+        ", timestamp: " + timestampToString(timestamp);
 
     phosphor::logging::log<phosphor::logging::level::INFO>(msg.c_str());
 }
