@@ -18,8 +18,7 @@ using namespace testing;
 using namespace std::string_literals;
 using namespace std::chrono_literals;
 
-using AddReportFutureVersionVariantForSet =
-    utils::WithoutMonostate<AddReportFutureVersionVariant>;
+using AddReportVariantForSet = utils::WithoutMonostate<AddReportVariant>;
 
 class TestReportManager : public Test
 {
@@ -57,10 +56,9 @@ class TestReportManager : public Test
         DbusEnvironment::synchronizeIoc();
     }
 
-    std::pair<boost::system::error_code, std::string>
-        addReport(const std::vector<
-                  std::pair<std::string, AddReportFutureVersionVariantForSet>>&
-                      properties)
+    std::pair<boost::system::error_code, std::string> addReport(
+        const std::vector<std::pair<std::string, AddReportVariantForSet>>&
+            properties)
     {
         std::promise<std::pair<boost::system::error_code, std::string>>
             addReportPromise;
@@ -70,15 +68,13 @@ class TestReportManager : public Test
                 addReportPromise.set_value({ec, path});
             },
             DbusEnvironment::serviceName(), ReportManager::reportManagerPath,
-            ReportManager::reportManagerIfaceName, "AddReportFutureVersion",
-            properties);
+            ReportManager::reportManagerIfaceName, "AddReport", properties);
         return DbusEnvironment::waitForFuture(addReportPromise.get_future());
     }
 
     auto addReport(const ReportParams& params)
     {
-        std::vector<std::pair<std::string, AddReportFutureVersionVariantForSet>>
-            properties;
+        std::vector<std::pair<std::string, AddReportVariantForSet>> properties;
 
         properties.emplace_back("Id", params.reportId());
         properties.emplace_back("Name", params.reportName());
@@ -163,8 +159,7 @@ TEST_F(TestReportManager, addReportWithOnlyDefaultParams)
         .WillOnce(Return(ByMove(std::move(reportMockPtr))));
 
     auto [ec, path] = addReport(
-        std::vector<
-            std::pair<std::string, AddReportFutureVersionVariantForSet>>{});
+        std::vector<std::pair<std::string, AddReportVariantForSet>>{});
     EXPECT_THAT(ec.value(), Eq(boost::system::errc::success));
     EXPECT_THAT(path, Eq(reportMock.getPath()));
 }
