@@ -16,10 +16,6 @@
 #include <variant>
 #include <vector>
 
-using ReadingParametersPastVersion =
-    std::vector<std::tuple<sdbusplus::message::object_path, std::string,
-                           std::string, std::string>>;
-
 using ReadingParameters = std::vector<std::tuple<
     std::vector<std::tuple<sdbusplus::message::object_path, std::string>>,
     std::string, std::string, std::string, uint64_t>>;
@@ -31,7 +27,7 @@ using LabeledMetricParameters = utils::LabeledTuple<
     utils::tstring::Id, utils::tstring::CollectionTimeScope,
     utils::tstring::CollectionDuration>;
 
-using AddReportFutureVersionVariant =
+using AddReportVariant =
     std::variant<std::monostate, bool, uint64_t, std::string,
                  std::vector<std::string>, ReadingParameters>;
 
