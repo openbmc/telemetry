@@ -161,6 +161,16 @@ class TestReport : public Test
                                                property, newValue);
     }
 
+    template <class... Args>
+    static boost::system::error_code callMethod(const std::string& path,
+                                                const std::string& method,
+                                                Args&&... args)
+    {
+        return DbusEnvironment::callMethod(path, Report::reportIfaceName,
+                                           "SetReportingProperties",
+                                           std::forward<Args>(args)...);
+    }
+
     template <class T>
     struct ChangePropertyParams
     {
@@ -242,16 +252,13 @@ TEST_F(TestReport, verifyIfPropertiesHaveValidValue)
         getProperty<bool>(sut->getPath(), "LogToMetricReportsCollection"),
         Eq(utils::contains(defaultParams().reportActions(),
                            ReportAction::logToMetricReportsCollection)));
-    EXPECT_THAT(getProperty<ReadingParameters>(
-                    sut->getPath(), "ReadingParametersFutureVersion"),
-                Eq(toReadingParameters(defaultParams().metricParameters())));
+    EXPECT_THAT(
+        getProperty<ReadingParameters>(sut->getPath(), "ReadingParameters"),
+        Eq(toReadingParameters(defaultParams().metricParameters())));
     EXPECT_THAT(getProperty<std::string>(sut->getPath(), "Name"),
                 Eq(defaultParams().reportName()));
     EXPECT_THAT(
         getProperty<std::vector<object_path>>(sut->getPath(), "Triggers"),
-        IsEmpty());
-    EXPECT_THAT(
-        getProperty<ErrorMessagesDbusType>(sut->getPath(), "ErrorMessages"),
         IsEmpty());
 }
 
@@ -277,12 +284,11 @@ TEST_F(TestReport, setReadingParametersWithNewParams)
     EXPECT_CALL(*reportFactoryMock, updateMetrics(_, _, _))
         .WillOnce(SetArgReferee<0>(metrics));
     EXPECT_THAT(
-        setProperty(sut->getPath(), "ReadingParametersFutureVersion", newParams)
-            .value(),
+        setProperty(sut->getPath(), "ReadingParameters", newParams).value(),
         Eq(boost::system::errc::success));
-    EXPECT_THAT(getProperty<ReadingParameters>(
-                    sut->getPath(), "ReadingParametersFutureVersion"),
-                Eq(newParams));
+    EXPECT_THAT(
+        getProperty<ReadingParameters>(sut->getPath(), "ReadingParameters"),
+        Eq(newParams));
 }
 
 TEST_F(TestReport, setReadingParametersWithTooLongMetricId)
@@ -301,30 +307,9 @@ TEST_F(TestReport, setReadingParametersWithTooLongMetricId)
             CollectionDuration(250ms)}}});
 
     changeProperty<ReadingParameters>(
-        sut->getPath(), "ReadingParametersFutureVersion",
+        sut->getPath(), "ReadingParameters",
         {.valueBefore = Eq(currentValue),
          .newValue = newParams,
-         .ec = Eq(boost::system::errc::invalid_argument),
-         .valueAfter = Eq(currentValue)});
-}
-
-TEST_F(TestReport, setReportingTypeWithValidNewType)
-{
-    changeProperty<std::string>(
-        sut->getPath(), "ReportingType",
-        {.valueBefore = Not(Eq(utils::enumToString(ReportingType::onRequest))),
-         .newValue = utils::enumToString(ReportingType::onRequest)});
-}
-
-TEST_F(TestReport, setReportingTypeWithInvalidType)
-{
-    const std::string currentValue =
-        utils::enumToString(defaultParams().reportingType());
-
-    changeProperty<std::string>(
-        sut->getPath(), "ReportingType",
-        {.valueBefore = Eq(currentValue),
-         .newValue = "Periodic_ABC",
          .ec = Eq(boost::system::errc::invalid_argument),
          .valueAfter = Eq(currentValue)});
 }
@@ -431,113 +416,73 @@ TEST_F(TestReport, setEnabledWithNewValue)
     EXPECT_THAT(getProperty<bool>(sut->getPath(), "Enabled"), Eq(newValue));
 }
 
-TEST_F(TestReport, setIntervalWithValidValue)
+TEST_F(TestReport, setReportingPropertiesWithValidValues)
 {
     uint64_t newValue = ReportManager::minInterval.count() * 42;
-    EXPECT_THAT(setProperty(sut->getPath(), "Interval", newValue).value(),
+    EXPECT_THAT(callMethod(sut->getPath(), "SetReportingProperties", "Periodic",
+                           newValue),
                 Eq(boost::system::errc::success));
     EXPECT_THAT(getProperty<uint64_t>(sut->getPath(), "Interval"),
                 Eq(newValue));
 }
 
-TEST_F(
-    TestReport,
-    settingIntervalWithInvalidValueDoesNotChangePropertyAndReturnsInvalidArgument)
+TEST_F(TestReport, failsToSetInvalidInterval)
 {
     uint64_t newValue = ReportManager::minInterval.count() - 1;
-    EXPECT_THAT(setProperty(sut->getPath(), "Interval", newValue).value(),
-                Eq(boost::system::errc::invalid_argument));
+
+    EXPECT_THAT(
+        callMethod(sut->getPath(), "SetReportingProperties", "", newValue),
+        Eq(boost::system::errc::invalid_argument));
+
     EXPECT_THAT(getProperty<uint64_t>(sut->getPath(), "Interval"),
                 Eq(defaultParams().interval().count()));
 }
 
-TEST_F(TestReport, settingInvalidReportingTypeCreatesErrorMessage)
+TEST_F(TestReport, failsToSetIncompatibleInterval)
 {
     auto report = makeReport(defaultParams()
                                  .reportId("report2")
                                  .reportingType(ReportingType::onRequest)
                                  .interval(Milliseconds{0}));
 
-    EXPECT_THAT(
-        setProperty<std::string>(report->getPath(), "ReportingType", "Periodic")
-            .value(),
-        Eq(boost::system::errc::success));
+    uint64_t newValue = ReportManager::minInterval.count();
 
-    EXPECT_THAT(getProperty<std::string>(report->getPath(), "ReportingType"),
-                Eq("Periodic"));
     EXPECT_THAT(
-        getProperty<ErrorMessagesDbusType>(report->getPath(), "ErrorMessages"),
-        UnorderedElementsAre(
-            ErrorMessageDbusType(
-                utils::enumToString(ErrorType::propertyConflict), "Interval"),
-            ErrorMessageDbusType(
-                utils::enumToString(ErrorType::propertyConflict),
-                "ReportingType")));
+        callMethod(report->getPath(), "SetReportingProperties", "", newValue),
+        Eq(boost::system::errc::invalid_argument));
+
+    EXPECT_THAT(getProperty<uint64_t>(report->getPath(), "Interval"),
+                Eq(defaultParams().interval().count()));
 }
 
-TEST_F(TestReport, settingValidReportingTypeRemovesErrors)
+TEST_F(TestReport, failsToSetInvalidReportingType)
 {
     auto report = makeReport(defaultParams()
                                  .reportId("report2")
                                  .reportingType(ReportingType::onRequest)
                                  .interval(Milliseconds{0}));
 
-    EXPECT_THAT(
-        setProperty<std::string>(report->getPath(), "ReportingType", "Periodic")
-            .value(),
-        Eq(boost::system::errc::success));
-    EXPECT_THAT(setProperty<std::string>(report->getPath(), "ReportingType",
-                                         "OnRequest")
-                    .value(),
-                Eq(boost::system::errc::success));
+    EXPECT_THAT(callMethod(sut->getPath(), "SetReportingProperties", "XYZ",
+                           std::numeric_limits<uint64_t>::max()),
+                Eq(boost::system::errc::invalid_argument));
 
     EXPECT_THAT(getProperty<std::string>(report->getPath(), "ReportingType"),
                 Eq("OnRequest"));
-    EXPECT_THAT(
-        getProperty<ErrorMessagesDbusType>(report->getPath(), "ErrorMessages"),
-        IsEmpty());
 }
 
-TEST_F(TestReport, settingInvalidIntervalDisablesReport)
+TEST_F(TestReport, failsToSetIncompatibleReportingType)
 {
     auto report = makeReport(defaultParams()
                                  .reportId("report2")
-                                 .reportingType(ReportingType::periodic)
-                                 .interval(ReportManager::minInterval));
+                                 .reportingType(ReportingType::onRequest)
+                                 .interval(Milliseconds{0}));
 
-    EXPECT_THAT(setProperty<uint64_t>(report->getPath(), "Interval", 0).value(),
-                Eq(boost::system::errc::success));
+    EXPECT_THAT(callMethod(sut->getPath(), "SetReportingProperties", "Periodic",
+                           std::numeric_limits<uint64_t>::max()),
+                Eq(boost::system::errc::invalid_argument));
 
-    EXPECT_THAT(getProperty<uint64_t>(report->getPath(), "Interval"), Eq(0u));
-    EXPECT_THAT(
-        getProperty<ErrorMessagesDbusType>(report->getPath(), "ErrorMessages"),
-        UnorderedElementsAre(
-            ErrorMessageDbusType(
-                utils::enumToString(ErrorType::propertyConflict), "Interval"),
-            ErrorMessageDbusType(
-                utils::enumToString(ErrorType::propertyConflict),
-                "ReportingType")));
-}
-
-TEST_F(TestReport, settingValidIntervalEnablesReport)
-{
-    auto report = makeReport(defaultParams()
-                                 .reportId("report2")
-                                 .reportingType(ReportingType::periodic)
-                                 .interval(ReportManager::minInterval));
-
-    EXPECT_THAT(setProperty<uint64_t>(report->getPath(), "Interval", 0).value(),
-                Eq(boost::system::errc::success));
-    EXPECT_THAT(setProperty<uint64_t>(report->getPath(), "Interval",
-                                      ReportManager::minInterval.count())
-                    .value(),
-                Eq(boost::system::errc::success));
-
-    EXPECT_THAT(getProperty<uint64_t>(report->getPath(), "Interval"),
-                Eq(ReportManager::minInterval.count()));
-    EXPECT_THAT(
-        getProperty<ErrorMessagesDbusType>(report->getPath(), "ErrorMessages"),
-        IsEmpty());
+    EXPECT_THAT(getProperty<std::string>(report->getPath(), "ReportingType"),
+                Eq("OnRequest"));
 }
 
 TEST_F(TestReport, settingEmitsReadingsUpdateHaveNoEffect)
@@ -895,10 +840,13 @@ class TestReportNonOnRequestType :
     }
 };
 
-INSTANTIATE_TEST_SUITE_P(
-    _, TestReportNonOnRequestType,
-    Values(defaultParams().reportingType(ReportingType::periodic),
-           defaultParams().reportingType(ReportingType::onChange)));
+INSTANTIATE_TEST_SUITE_P(_, TestReportNonOnRequestType,
+                         Values(defaultParams()
+                                    .reportingType(ReportingType::periodic)
+                                    .interval(ReportManager::minInterval * 10),
+                                defaultParams()
+                                    .reportingType(ReportingType::onChange)
+                                    .interval(Milliseconds(0))));
 
 TEST_P(TestReportNonOnRequestType, readingsAreNotUpdateOnUpdateCall)
 {
@@ -983,9 +931,8 @@ class TestReportWithReportUpdatesAndLimit :
 
     void changeReport(ReportingType rt, Milliseconds interval)
     {
-        setProperty<std::string>(sut->getPath(), "ReportingType",
-                                 utils::enumToString(rt));
-        setProperty<uint64_t>(sut->getPath(), "Interval", interval.count());
+        callMethod(sut->getPath(), "SetReportingProperties",
+                   utils::enumToString(rt), interval.count());
     }
 
     auto readings()
@@ -1274,7 +1221,8 @@ TEST_F(TestReportInitialization,
 
     sut = makeReport(defaultParams()
                          .reportingType(ReportingType::periodic)
-                         .reportActions({}));
+                         .reportActions({})
+                         .interval(Milliseconds(1000)));
     makeMonitor();
     DbusEnvironment::sleepFor(defaultParams().interval() * 2);
 }
