@@ -15,23 +15,6 @@
 #include <stdexcept>
 #include <system_error>
 
-ReadingParameters
-    convertToReadingParameters(ReadingParametersPastVersion params)
-{
-    return utils::transform(params, [](const auto& param) {
-        using namespace std::chrono_literals;
-
-        const auto& [sensorPath, operationType, id, metadata] = param;
-
-        return ReadingParameters::value_type(
-            std::vector<
-                std::tuple<sdbusplus::message::object_path, std::string>>{
-                {sensorPath, metadata}},
-            operationType, id, utils::enumToString(CollectionTimeScope::point),
-            0u);
-    });
-}
-
 ReportManager::ReportManager(
     std::unique_ptr<interfaces::ReportFactory> reportFactoryIn,
     std::unique_ptr<interfaces::JsonStorage> reportStorageIn,
@@ -62,46 +45,10 @@ ReportManager::ReportManager(
                 });
 
             dbusIface.register_method(
-                "AddReport", [this](boost::asio::yield_context& yield,
-                                    const std::string& reportId,
-                                    const std::string& reportingType,
-                                    const bool emitsReadingsUpdate,
-                                    const bool logToMetricReportsCollection,
-                                    const uint64_t interval,
-                                    ReadingParametersPastVersion metricParams) {
-                    constexpr auto enabledDefault = true;
-                    constexpr ReportUpdates reportUpdatesDefault =
-                        ReportUpdates::overwrite;
-
-                    std::vector<ReportAction> reportActions;
-
-                    if (emitsReadingsUpdate)
-                    {
-                        reportActions.emplace_back(
-                            ReportAction::emitsReadingsUpdate);
-                    }
-                    if (logToMetricReportsCollection)
-                    {
-                        reportActions.emplace_back(
-                            ReportAction::logToMetricReportsCollection);
-                    }
-
-                    return addReport(yield, reportId, reportId,
-                                     utils::toReportingType(reportingType),
-                                     reportActions, Milliseconds(interval),
-                                     maxAppendLimit, reportUpdatesDefault,
-                                     convertToReadingParameters(
-                                         std::move(metricParams)),
-                                     enabledDefault)
-                        .getPath();
-                });
-
-            dbusIface.register_method(
-                "AddReportFutureVersion",
+                "AddReport",
                 [this](
                     boost::asio::yield_context& yield,
-                    const std::vector<
-                        std::pair<std::string, AddReportFutureVersionVariant>>&
+                    const std::vector<std::pair<std::string, AddReportVariant>>&
                         properties) {
                     std::optional<std::string> reportId;
                     std::optional<std::string> reportName;

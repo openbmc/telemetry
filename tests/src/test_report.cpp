@@ -242,9 +242,9 @@ TEST_F(TestReport, verifyIfPropertiesHaveValidValue)
         getProperty<bool>(sut->getPath(), "LogToMetricReportsCollection"),
         Eq(utils::contains(defaultParams().reportActions(),
                            ReportAction::logToMetricReportsCollection)));
-    EXPECT_THAT(getProperty<ReadingParameters>(
-                    sut->getPath(), "ReadingParametersFutureVersion"),
-                Eq(toReadingParameters(defaultParams().metricParameters())));
+    EXPECT_THAT(
+        getProperty<ReadingParameters>(sut->getPath(), "ReadingParameters"),
+        Eq(toReadingParameters(defaultParams().metricParameters())));
     EXPECT_THAT(getProperty<std::string>(sut->getPath(), "Name"),
                 Eq(defaultParams().reportName()));
     EXPECT_THAT(
@@ -277,12 +277,11 @@ TEST_F(TestReport, setReadingParametersWithNewParams)
     EXPECT_CALL(*reportFactoryMock, updateMetrics(_, _, _))
         .WillOnce(SetArgReferee<0>(metrics));
     EXPECT_THAT(
-        setProperty(sut->getPath(), "ReadingParametersFutureVersion", newParams)
-            .value(),
+        setProperty(sut->getPath(), "ReadingParameters", newParams).value(),
         Eq(boost::system::errc::success));
-    EXPECT_THAT(getProperty<ReadingParameters>(
-                    sut->getPath(), "ReadingParametersFutureVersion"),
-                Eq(newParams));
+    EXPECT_THAT(
+        getProperty<ReadingParameters>(sut->getPath(), "ReadingParameters"),
+        Eq(newParams));
 }
 
 TEST_F(TestReport, setReadingParametersWithTooLongMetricId)
@@ -301,7 +300,7 @@ TEST_F(TestReport, setReadingParametersWithTooLongMetricId)
             CollectionDuration(250ms)}}});
 
     changeProperty<ReadingParameters>(
-        sut->getPath(), "ReadingParametersFutureVersion",
+        sut->getPath(), "ReadingParameters",
         {.valueBefore = Eq(currentValue),
          .newValue = newParams,
          .ec = Eq(boost::system::errc::invalid_argument),

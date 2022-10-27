@@ -48,16 +48,6 @@ Report::Report(boost::asio::io_context& ioc,
             return metric->dumpConfiguration();
         }));
 
-    readingParametersPastVersion =
-        utils::transform(readingParameters, [](const auto& item) {
-            const auto& [sensorData, operationType, id, collectionTimeScope,
-                         collectionDuration] = item;
-
-            return ReadingParametersPastVersion::value_type(
-                std::get<0>(sensorData.front()), operationType, id,
-                std::get<1>(sensorData.front()));
-        });
-
     reportActions.insert(ReportAction::logToMetricReportsCollection);
 
     deleteIface = objServer->add_unique_interface(
@@ -315,12 +305,8 @@ std::unique_ptr<sdbusplus::asio::dbus_interface>
             return 1;
         },
         [this](const auto&) { return utils::enumToString(reportingType); });
-    dbusIface->register_property_r(
-        "ReadingParameters", readingParametersPastVersion,
-        sdbusplus::vtable::property_::const_,
-        [this](const auto&) { return readingParametersPastVersion; });
     dbusIface->register_property_rw(
-        "ReadingParametersFutureVersion", readingParameters,
+        "ReadingParameters", readingParameters,
         sdbusplus::vtable::property_::emits_change,
         [this, &reportFactory](auto newVal, auto& oldVal) {
             auto labeledMetricParams =
