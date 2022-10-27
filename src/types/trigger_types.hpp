@@ -23,10 +23,15 @@ namespace details
 {
 constexpr std::array<std::pair<std::string_view, TriggerAction>, 3>
     convDataTriggerAction = {
-        std::make_pair("LogToJournal", TriggerAction::LogToJournal),
-        std::make_pair("LogToRedfishEventLog",
+        std::make_pair(
+            "xyz.openbmc_project.Telemetry.Trigger.TriggerAction.LogToJournal",
+            TriggerAction::LogToJournal),
+        std::make_pair("xyz.openbmc_project.Telemetry.Trigger.TriggerAction."
+                       "LogToRedfishEventLog",
                        TriggerAction::LogToRedfishEventLog),
-        std::make_pair("UpdateReport", TriggerAction::UpdateReport)};
+        std::make_pair(
+            "xyz.openbmc_project.Telemetry.Trigger.TriggerAction.UpdateReport",
+            TriggerAction::UpdateReport)};
 }
 
 inline TriggerAction toTriggerAction(const std::string& str)
@@ -48,25 +53,6 @@ enum class Severity
     warning,
     critical
 };
-
-namespace details
-{
-constexpr std::array<std::pair<std::string_view, Severity>, 3>
-    convDataSeverity = {std::make_pair("OK", Severity::ok),
-                        std::make_pair("Warning", Severity::warning),
-                        std::make_pair("Critical", Severity::critical)};
-
-} // namespace details
-
-inline Severity toSeverity(const std::string& str)
-{
-    return utils::toEnum(details::convDataSeverity, str);
-}
-
-inline std::string severityToString(Severity v)
-{
-    return std::string(utils::enumToString(details::convDataSeverity, v));
-}
 
 using ThresholdParam =
     std::tuple<std::string, std::string, uint64_t, std::string>;
@@ -99,15 +85,25 @@ namespace details
 {
 
 constexpr std::array<std::pair<std::string_view, Type>, 4> convDataType = {
-    std::make_pair("LowerCritical", Type::lowerCritical),
-    std::make_pair("LowerWarning", Type::lowerWarning),
-    std::make_pair("UpperWarning", Type::upperWarning),
-    std::make_pair("UpperCritical", Type::upperCritical)};
+    std::make_pair("xyz.openbmc_project.Telemetry.Trigger.Type.LowerCritical",
+                   Type::lowerCritical),
+    std::make_pair("xyz.openbmc_project.Telemetry.Trigger.Type.LowerWarning",
+                   Type::lowerWarning),
+    std::make_pair("xyz.openbmc_project.Telemetry.Trigger.Type.UpperWarning",
+                   Type::upperWarning),
+    std::make_pair("xyz.openbmc_project.Telemetry.Trigger.Type.UpperCritical",
+                   Type::upperCritical)};
 
 constexpr std::array<std::pair<std::string_view, Direction>, 3>
-    convDataDirection = {std::make_pair("Either", Direction::either),
-                         std::make_pair("Decreasing", Direction::decreasing),
-                         std::make_pair("Increasing", Direction::increasing)};
+    convDataDirection = {
+        std::make_pair("xyz.openbmc_project.Telemetry.Trigger.Direction.Either",
+                       Direction::either),
+        std::make_pair(
+            "xyz.openbmc_project.Telemetry.Trigger.Direction.Decreasing",
+            Direction::decreasing),
+        std::make_pair(
+            "xyz.openbmc_project.Telemetry.Trigger.Direction.Increasing",
+            Direction::increasing)};
 
 } // namespace details
 
@@ -180,6 +176,26 @@ inline std::string triggerValueToString(TriggerValue val)
 
 namespace utils
 {
+
+constexpr std::array<std::pair<std::string_view, discrete::Severity>, 3>
+    convDataSeverity = {
+        std::make_pair("xyz.openbmc_project.Telemetry.Trigger.Severity.OK",
+                       discrete::Severity::ok),
+        std::make_pair("xyz.openbmc_project.Telemetry.Trigger.Severity.Warning",
+                       discrete::Severity::warning),
+        std::make_pair(
+            "xyz.openbmc_project.Telemetry.Trigger.Severity.Critical",
+            discrete::Severity::critical)};
+
+inline discrete::Severity toSeverity(const std::string& str)
+{
+    return utils::toEnum(convDataSeverity, str);
+}
+
+inline std::string enumToString(discrete::Severity v)
+{
+    return std::string(enumToString(convDataSeverity, v));
+}
 
 template <>
 struct EnumTraits<TriggerAction>

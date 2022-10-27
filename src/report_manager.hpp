@@ -33,9 +33,6 @@ class ReportManager : public interfaces::ReportManager
 
     void removeReport(const interfaces::Report* report) override;
 
-    static void verifyMetricParameters(
-        const std::vector<LabeledMetricParameters>& readingParams);
-
   private:
     std::unique_ptr<interfaces::ReportFactory> reportFactory;
     std::unique_ptr<interfaces::JsonStorage> reportStorage;

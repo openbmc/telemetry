@@ -24,14 +24,19 @@ struct EnumTraits<OperationType>
 };
 
 constexpr std::array<std::pair<std::string_view, OperationType>, 4>
-    convDataOperationType = {{std::make_pair<std::string_view, OperationType>(
-                                  "Maximum", OperationType::max),
-                              std::make_pair<std::string_view, OperationType>(
-                                  "Minimum", OperationType::min),
-                              std::make_pair<std::string_view, OperationType>(
-                                  "Average", OperationType::avg),
-                              std::make_pair<std::string_view, OperationType>(
-                                  "Summation", OperationType::sum)}};
+    convDataOperationType = {
+        {std::make_pair<std::string_view, OperationType>(
+             "xyz.openbmc_project.Telemetry.Report.OperationType.Maximum",
+             OperationType::max),
+         std::make_pair<std::string_view, OperationType>(
+             "xyz.openbmc_project.Telemetry.Report.OperationType.Minimum",
+             OperationType::min),
+         std::make_pair<std::string_view, OperationType>(
+             "xyz.openbmc_project.Telemetry.Report.OperationType.Average",
+             OperationType::avg),
+         std::make_pair<std::string_view, OperationType>(
+             "xyz.openbmc_project.Telemetry.Report.OperationType.Summation",
+             OperationType::sum)}};
 
 inline OperationType
     toOperationType(std::underlying_type_t<OperationType> value)
