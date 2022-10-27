@@ -117,7 +117,6 @@ class Report : public interfaces::Report, public interfaces::MetricListener
     ReportingType reportingType;
     Milliseconds interval;
     std::unordered_set<ReportAction> reportActions;
-    ReadingParametersPastVersion readingParametersPastVersion;
     ReadingParameters readingParameters;
     bool persistency = false;
     uint64_t metricCount;
