@@ -1,6 +1,7 @@
 #include "discrete_threshold.hpp"
 
 #include "utils/conversion_trigger.hpp"
+#include "utils/to_short_enum.hpp"
 
 #include <phosphor-logging/log.hpp>
 
@@ -113,7 +114,8 @@ std::string DiscreteThreshold::getNonEmptyName(const std::string& nameIn) const
 {
     if (nameIn.empty())
     {
-        return discrete::severityToString(severity) + " condition";
+        return std::string(utils::toShortEnum(utils::enumToString(severity))) +
+               " condition";
     }
     return nameIn;
 }

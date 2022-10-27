@@ -14,9 +14,8 @@ class Metric :
     public std::enable_shared_from_this<Metric>
 {
   public:
-    Metric(Sensors sensors, OperationType operationType, std::string id,
-           CollectionTimeScope, CollectionDuration,
-           std::unique_ptr<interfaces::Clock>);
+    Metric(Sensors sensors, OperationType operationType, CollectionTimeScope,
+           CollectionDuration, std::unique_ptr<interfaces::Clock>);
 
     void initialize() override;
     void deinitialize() override;
@@ -34,7 +33,6 @@ class Metric :
     metrics::CollectionData&
         findAssociatedData(const interfaces::Sensor& notifier);
 
-    std::string id;
     std::vector<MetricValue> readings;
     Sensors sensors;
     OperationType operationType;

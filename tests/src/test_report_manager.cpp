@@ -18,8 +18,7 @@ using namespace testing;
 using namespace std::string_literals;
 using namespace std::chrono_literals;
 
-using AddReportFutureVersionVariantForSet =
-    utils::WithoutMonostate<AddReportFutureVersionVariant>;
+using AddReportVariantForSet = utils::WithoutMonostate<AddReportVariant>;
 
 class TestReportManager : public Test
 {
@@ -57,10 +56,9 @@ class TestReportManager : public Test
         DbusEnvironment::synchronizeIoc();
     }
 
-    std::pair<boost::system::error_code, std::string>
-        addReport(const std::vector<
-                  std::pair<std::string, AddReportFutureVersionVariantForSet>>&
-                      properties)
+    template <class... Args>
+        requires(sizeof...(Args) > 1)
+    std::pair<boost::system::error_code, std::string> addReport(Args&&... args)
     {
         std::promise<std::pair<boost::system::error_code, std::string>>
             addReportPromise;
@@ -70,34 +68,22 @@ class TestReportManager : public Test
                 addReportPromise.set_value({ec, path});
             },
             DbusEnvironment::serviceName(), ReportManager::reportManagerPath,
-            ReportManager::reportManagerIfaceName, "AddReportFutureVersion",
-            properties);
+            ReportManager::reportManagerIfaceName, "AddReport",
+            std::forward<Args>(args)...);
         return DbusEnvironment::waitForFuture(addReportPromise.get_future());
     }
 
     auto addReport(const ReportParams& params)
     {
-        std::vector<std::pair<std::string, AddReportFutureVersionVariantForSet>>
-            properties;
-
-        properties.emplace_back("Id", params.reportId());
-        properties.emplace_back("Name", params.reportName());
-        properties.emplace_back("ReportingType",
-                                utils::enumToString(params.reportingType()));
-        properties.emplace_back("ReportUpdates",
-                                utils::enumToString(params.reportUpdates()));
-        properties.emplace_back("AppendLimit", params.appendLimit());
-        properties.emplace_back("Enabled", params.enabled());
-        properties.emplace_back(
-            "ReportActions",
-            utils::transform(params.reportActions(), [](const auto v) {
-                return utils::enumToString(v);
-            }));
-        properties.emplace_back("Interval", params.interval().count());
-        properties.emplace_back("ReadingParameters",
-                                toReadingParameters(params.metricParameters()));
-
-        return addReport(properties);
+        return addReport(
+            params.reportId(), params.reportName(),
+            utils::enumToString(params.reportingType()),
+            utils::enumToString(params.reportUpdates()), params.appendLimit(),
+            utils::transform(
+                params.reportActions(),
+                [](const auto v) { return utils::enumToString(v); }),
+            params.interval().count(),
+            toReadingParameters(params.metricParameters()), params.enabled());
     }
 
     template <class T>
@@ -125,7 +111,10 @@ TEST_F(TestReportManager, returnsPropertySupportedOperationTypes)
 {
     EXPECT_THAT(
         getProperty<std::vector<std::string>>("SupportedOperationTypes"),
-        UnorderedElementsAre("Maximum", "Minimum", "Average", "Summation"));
+        UnorderedElementsAre(utils::enumToString(OperationType::max),
+                             utils::enumToString(OperationType::min),
+                             utils::enumToString(OperationType::avg),
+                             utils::enumToString(OperationType::sum)));
 }
 
 TEST_F(TestReportManager, addReport)
@@ -163,8 +152,10 @@ TEST_F(TestReportManager, addReportWithOnlyDefaultParams)
         .WillOnce(Return(ByMove(std::move(reportMockPtr))));
 
     auto [ec, path] = addReport(
-        std::vector<
-            std::pair<std::string, AddReportFutureVersionVariantForSet>>{});
+        "", "", "", "", std::numeric_limits<uint64_t>::max(),
+        std::vector<std::string>(), std::numeric_limits<uint64_t>::max(),
+        ReadingParameters(), true);
+
     EXPECT_THAT(ec.value(), Eq(boost::system::errc::success));
     EXPECT_THAT(path, Eq(reportMock.getPath()));
 }
@@ -235,28 +226,6 @@ TEST_F(TestReportManager, addReportWithMaxLengthPrefix)
 TEST_F(TestReportManager, addReportWithMaxLengthName)
 {
     reportParams.reportName(utils::string_utils::getMaxName());
-    reportFactoryMock.expectMake(reportParams, Ref(*sut), Ref(storageMock));
-
-    auto [ec, path] = addReport(reportParams);
-
-    EXPECT_THAT(ec.value(), Eq(boost::system::errc::success));
-    EXPECT_THAT(path, Eq("/"s + reportParams.reportId()));
-}
-
-TEST_F(TestReportManager, addReportWithMaxLengthMetricId)
-{
-    namespace ts = utils::tstring;
-    std::vector<LabeledMetricParameters> newMetricParams{
-        {LabeledMetricParameters{
-            {LabeledSensorInfo{"Service",
-                               "/xyz/openbmc_project/sensors/power/p1",
-                               "metadata1"}},
-            OperationType::avg,
-            utils::string_utils::getMaxId(),
-            CollectionTimeScope::point,
-            CollectionDuration(Milliseconds(0u))}}};
-
-    reportParams.metricParameters(newMetricParams);
     reportFactoryMock.expectMake(reportParams, Ref(*sut), Ref(storageMock));
 
     auto [ec, path] = addReport(reportParams);
@@ -338,31 +307,6 @@ TEST_F(TestReportManager, DISABLED_failToAddReportWithTooLongName)
     EXPECT_THAT(path, Eq(std::string()));
 }
 
-TEST_F(TestReportManager, DISABLED_failToAddReportWithTooLongMetricId)
-{
-    namespace ts = utils::tstring;
-
-    std::vector<LabeledMetricParameters> newMetricParams{
-        {LabeledMetricParameters{
-            {LabeledSensorInfo{"Service",
-                               "/xyz/openbmc_project/sensors/power/p1",
-                               "metadata1"}},
-            OperationType::avg,
-            utils::string_utils::getTooLongId(),
-            CollectionTimeScope::point,
-            CollectionDuration(Milliseconds(0u))}}};
-
-    reportFactoryMock.expectMake(std::nullopt, Ref(*sut), Ref(storageMock))
-        .Times(0);
-
-    reportParams.metricParameters(newMetricParams);
-
-    auto [ec, path] = addReport(reportParams);
-
-    EXPECT_THAT(ec.value(), Eq(boost::system::errc::invalid_argument));
-    EXPECT_THAT(path, Eq(std::string()));
-}
-
 TEST_F(TestReportManager, DISABLED_failToAddReportTwice)
 {
     reportFactoryMock.expectMake(reportParams, Ref(*sut), Ref(storageMock))
@@ -395,8 +339,10 @@ TEST_F(TestReportManager, DISABLED_failToAddReportWithInvalidReportingType)
     reportFactoryMock.expectMake(std::nullopt, Ref(*sut), Ref(storageMock))
         .Times(0);
 
-    auto [ec, path] = addReport({{"Name", reportParams.reportName()},
-                                 {"ReportingType", "InvalidReportingType"}});
+    auto [ec, path] = addReport(
+        "", "", "InvalidReportingType", "",
+        std::numeric_limits<uint64_t>::max(), std::vector<std::string>(),
+        std::numeric_limits<uint64_t>::max(), ReadingParameters(), false);
 
     EXPECT_THAT(ec.value(), Eq(boost::system::errc::invalid_argument));
     EXPECT_THAT(path, Eq(std::string()));
@@ -414,7 +360,6 @@ TEST_F(TestReportManager,
                                "/xyz/openbmc_project/sensors/power/p1",
                                "Metadata1"}},
             OperationType::avg,
-            "MetricId1",
             CollectionTimeScope::point,
             CollectionDuration(Milliseconds(0u))}}});
 
@@ -448,7 +393,6 @@ TEST_F(TestReportManager, DISABLED_failToAddReportWithMoreMetricsThanExpected)
         metricParams.emplace_back(
             LabeledMetricParameters{{},
                                     OperationType::avg,
-                                    "MetricId1",
                                     CollectionTimeScope::point,
                                     CollectionDuration(Milliseconds(0u))});
     }
@@ -476,13 +420,14 @@ TEST_F(TestReportManager, DISABLED_failToAddReportWithAppendLimitGreaterThanMax)
 
 TEST_F(TestReportManager, addReportWithAppendLimitEqualToUint64MaxIsAllowed)
 {
-    reportParams.appendLimit(std::numeric_limits<uint64_t>::max());
-
     EXPECT_CALL(reportFactoryMock, convertMetricParams(_, _));
-    reportFactoryMock.expectMake(reportParams, Ref(*sut), Ref(storageMock))
+    reportFactoryMock
+        .expectMake(reportParams.appendLimit(ReportManager::maxAppendLimit),
+                    Ref(*sut), Ref(storageMock))
         .WillOnce(Return(ByMove(std::move(reportMockPtr))));
 
-    auto [ec, path] = addReport(reportParams);
+    auto [ec, path] = addReport(
+        reportParams.appendLimit(std::numeric_limits<uint64_t>::max()));
     EXPECT_THAT(ec.value(), Eq(boost::system::errc::success));
     EXPECT_THAT(path, Eq(reportMock.getPath()));
 }
@@ -574,7 +519,6 @@ TEST_P(TestReportManagerWithAggregationOperationType,
                                "/xyz/openbmc_project/sensors/power/p1",
                                "Metadata1"}},
             operationType,
-            "MetricId1",
             CollectionTimeScope::point,
             CollectionDuration(Milliseconds(0u))}}});
 

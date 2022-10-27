@@ -3,12 +3,11 @@
 #include "utils/labeled_tuple.hpp"
 #include "utils/tstring.hpp"
 
-using ReadingData = std::tuple<std::string, std::string, double, uint64_t>;
+using ReadingData = std::tuple<std::string, double, uint64_t>;
 using Readings = std::tuple<uint64_t, std::vector<ReadingData>>;
 
 using LabeledReadingData =
-    utils::LabeledTuple<ReadingData, utils::tstring::MetricId,
-                        utils::tstring::MetricProperty,
+    utils::LabeledTuple<ReadingData, utils::tstring::MetricProperty,
                         utils::tstring::MetricValue, utils::tstring::Timestamp>;
 
 using LabeledReadings =
