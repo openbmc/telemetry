@@ -113,7 +113,7 @@ std::string DiscreteThreshold::getNonEmptyName(const std::string& nameIn) const
 {
     if (nameIn.empty())
     {
-        return discrete::severityToString(severity) + " condition";
+        return utils::enumToString(severity) + " condition";
     }
     return nameIn;
 }

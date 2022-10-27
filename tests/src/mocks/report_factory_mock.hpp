@@ -21,9 +21,8 @@ class ReportFactoryMock : public interfaces::ReportFactory
                                          std::get<1>(sensorData));
                                  }),
                 utils::toOperationType(std::get<1>(params)),
-                std::get<2>(params),
-                utils::toCollectionTimeScope(std::get<3>(params)),
-                CollectionDuration(Milliseconds(std::get<4>(params))));
+                utils::toCollectionTimeScope(std::get<2>(params)),
+                CollectionDuration(Milliseconds(std::get<3>(params))));
         });
     }
 

@@ -19,7 +19,6 @@ ReadingParameters
                             sensorParameters.at_label<ts::Metadata>());
                     }),
                 utils::enumToString(metricParams.at_label<ts::OperationType>()),
-                metricParams.at_label<ts::Id>(),
                 utils::enumToString(
                     metricParams.at_label<ts::CollectionTimeScope>()),
                 metricParams.at_label<ts::CollectionDuration>().t.count());

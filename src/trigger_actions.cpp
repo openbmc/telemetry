@@ -148,7 +148,7 @@ void LogToJournal::commit(const std::string& triggerId,
     std::string msg = "Discrete condition '" + thresholdNameIn->get() +
                       "' of trigger '" + triggerId + "' is met on sensor " +
                       sensorName + ", recorded value: " + value +
-                      ", severity: " + ::discrete::severityToString(severity) +
+                      ", severity: " + utils::enumToString(severity) +
                       ", timestamp: " + timestampToString(timestamp);
 
     phosphor::logging::log<phosphor::logging::level::INFO>(msg.c_str());

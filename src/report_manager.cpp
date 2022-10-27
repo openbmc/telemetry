@@ -15,23 +15,6 @@
 #include <stdexcept>
 #include <system_error>
 
-ReadingParameters
-    convertToReadingParameters(ReadingParametersPastVersion params)
-{
-    return utils::transform(params, [](const auto& param) {
-        using namespace std::chrono_literals;
-
-        const auto& [sensorPath, operationType, id, metadata] = param;
-
-        return ReadingParameters::value_type(
-            std::vector<
-                std::tuple<sdbusplus::message::object_path, std::string>>{
-                {sensorPath, metadata}},
-            operationType, id, utils::enumToString(CollectionTimeScope::point),
-            0u);
-    });
-}
-
 ReportManager::ReportManager(
     std::unique_ptr<interfaces::ReportFactory> reportFactoryIn,
     std::unique_ptr<interfaces::JsonStorage> reportStorageIn,
@@ -60,100 +43,47 @@ ReportManager::ReportManager(
                             return std::string(item.first);
                         });
                 });
-
             dbusIface.register_method(
-                "AddReport", [this](boost::asio::yield_context& yield,
-                                    const std::string& reportId,
-                                    const std::string& reportingType,
-                                    const bool emitsReadingsUpdate,
-                                    const bool logToMetricReportsCollection,
-                                    const uint64_t interval,
-                                    ReadingParametersPastVersion metricParams) {
-                    constexpr auto enabledDefault = true;
-                    constexpr ReportUpdates reportUpdatesDefault =
-                        ReportUpdates::overwrite;
-
-                    std::vector<ReportAction> reportActions;
-
-                    if (emitsReadingsUpdate)
+                "AddReport",
+                [this](boost::asio::yield_context& yield, std::string reportId,
+                       std::string reportName, std::string reportingType,
+                       std::string reportUpdates, uint64_t appendLimit,
+                       std::vector<std::string> reportActions,
+                       uint64_t interval, ReadingParameters readingParameters,
+                       bool enabled) {
+                    if (reportingType.empty())
                     {
-                        reportActions.emplace_back(
-                            ReportAction::emitsReadingsUpdate);
-                    }
-                    if (logToMetricReportsCollection)
-                    {
-                        reportActions.emplace_back(
-                            ReportAction::logToMetricReportsCollection);
+                        reportingType =
+                            utils::enumToString(ReportingType::onRequest);
                     }
 
-                    return addReport(yield, reportId, reportId,
+                    if (reportUpdates.empty())
+                    {
+                        reportUpdates =
+                            utils::enumToString(ReportUpdates::overwrite);
+                    }
+
+                    if (appendLimit == std::numeric_limits<uint64_t>::max())
+                    {
+                        appendLimit = maxAppendLimit;
+                    }
+
+                    if (interval == std::numeric_limits<uint64_t>::max())
+                    {
+                        interval = 0;
+                    }
+
+                    return addReport(yield, reportId, reportName,
                                      utils::toReportingType(reportingType),
-                                     reportActions, Milliseconds(interval),
-                                     maxAppendLimit, reportUpdatesDefault,
-                                     convertToReadingParameters(
-                                         std::move(metricParams)),
-                                     enabledDefault)
-                        .getPath();
-                });
-
-            dbusIface.register_method(
-                "AddReportFutureVersion",
-                [this](
-                    boost::asio::yield_context& yield,
-                    const std::vector<
-                        std::pair<std::string, AddReportFutureVersionVariant>>&
-                        properties) {
-                    std::optional<std::string> reportId;
-                    std::optional<std::string> reportName;
-                    std::optional<std::string> reportingType;
-                    std::optional<std::vector<std::string>> reportActions;
-                    std::optional<uint64_t> interval;
-                    std::optional<uint64_t> appendLimit;
-                    std::optional<std::string> reportUpdates;
-                    std::optional<ReadingParameters> metricParams;
-                    std::optional<ReadingParameters> readingParameters;
-                    std::optional<bool> enabled;
-
-                    try
-                    {
-                        sdbusplus::unpackProperties(
-                            properties, "Id", reportId, "Name", reportName,
-                            "ReportingType", reportingType, "ReportActions",
-                            reportActions, "Interval", interval, "AppendLimit",
-                            appendLimit, "ReportUpdates", reportUpdates,
-                            "MetricParams", metricParams, "Enabled", enabled,
-                            "ReadingParameters", readingParameters);
-                    }
-                    catch (const sdbusplus::exception::UnpackPropertyError& e)
-                    {
-                        throw errors::InvalidArgument(e.propertyName);
-                    }
-
-                    if (readingParameters == std::nullopt)
-                    {
-                        readingParameters = metricParams;
-                    }
-
-                    return addReport(
-                               yield, reportId.value_or(""),
-                               reportName.value_or(""),
-                               utils::toReportingType(
-                                   reportingType.value_or(utils::enumToString(
-                                       ReportingType::onRequest))),
-                               utils::transform(
-                                   reportActions.value_or(
-                                       std::vector<std::string>{}),
-                                   [](const auto& reportAction) {
-                                       return utils::toReportAction(
-                                           reportAction);
-                                   }),
-                               Milliseconds(interval.value_or(0)),
-                               appendLimit.value_or(maxAppendLimit),
-                               utils::toReportUpdates(
-                                   reportUpdates.value_or(utils::enumToString(
-                                       ReportUpdates::overwrite))),
-                               readingParameters.value_or(ReadingParameters{}),
-                               enabled.value_or(true))
+                                     utils::transform(
+                                         reportActions,
+                                         [](const auto& reportAction) {
+                                             return utils::toReportAction(
+                                                 reportAction);
+                                         }),
+                                     Milliseconds(interval), appendLimit,
+                                     utils::toReportUpdates(reportUpdates),
+                                     readingParameters, enabled)
                         .getPath();
                 });
         });
@@ -165,21 +95,6 @@ void ReportManager::removeReport(const interfaces::Report* report)
         std::remove_if(reports.begin(), reports.end(),
                        [report](const auto& x) { return report == x.get(); }),
         reports.end());
-}
-
-void ReportManager::verifyMetricParameters(
-    const std::vector<LabeledMetricParameters>& readingParams)
-{
-    namespace ts = utils::tstring;
-
-    for (auto readingParam : readingParams)
-    {
-        if (readingParam.at_label<ts::Id>().length() >
-            utils::constants::maxIdNameLength)
-        {
-            throw errors::InvalidArgument("ReadingParameters.Id", "Too long.");
-        }
-    }
 }
 
 void ReportManager::verifyAddReport(
@@ -223,8 +138,6 @@ void ReportManager::verifyAddReport(
     {
         throw errors::InvalidArgument("MetricParams", "Too many.");
     }
-
-    verifyMetricParameters(readingParams);
 
     for (const LabeledMetricParameters& item : readingParams)
     {

@@ -134,7 +134,6 @@ class ReportParams final
                                 "/xyz/openbmc_project/sensors/power/p1",
                                 "metadata1"}},
              OperationType::avg,
-             "MetricId1",
              CollectionTimeScope::point,
              CollectionDuration(Milliseconds(0u))},
          LabeledMetricParameters{
@@ -142,7 +141,6 @@ class ReportParams final
                                 "/xyz/openbmc_project/sensors/power/p2",
                                 "metadata2"}},
              OperationType::avg,
-             "MetricId2",
              CollectionTimeScope::point,
              CollectionDuration(Milliseconds(0u))}}};
     bool enabledProperty = true;

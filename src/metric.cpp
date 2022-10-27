@@ -11,12 +11,12 @@
 #include <algorithm>
 
 Metric::Metric(Sensors sensorsIn, OperationType operationTypeIn,
-               std::string idIn, CollectionTimeScope timeScopeIn,
+               CollectionTimeScope timeScopeIn,
                CollectionDuration collectionDurationIn,
                std::unique_ptr<interfaces::Clock> clockIn) :
-    id(std::move(idIn)),
-    sensors(std::move(sensorsIn)), operationType(operationTypeIn),
-    collectionTimeScope(timeScopeIn), collectionDuration(collectionDurationIn),
+    sensors(std::move(sensorsIn)),
+    operationType(operationTypeIn), collectionTimeScope(timeScopeIn),
+    collectionDuration(collectionDurationIn),
     collectionAlgorithms(
         metrics::makeCollectionData(sensors.size(), operationType,
                                     collectionTimeScope, collectionDuration)),
@@ -81,7 +81,7 @@ const std::vector<MetricValue>& Metric::getUpdatedReadings()
                     i = idx;
                 }
 
-                readings.emplace_back(id, sensors[i]->metadata(), *value,
+                readings.emplace_back(sensors[i]->metadata(), *value,
                                       systemTimestamp);
             }
         }
@@ -122,7 +122,7 @@ LabeledMetricParameters Metric::dumpConfiguration() const
                                  sensor->metadata());
     });
 
-    return LabeledMetricParameters(std::move(sensorPath), operationType, id,
+    return LabeledMetricParameters(std::move(sensorPath), operationType,
                                    collectionTimeScope, collectionDuration);
 }
 

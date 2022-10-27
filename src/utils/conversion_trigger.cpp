@@ -36,7 +36,7 @@ LabeledTriggerThresholdParams ToLabeledThresholdParamConversion::operator()(
         const auto& [userId, severity, dwellTime, thresholdValue] =
             thresholdParam;
         return discrete::LabeledThresholdParam(
-            userId, discrete::toSeverity(severity), dwellTime, thresholdValue);
+            userId, utils::toSeverity(severity), dwellTime, thresholdValue);
     });
 }
 
@@ -62,7 +62,7 @@ TriggerThresholdParams FromLabeledThresholdParamConversion::operator()(
         arg, [](const discrete::LabeledThresholdParam& labeledThresholdParam) {
             return discrete::ThresholdParam(
                 labeledThresholdParam.at_label<ts::UserId>(),
-                discrete::severityToString(
+                utils::enumToString(
                     labeledThresholdParam.at_label<ts::Severity>()),
                 labeledThresholdParam.at_label<ts::DwellTime>(),
                 labeledThresholdParam.at_label<ts::ThresholdValue>());
@@ -104,8 +104,7 @@ TriggerThresholdParams
             }
             return discrete::ThresholdParam(
                 paramUnpacked->at_label<ts::UserId>(),
-                discrete::severityToString(
-                    paramUnpacked->at_label<ts::Severity>()),
+                utils::enumToString(paramUnpacked->at_label<ts::Severity>()),
                 paramUnpacked->at_label<ts::DwellTime>(),
                 paramUnpacked->at_label<ts::ThresholdValue>());
         });

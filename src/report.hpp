@@ -109,7 +109,7 @@ class Report : public interfaces::Report, public interfaces::MetricListener
     bool shouldStoreMetricValues() const;
     void updateReadings();
     void scheduleTimer();
-    std::vector<ErrorMessage> verify() const;
+    static std::vector<ErrorMessage> verify(ReportingType, Milliseconds);
 
     std::string id;
     const sdbusplus::message::object_path path;
@@ -117,7 +117,6 @@ class Report : public interfaces::Report, public interfaces::MetricListener
     ReportingType reportingType;
     Milliseconds interval;
     std::unordered_set<ReportAction> reportActions;
-    ReadingParametersPastVersion readingParametersPastVersion;
     ReadingParameters readingParameters;
     bool persistency = false;
     uint64_t metricCount;
@@ -139,7 +138,6 @@ class Report : public interfaces::Report, public interfaces::MetricListener
     utils::Ensure<std::function<void()>> unregisterFromMetrics;
     State<ReportFlags, Report, ReportFlags::enabled, ReportFlags::valid> state{
         *this};
-    std::vector<ErrorMessage> errorMessages;
 
   public:
     static constexpr const char* reportIfaceName =

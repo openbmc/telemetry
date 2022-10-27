@@ -26,19 +26,19 @@ std::unique_ptr<interfaces::Report> ReportFactory::make(
     std::vector<LabeledMetricParameters> labeledMetricParams, bool enabled,
     Readings readings) const
 {
-    auto metrics = utils::transform(
-        labeledMetricParams,
-        [this](const LabeledMetricParameters& param)
-            -> std::shared_ptr<interfaces::Metric> {
-            namespace ts = utils::tstring;
+    auto metrics =
+        utils::transform(labeledMetricParams,
+                         [this](const LabeledMetricParameters& param)
+                             -> std::shared_ptr<interfaces::Metric> {
+                             namespace ts = utils::tstring;
 
-            return std::make_shared<Metric>(
-                getSensors(param.at_label<ts::SensorPath>()),
-                param.at_label<ts::OperationType>(), param.at_label<ts::Id>(),
-                param.at_label<ts::CollectionTimeScope>(),
-                param.at_label<ts::CollectionDuration>(),
-                std::make_unique<Clock>());
-        });
+                             return std::make_shared<Metric>(
+                                 getSensors(param.at_label<ts::SensorPath>()),
+                                 param.at_label<ts::OperationType>(),
+                                 param.at_label<ts::CollectionTimeScope>(),
+                                 param.at_label<ts::CollectionDuration>(),
+                                 std::make_unique<Clock>());
+                         });
 
     return std::make_unique<Report>(
         bus->get_io_context(), objServer, id, name, reportingType,
@@ -73,7 +73,6 @@ void ReportFactory::updateMetrics(
         newMetrics.emplace_back(std::make_shared<Metric>(
             getSensors(labeledMetricParam.at_label<ts::SensorPath>()),
             labeledMetricParam.at_label<ts::OperationType>(),
-            labeledMetricParam.at_label<ts::Id>(),
             labeledMetricParam.at_label<ts::CollectionTimeScope>(),
             labeledMetricParam.at_label<ts::CollectionDuration>(),
             std::make_unique<Clock>()));
@@ -143,7 +142,7 @@ std::vector<LabeledMetricParameters>
     try
     {
         return utils::transform(metricParams, [&tree](const auto& item) {
-            auto [sensorPaths, operationType, id, collectionTimeScope,
+            auto [sensorPaths, operationType, collectionTimeScope,
                   collectionDuration] = item;
 
             std::vector<LabeledSensorInfo> sensorParameters;
@@ -188,7 +187,7 @@ std::vector<LabeledMetricParameters>
 
             return LabeledMetricParameters(
                 std::move(sensorParameters),
-                utils::toOperationType(operationType), id,
+                utils::toOperationType(operationType),
                 utils::toCollectionTimeScope(collectionTimeScope),
                 CollectionDuration(Milliseconds(collectionDuration)));
         });

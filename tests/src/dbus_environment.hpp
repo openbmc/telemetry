@@ -131,6 +131,23 @@ class DbusEnvironment : public ::testing::Environment
         return DbusEnvironment::waitForFuture(std::move(future));
     }
 
+    template <class... Args>
+    static boost::system::error_code
+        callMethod(const std::string& path, const std::string& interface,
+                   const std::string& method, Args&&... args)
+    {
+        auto promise = std::promise<boost::system::error_code>();
+        auto future = promise.get_future();
+        DbusEnvironment::getBus()->async_method_call(
+            [promise =
+                 std::move(promise)](boost::system::error_code ec) mutable {
+                promise.set_value(ec);
+            },
+            DbusEnvironment::serviceName(), path, interface, method,
+            std::forward<Args>(args)...);
+        return DbusEnvironment::waitForFuture(std::move(future));
+    }
+
   private:
     static std::future<bool> getFuture(std::string_view name);
 

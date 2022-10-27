@@ -23,12 +23,14 @@ struct EnumTraits<ReportAction>
 };
 
 constexpr std::array<std::pair<std::string_view, ReportAction>, 2>
-    convDataReportAction = {
-        {std::make_pair<std::string_view, ReportAction>(
-             "EmitsReadingsUpdate", ReportAction::emitsReadingsUpdate),
-         std::make_pair<std::string_view, ReportAction>(
-             "LogToMetricReportsCollection",
-             ReportAction::logToMetricReportsCollection)}};
+    convDataReportAction = {{std::make_pair<std::string_view, ReportAction>(
+                                 "xyz.openbmc_project.Telemetry.Report."
+                                 "ReportActions.EmitsReadingsUpdate",
+                                 ReportAction::emitsReadingsUpdate),
+                             std::make_pair<std::string_view, ReportAction>(
+                                 "xyz.openbmc_project.Telemetry.Report."
+                                 "ReportActions.LogToMetricReportsCollection",
+                                 ReportAction::logToMetricReportsCollection)}};
 
 inline ReportAction toReportAction(std::underlying_type_t<ReportAction> value)
 {
