@@ -70,7 +70,6 @@ ReportManager::ReportManager(
                                     const uint64_t interval,
                                     ReadingParametersPastVersion metricParams) {
                     constexpr auto enabledDefault = true;
-                    constexpr uint64_t appendLimitDefault = 0;
                     constexpr ReportUpdates reportUpdatesDefault =
                         ReportUpdates::overwrite;
 
@@ -90,7 +89,7 @@ ReportManager::ReportManager(
                     return addReport(yield, reportId, reportId,
                                      utils::toReportingType(reportingType),
                                      reportActions, Milliseconds(interval),
-                                     appendLimitDefault, reportUpdatesDefault,
+                                     maxAppendLimit, reportUpdatesDefault,
                                      convertToReadingParameters(
                                          std::move(metricParams)),
                                      enabledDefault)

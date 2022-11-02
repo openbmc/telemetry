@@ -285,34 +285,6 @@ TEST_F(TestReport, setReadingParametersWithNewParams)
                 Eq(newParams));
 }
 
-TEST_F(TestReport, setReadingParametersWithNewParamsUpdatesSensorCount)
-{
-    auto report =
-        makeReport(ReportParams()
-                       .appendLimit(std::numeric_limits<uint64_t>::max())
-                       .reportId("DefaultAppendLimit"));
-
-    ReadingParameters newParams = toReadingParameters(
-        std::vector<LabeledMetricParameters>{{LabeledMetricParameters{
-            {LabeledSensorInfo{"Service",
-                               "/xyz/openbmc_project/sensors/power/psu",
-                               "NewMetadata123"}},
-            OperationType::avg,
-            "NewMetricId123",
-            CollectionTimeScope::startup,
-            CollectionDuration(250ms)}}});
-    auto metrics = getMetricsFromReadingParams(newParams);
-
-    EXPECT_CALL(*reportFactoryMock, updateMetrics(_, _, _))
-        .WillOnce(SetArgReferee<0>(metrics));
-    EXPECT_THAT(setProperty(report->getPath(), "ReadingParametersFutureVersion",
-                            newParams)
-                    .value(),
-                Eq(boost::system::errc::success));
-    EXPECT_THAT(getProperty<uint64_t>(report->getPath(), "AppendLimit"),
-                Eq(1ull));
-}
-
 TEST_F(TestReport, setReadingParametersWithTooLongMetricId)
 {
     const ReadingParameters currentValue =
@@ -707,7 +679,7 @@ INSTANTIATE_TEST_SUITE_P(
     _, TestReportStore,
     Values(
         std::make_pair("Enabled"s, nlohmann::json(defaultParams().enabled())),
-        std::make_pair("Version"s, nlohmann::json(6)),
+        std::make_pair("Version"s, nlohmann::json(7)),
         std::make_pair("Id"s, nlohmann::json(defaultParams().reportId())),
         std::make_pair("Name"s, nlohmann::json(defaultParams().reportName())),
         std::make_pair("ReportingType",
@@ -965,6 +937,7 @@ class TestReportPeriodicReport : public TestReport
     void SetUp() override
     {
         sut = makeReport(defaultParams()
+                             .appendLimit(2u)
                              .reportingType(ReportingType::periodic)
                              .interval(ReportManager::minInterval));
     }
@@ -1125,7 +1098,7 @@ INSTANTIATE_TEST_SUITE_P(
         ReportUpdatesReportParams{
             defaultParams()
                 .reportUpdates(ReportUpdates::appendStopsWhenFull)
-                .appendLimit(std::numeric_limits<uint64_t>::max()),
+                .appendLimit(2u),
             std::vector<ReadingData>{
                 {std::make_tuple("a"s, "b"s, 17.1, 114u),
                  std::make_tuple("aa"s, "bb"s, 42.0, 74u)}},
@@ -1149,6 +1122,7 @@ TEST_P(TestReportWithReportUpdatesAndLimit,
        appendLimitIsRespectedAfterChangingToPeriodic)
 {
     sut = makeReport(ReportParams(GetParam().reportParams)
+                         .appendLimit(GetParam().expectedReadings.size())
                          .reportingType(ReportingType::onRequest)
                          .interval(std::chrono::hours(0)));
 
@@ -1303,23 +1277,6 @@ TEST_F(TestReportInitialization,
                          .reportActions({}));
     makeMonitor();
     DbusEnvironment::sleepFor(defaultParams().interval() * 2);
-}
-
-TEST_F(TestReportInitialization, appendLimitDeducedProperly)
-{
-    sut = makeReport(
-        defaultParams().appendLimit(std::numeric_limits<uint64_t>::max()));
-    auto appendLimit = getProperty<uint64_t>(sut->getPath(), "AppendLimit");
-    EXPECT_EQ(appendLimit, 2ull);
-}
-
-TEST_F(TestReportInitialization, appendLimitSetToUintMaxIsStoredCorrectly)
-{
-    sut = makeReport(
-        ReportParams().appendLimit(std::numeric_limits<uint64_t>::max()));
-
-    ASSERT_THAT(storedConfiguration.at("AppendLimit"),
-                Eq(std::numeric_limits<uint64_t>::max()));
 }
 
 TEST_F(TestReportInitialization, triggerIdsPropertyIsInitialzed)
