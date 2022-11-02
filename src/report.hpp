@@ -96,14 +96,11 @@ class Report : public interfaces::Report, public interfaces::MetricListener
                                            Report& self);
     void scheduleTimerForPeriodicReport(Milliseconds interval);
     void scheduleTimerForOnChangeReport();
-    std::optional<uint64_t>
-        deduceAppendLimit(const uint64_t appendLimitIn) const;
     uint64_t deduceBufferSize(const ReportUpdates reportUpdatesIn,
                               const ReportingType reportingTypeIn) const;
     void setReadingBuffer(const ReportUpdates newReportUpdates);
     void setReportUpdates(const ReportUpdates newReportUpdates);
-    void updateSensorCount(const uint64_t newSensorCount);
-    static uint64_t getSensorCount(
+    static uint64_t getMetricCount(
         const std::vector<std::shared_ptr<interfaces::Metric>>& metrics);
     interfaces::JsonStorage::FilePath reportFileName() const;
     std::unordered_set<std::string>
@@ -123,8 +120,8 @@ class Report : public interfaces::Report, public interfaces::MetricListener
     ReadingParametersPastVersion readingParametersPastVersion;
     ReadingParameters readingParameters;
     bool persistency = false;
-    uint64_t sensorCount;
-    std::optional<uint64_t> appendLimit;
+    uint64_t metricCount;
+    uint64_t appendLimit;
     ReportUpdates reportUpdates;
     Readings readings = {};
     CircularVector<ReadingData> readingsBuffer;
@@ -149,5 +146,5 @@ class Report : public interfaces::Report, public interfaces::MetricListener
         "xyz.openbmc_project.Telemetry.Report";
     static constexpr const char* deleteIfaceName =
         "xyz.openbmc_project.Object.Delete";
-    static constexpr size_t reportVersion = 6;
+    static constexpr size_t reportVersion = 7;
 };

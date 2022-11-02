@@ -126,7 +126,7 @@ LabeledMetricParameters Metric::dumpConfiguration() const
                                    collectionTimeScope, collectionDuration);
 }
 
-uint64_t Metric::sensorCount() const
+uint64_t Metric::metricCount() const
 {
     return sensors.size();
 }

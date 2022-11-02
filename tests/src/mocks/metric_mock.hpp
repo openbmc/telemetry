@@ -13,7 +13,7 @@ class MetricMock : public interfaces::Metric
 
         ON_CALL(*this, getUpdatedReadings())
             .WillByDefault(ReturnRefOfCopy(std::vector<MetricValue>()));
-        ON_CALL(*this, sensorCount).WillByDefault(InvokeWithoutArgs([this] {
+        ON_CALL(*this, metricCount).WillByDefault(InvokeWithoutArgs([this] {
             return getUpdatedReadings().size();
         }));
     }
@@ -24,7 +24,7 @@ class MetricMock : public interfaces::Metric
                 (override));
     MOCK_METHOD(LabeledMetricParameters, dumpConfiguration, (),
                 (const, override));
-    MOCK_METHOD(uint64_t, sensorCount, (), (const, override));
+    MOCK_METHOD(uint64_t, metricCount, (), (const, override));
     MOCK_METHOD(void, registerForUpdates, (interfaces::MetricListener&),
                 (override));
     MOCK_METHOD(void, unregisterFromUpdates, (interfaces::MetricListener&),

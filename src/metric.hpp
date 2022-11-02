@@ -24,7 +24,7 @@ class Metric :
     void sensorUpdated(interfaces::Sensor&, Milliseconds,
                        double value) override;
     LabeledMetricParameters dumpConfiguration() const override;
-    uint64_t sensorCount() const override;
+    uint64_t metricCount() const override;
     void registerForUpdates(interfaces::MetricListener& listener) override;
     void unregisterFromUpdates(interfaces::MetricListener& listener) override;
     void updateReadings(Milliseconds) override;

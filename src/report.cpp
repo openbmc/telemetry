@@ -35,8 +35,7 @@ Report::Report(boost::asio::io_context& ioc,
     path(utils::pathAppend(utils::constants::reportDirPath, id)),
     name(reportName), reportingType(reportingTypeIn), interval(intervalIn),
     reportActions(reportActionsIn.begin(), reportActionsIn.end()),
-    sensorCount(getSensorCount(metricsIn)),
-    appendLimit(deduceAppendLimit(appendLimitIn)),
+    metricCount(getMetricCount(metricsIn)), appendLimit(appendLimitIn),
     reportUpdates(reportUpdatesIn), readings(std::move(readingsIn)),
     readingsBuffer(std::get<1>(readings),
                    deduceBufferSize(reportUpdates, reportingType)),
@@ -165,28 +164,15 @@ void Report::deactivate()
     }
 }
 
-uint64_t Report::getSensorCount(
+uint64_t Report::getMetricCount(
     const std::vector<std::shared_ptr<interfaces::Metric>>& metrics)
 {
-    uint64_t sensorCount = 0;
+    uint64_t metricCount = 0;
     for (auto& metric : metrics)
     {
-        sensorCount += metric->sensorCount();
+        metricCount += metric->metricCount();
     }
-    return sensorCount;
-}
-
-std::optional<uint64_t>
-    Report::deduceAppendLimit(const uint64_t appendLimitIn) const
-{
-    if (appendLimitIn == std::numeric_limits<uint64_t>::max())
-    {
-        return std::nullopt;
-    }
-    else
-    {
-        return appendLimitIn;
-    }
+    return metricCount;
 }
 
 uint64_t Report::deduceBufferSize(const ReportUpdates reportUpdatesIn,
@@ -195,11 +181,11 @@ uint64_t Report::deduceBufferSize(const ReportUpdates reportUpdatesIn,
     if (reportUpdatesIn == ReportUpdates::overwrite ||
         reportingTypeIn == ReportingType::onRequest)
     {
-        return sensorCount;
+        return metricCount;
     }
     else
     {
-        return appendLimit.value_or(sensorCount);
+        return appendLimit;
     }
 }
 
@@ -219,18 +205,6 @@ void Report::setReportUpdates(const ReportUpdates newReportUpdates)
     {
         setReadingBuffer(newReportUpdates);
         reportUpdates = newReportUpdates;
-    }
-}
-
-void Report::updateSensorCount(const uint64_t newSensorCount)
-{
-    if (sensorCount != newSensorCount)
-    {
-        sensorCount = newSensorCount;
-        if (!appendLimit.has_value())
-        {
-            reportIface->signal_property("AppendLimit");
-        }
     }
 }
 
@@ -351,7 +325,7 @@ std::unique_ptr<sdbusplus::asio::dbus_interface>
                 utils::transform(metrics, [](const auto& metric) {
                     return metric->dumpConfiguration();
                 }));
-            updateSensorCount(getSensorCount(metrics));
+            metricCount = getMetricCount(metrics);
             setReadingBuffer(reportUpdates);
             persistency = storeConfiguration();
             oldVal = std::move(newVal);
@@ -395,10 +369,9 @@ std::unique_ptr<sdbusplus::asio::dbus_interface>
                     return utils::enumToString(reportAction);
                 });
         });
-    dbusIface->register_property_r(
-        "AppendLimit", appendLimit.value_or(sensorCount),
-        sdbusplus::vtable::property_::emits_change,
-        [this](const auto&) { return appendLimit.value_or(sensorCount); });
+    dbusIface->register_property_r<uint64_t>(
+        "AppendLimit", sdbusplus::vtable::property_::emits_change,
+        [this](const auto&) { return appendLimit; });
     dbusIface->register_property_rw(
         "ReportUpdates", std::string(),
         sdbusplus::vtable::property_::emits_change,
@@ -547,8 +520,7 @@ bool Report::storeConfiguration() const
                 return utils::toUnderlying(reportAction);
             });
         data["Interval"] = interval.count();
-        data["AppendLimit"] =
-            appendLimit.value_or(std::numeric_limits<uint64_t>::max());
+        data["AppendLimit"] = appendLimit;
         data["ReportUpdates"] = utils::toUnderlying(reportUpdates);
         data["ReadingParameters"] =
             utils::transform(metrics, [](const auto& metric) {
