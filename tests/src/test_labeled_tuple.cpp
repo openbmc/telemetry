@@ -1,7 +1,6 @@
 #include "helpers.hpp"
 #include "utils/labeled_tuple.hpp"
 
-#include <iostream>
 #include <limits>
 
 #include <gmock/gmock.h>
