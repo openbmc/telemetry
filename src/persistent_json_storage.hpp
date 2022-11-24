@@ -19,4 +19,5 @@ class PersistentJsonStorage : public interfaces::JsonStorage
     static std::filesystem::path join(const std::filesystem::path&,
                                       const std::filesystem::path&);
     static void limitPermissions(const std::filesystem::path& path);
+    static void assertThatPathIsNotSymlink(const std::filesystem::path& path);
 };
