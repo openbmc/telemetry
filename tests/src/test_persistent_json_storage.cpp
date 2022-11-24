@@ -1,6 +1,8 @@
 #include "helpers.hpp"
 #include "persistent_json_storage.hpp"
 
+#include <fstream>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
@@ -110,4 +112,70 @@ TEST_F(TestPersistentJsonStorage, returnsFalseWhenDeletingNonExistingFile)
 TEST_F(TestPersistentJsonStorage, returnsNulloptWhenFileDoesntExist)
 {
     ASSERT_THAT(sut.load(fileName), Eq(std::nullopt));
+}
+
+class TestPersistentJsonStorageWithSymlink : public TestPersistentJsonStorage
+{
+  public:
+    TestPersistentJsonStorageWithSymlink()
+    {
+        std::ofstream file(dummyReportPath);
+        file << "{}";
+        file.close();
+
+        std::filesystem::create_directories(std::filesystem::path(directory) /
+                                            "report");
+        std::filesystem::create_symlink(dummyReportPath,
+                                        std::filesystem::path(directory) /
+                                            "report/symlink.json");
+    }
+
+    static void SetUpTestSuite()
+    {
+        TestPersistentJsonStorage::SetUpTestSuite();
+        ASSERT_FALSE(std::filesystem::exists(dummyReportPath));
+    }
+
+    void TearDown() override
+    {
+        TestPersistentJsonStorage::TearDown();
+        if (std::filesystem::exists(dummyReportPath))
+        {
+            std::filesystem::remove(dummyReportPath);
+        }
+    }
+
+    static const std::filesystem::path dummyReportPath;
+};
+
+const std::filesystem::path
+    TestPersistentJsonStorageWithSymlink::dummyReportPath =
+        std::filesystem::temp_directory_path() / "report";
+
+TEST_F(TestPersistentJsonStorageWithSymlink, symlinksAreNotListed)
+{
+    ASSERT_THAT(sut.list(), UnorderedElementsAre());
+}
+
+TEST_F(TestPersistentJsonStorageWithSymlink, throwsWhenStoreTargetIsSymlink)
+{
+    ASSERT_THROW(
+        sut.store(FilePath("report/symlink.json"), nlohmann::json("data")),
+        std::runtime_error);
+
+    ASSERT_THAT(sut.list(), UnorderedElementsAre());
+}
+
+TEST_F(TestPersistentJsonStorageWithSymlink, returnsNulloptWhenFileIsSymlink)
+{
+    ASSERT_THAT(sut.load(FilePath("report/symlink.json")), Eq(std::nullopt));
+}
+
+TEST_F(TestPersistentJsonStorageWithSymlink,
+       returnsFalseWhenTryingToDeleteSymlink)
+{
+    EXPECT_THAT(sut.remove(FilePath("report/symlink.json")), Eq(false));
+    EXPECT_TRUE(std::filesystem::exists(std::filesystem::path(directory) /
+                                        "report/symlink.json"));
+    EXPECT_TRUE(std::filesystem::exists(dummyReportPath));
 }
