@@ -1,6 +1,7 @@
-from redfish_requests import RedfishHttpStatus, RedfishRequest, Duration
-import pytest
 import time
+
+import pytest
+from redfish_requests import Duration, RedfishHttpStatus, RedfishRequest
 
 
 def test_get_telemetry_service(redfish):
