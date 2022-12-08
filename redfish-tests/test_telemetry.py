@@ -261,7 +261,7 @@ def test_add_report_check_if_duration_is_set(
 
 
 @pytest.mark.parametrize(
-    "invalid", ["50000", "P12ST", "PT12S12", "PPP" "PD222T222H222M222.222S"]
+    "invalid", ["50000", "P12ST", "PT12S12", "PPPPD222T222H222M222.222S"]
 )
 def test_add_report_with_invalid_duration_response_bad_request(
     invalid, report_definitions
