@@ -16,13 +16,14 @@ $ sudo pip3 install request pytest
 # Config
 
 There are few options included to tests:
+
 - `--host_addr` - address of an OpenBMC together with protocol and port, ex.
-'https://localhost:443', default: 'https://localhost:4443'
+  'https://localhost:443', default: 'https://localhost:4443'
 - `--username` - name of the user that is used during tests, user should have
-'ConfigureManager' privilege, default: 'root'
+  'ConfigureManager' privilege, default: 'root'
 - `--password` - plain password, default: '0penBmc'
 - `--metric_limit` - allows to limit number of detected metrics in system,
-default: 200
+  default: 200
 
 SSL verification is disabled during tests.
 
