@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "fee5b578_6a85f39d",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2022-12-08T13:13:08Z",
+      "side": 1,
+      "message": "This is failing due to a flaky time-based test.  When the build servers are busy this test case fails.  Can the maintainers look into this?\n\n```[  FAILED  ] SleepAfterEveryUpdate/TestNumericThresholdWithDwellTime.senorsIsUpdatedMultipleTimes/6, where GetParam() \u003d { DwellTime: 200ms , ThresholdValue: 90, Direction: 1, InitialValues: [ { SensorIndex: 0, Value: 100 },  ], Updates: [ { SensorIndex: 0, Value: 80, SleepAfter: 200ms }, { SensorIndex: 0, Value: 99, SleepAfter: 100ms }, { SensorIndex: 0, Value: 85, SleepAfter: 200ms },  ], Expected: [ { SensorIndex: 0, Value: 80, waitMin: 200ms }, { SensorIndex: 0, Value: 85, waitMin: 500ms },  ] }\n\n 1 FAILED TEST\n  YOU HAVE 30 DISABLED TESTS\n\n\n\nSummary of Failures:\n\n1/1 telemetry-ut FAIL            30.62s   exit status 1\n```\n",
+      "revId": "6f376b3c96d330adcf691918c975eca88f70fcfb",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
