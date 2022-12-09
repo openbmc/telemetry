@@ -1,9 +1,11 @@
-# Requirements
+# Redfish Tests
+
+## Requirements
 
 At least python3.6 is required and following two python packages installed -
 requests, pytest.
 
-```
+```sh
 $ python3 --version
 Python 3.6.8
 
@@ -13,7 +15,7 @@ This is pytest version 5.4.2, imported from /usr/local/lib/python3.6/site-packag
 $ sudo pip3 install request pytest
 ```
 
-# Config
+## Config
 
 There are few options included to tests:
 
@@ -27,9 +29,9 @@ There are few options included to tests:
 
 SSL verification is disabled during tests.
 
-# Run
+## Run
 
-```
+```sh
 # To run all tests in verbose mode and with stop on first failed test (s option direct all print to stdout)
  pytest test_telemetry.py -xsv
 

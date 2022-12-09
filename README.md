@@ -30,7 +30,7 @@ To build it using bitbake follow the guide from OpenBMC docs`[5]`. To build it
 using meson follow the quick guide to install meson`[6]` and then run below
 commands
 
-```
+```sh
 meson build
 cd build
 ninja
@@ -39,7 +39,7 @@ ninja
 After successful build you should be able to run telemetry binary or start unit
 tests
 
-```
+```sh
 ./tests/telemetry-ut
 ./telemetry
 ```
