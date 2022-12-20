@@ -112,10 +112,10 @@ TEST_F(TestPersistentJsonStorage, returnsNulloptWhenFileDoesntExist)
     ASSERT_THAT(sut.load(fileName), Eq(std::nullopt));
 }
 
-class TestPersistentJsonStorageWithSymlink : public TestPersistentJsonStorage
+struct TestFileSymlink
 {
-  public:
-    TestPersistentJsonStorageWithSymlink()
+    static void
+        setupSymlinks(const interfaces::JsonStorage::DirectoryPath& directory)
     {
         std::filesystem::create_directories(std::filesystem::path(directory) /
                                             "report");
@@ -123,24 +123,62 @@ class TestPersistentJsonStorageWithSymlink : public TestPersistentJsonStorage
             std::filesystem::path(directory) / "report/report.json",
             std::filesystem::path(directory) / "report/symlink.json");
     }
+
+    static constexpr std::string_view filePath = "report/symlink.json";
 };
 
-TEST_F(TestPersistentJsonStorageWithSymlink, throwsWhenStoreTargetIsSymlink)
+struct TestDirectorySymlink
 {
-    ASSERT_THROW(
-        sut.store(FilePath("report/symlink.json"), nlohmann::json("data")),
-        std::runtime_error);
+    static void
+        setupSymlinks(const interfaces::JsonStorage::DirectoryPath& directory)
+    {
+        std::filesystem::create_directories(std::filesystem::path(directory) /
+                                            "report");
+        std::filesystem::create_directory_symlink(
+            std::filesystem::path(directory) / "report",
+            std::filesystem::path(directory) / "reportLink");
+    }
 
-    ASSERT_THAT(sut.list(), UnorderedElementsAre());
+    static constexpr std::string_view filePath = "reportLink/report.json";
+};
+
+template <typename T>
+class TestPersistentJsonStorageWithSymlink : public TestPersistentJsonStorage
+{
+  public:
+    TestPersistentJsonStorageWithSymlink()
+    {
+        T::setupSymlinks(directory);
+    }
+
+    static constexpr std::string_view filePath = T::filePath;
+};
+
+using MyTypes = ::testing::Types<TestFileSymlink, TestDirectorySymlink>;
+TYPED_TEST_SUITE(TestPersistentJsonStorageWithSymlink, MyTypes);
+
+TYPED_TEST(TestPersistentJsonStorageWithSymlink, throwsWhenStoreTargetIsSymlink)
+{
+    ASSERT_THROW(TestPersistentJsonStorage::sut.store(
+                     TestPersistentJsonStorage::FilePath(TestFixture::filePath),
+                     nlohmann::json("data")),
+                 std::runtime_error);
+
+    ASSERT_THAT(TestPersistentJsonStorage::sut.list(), UnorderedElementsAre());
 }
 
-TEST_F(TestPersistentJsonStorageWithSymlink, returnsNulloptWhenFileIsSymlink)
+TYPED_TEST(TestPersistentJsonStorageWithSymlink,
+           returnsNulloptWhenFileIsSymlink)
 {
-    ASSERT_THAT(sut.load(FilePath("report/symlink.json")), Eq(std::nullopt));
+    ASSERT_THAT(TestPersistentJsonStorage::sut.load(
+                    TestPersistentJsonStorage::FilePath(TestFixture::filePath)),
+                Eq(std::nullopt));
 }
 
-TEST_F(TestPersistentJsonStorageWithSymlink,
-       returnsFalseWhenTryingToDeleteSymlink)
+TYPED_TEST(TestPersistentJsonStorageWithSymlink,
+           returnsFalseWhenTryingToDeleteSymlink)
 {
-    ASSERT_THAT(sut.remove(FilePath("report/symlink.json")), Eq(false));
+    ASSERT_THAT(TestPersistentJsonStorage::sut.remove(
+                    TestPersistentJsonStorage::FilePath(TestFixture::filePath)),
+                Eq(false));
 }

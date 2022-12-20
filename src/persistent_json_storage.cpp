@@ -9,6 +9,20 @@ PersistentJsonStorage::PersistentJsonStorage(const DirectoryPath& directory) :
     directory(directory)
 {}
 
+bool isAnySymlink(const std::filesystem::path& path)
+{
+    auto currentPath = path;
+    while (currentPath != path.root_path())
+    {
+        if (std::filesystem::is_symlink(currentPath))
+        {
+            return true;
+        }
+        currentPath = currentPath.parent_path();
+    }
+    return false;
+}
+
 void PersistentJsonStorage::store(const FilePath& filePath,
                                   const nlohmann::json& data)
 {
@@ -51,7 +65,7 @@ bool PersistentJsonStorage::remove(const FilePath& filePath)
 {
     const auto path = join(directory, filePath);
 
-    if (std::filesystem::is_symlink(path))
+    if (isAnySymlink(path))
     {
         return false;
     }
@@ -147,7 +161,7 @@ bool PersistentJsonStorage::exist(const FilePath& subPath) const
 void PersistentJsonStorage::assertThatPathIsNotSymlink(
     const std::filesystem::path& path)
 {
-    if (std::filesystem::is_symlink(path))
+    if (isAnySymlink(path))
     {
         throw std::runtime_error("Source/Target file is a symlink!");
     }
