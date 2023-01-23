@@ -7,6 +7,20 @@
 
 using namespace std::literals::string_literals;
 
+bool isAnySymlink(const std::filesystem::path& path)
+{
+    auto currentPath = path;
+    while (currentPath != path.root_path())
+    {
+        if (std::filesystem::is_symlink(currentPath))
+        {
+            return true;
+        }
+        currentPath = currentPath.parent_path();
+    }
+    return false;
+}
+
 PersistentJsonStorage::PersistentJsonStorage(const DirectoryPath& directory) :
     directory(directory)
 {}
@@ -53,7 +67,7 @@ bool PersistentJsonStorage::remove(const FilePath& filePath)
 {
     const auto path = join(directory, filePath);
 
-    if (std::filesystem::is_symlink(path))
+    if (isAnySymlink(path))
     {
         return false;
     }
@@ -114,7 +128,7 @@ std::vector<interfaces::JsonStorage::FilePath>
     for (const auto& p :
          std::filesystem::recursive_directory_iterator(directory))
     {
-        if (p.is_regular_file() && !p.is_symlink())
+        if (p.is_regular_file() && !isAnySymlink(p.path()))
         {
             auto item = std::filesystem::relative(p.path(), directory);
             result.emplace_back(std::move(item));
@@ -149,7 +163,7 @@ bool PersistentJsonStorage::exist(const FilePath& subPath) const
 void PersistentJsonStorage::assertThatPathIsNotSymlink(
     const std::filesystem::path& path)
 {
-    if (std::filesystem::is_symlink(path))
+    if (isAnySymlink(path))
     {
         throw std::runtime_error(
             "Source/Target file is a symlink! Operation canceled on path "s +
