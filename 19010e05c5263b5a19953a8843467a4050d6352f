@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "70e12c99_4273130f",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 7
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2023-03-01T07:47:53Z",
+      "side": 1,
+      "message": "Initially it was only removal of no longer used method from interface.\nNow this change makes few other things, which in ideal situation should be done in separate changes. But given that it is way easier to change dbus API in one fell swoop, I\u0027ll be okay with that. So let\u0027s just settle with the commit message extension, and I will change CR to +2.",
+      "revId": "19010e05c5263b5a19953a8843467a4050d6352f",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}

@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "fe1237de_2e322e31",
+        "filename": "src/metric.hpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2023-03-01T07:47:53Z",
+      "side": 0,
+      "message": "Removal of this property should be explained in commit message.",
+      "range": {
+        "startLine": 37,
+        "startChar": 4,
+        "endLine": 37,
+        "endChar": 19
+      },
+      "revId": "9189e35fb25188b438fd536e4f7173bbf2911473",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ba4dc414_80a2eff9",
+        "filename": "src/report_manager.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1001026
+      },
+      "writtenOn": "2023-03-01T07:47:53Z",
+      "side": 0,
+      "message": "I think it would be worth to note in commit message \nthat the \"Changed API to be more flexible in the future\" part from https://gerrit.openbmc.org/c/openbmc/telemetry/+/55103 \nwas reverted by this change",
+      "range": {
+        "startLine": 103,
+        "startChar": 20,
+        "endLine": 105,
+        "endChar": 35
+      },
+      "revId": "9189e35fb25188b438fd536e4f7173bbf2911473",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
