@@ -1,7 +1,7 @@
 project(
     'Telemetry',
     'cpp',
-    meson_version: '>=0.57.0',
+    meson_version: '>=0.58.0',
     default_options: [
         'buildtype=debugoptimized',
         'cpp_std=c++20',
@@ -128,7 +128,7 @@ configure_file(
         'after': service_after
     },
     install: true,
-    install_dir: systemd.get_variable(pkgconfig: 'systemdsystemunitdir'),
+    install_dir: systemd.get_variable('systemdsystemunitdir'),
 )
 
 if get_option('buildtest')
