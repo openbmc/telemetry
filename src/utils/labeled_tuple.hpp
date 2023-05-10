@@ -151,10 +151,8 @@ struct LabeledTuple<std::tuple<Args...>, Labels...>
     LabeledTuple(const LabeledTuple&) = default;
     LabeledTuple(LabeledTuple&&) = default;
 
-    explicit LabeledTuple(tuple_type v) : value(std::move(v))
-    {}
-    LabeledTuple(Args... args) : value(std::move(args)...)
-    {}
+    explicit LabeledTuple(tuple_type v) : value(std::move(v)) {}
+    LabeledTuple(Args... args) : value(std::move(args)...) {}
 
     LabeledTuple& operator=(const LabeledTuple&) = default;
     LabeledTuple& operator=(LabeledTuple&&) = default;
@@ -209,11 +207,9 @@ struct LabeledTuple<std::tuple<Args...>, Labels...>
     {
         return std::apply(
             [&](auto&&... x) {
-                return std::apply(
-                    [&](auto&&... y) {
-                        return (true && ... && detail::eq(x, y));
-                    },
-                    value);
+            return std::apply(
+                [&](auto&&... y) { return (true && ... && detail::eq(x, y)); },
+                value);
             },
             other.value);
     }

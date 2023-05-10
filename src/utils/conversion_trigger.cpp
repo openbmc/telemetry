@@ -21,8 +21,8 @@ LabeledTriggerThresholdParams ToLabeledThresholdParamConversion::operator()(
     const std::vector<numeric::ThresholdParam>& arg) const
 {
     return utils::transform(arg, [](const auto& thresholdParam) {
-        const auto& [type, dwellTime, direction, thresholdValue] =
-            thresholdParam;
+        const auto& [type, dwellTime, direction,
+                     thresholdValue] = thresholdParam;
         return numeric::LabeledThresholdParam(numeric::toType(type), dwellTime,
                                               numeric::toDirection(direction),
                                               thresholdValue);
@@ -33,8 +33,8 @@ LabeledTriggerThresholdParams ToLabeledThresholdParamConversion::operator()(
     const std::vector<discrete::ThresholdParam>& arg) const
 {
     return utils::transform(arg, [](const auto& thresholdParam) {
-        const auto& [userId, severity, dwellTime, thresholdValue] =
-            thresholdParam;
+        const auto& [userId, severity, dwellTime,
+                     thresholdValue] = thresholdParam;
         return discrete::LabeledThresholdParam(
             userId, discrete::toSeverity(severity), dwellTime, thresholdValue);
     });
@@ -44,14 +44,14 @@ TriggerThresholdParams FromLabeledThresholdParamConversion::operator()(
     const std::vector<numeric::LabeledThresholdParam>& arg) const
 {
     return utils::transform(
-        arg, [](const numeric::LabeledThresholdParam& labeledThresholdParam) {
-            return numeric::ThresholdParam(
-                numeric::typeToString(
-                    labeledThresholdParam.at_label<ts::Type>()),
-                labeledThresholdParam.at_label<ts::DwellTime>(),
-                numeric::directionToString(
-                    labeledThresholdParam.at_label<ts::Direction>()),
-                labeledThresholdParam.at_label<ts::ThresholdValue>());
+        arg,
+        [](const numeric::LabeledThresholdParam& labeledThresholdParam) {
+        return numeric::ThresholdParam(
+            numeric::typeToString(labeledThresholdParam.at_label<ts::Type>()),
+            labeledThresholdParam.at_label<ts::DwellTime>(),
+            numeric::directionToString(
+                labeledThresholdParam.at_label<ts::Direction>()),
+            labeledThresholdParam.at_label<ts::ThresholdValue>());
         });
 }
 

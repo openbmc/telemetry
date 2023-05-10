@@ -30,12 +30,12 @@ void Metric::registerForUpdates(interfaces::MetricListener& listener)
 
 void Metric::unregisterFromUpdates(interfaces::MetricListener& listener)
 {
-    listeners.erase(
-        std::remove_if(listeners.begin(), listeners.end(),
-                       [&listener](const interfaces::MetricListener& item) {
-                           return &item == &listener;
-                       }),
-        listeners.end());
+    listeners.erase(std::remove_if(
+                        listeners.begin(), listeners.end(),
+                        [&listener](const interfaces::MetricListener& item) {
+        return &item == &listener;
+                        }),
+                    listeners.end());
 }
 
 void Metric::initialize()
@@ -108,9 +108,10 @@ void Metric::sensorUpdated(interfaces::Sensor& notifier, Milliseconds timestamp,
 metrics::CollectionData&
     Metric::findAssociatedData(const interfaces::Sensor& notifier)
 {
-    auto it = std::find_if(
-        sensors.begin(), sensors.end(),
-        [&notifier](const auto& sensor) { return sensor.get() == &notifier; });
+    auto it = std::find_if(sensors.begin(), sensors.end(),
+                           [&notifier](const auto& sensor) {
+        return sensor.get() == &notifier;
+    });
     auto index = std::distance(sensors.begin(), it);
     return *collectionAlgorithms.at(index);
 }

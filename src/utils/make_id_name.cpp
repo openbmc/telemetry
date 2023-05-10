@@ -49,19 +49,17 @@ std::string generateId(std::string_view idIn, std::string_view nameIn,
     {
         strippedId = defaultName;
     }
-    strippedId.erase(
-        std::remove_if(
-            strippedId.begin(), strippedId.end(),
-            [](char c) {
-                return c == '/' ||
-                       utils::constants::allowedCharactersInPath.find(c) ==
-                           std::string_view::npos;
-            }),
-        strippedId.end());
+    strippedId.erase(std::remove_if(
+                         strippedId.begin(), strippedId.end(),
+                         [](char c) {
+        return c == '/' || utils::constants::allowedCharactersInPath.find(c) ==
+                               std::string_view::npos;
+                         }),
+                     strippedId.end());
 
     size_t idx = 0;
-    std::string tmpId =
-        prefixes + strippedId.substr(0, constants::maxIdNameLength);
+    std::string tmpId = prefixes +
+                        strippedId.substr(0, constants::maxIdNameLength);
 
     while (std::find(conflictIds.begin(), conflictIds.end(), tmpId) !=
            conflictIds.end())

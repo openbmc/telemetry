@@ -73,10 +73,11 @@ class TriggerFactoryMock : public interfaces::TriggerFactory
 
             return EXPECT_CALL(
                 *this, make(params.id(), params.name(),
-                            utils::transform(params.triggerActions(),
-                                             [](const auto& action) {
-                                                 return actionToString(action);
-                                             }),
+                            utils::transform(
+                                params.triggerActions(),
+                                [](const auto& action) {
+                return actionToString(action);
+                                }),
                             params.reportIds(), tm, triggerStorage,
                             params.thresholdParams(), params.sensors()));
         }

@@ -67,7 +67,7 @@ class TestReportManager : public Test
         DbusEnvironment::getBus()->async_method_call(
             [&addReportPromise](boost::system::error_code ec,
                                 const std::string& path) {
-                addReportPromise.set_value({ec, path});
+            addReportPromise.set_value({ec, path});
             },
             DbusEnvironment::serviceName(), ReportManager::reportManagerPath,
             ReportManager::reportManagerIfaceName, "AddReportFutureVersion",
@@ -88,11 +88,11 @@ class TestReportManager : public Test
                                 utils::enumToString(params.reportUpdates()));
         properties.emplace_back("AppendLimit", params.appendLimit());
         properties.emplace_back("Enabled", params.enabled());
-        properties.emplace_back(
-            "ReportActions",
-            utils::transform(params.reportActions(), [](const auto v) {
-                return utils::enumToString(v);
-            }));
+        properties.emplace_back("ReportActions",
+                                utils::transform(params.reportActions(),
+                                                 [](const auto v) {
+            return utils::enumToString(v);
+                                }));
         properties.emplace_back("Interval", params.interval().count());
         properties.emplace_back("ReadingParameters",
                                 toReadingParameters(params.metricParameters()));

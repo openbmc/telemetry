@@ -15,8 +15,7 @@ struct Ensure
     Ensure(U&& functor) : functor(std::forward<U>(functor))
     {}
 
-    Ensure(F functor) : functor(std::move(functor))
-    {}
+    Ensure(F functor) : functor(std::move(functor)) {}
 
     Ensure(Ensure&& other) = delete;
     Ensure(const Ensure&) = delete;

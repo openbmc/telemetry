@@ -104,8 +104,7 @@ TEST_P(TestBadDiscreteThresholdValues, throwsWhenNotNumericValues)
 
 class TestDiscreteThresholdInit : public TestDiscreteThreshold
 {
-    void SetUp() override
-    {}
+    void SetUp() override {}
 };
 
 TEST_F(TestDiscreteThresholdInit, nonEmptyNameIsNotChanged)

@@ -57,10 +57,10 @@ void NumericThreshold::sensorUpdated(interfaces::Sensor& sensor,
         return;
     }
 
-    bool crossedDecreasing =
-        thresholdValue < prevValue && thresholdValue > value;
-    bool crossedIncreasing =
-        thresholdValue > prevValue && thresholdValue < value;
+    bool crossedDecreasing = thresholdValue < prevValue &&
+                             thresholdValue > value;
+    bool crossedIncreasing = thresholdValue > prevValue &&
+                             thresholdValue < value;
 
     if (!crossedDecreasing && !crossedIncreasing && thresholdValue == prevValue)
     {

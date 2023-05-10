@@ -249,8 +249,7 @@ TEST_F(TestLogToRedfishEventLogDiscreteOnChange,
 class TestUpdateReport : public Test
 {
   public:
-    TestUpdateReport() : messanger(DbusEnvironment::getIoc())
-    {}
+    TestUpdateReport() : messanger(DbusEnvironment::getIoc()) {}
 
     void make(std::vector<std::string> names)
     {
