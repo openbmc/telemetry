@@ -23,8 +23,7 @@ template <class Flags, class Object, Flags... Keys>
 class State
 {
   public:
-    explicit State(Object& object) : object(object)
-    {}
+    explicit State(Object& object) : object(object) {}
 
     template <Flags... Indexes>
     StateEvent set(boolean auto... values)

@@ -16,11 +16,11 @@ MessangerService::Context& MessangerService::create()
 
 void MessangerService::destroy(MessangerService::Context& context)
 {
-    contexts_.erase(std::remove_if(contexts_.begin(), contexts_.end(),
-                                   [&context](const auto& item) {
-                                       return item.get() == &context;
-                                   }),
-                    contexts_.end());
+    contexts_.erase(
+        std::remove_if(
+            contexts_.begin(), contexts_.end(),
+            [&context](const auto& item) { return item.get() == &context; }),
+        contexts_.end());
 }
 
 boost::asio::execution_context::id MessangerService::id = {};

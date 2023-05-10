@@ -20,8 +20,7 @@ class MessangerService : public boost::asio::execution_context::service
     MessangerService(boost::asio::execution_context& execution_context);
     ~MessangerService() = default;
 
-    void shutdown()
-    {}
+    void shutdown() {}
 
     Context& create();
     void destroy(Context& context);

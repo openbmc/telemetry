@@ -45,8 +45,8 @@ template <typename T>
 inline constexpr bool is_variant_v = is_variant<T>::value;
 
 template <typename AlternativeT, typename VariantT>
-    requires is_variant_v<VariantT> bool
-isFirstElementOfType(const std::vector<VariantT>& collection)
+    requires is_variant_v<VariantT>
+bool isFirstElementOfType(const std::vector<VariantT>& collection)
 {
     if (collection.empty())
     {

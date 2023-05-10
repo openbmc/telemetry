@@ -140,7 +140,7 @@ class TestTrigger : public Test
         std::promise<boost::system::error_code> methodPromise;
         DbusEnvironment::getBus()->async_method_call(
             [&methodPromise](boost::system::error_code ec) {
-                methodPromise.set_value(ec);
+            methodPromise.set_value(ec);
             },
             DbusEnvironment::serviceName(), path, Trigger::deleteIfaceName,
             "Delete");
@@ -155,9 +155,10 @@ TEST_F(TestTrigger, checkIfPropertiesAreSet)
     EXPECT_THAT(getProperty<bool>(sut->getPath(), "Persistent"), Eq(true));
     EXPECT_THAT(
         getProperty<std::vector<std::string>>(sut->getPath(), "TriggerActions"),
-        Eq(utils::transform(
-            triggerParams.triggerActions(),
-            [](const auto& action) { return actionToString(action); })));
+        Eq(utils::transform(triggerParams.triggerActions(),
+                            [](const auto& action) {
+        return actionToString(action);
+        })));
     EXPECT_THAT((getProperty<SensorsInfo>(sut->getPath(), "Sensors")),
                 Eq(utils::fromLabeledSensorsInfo(triggerParams.sensors())));
     EXPECT_THAT(
@@ -442,8 +443,7 @@ TEST_F(TestTrigger, settingPersistencyToFalseRemovesTriggerFromStorage)
 class TestTriggerInitialization : public TestTrigger
 {
   public:
-    void SetUp() override
-    {}
+    void SetUp() override {}
 
     nlohmann::json storedConfiguration;
 };
@@ -516,8 +516,8 @@ TEST_F(TestTriggerStore, settingPersistencyToTrueStoresTriggerTriggerActions)
     ASSERT_THAT(storedConfiguration.at("TriggerActions"),
                 Eq(utils::transform(triggerParams.triggerActions(),
                                     [](const auto& action) {
-                                        return actionToString(action);
-                                    })));
+        return actionToString(action);
+                })));
 }
 
 TEST_F(TestTriggerStore, settingPersistencyToTrueStoresTriggerReportIds)

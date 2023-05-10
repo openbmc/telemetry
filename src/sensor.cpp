@@ -49,18 +49,18 @@ void Sensor::async_read(std::shared_ptr<utils::UniqueCall::Lock> lock)
         "xyz.openbmc_project.Sensor.Value", "Value",
         [lock, id = sensorId, weakSelf = weak_from_this()](
             boost::system::error_code ec, double newValue) {
-            if (ec)
-            {
-                phosphor::logging::log<phosphor::logging::level::WARNING>(
-                    "DBus 'GetProperty' call failed on Sensor Value",
-                    phosphor::logging::entry("SENSOR_PATH=%s", id.path.c_str()),
-                    phosphor::logging::entry("ERROR_CODE=%d", ec.value()));
-                return;
-            }
-            if (auto self = weakSelf.lock())
-            {
-                self->updateValue(newValue);
-            }
+        if (ec)
+        {
+            phosphor::logging::log<phosphor::logging::level::WARNING>(
+                "DBus 'GetProperty' call failed on Sensor Value",
+                phosphor::logging::entry("SENSOR_PATH=%s", id.path.c_str()),
+                phosphor::logging::entry("ERROR_CODE=%d", ec.value()));
+            return;
+        }
+        if (auto self = weakSelf.lock())
+        {
+            self->updateValue(newValue);
+        }
         });
 }
 
@@ -96,8 +96,8 @@ void Sensor::unregisterFromUpdates(
             std::remove_if(
                 listeners.begin(), listeners.end(),
                 [listenerToUnregister = listener.get()](const auto& listener) {
-                    return (listener.expired() ||
-                            listener.lock().get() == listenerToUnregister);
+            return (listener.expired() ||
+                    listener.lock().get() == listenerToUnregister);
                 }),
             listeners.end());
     }
@@ -137,7 +137,7 @@ void Sensor::makeSignalMonitor()
     signalMonitor = std::make_unique<sdbusplus::bus::match_t>(
         *bus, param,
         [weakSelf = weak_from_this()](sdbusplus::message_t& message) {
-            signalProc(weakSelf, message);
+        signalProc(weakSelf, message);
         });
 }
 

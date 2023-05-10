@@ -68,8 +68,7 @@ namespace discrete
 class LogToJournal : public interfaces::TriggerAction
 {
   public:
-    explicit LogToJournal(::discrete::Severity severity) : severity(severity)
-    {}
+    explicit LogToJournal(::discrete::Severity severity) : severity(severity) {}
 
     void commit(const std::string& triggerId, const ThresholdName thresholdName,
                 const std::string& sensorName, const Milliseconds timestamp,
@@ -107,8 +106,7 @@ namespace onChange
 class LogToJournal : public interfaces::TriggerAction
 {
   public:
-    LogToJournal()
-    {}
+    LogToJournal() {}
 
     void commit(const std::string& triggerId, const ThresholdName thresholdName,
                 const std::string& sensorName, const Milliseconds timestamp,
@@ -118,8 +116,7 @@ class LogToJournal : public interfaces::TriggerAction
 class LogToRedfishEventLog : public interfaces::TriggerAction
 {
   public:
-    LogToRedfishEventLog()
-    {}
+    LogToRedfishEventLog() {}
 
     void commit(const std::string& triggerId, const ThresholdName thresholdName,
                 const std::string& sensorName, const Milliseconds timestamp,

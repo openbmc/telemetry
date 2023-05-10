@@ -25,13 +25,13 @@ struct EnumTraits<ReportUpdates>
     static constexpr auto propertyName = ConstexprString{"ReportUpdates"};
 };
 
-constexpr auto convDataReportUpdates =
-    std::array{std::make_pair<std::string_view, ReportUpdates>(
-                   "Overwrite", ReportUpdates::overwrite),
-               std::make_pair<std::string_view, ReportUpdates>(
-                   "AppendStopsWhenFull", ReportUpdates::appendStopsWhenFull),
-               std::make_pair<std::string_view, ReportUpdates>(
-                   "AppendWrapsWhenFull", ReportUpdates::appendWrapsWhenFull)};
+constexpr auto convDataReportUpdates = std::array{
+    std::make_pair<std::string_view, ReportUpdates>("Overwrite",
+                                                    ReportUpdates::overwrite),
+    std::make_pair<std::string_view, ReportUpdates>(
+        "AppendStopsWhenFull", ReportUpdates::appendStopsWhenFull),
+    std::make_pair<std::string_view, ReportUpdates>(
+        "AppendWrapsWhenFull", ReportUpdates::appendWrapsWhenFull)};
 
 inline ReportUpdates
     toReportUpdates(std::underlying_type_t<ReportUpdates> value)

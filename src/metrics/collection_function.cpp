@@ -14,10 +14,8 @@ class FunctionMinimum : public CollectionFunction
         return std::min_element(
                    readings.begin(), readings.end(),
                    [](const auto& left, const auto& right) {
-                       return std::make_tuple(!std::isfinite(left.second),
-                                              left.second) <
-                              std::make_tuple(!std::isfinite(right.second),
-                                              right.second);
+            return std::make_tuple(!std::isfinite(left.second), left.second) <
+                   std::make_tuple(!std::isfinite(right.second), right.second);
                    })
             ->second;
     }
@@ -40,10 +38,8 @@ class FunctionMaximum : public CollectionFunction
         return std::max_element(
                    readings.begin(), readings.end(),
                    [](const auto& left, const auto& right) {
-                       return std::make_tuple(std::isfinite(left.second),
-                                              left.second) <
-                              std::make_tuple(std::isfinite(right.second),
-                                              right.second);
+            return std::make_tuple(std::isfinite(left.second), left.second) <
+                   std::make_tuple(std::isfinite(right.second), right.second);
                    })
             ->second;
     }

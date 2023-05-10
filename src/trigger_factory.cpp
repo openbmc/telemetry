@@ -223,10 +223,10 @@ std::unique_ptr<interfaces::Trigger> TriggerFactory::make(
     const std::vector<LabeledSensorInfo>& labeledSensorsInfo) const
 {
     const auto& sensors = getSensors(labeledSensorsInfo);
-    auto triggerActions =
-        utils::transform(triggerActionsIn, [](const auto& triggerActionStr) {
-            return toTriggerAction(triggerActionStr);
-        });
+    auto triggerActions = utils::transform(triggerActionsIn,
+                                           [](const auto& triggerActionStr) {
+        return toTriggerAction(triggerActionStr);
+    });
     std::vector<std::shared_ptr<interfaces::Threshold>> thresholds;
     auto id = std::make_unique<const std::string>(idIn);
 
@@ -260,9 +260,8 @@ void TriggerFactory::updateSensors(
     {
         auto existing = std::find_if(oldSensors.begin(), oldSensors.end(),
                                      [labeledSensorInfo](auto sensor) {
-                                         return labeledSensorInfo ==
-                                                sensor->getLabeledSensorInfo();
-                                     });
+            return labeledSensorInfo == sensor->getLabeledSensorInfo();
+        });
 
         if (existing != oldSensors.end())
         {
@@ -311,9 +310,10 @@ std::vector<LabeledSensorInfo>
 {
     return utils::transform(sensorsInfo, [&tree](const auto& item) {
         const auto& [sensorPath, metadata] = item;
-        auto found = std::find_if(
-            tree.begin(), tree.end(),
-            [path = sensorPath](const auto& x) { return x.first == path; });
+        auto found = std::find_if(tree.begin(), tree.end(),
+                                  [path = sensorPath](const auto& x) {
+            return x.first == path;
+        });
 
         if (tree.end() != found)
         {

@@ -353,8 +353,8 @@ TEST_P(TestMetricCalculationFunctions, calculatesReadingValue)
         clockFake.advance(timestamp);
     }
 
-    const auto [expectedTimestamp, expectedReading] =
-        GetParam().expectedReading();
+    const auto [expectedTimestamp,
+                expectedReading] = GetParam().expectedReading();
     const auto readings = sut->getUpdatedReadings();
 
     EXPECT_THAT(readings,
@@ -373,8 +373,8 @@ TEST_P(TestMetricCalculationFunctions,
         sut->getUpdatedReadings();
     }
 
-    const auto [expectedTimestamp, expectedReading] =
-        GetParam().expectedReading();
+    const auto [expectedTimestamp,
+                expectedReading] = GetParam().expectedReading();
     const auto readings = sut->getUpdatedReadings();
 
     EXPECT_THAT(readings,

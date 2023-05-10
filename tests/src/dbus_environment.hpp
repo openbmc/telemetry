@@ -104,12 +104,12 @@ class DbusEnvironment : public ::testing::Environment
             *DbusEnvironment::getBus(), DbusEnvironment::serviceName(), path,
             interfaceName, property,
             [&propertyPromise](const boost::system::error_code& ec, T t) {
-                if (ec)
-                {
-                    utils::setException(propertyPromise, "GetProperty failed");
-                    return;
-                }
-                propertyPromise.set_value(t);
+            if (ec)
+            {
+                utils::setException(propertyPromise, "GetProperty failed");
+                return;
+            }
+            propertyPromise.set_value(t);
             });
         return DbusEnvironment::waitForFuture(std::move(propertyFuture));
     }
@@ -124,9 +124,9 @@ class DbusEnvironment : public ::testing::Environment
         sdbusplus::asio::setProperty(
             *DbusEnvironment::getBus(), DbusEnvironment::serviceName(), path,
             interfaceName, property, std::move(newValue),
-            [promise =
-                 std::move(promise)](boost::system::error_code ec) mutable {
-                promise.set_value(ec);
+            [promise = std::move(promise)](
+                boost::system::error_code ec) mutable {
+            promise.set_value(ec);
             });
         return DbusEnvironment::waitForFuture(std::move(future));
     }

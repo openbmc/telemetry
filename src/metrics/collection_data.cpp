@@ -85,8 +85,8 @@ class DataInterval : public CollectionData
 
         if (timestamp > duration.t)
         {
-            readings.front().first =
-                std::max(readings.front().first, timestamp - duration.t);
+            readings.front().first = std::max(readings.front().first,
+                                              timestamp - duration.t);
         }
     }
 
@@ -139,9 +139,8 @@ std::vector<std::unique_ptr<CollectionData>>
         case CollectionTimeScope::interval:
             std::generate_n(std::back_inserter(result), size,
                             [cf = makeCollectionFunction(op), duration] {
-                                return std::make_unique<DataInterval>(cf,
-                                                                      duration);
-                            });
+                return std::make_unique<DataInterval>(cf, duration);
+            });
             break;
         case CollectionTimeScope::point:
             std::generate_n(std::back_inserter(result), size,
@@ -150,8 +149,8 @@ std::vector<std::unique_ptr<CollectionData>>
         case CollectionTimeScope::startup:
             std::generate_n(std::back_inserter(result), size,
                             [cf = makeCollectionFunction(op)] {
-                                return std::make_unique<DataStartup>(cf);
-                            });
+                return std::make_unique<DataStartup>(cf);
+            });
             break;
     }
 

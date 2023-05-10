@@ -14,12 +14,12 @@ class ReportFactoryMock : public interfaces::ReportFactory
     {
         return utils::transform(readingParams, [](const auto& params) {
             return LabeledMetricParameters(
-                utils::transform(std::get<0>(params),
-                                 [](const auto& sensorData) {
-                                     return LabeledSensorInfo(
-                                         "Service", std::get<0>(sensorData),
+                utils::transform(
+                    std::get<0>(params),
+                    [](const auto& sensorData) {
+                return LabeledSensorInfo("Service", std::get<0>(sensorData),
                                          std::get<1>(sensorData));
-                                 }),
+                    }),
                 utils::toOperationType(std::get<1>(params)),
                 std::get<2>(params),
                 utils::toCollectionTimeScope(std::get<3>(params)),

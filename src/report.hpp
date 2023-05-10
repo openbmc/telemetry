@@ -32,8 +32,7 @@ class Report : public interfaces::Report, public interfaces::MetricListener
     class OnChangeContext
     {
       public:
-        OnChangeContext(Report& report) : report(report)
-        {}
+        OnChangeContext(Report& report) : report(report) {}
 
         ~OnChangeContext()
         {

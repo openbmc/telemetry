@@ -59,10 +59,10 @@ INSTANTIATE_TEST_SUITE_P(
 
 TEST_P(TestSensorCacheP, shouldReturnDifferentSensorWhenIdsAreDifferent)
 {
-    auto sensor1 =
-        sut.makeSensor<NiceMock<SensorMock>>(id<0>().service, id<0>().path);
-    auto sensor2 =
-        sut.makeSensor<NiceMock<SensorMock>>(id<1>().service, id<1>().path);
+    auto sensor1 = sut.makeSensor<NiceMock<SensorMock>>(id<0>().service,
+                                                        id<0>().path);
+    auto sensor2 = sut.makeSensor<NiceMock<SensorMock>>(id<1>().service,
+                                                        id<1>().path);
 
     ASSERT_THAT(sensor1.get(), Not(Eq(sensor2.get())));
     ASSERT_THAT(sensor1->mockId, Not(Eq(sensor2->mockId)));
@@ -70,10 +70,10 @@ TEST_P(TestSensorCacheP, shouldReturnDifferentSensorWhenIdsAreDifferent)
 
 TEST_F(TestSensorCache, shouldReturnSameSensorWhenSensorWithSameIdStillExists)
 {
-    auto sensor1 =
-        sut.makeSensor<NiceMock<SensorMock>>("sensor-service", "sensor-path");
-    auto sensor2 =
-        sut.makeSensor<NiceMock<SensorMock>>("sensor-service", "sensor-path");
+    auto sensor1 = sut.makeSensor<NiceMock<SensorMock>>("sensor-service",
+                                                        "sensor-path");
+    auto sensor2 = sut.makeSensor<NiceMock<SensorMock>>("sensor-service",
+                                                        "sensor-path");
 
     ASSERT_THAT(sensor1.get(), Eq(sensor2.get()));
     ASSERT_THAT(sensor1->mockId, Eq(sensor2->mockId));
@@ -81,21 +81,21 @@ TEST_F(TestSensorCache, shouldReturnSameSensorWhenSensorWithSameIdStillExists)
 
 TEST_F(TestSensorCache, shouldReturnDifferentSensorWhenPreviousSensorExpired)
 {
-    auto mockId1 =
-        sut.makeSensor<NiceMock<SensorMock>>("sensor-service", "sensor-path")
-            ->mockId;
-    auto mockId2 =
-        sut.makeSensor<NiceMock<SensorMock>>("sensor-service", "sensor-path")
-            ->mockId;
+    auto mockId1 = sut.makeSensor<NiceMock<SensorMock>>("sensor-service",
+                                                        "sensor-path")
+                       ->mockId;
+    auto mockId2 = sut.makeSensor<NiceMock<SensorMock>>("sensor-service",
+                                                        "sensor-path")
+                       ->mockId;
 
     ASSERT_THAT(mockId2, Not(Eq(mockId1)));
 }
 
 TEST_F(TestSensorCache, shouldCreateSensorWithCorrespondingId)
 {
-    auto id =
-        sut.makeSensor<NiceMock<SensorMock>>("sensor-service", "sensor-path")
-            ->id();
+    auto id = sut.makeSensor<NiceMock<SensorMock>>("sensor-service",
+                                                   "sensor-path")
+                  ->id();
 
     auto expected = SensorMock::makeId("sensor-service", "sensor-path");
 

@@ -58,9 +58,8 @@ void ReportFactory::updateMetrics(
     {
         auto existing = std::find_if(oldMetrics.begin(), oldMetrics.end(),
                                      [labeledMetricParam](auto metric) {
-                                         return labeledMetricParam ==
-                                                metric->dumpConfiguration();
-                                     });
+            return labeledMetricParam == metric->dumpConfiguration();
+        });
 
         if (existing != oldMetrics.end())
         {
@@ -152,8 +151,8 @@ std::vector<LabeledMetricParameters>
             {
                 auto it = std::find_if(tree.begin(), tree.end(),
                                        [path = sensorPath](const auto& v) {
-                                           return v.first == path;
-                                       });
+                    return v.first == path;
+                });
 
                 if (it != tree.end() && it->second.size() == 1)
                 {
