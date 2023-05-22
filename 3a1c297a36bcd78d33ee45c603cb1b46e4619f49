@@ -1,0 +1,7 @@
+Verified+1: OpenBMC CI <openbmcbump-ci@yahoo.com>
+Code-Review+2: Krzysztof Grobelny <krzysztof.grobelny@intel.com>
+Submitted-by: Krzysztof Grobelny <krzysztof.grobelny@intel.com>
+Submitted-at: Mon, 22 May 2023 08:49:07 +0000
+Reviewed-on: https://gerrit.openbmc.org/c/openbmc/telemetry/+/63262
+Project: openbmc/telemetry
+Branch: refs/heads/master
