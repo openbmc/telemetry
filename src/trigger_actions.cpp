@@ -95,10 +95,11 @@ void LogToRedfishEventLog::commit(const std::string& triggerId,
         "Logging numeric trigger action to Redfish Event Log.",
         phosphor::logging::entry("REDFISH_MESSAGE_ID=%s",
                                  getRedfishMessageId()),
-        phosphor::logging::entry("REDFISH_MESSAGE_ARGS=%s,%s,%s,%f,%s,%s",
-                                 thresholdName.c_str(), triggerId.c_str(),
-                                 sensorName.c_str(), value, direction,
-                                 timestampStr.c_str()));
+        phosphor::logging::entry(
+            "REDFISH_MESSAGE_ARGS=%s,%s,%s,%f,%s,%s",
+            std::string(utils::toShortEnum(thresholdName)).c_str(),
+            triggerId.c_str(), sensorName.c_str(), value, direction,
+            timestampStr.c_str()));
 }
 
 void fillActions(
