@@ -1,4 +1,28 @@
 {
-  "comments": [],
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c676d13a_48cb12e3",
+        "filename": "OWNERS",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2023-06-07T14:00:03Z",
+      "side": 1,
+      "message": "I don\u0027t really understand what is happening here.  We aren\u0027t suppose to just \"assign\" people as owners.  This is not Intel\u0027s repository, but a community repository.  None of these individuals has committed a single commit to this repository nor are they really active contributors to the project as a whole.  What makes them appropriate owners?\n\nAlicja - 1 commit to webui-vue, 0 code reviews.\nPawel - 1 commit to phosphor-objmgr, 0 code reviews.\nHubert - Has no Gerrit account.",
+      "range": {
+        "startLine": 5,
+        "startChar": 0,
+        "endLine": 7,
+        "endChar": 24
+      },
+      "revId": "cc8abc0be58c19acd088da455454fdf466a1745f",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ],
   "submitRequirementResults": []
 }
