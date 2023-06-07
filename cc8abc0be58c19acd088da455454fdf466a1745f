@@ -22,6 +22,30 @@
       },
       "revId": "cc8abc0be58c19acd088da455454fdf466a1745f",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "83e42703_4d47a37f",
+        "filename": "OWNERS",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2023-06-07T14:03:11Z",
+      "side": 1,
+      "message": "For reference, the requirements and expectations for maintainers is listed here:\n\nhttps://github.com/openbmc/docs/blob/f44abd66eca86b14b662dd5fa0b902b0a4e0af9a/community-membership.md#subproject-owner",
+      "parentUuid": "c676d13a_48cb12e3",
+      "range": {
+        "startLine": 5,
+        "startChar": 0,
+        "endLine": 7,
+        "endChar": 24
+      },
+      "revId": "cc8abc0be58c19acd088da455454fdf466a1745f",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ],
   "submitRequirementResults": []
