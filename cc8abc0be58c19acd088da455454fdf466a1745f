@@ -46,6 +46,30 @@
       },
       "revId": "cc8abc0be58c19acd088da455454fdf466a1745f",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "34291684_0502cc8d",
+        "filename": "OWNERS",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1000153
+      },
+      "writtenOn": "2023-06-08T20:17:19Z",
+      "side": 1,
+      "message": "+1",
+      "parentUuid": "83e42703_4d47a37f",
+      "range": {
+        "startLine": 5,
+        "startChar": 0,
+        "endLine": 7,
+        "endChar": 24
+      },
+      "revId": "cc8abc0be58c19acd088da455454fdf466a1745f",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ],
   "submitRequirementResults": []
