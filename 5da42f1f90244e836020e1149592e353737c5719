@@ -16,6 +16,24 @@
       "message": "Given that LowerWarning doesn\u0027t exist in the OpenBMC message registry:\n\nhttps://github.com/openbmc/bmcweb/blob/master/redfish-core/include/registries/openbmc_message_registry.hpp\n\nNor the base registry.\nhttps://github.com/openbmc/bmcweb/blob/master/redfish-core/include/registries/base_message_registry.hpp\n\nI don\u0027t see how this could possibly be true.  Is there another patchset required to make this function?",
       "revId": "5da42f1f90244e836020e1149592e353737c5719",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "37b19ea8_f414e415",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1001757
+      },
+      "writtenOn": "2023-06-14T07:43:44Z",
+      "side": 1,
+      "message": "AFAIK this is the patch required: https://gerrit.openbmc.org/c/openbmc/bmcweb/+/44935/",
+      "parentUuid": "39937fff_97287ec4",
+      "revId": "5da42f1f90244e836020e1149592e353737c5719",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
