@@ -34,6 +34,24 @@
       "parentUuid": "39937fff_97287ec4",
       "revId": "5da42f1f90244e836020e1149592e353737c5719",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "2ffbdc30_f762996f",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1001757
+      },
+      "writtenOn": "2023-06-29T11:32:37Z",
+      "side": 1,
+      "message": "Ed - sorry for late reply, but I was wrong in my previous response and want to clarify: these messages were in fact part of linked patch, but as we can see they were reverted. We will prepare separate patch with these definitions, just as you suggested, and we can go back to this review then.",
+      "parentUuid": "37b19ea8_f414e415",
+      "revId": "5da42f1f90244e836020e1149592e353737c5719",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
