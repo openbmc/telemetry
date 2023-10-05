@@ -409,10 +409,19 @@ void Report::timerProcForOnChangeReport(boost::system::error_code ec,
 
 void Report::scheduleTimerForPeriodicReport(Milliseconds timerInterval)
 {
-    timer.expires_after(timerInterval);
-    timer.async_wait([this](boost::system::error_code ec) {
-        timerProcForPeriodicReport(ec, *this);
-    });
+    try
+    {
+        timer.expires_after(timerInterval);
+        timer.async_wait([this](boost::system::error_code ec) {
+            timerProcForPeriodicReport(ec, *this);
+        });
+    }
+    catch (const boost::system::system_error& exception)
+    {
+        phosphor::logging::log<phosphor::logging::level::ERR>(
+            "Failed to schedule timer for periodic report: ",
+            phosphor::logging::entry("EXCEPTION_MSG=%s", exception.what()));
+    }
 }
 
 void Report::scheduleTimerForOnChangeReport()
