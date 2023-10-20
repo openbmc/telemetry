@@ -49,12 +49,11 @@ std::string generateId(std::string_view idIn, std::string_view nameIn,
     {
         strippedId = defaultName;
     }
-    strippedId.erase(std::remove_if(
-                         strippedId.begin(), strippedId.end(),
-                         [](char c) {
+    strippedId.erase(std::remove_if(strippedId.begin(), strippedId.end(),
+                                    [](char c) {
         return c == '/' || utils::constants::allowedCharactersInPath.find(c) ==
                                std::string_view::npos;
-                         }),
+    }),
                      strippedId.end());
 
     size_t idx = 0;

@@ -61,7 +61,7 @@ void Sensor::async_read(std::shared_ptr<utils::UniqueCall::Lock> lock)
         {
             self->updateValue(newValue);
         }
-        });
+    });
 }
 
 void Sensor::registerForUpdates(
@@ -92,14 +92,13 @@ void Sensor::unregisterFromUpdates(
 {
     if (auto listener = weakListener.lock())
     {
-        listeners.erase(
-            std::remove_if(
-                listeners.begin(), listeners.end(),
-                [listenerToUnregister = listener.get()](const auto& listener) {
+        listeners.erase(std::remove_if(listeners.begin(), listeners.end(),
+                                       [listenerToUnregister = listener.get()](
+                                           const auto& listener) {
             return (listener.expired() ||
                     listener.lock().get() == listenerToUnregister);
-                }),
-            listeners.end());
+        }),
+                        listeners.end());
     }
 }
 
@@ -138,7 +137,7 @@ void Sensor::makeSignalMonitor()
         *bus, param,
         [weakSelf = weak_from_this()](sdbusplus::message_t& message) {
         signalProc(weakSelf, message);
-        });
+    });
 }
 
 void Sensor::signalProc(const std::weak_ptr<Sensor>& weakSelf,

@@ -90,10 +90,9 @@ template <class T, size_t N>
 inline T toEnum(const std::array<std::pair<std::string_view, T>, N>& data,
                 const std::string& value)
 {
-    auto it = std::find_if(std::begin(data), std::end(data),
-                           [&value](const auto& item) {
-        return item.first == value;
-    });
+    auto it = std::find_if(
+        std::begin(data), std::end(data),
+        [&value](const auto& item) { return item.first == value; });
     if (it == std::end(data))
     {
         throwConversionError(EnumTraits<T>::propertyName);
@@ -106,10 +105,9 @@ inline std::string_view
     enumToString(const std::array<std::pair<std::string_view, T>, N>& data,
                  T value)
 {
-    auto it = std::find_if(std::begin(data), std::end(data),
-                           [value](const auto& item) {
-        return item.second == value;
-    });
+    auto it = std::find_if(
+        std::begin(data), std::end(data),
+        [value](const auto& item) { return item.second == value; });
     if (it == std::end(data))
     {
         throwConversionError(EnumTraits<T>::propertyName);

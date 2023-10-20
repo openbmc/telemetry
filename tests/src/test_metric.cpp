@@ -66,8 +66,8 @@ TEST_F(TestMetric, subscribesForSensorDuringInitialization)
 
     EXPECT_CALL(*sensorMocks.front(),
                 registerForUpdates(Truly([sut = sut.get()](const auto& a0) {
-                    return a0.lock().get() == sut;
-                })));
+        return a0.lock().get() == sut;
+    })));
 
     sut->initialize();
 }
@@ -78,8 +78,8 @@ TEST_F(TestMetric, unsubscribesForSensorDuringDeinitialization)
 
     EXPECT_CALL(*sensorMocks.front(),
                 unregisterFromUpdates(Truly([sut = sut.get()](const auto& a0) {
-                    return a0.lock().get() == sut;
-                })));
+        return a0.lock().get() == sut;
+    })));
 
     sut->deinitialize();
 }

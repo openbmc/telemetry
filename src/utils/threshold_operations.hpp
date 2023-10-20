@@ -22,11 +22,10 @@ struct ThresholdOperations
         getDetails(ThresholdType* thresholdPtr,
                    const interfaces::Sensor& sensor)
     {
-        auto it = std::find_if(thresholdPtr->sensorDetails.begin(),
-                               thresholdPtr->sensorDetails.end(),
-                               [&sensor](const auto& x) {
-            return &sensor == x.first.get();
-        });
+        auto it = std::find_if(
+            thresholdPtr->sensorDetails.begin(),
+            thresholdPtr->sensorDetails.end(),
+            [&sensor](const auto& x) { return &sensor == x.first.get(); });
         return *it->second;
     }
 

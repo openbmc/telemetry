@@ -11,13 +11,11 @@ class FunctionMinimum : public CollectionFunction
     double calculate(const std::vector<ReadingItem>& readings,
                      Milliseconds) const override
     {
-        return std::min_element(
-                   readings.begin(), readings.end(),
-                   [](const auto& left, const auto& right) {
+        return std::min_element(readings.begin(), readings.end(),
+                                [](const auto& left, const auto& right) {
             return std::make_tuple(!std::isfinite(left.second), left.second) <
                    std::make_tuple(!std::isfinite(right.second), right.second);
-                   })
-            ->second;
+        })->second;
     }
 
     double calculateForStartupInterval(std::vector<ReadingItem>& readings,
@@ -35,13 +33,11 @@ class FunctionMaximum : public CollectionFunction
     double calculate(const std::vector<ReadingItem>& readings,
                      Milliseconds) const override
     {
-        return std::max_element(
-                   readings.begin(), readings.end(),
-                   [](const auto& left, const auto& right) {
+        return std::max_element(readings.begin(), readings.end(),
+                                [](const auto& left, const auto& right) {
             return std::make_tuple(std::isfinite(left.second), left.second) <
                    std::make_tuple(std::isfinite(right.second), right.second);
-                   })
-            ->second;
+        })->second;
     }
 
     double calculateForStartupInterval(std::vector<ReadingItem>& readings,

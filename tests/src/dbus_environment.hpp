@@ -110,7 +110,7 @@ class DbusEnvironment : public ::testing::Environment
                 return;
             }
             propertyPromise.set_value(t);
-            });
+        });
         return DbusEnvironment::waitForFuture(std::move(propertyFuture));
     }
 
@@ -127,7 +127,7 @@ class DbusEnvironment : public ::testing::Environment
             [promise = std::move(promise)](
                 boost::system::error_code ec) mutable {
             promise.set_value(ec);
-            });
+        });
         return DbusEnvironment::waitForFuture(std::move(future));
     }
 
@@ -142,7 +142,7 @@ class DbusEnvironment : public ::testing::Environment
             [promise = std::move(promise)](
                 boost::system::error_code ec) mutable {
             promise.set_value(ec);
-            },
+        },
             DbusEnvironment::serviceName(), path, interface, method,
             std::forward<Args>(args)...);
         return DbusEnvironment::waitForFuture(std::move(future));

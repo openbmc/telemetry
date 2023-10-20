@@ -199,7 +199,7 @@ class TestReport : public Test
         DbusEnvironment::getBus()->async_method_call(
             [&methodPromise](boost::system::error_code ec) {
             methodPromise.set_value(ec);
-            },
+        },
             DbusEnvironment::serviceName(), path, interface, method);
         return DbusEnvironment::waitForFuture(methodPromise.get_future());
     }
@@ -237,8 +237,8 @@ TEST_F(TestReport, verifyIfPropertiesHaveValidValue)
     EXPECT_THAT(
         getProperty<std::vector<std::string>>(sut->getPath(), "ReportActions"),
         Eq(utils::transform(defaultParams().reportActions(), [](const auto v) {
-            return utils::enumToString(v);
-        })));
+        return utils::enumToString(v);
+    })));
     EXPECT_THAT(getProperty<bool>(sut->getPath(), "EmitsReadingsUpdate"),
                 Eq(utils::contains(defaultParams().reportActions(),
                                    ReportAction::emitsReadingsUpdate)));
@@ -357,8 +357,8 @@ TEST_F(TestReport, setReportActionsWithInvalidActions)
     EXPECT_THAT(
         getProperty<std::vector<std::string>>(sut->getPath(), "ReportActions"),
         Eq(utils::transform(defaultParams().reportActions(), [](const auto v) {
-            return utils::enumToString(v);
-        })));
+        return utils::enumToString(v);
+    })));
 }
 
 TEST_F(TestReport, createReportWithEmptyActions)
@@ -385,8 +385,8 @@ TEST_F(TestReport, createReportWithValidUnsortedActions)
         ReportParams()
             .reportId("TestId_1")
             .reportActions(utils::transform(newActions, [](const auto& action) {
-                return utils::toReportAction(action);
-            })));
+        return utils::toReportAction(action);
+    })));
     EXPECT_THAT(
         getProperty<std::vector<std::string>>(sut->getPath(), "ReportActions"),
         Eq(expectedActions));
@@ -618,7 +618,7 @@ INSTANTIATE_TEST_SUITE_P(
                                             defaultParams().reportActions(),
                                             [](const auto v) {
     return utils::toUnderlying(v);
-                                            }))),
+}))),
         std::make_pair("Interval",
                        nlohmann::json(defaultParams().interval().count())),
         std::make_pair("AppendLimit",
@@ -1116,8 +1116,8 @@ TEST_F(TestReportInitialization,
     {
         EXPECT_CALL(*metric, registerForUpdates(_))
             .WillOnce(Invoke([&args](const interfaces::MetricListener& report) {
-                args.emplace_back(&report);
-            }));
+            args.emplace_back(&report);
+        }));
         ;
     }
 

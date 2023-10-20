@@ -27,8 +27,7 @@ ReportManager::ReportManager(
     loadFromPersistent();
 
     reportManagerIface = objServer->add_unique_interface(
-        reportManagerPath, reportManagerIfaceName,
-        [this](auto& dbusIface) {
+        reportManagerPath, reportManagerIfaceName, [this](auto& dbusIface) {
         dbusIface.register_property_r("MaxReports", size_t{},
                                       sdbusplus::vtable::property_::const_,
                                       [](const auto&) { return maxReports; });
@@ -39,10 +38,10 @@ ReportManager::ReportManager(
             "SupportedOperationTypes", std::vector<std::string>{},
             sdbusplus::vtable::property_::const_,
             [](const auto&) -> std::vector<std::string> {
-                return utils::transform<std::vector>(
-                    utils::convDataOperationType,
-                    [](const auto& item) { return std::string(item.first); });
-            });
+            return utils::transform<std::vector>(
+                utils::convDataOperationType,
+                [](const auto& item) { return std::string(item.first); });
+        });
         dbusIface.register_method(
             "AddReport",
             [this](boost::asio::yield_context& yield, std::string reportId,
@@ -72,17 +71,16 @@ ReportManager::ReportManager(
 
             return addReport(yield, reportId, reportName,
                              utils::toReportingType(reportingType),
-                             utils::transform(
-                                 reportActions,
-                                 [](const auto& reportAction) {
+                             utils::transform(reportActions,
+                                              [](const auto& reportAction) {
                 return utils::toReportAction(reportAction);
-                                 }),
+            }),
                              Milliseconds(interval), appendLimit,
                              utils::toReportUpdates(reportUpdates),
                              readingParameters, enabled)
                 .getPath();
-            });
         });
+    });
 }
 
 void ReportManager::removeReport(const interfaces::Report* report)
@@ -205,7 +203,7 @@ void ReportManager::loadFromPersistent()
                 data->at("ReportActions").get<std::vector<uint32_t>>(),
                 [](const auto reportAction) {
                 return utils::toReportAction(reportAction);
-                });
+            });
             uint64_t interval = data->at("Interval").get<uint64_t>();
             uint64_t appendLimit = data->at("AppendLimit").get<uint64_t>();
             uint32_t reportUpdates = data->at("ReportUpdates").get<uint32_t>();

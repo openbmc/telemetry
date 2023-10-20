@@ -60,8 +60,8 @@ TEST_F(TestNumericThreshold, initializeThresholdExpectAllSensorsAreRegistered)
     {
         EXPECT_CALL(*sensor,
                     registerForUpdates(Truly([sut = sut.get()](const auto& x) {
-                        return x.lock().get() == sut;
-                    })));
+            return x.lock().get() == sut;
+        })));
     }
 
     sut->initialize();
@@ -207,9 +207,8 @@ class TestNumericThresholdCommon :
                                _, TriggerValue(value)))
                 .WillOnce(DoAll(
                     InvokeWithoutArgs([idx = index, &timestamps] {
-                        timestamps[idx] =
-                            std::chrono::high_resolution_clock::now();
-                    }),
+                timestamps[idx] = std::chrono::high_resolution_clock::now();
+            }),
                     InvokeWithoutArgs(DbusEnvironment::setPromise("commit"))));
         }
 

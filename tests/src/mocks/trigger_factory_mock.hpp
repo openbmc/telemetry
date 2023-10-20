@@ -18,8 +18,8 @@ class TriggerFactoryMock : public interfaces::TriggerFactory
 
         ON_CALL(*this, make(A<const std::string&>(), _, _, _, _, _, _, _))
             .WillByDefault(WithArgs<0>(Invoke([](const std::string& id) {
-                return std::make_unique<NiceMock<TriggerMock>>(id);
-            })));
+            return std::make_unique<NiceMock<TriggerMock>>(id);
+        })));
     }
 
     MOCK_METHOD(std::unique_ptr<interfaces::Trigger>, make,
@@ -73,11 +73,10 @@ class TriggerFactoryMock : public interfaces::TriggerFactory
 
             return EXPECT_CALL(
                 *this, make(params.id(), params.name(),
-                            utils::transform(
-                                params.triggerActions(),
-                                [](const auto& action) {
+                            utils::transform(params.triggerActions(),
+                                             [](const auto& action) {
                 return actionToString(action);
-                                }),
+            }),
                             params.reportIds(), tm, triggerStorage,
                             params.thresholdParams(), params.sensors()));
         }

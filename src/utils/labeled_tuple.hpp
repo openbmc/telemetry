@@ -210,7 +210,7 @@ struct LabeledTuple<std::tuple<Args...>, Labels...>
             return std::apply(
                 [&](auto&&... y) { return (true && ... && detail::eq(x, y)); },
                 value);
-            },
+        },
             other.value);
     }
 

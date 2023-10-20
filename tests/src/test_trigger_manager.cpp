@@ -31,7 +31,7 @@ class TestTriggerManager : public Test
             [&addTriggerPromise](boost::system::error_code ec,
                                  const std::string& path) {
             addTriggerPromise.set_value({ec, path});
-            },
+        },
             DbusEnvironment::serviceName(), TriggerManager::triggerManagerPath,
             TriggerManager::triggerManagerIfaceName, "AddTrigger", params.id(),
             params.name(),
@@ -465,10 +465,10 @@ class TestTriggerManagerStorage : public TestTriggerManager
         {"Name", TriggerParams().name()},
         {"ThresholdParamsDiscriminator",
          TriggerParams().thresholdParams().index()},
-        {"TriggerActions",
-         utils::transform(
-             TriggerParams().triggerActions(),
-             [](const auto& action) { return actionToString(action); })},
+        {"TriggerActions", utils::transform(TriggerParams().triggerActions(),
+                                            [](const auto& action) {
+        return actionToString(action);
+    })},
         {"ThresholdParams", utils::labeledThresholdParamsToJson(
                                 TriggerParams().thresholdParams())},
         {"ReportIds", TriggerParams().reportIds()},

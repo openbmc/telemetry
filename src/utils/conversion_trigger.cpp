@@ -44,29 +44,27 @@ TriggerThresholdParams FromLabeledThresholdParamConversion::operator()(
     const std::vector<numeric::LabeledThresholdParam>& arg) const
 {
     return utils::transform(
-        arg,
-        [](const numeric::LabeledThresholdParam& labeledThresholdParam) {
+        arg, [](const numeric::LabeledThresholdParam& labeledThresholdParam) {
         return numeric::ThresholdParam(
             numeric::typeToString(labeledThresholdParam.at_label<ts::Type>()),
             labeledThresholdParam.at_label<ts::DwellTime>(),
             numeric::directionToString(
                 labeledThresholdParam.at_label<ts::Direction>()),
             labeledThresholdParam.at_label<ts::ThresholdValue>());
-        });
+    });
 }
 
 TriggerThresholdParams FromLabeledThresholdParamConversion::operator()(
     const std::vector<discrete::LabeledThresholdParam>& arg) const
 {
     return utils::transform(
-        arg,
-        [](const discrete::LabeledThresholdParam& labeledThresholdParam) {
+        arg, [](const discrete::LabeledThresholdParam& labeledThresholdParam) {
         return discrete::ThresholdParam(
             labeledThresholdParam.at_label<ts::UserId>(),
             utils::enumToString(labeledThresholdParam.at_label<ts::Severity>()),
             labeledThresholdParam.at_label<ts::DwellTime>(),
             labeledThresholdParam.at_label<ts::ThresholdValue>());
-        });
+    });
 }
 
 SensorsInfo fromLabeledSensorsInfo(const std::vector<LabeledSensorInfo>& infos)

@@ -21,9 +21,8 @@ TriggerManager::TriggerManager(
 {
     loadFromPersistent();
 
-    managerIface = objServer->add_unique_interface(triggerManagerPath,
-                                                   triggerManagerIfaceName,
-                                                   [this](auto& iface) {
+    managerIface = objServer->add_unique_interface(
+        triggerManagerPath, triggerManagerIfaceName, [this](auto& iface) {
         iface.register_method(
             "AddTrigger",
             [this](boost::asio::yield_context& yield, const std::string& id,
@@ -46,7 +45,7 @@ TriggerManager::TriggerManager(
             return addTrigger(id, name, triggerActions, labeledSensorsInfo,
                               reportIds, labeledTriggerThresholdParams)
                 .getPath();
-            });
+        });
     });
 }
 

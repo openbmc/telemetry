@@ -310,10 +310,9 @@ std::vector<LabeledSensorInfo>
 {
     return utils::transform(sensorsInfo, [&tree](const auto& item) {
         const auto& [sensorPath, metadata] = item;
-        auto found = std::find_if(tree.begin(), tree.end(),
-                                  [path = sensorPath](const auto& x) {
-            return x.first == path;
-        });
+        auto found = std::find_if(
+            tree.begin(), tree.end(),
+            [path = sensorPath](const auto& x) { return x.first == path; });
 
         if (tree.end() != found)
         {

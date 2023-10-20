@@ -45,8 +45,8 @@ Report::Report(boost::asio::io_context& ioc,
 {
     readingParameters =
         toReadingParameters(utils::transform(metrics, [](const auto& metric) {
-            return metric->dumpConfiguration();
-        }));
+        return metric->dumpConfiguration();
+    }));
 
     reportActions.insert(ReportAction::logToMetricReportsCollection);
 
@@ -65,7 +65,7 @@ Report::Report(boost::asio::io_context& ioc,
                 reportManager.removeReport(this);
             });
         });
-        });
+    });
 
     auto errorMessages = verify(reportingType, interval);
     state.set<ReportFlags::enabled, ReportFlags::valid>(enabledIn,
@@ -203,7 +203,7 @@ std::unique_ptr<sdbusplus::asio::dbus_interface>
             persistency = storeConfiguration();
         }
         return 1;
-        },
+    },
         [this](const auto&) { return state.get<ReportFlags::enabled>(); });
     dbusIface->register_method(
         "SetReportingProperties",
@@ -255,7 +255,7 @@ std::unique_ptr<sdbusplus::asio::dbus_interface>
         persistency = storeConfiguration();
 
         setReadingBuffer(reportUpdates);
-        });
+    });
     dbusIface->register_property_r<uint64_t>(
         "Interval", sdbusplus::vtable::property_::emits_change,
         [this](const auto&) { return interval.count(); });
@@ -276,7 +276,7 @@ std::unique_ptr<sdbusplus::asio::dbus_interface>
             persistency = oldVal = false;
         }
         return 1;
-        },
+    },
         [this](const auto&) { return persistency; });
 
     dbusIface->register_property_r("Readings", readings,
@@ -294,14 +294,14 @@ std::unique_ptr<sdbusplus::asio::dbus_interface>
                                     labeledMetricParams);
         readingParameters = toReadingParameters(
             utils::transform(metrics, [](const auto& metric) {
-                return metric->dumpConfiguration();
-            }));
+            return metric->dumpConfiguration();
+        }));
         metricCount = getMetricCount(metrics);
         setReadingBuffer(reportUpdates);
         persistency = storeConfiguration();
         oldVal = std::move(newVal);
         return 1;
-        },
+    },
         [this](const auto&) { return readingParameters; });
     dbusIface->register_property_r<bool>("EmitsReadingsUpdate",
                                          sdbusplus::vtable::property_::none,
@@ -322,8 +322,8 @@ std::unique_ptr<sdbusplus::asio::dbus_interface>
         [this](auto newVal, auto& oldVal) {
         auto tmp = utils::transform<std::unordered_set>(
             newVal, [](const auto& reportAction) {
-                return utils::toReportAction(reportAction);
-            });
+            return utils::toReportAction(reportAction);
+        });
         tmp.insert(ReportAction::logToMetricReportsCollection);
 
         if (tmp != reportActions)
@@ -333,7 +333,7 @@ std::unique_ptr<sdbusplus::asio::dbus_interface>
             oldVal = std::move(newVal);
         }
         return 1;
-        },
+    },
         [this](const auto&) {
         return utils::transform<std::vector>(reportActions,
                                              [](const auto reportAction) {
@@ -350,17 +350,17 @@ std::unique_ptr<sdbusplus::asio::dbus_interface>
         setReportUpdates(utils::toReportUpdates(newVal));
         oldVal = newVal;
         return 1;
-        },
+    },
         [this](const auto&) { return utils::enumToString(reportUpdates); });
     dbusIface->register_property_r(
         "Triggers", std::vector<sdbusplus::message::object_path>{},
         sdbusplus::vtable::property_::emits_change, [this](const auto&) {
-            return utils::transform<std::vector>(triggerIds,
-                                                 [](const auto& triggerId) {
+        return utils::transform<std::vector>(triggerIds,
+                                             [](const auto& triggerId) {
             return utils::pathAppend(utils::constants::triggerDirPath,
                                      triggerId);
-            });
         });
+    });
     dbusIface->register_method("Update", [this] {
         if (reportingType == ReportingType::onRequest)
         {
@@ -502,10 +502,9 @@ bool Report::storeConfiguration() const
         data["Interval"] = interval.count();
         data["AppendLimit"] = appendLimit;
         data["ReportUpdates"] = utils::toUnderlying(reportUpdates);
-        data["ReadingParameters"] = utils::transform(metrics,
-                                                     [](const auto& metric) {
-            return metric->dumpConfiguration();
-        });
+        data["ReadingParameters"] = utils::transform(
+            metrics,
+            [](const auto& metric) { return metric->dumpConfiguration(); });
 
         if (shouldStoreMetricValues())
         {

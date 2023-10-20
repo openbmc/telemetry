@@ -66,7 +66,7 @@ class TestReportManager : public Test
             [&addReportPromise](boost::system::error_code ec,
                                 const std::string& path) {
             addReportPromise.set_value({ec, path});
-            },
+        },
             DbusEnvironment::serviceName(), ReportManager::reportManagerPath,
             ReportManager::reportManagerIfaceName, "AddReport",
             std::forward<Args>(args)...);
