@@ -64,7 +64,7 @@ test(
             boost,
             gmock_dep,
             gtest_dep,
-            nlohmann_json,
+            nlohmann_json_dep,
             phosphor_logging,
             sdbusplus,
         ],
