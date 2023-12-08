@@ -29,18 +29,13 @@ add_project_arguments(
 boost_version = '>=1.79.0'
 boost_modules = ['coroutine', 'context']
 boost = dependency('boost',
-    version: boost_version, 
+    version: boost_version,
     modules: boost_modules)
 
+nlohmann_json_dep = dependency('nlohmann_json', include_type: 'system')
 phosphor_logging = dependency('phosphor-logging')
 sdbusplus = dependency('sdbusplus')
 systemd = dependency('systemd')
-
-if cxx.has_header('nlohmann/json.hpp')
-    nlohmann_json = declare_dependency()
-else
-    nlohmann_json = dependency('nlohmann_json')
-endif
 
 add_project_arguments(
     '-DTELEMETRY_MAX_REPORTS=' + get_option('max-reports').to_string(),
@@ -87,7 +82,7 @@ executable(
     ],
     dependencies: [
         boost,
-        nlohmann_json,
+        nlohmann_json_dep,
         sdbusplus,
         phosphor_logging,
     ],

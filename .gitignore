@@ -117,7 +117,7 @@ fabric.properties
 !/subprojects/packagefiles/
 !/subprojects/boost.wrap
 !/subprojects/googletest.wrap
-!/subprojects/nlohmann.wrap
+!/subprojects/nlohmann_json.wrap
 !/subprojects/phosphor-logging.wrap
 !/subprojects/sdbusplus.wrap
 
