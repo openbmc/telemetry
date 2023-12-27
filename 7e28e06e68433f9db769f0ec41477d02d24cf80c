@@ -16,6 +16,24 @@
       "message": "@Adrian\nAny comments on this one?",
       "revId": "7e28e06e68433f9db769f0ec41477d02d24cf80c",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "2e915955_fe0710fa",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000534
+      },
+      "writtenOn": "2023-12-27T11:25:38Z",
+      "side": 1,
+      "message": "No, sorry for the delay. As I\u0027ve noted in mailing list - this change flew under the radar due to internal company reorganization.\n\nChanges are integrated and currently undergoing automated tests on target hardware.",
+      "parentUuid": "14ef1d8f_65f070c4",
+      "revId": "7e28e06e68433f9db769f0ec41477d02d24cf80c",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
