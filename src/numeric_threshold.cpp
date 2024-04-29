@@ -9,8 +9,7 @@ NumericThreshold::NumericThreshold(
     Milliseconds dwellTimeIn, numeric::Direction directionIn,
     double thresholdValueIn, numeric::Type typeIn,
     std::unique_ptr<interfaces::Clock> clockIn) :
-    ioc(ioc),
-    triggerId(triggerIdIn), actions(std::move(actionsIn)),
+    ioc(ioc), triggerId(triggerIdIn), actions(std::move(actionsIn)),
     dwellTime(dwellTimeIn), direction(directionIn),
     thresholdValue(thresholdValueIn), type(typeIn), clock(std::move(clockIn))
 {

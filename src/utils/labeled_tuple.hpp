@@ -205,13 +205,11 @@ struct LabeledTuple<std::tuple<Args...>, Labels...>
 
     bool operator==(const LabeledTuple& other) const
     {
-        return std::apply(
-            [&](auto&&... x) {
-            return std::apply(
-                [&](auto&&... y) { return (true && ... && detail::eq(x, y)); },
-                value);
-        },
-            other.value);
+        return std::apply([&](auto&&... x) {
+            return std::apply([&](auto&&... y) {
+                return (true && ... && detail::eq(x, y));
+            }, value);
+        }, other.value);
     }
 
     bool operator<(const LabeledTuple& other) const

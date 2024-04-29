@@ -56,8 +56,7 @@ class DiscreteThreshold :
 
         ThresholdDetail(const std::string& sensorNameIn,
                         boost::asio::io_context& ioc) :
-            timer(ioc),
-            sensorName(sensorNameIn)
+            timer(ioc), sensorName(sensorNameIn)
         {}
         ThresholdDetail(const ThresholdDetail&) = delete;
         ThresholdDetail(ThresholdDetail&&) = delete;

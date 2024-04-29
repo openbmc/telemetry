@@ -14,8 +14,7 @@ DbusSensorObject::DbusSensorObject(
     boost::asio::io_context& ioc,
     const std::shared_ptr<sdbusplus::asio::connection>& bus,
     const std::shared_ptr<sdbusplus::asio::object_server>& objServer) :
-    ioc(ioc),
-    bus(bus), objServer(objServer)
+    ioc(ioc), bus(bus), objServer(objServer)
 {
     sensorIface = objServer->add_unique_interface(path(), interface(),
                                                   [this](auto& iface) {

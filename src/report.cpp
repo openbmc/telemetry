@@ -31,8 +31,7 @@ Report::Report(boost::asio::io_context& ioc,
                const interfaces::ReportFactory& reportFactory,
                const bool enabledIn, std::unique_ptr<interfaces::Clock> clock,
                Readings readingsIn) :
-    id(reportId),
-    path(utils::pathAppend(utils::constants::reportDirPath, id)),
+    id(reportId), path(utils::pathAppend(utils::constants::reportDirPath, id)),
     name(reportName), reportingType(reportingTypeIn), interval(intervalIn),
     reportActions(reportActionsIn.begin(), reportActionsIn.end()),
     metricCount(getMetricCount(metricsIn)), appendLimit(appendLimitIn),
@@ -203,8 +202,7 @@ std::unique_ptr<sdbusplus::asio::dbus_interface>
             persistency = storeConfiguration();
         }
         return 1;
-    },
-        [this](const auto&) { return state.get<ReportFlags::enabled>(); });
+    }, [this](const auto&) { return state.get<ReportFlags::enabled>(); });
     dbusIface->register_method(
         "SetReportingProperties",
         [this](std::string newReportingType, uint64_t newInterval) {
@@ -276,8 +274,7 @@ std::unique_ptr<sdbusplus::asio::dbus_interface>
             persistency = oldVal = false;
         }
         return 1;
-    },
-        [this](const auto&) { return persistency; });
+    }, [this](const auto&) { return persistency; });
 
     dbusIface->register_property_r("Readings", readings,
                                    sdbusplus::vtable::property_::emits_change,
@@ -301,8 +298,7 @@ std::unique_ptr<sdbusplus::asio::dbus_interface>
         persistency = storeConfiguration();
         oldVal = std::move(newVal);
         return 1;
-    },
-        [this](const auto&) { return readingParameters; });
+    }, [this](const auto&) { return readingParameters; });
     dbusIface->register_property_r<bool>("EmitsReadingsUpdate",
                                          sdbusplus::vtable::property_::none,
                                          [this](const auto&) {
@@ -333,8 +329,7 @@ std::unique_ptr<sdbusplus::asio::dbus_interface>
             oldVal = std::move(newVal);
         }
         return 1;
-    },
-        [this](const auto&) {
+    }, [this](const auto&) {
         return utils::transform<std::vector>(reportActions,
                                              [](const auto reportAction) {
             return utils::enumToString(reportAction);
@@ -343,15 +338,13 @@ std::unique_ptr<sdbusplus::asio::dbus_interface>
     dbusIface->register_property_r<uint64_t>(
         "AppendLimit", sdbusplus::vtable::property_::emits_change,
         [this](const auto&) { return appendLimit; });
-    dbusIface->register_property_rw(
-        "ReportUpdates", std::string(),
-        sdbusplus::vtable::property_::emits_change,
-        [this](auto newVal, auto& oldVal) {
+    dbusIface->register_property_rw("ReportUpdates", std::string(),
+                                    sdbusplus::vtable::property_::emits_change,
+                                    [this](auto newVal, auto& oldVal) {
         setReportUpdates(utils::toReportUpdates(newVal));
         oldVal = newVal;
         return 1;
-    },
-        [this](const auto&) { return utils::enumToString(reportUpdates); });
+    }, [this](const auto&) { return utils::enumToString(reportUpdates); });
     dbusIface->register_property_r(
         "Triggers", std::vector<sdbusplus::message::object_path>{},
         sdbusplus::vtable::property_::emits_change, [this](const auto&) {

@@ -141,8 +141,7 @@ class TestTrigger : public Test
         DbusEnvironment::getBus()->async_method_call(
             [&methodPromise](boost::system::error_code ec) {
             methodPromise.set_value(ec);
-        },
-            DbusEnvironment::serviceName(), path, Trigger::deleteIfaceName,
+        }, DbusEnvironment::serviceName(), path, Trigger::deleteIfaceName,
             "Delete");
         return DbusEnvironment::waitForFuture(methodPromise.get_future());
     }

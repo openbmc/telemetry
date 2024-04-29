@@ -35,8 +35,7 @@ class DataInterval : public CollectionData
   public:
     DataInterval(std::shared_ptr<CollectionFunction> function,
                  CollectionDuration duration) :
-        function(std::move(function)),
-        duration(duration)
+        function(std::move(function)), duration(duration)
     {
         if (duration.t.count() == 0)
         {

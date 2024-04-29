@@ -136,8 +136,7 @@ class UpdateReport : public interfaces::TriggerAction
   public:
     UpdateReport(boost::asio::io_context& ioc,
                  std::shared_ptr<std::vector<std::string>> ids) :
-        ioc(ioc),
-        reportIds(std::move(ids))
+        ioc(ioc), reportIds(std::move(ids))
     {}
 
     void commit(const std::string& triggerId, const ThresholdName thresholdName,

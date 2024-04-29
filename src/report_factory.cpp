@@ -12,8 +12,7 @@ ReportFactory::ReportFactory(
     std::shared_ptr<sdbusplus::asio::connection> bus,
     const std::shared_ptr<sdbusplus::asio::object_server>& objServer,
     SensorCache& sensorCache) :
-    bus(std::move(bus)),
-    objServer(objServer), sensorCache(sensorCache)
+    bus(std::move(bus)), objServer(objServer), sensorCache(sensorCache)
 {}
 
 std::unique_ptr<interfaces::Report> ReportFactory::make(

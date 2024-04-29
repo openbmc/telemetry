@@ -14,9 +14,8 @@ Metric::Metric(Sensors sensorsIn, OperationType operationTypeIn,
                CollectionTimeScope timeScopeIn,
                CollectionDuration collectionDurationIn,
                std::unique_ptr<interfaces::Clock> clockIn) :
-    sensors(std::move(sensorsIn)),
-    operationType(operationTypeIn), collectionTimeScope(timeScopeIn),
-    collectionDuration(collectionDurationIn),
+    sensors(std::move(sensorsIn)), operationType(operationTypeIn),
+    collectionTimeScope(timeScopeIn), collectionDuration(collectionDurationIn),
     collectionAlgorithms(
         metrics::makeCollectionData(sensors.size(), operationType,
                                     collectionTimeScope, collectionDuration)),
