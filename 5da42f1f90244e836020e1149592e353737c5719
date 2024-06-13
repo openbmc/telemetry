@@ -87,6 +87,23 @@
       "message": "Is this patch still being worked?",
       "revId": "5da42f1f90244e836020e1149592e353737c5719",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "7749de62_2c1f23f9",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000534
+      },
+      "writtenOn": "2024-06-13T08:45:08Z",
+      "side": 1,
+      "message": "Reverting +2 as I didn\u0027t notice that there are unresolved comments.",
+      "revId": "5da42f1f90244e836020e1149592e353737c5719",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
