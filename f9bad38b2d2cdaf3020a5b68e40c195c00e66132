@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "3abb540e_591e2587",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000534
+      },
+      "writtenOn": "2024-06-13T07:44:50Z",
+      "side": 1,
+      "message": "As the build is failing what\u0027s our next step?",
+      "revId": "f9bad38b2d2cdaf3020a5b68e40c195c00e66132",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
