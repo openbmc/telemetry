@@ -14,22 +14,35 @@ namespace action
 {
 namespace numeric
 {
-using LogParam = std::tuple<::numeric::Type, double, double>;
+using LogParam = std::tuple<::numeric::Type, double, TriggerValue>;
 
 static auto getCorrectParams()
 {
-    return Values(std::make_tuple(::numeric::Type::upperCritical, 91.1, 90),
-                  std::make_tuple(::numeric::Type::lowerCritical, 91.2, 90),
-                  std::make_tuple(::numeric::Type::upperWarning, 88.5, 90),
-                  std::make_tuple(::numeric::Type::lowerWarning, 88.6, 90));
+    return Values(
+        std::make_tuple(::numeric::Type::upperCritical, 91.1,
+                        TriggerValue(90.0)),
+        std::make_tuple(::numeric::Type::upperCritical, 90, TriggerValue(91.1)),
+        std::make_tuple(::numeric::Type::lowerCritical, 91.2,
+                        TriggerValue(90.0)),
+        std::make_tuple(::numeric::Type::lowerCritical, 90, TriggerValue(91.2)),
+        std::make_tuple(::numeric::Type::upperWarning, 88.5,
+                        TriggerValue(90.0)),
+        std::make_tuple(::numeric::Type::upperWarning, 90, TriggerValue(88.5)),
+        std::make_tuple(::numeric::Type::lowerWarning, 88.6,
+                        TriggerValue(90.0)),
+        std::make_tuple(::numeric::Type::lowerWarning, 90, TriggerValue(88.6)));
 }
 
 static auto getIncorrectParams()
 {
-    return Values(
-        std::make_tuple(::numeric::Type::upperCritical, 90.0, 90),
-        std::make_tuple(static_cast<::numeric::Type>(-1), 88.0, 90),
-        std::make_tuple(static_cast<::numeric::Type>(123), 123.0, 90));
+    return Values(std::make_tuple(::numeric::Type::upperCritical, 90.0,
+                                  TriggerValue(90.0)),
+                  std::make_tuple(static_cast<::numeric::Type>(-1), 88.0,
+                                  TriggerValue(90.0)),
+                  std::make_tuple(static_cast<::numeric::Type>(123), 123.0,
+                                  TriggerValue(90.0)),
+                  std::make_tuple(::numeric::Type::upperCritical, 90.0,
+                                  TriggerValue("numeric")));
 }
 
 template <typename ActionType>
@@ -50,7 +63,7 @@ class TestActionNumeric : public Test, public WithParamInterface<LogParam>
     }
 
     std::unique_ptr<ActionType> sut;
-    double commmitValue;
+    TriggerValue commmitValue;
 };
 
 class TestLogToJournalNumeric : public TestActionNumeric<LogToJournal>
@@ -125,14 +138,15 @@ static auto getIncorrectParams()
         std::make_tuple(::discrete::Severity::ok, TriggerValue(0.1)));
 }
 
-template <typename ActionType>
-class TestActionDiscrete : public Test, public WithParamInterface<LogParam>
+class TestLogToJournalDiscrete :
+    public Test,
+    public WithParamInterface<LogParam>
 {
   public:
     void SetUp() override
     {
         auto [severity, value] = GetParam();
-        sut = std::make_unique<ActionType>(severity);
+        sut = std::make_unique<LogToJournal>(severity);
         commitValue = value;
     }
 
@@ -144,11 +158,8 @@ class TestActionDiscrete : public Test, public WithParamInterface<LogParam>
     }
 
     TriggerValue commitValue;
-    std::unique_ptr<ActionType> sut;
+    std::unique_ptr<LogToJournal> sut;
 };
-
-class TestLogToJournalDiscrete : public TestActionDiscrete<LogToJournal>
-{};
 
 INSTANTIATE_TEST_SUITE_P(LogToJournalDiscreteParams, TestLogToJournalDiscrete,
                          getCorrectParams());
@@ -169,28 +180,32 @@ TEST_P(TestLogToJournalDiscreteThrow, commitAnActionExpectThrow)
     EXPECT_ANY_THROW(commit());
 }
 
-class TestLogToRedfishEventLogDiscrete :
-    public TestActionDiscrete<LogToRedfishEventLog>
-{};
-
-INSTANTIATE_TEST_SUITE_P(LogToRedfishEventLogDiscreteParams,
-                         TestLogToRedfishEventLogDiscrete, getCorrectParams());
-
-TEST_P(TestLogToRedfishEventLogDiscrete, commitExpectNoThrow)
+class TestLogToRedfishEventLogDiscrete : public Test
 {
-    EXPECT_NO_THROW(commit());
+  public:
+    void SetUp()
+    {
+        sut = std::make_unique<LogToRedfishEventLog>();
+    }
+
+    void commit(TriggerValue value)
+    {
+        std::string thresholdName = "MyThreshold";
+        sut->commit("MyTrigger", std::cref(thresholdName), "MySensor",
+                    Milliseconds{100'000}, value);
+    }
+
+    std::unique_ptr<LogToRedfishEventLog> sut;
+};
+
+TEST_F(TestLogToRedfishEventLogDiscrete, commitDiscreteValueExpectNoThrow)
+{
+    EXPECT_NO_THROW(commit("DiscreteVal"));
 }
 
-class TestLogToRedfishEventLogDiscreteThrow :
-    public TestLogToRedfishEventLogDiscrete
-{};
-
-INSTANTIATE_TEST_SUITE_P(_, TestLogToRedfishEventLogDiscreteThrow,
-                         getIncorrectParams());
-
-TEST_P(TestLogToRedfishEventLogDiscreteThrow, commitExpectToThrow)
+TEST_F(TestLogToRedfishEventLogDiscrete, commitNumericValueExpectToThrow)
 {
-    EXPECT_ANY_THROW(commit());
+    EXPECT_ANY_THROW(commit(42.0));
 }
 
 namespace onChange
