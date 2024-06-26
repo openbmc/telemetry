@@ -64,19 +64,40 @@ void LogToJournal::commit(const std::string& triggerId,
     phosphor::logging::log<phosphor::logging::level::INFO>(msg.c_str());
 }
 
-const char* LogToRedfishEventLog::getRedfishMessageId() const
+const char* LogToRedfishEventLog::getRedfishMessageId(const double value) const
 {
-    switch (type)
+    std::string direction(getDirection(value, threshold));
+
+    if (direction == "decreasing")
     {
-        case ::numeric::Type::upperCritical:
-            return redfish_message_ids::TriggerNumericCritical;
-        case ::numeric::Type::lowerCritical:
-            return redfish_message_ids::TriggerNumericCritical;
-        case ::numeric::Type::upperWarning:
-            return redfish_message_ids::TriggerNumericWarning;
-        case ::numeric::Type::lowerWarning:
-            return redfish_message_ids::TriggerNumericWarning;
+        switch (type)
+        {
+            case ::numeric::Type::upperCritical:
+                return redfish_message_ids::TriggerNumericBelowUpperCritical;
+            case ::numeric::Type::lowerCritical:
+                return redfish_message_ids::TriggerNumericBelowLowerCritical;
+            case ::numeric::Type::upperWarning:
+                return redfish_message_ids::TriggerNumericReadingNormal;
+            case ::numeric::Type::lowerWarning:
+                return redfish_message_ids::TriggerNumericBelowLowerWarning;
+        }
     }
+
+    if (direction == "increasing")
+    {
+        switch (type)
+        {
+            case ::numeric::Type::upperCritical:
+                return redfish_message_ids::TriggerNumericAboveUpperCritical;
+            case ::numeric::Type::lowerCritical:
+                return redfish_message_ids::TriggerNumericAboveLowerCritical;
+            case ::numeric::Type::upperWarning:
+                return redfish_message_ids::TriggerNumericAboveUpperWarning;
+            case ::numeric::Type::lowerWarning:
+                return redfish_message_ids::TriggerNumericReadingNormal;
+        }
+    }
+
     throw std::runtime_error("Invalid type");
 }
 
@@ -87,18 +108,26 @@ void LogToRedfishEventLog::commit(const std::string& triggerId,
                                   const TriggerValue triggerValue)
 {
     double value = std::get<double>(triggerValue);
-    std::string thresholdName = ::numeric::typeToString(type);
-    auto direction = getDirection(value, threshold);
-    auto timestampStr = timestampToString(timestamp);
+    auto messageId = getRedfishMessageId(value);
 
-    phosphor::logging::log<phosphor::logging::level::INFO>(
-        "Logging numeric trigger action to Redfish Event Log.",
-        phosphor::logging::entry("REDFISH_MESSAGE_ID=%s",
-                                 getRedfishMessageId()),
-        phosphor::logging::entry("REDFISH_MESSAGE_ARGS=%s,%s,%s,%f,%s,%s",
-                                 thresholdName.c_str(), triggerId.c_str(),
-                                 sensorName.c_str(), value, direction,
-                                 timestampStr.c_str()));
+    if (messageId == redfish_message_ids::TriggerNumericReadingNormal)
+    {
+        phosphor::logging::log<phosphor::logging::level::INFO>(
+            "Logging numeric trigger action to Redfish Event Log.",
+            phosphor::logging::entry("REDFISH_MESSAGE_ID=%s", messageId),
+            phosphor::logging::entry("REDFISH_MESSAGE_ARGS=%s,%f,%s",
+                                     sensorName.c_str(), value,
+                                     triggerId.c_str()));
+    }
+    else
+    {
+        phosphor::logging::log<phosphor::logging::level::INFO>(
+            "Logging numeric trigger action to Redfish Event Log.",
+            phosphor::logging::entry("REDFISH_MESSAGE_ID=%s", messageId),
+            phosphor::logging::entry("REDFISH_MESSAGE_ARGS=%s,%f,%f,%s",
+                                     sensorName.c_str(), value, threshold,
+                                     triggerId.c_str()));
+    }
 }
 
 void fillActions(
@@ -157,20 +186,6 @@ void LogToJournal::commit(const std::string& triggerId,
     phosphor::logging::log<phosphor::logging::level::INFO>(msg.c_str());
 }
 
-const char* LogToRedfishEventLog::getRedfishMessageId() const
-{
-    switch (severity)
-    {
-        case ::discrete::Severity::ok:
-            return redfish_message_ids::TriggerDiscreteOK;
-        case ::discrete::Severity::warning:
-            return redfish_message_ids::TriggerDiscreteWarning;
-        case ::discrete::Severity::critical:
-            return redfish_message_ids::TriggerDiscreteCritical;
-    }
-    throw std::runtime_error("Invalid severity");
-}
-
 void LogToRedfishEventLog::commit(const std::string& triggerId,
                                   const ThresholdName thresholdNameIn,
                                   const std::string& sensorName,
@@ -178,16 +193,15 @@ void LogToRedfishEventLog::commit(const std::string& triggerId,
                                   const TriggerValue triggerValue)
 {
     auto value = std::get<std::string>(triggerValue);
-    auto timestampStr = timestampToString(timestamp);
 
     phosphor::logging::log<phosphor::logging::level::INFO>(
         "Logging discrete trigger action to Redfish Event Log.",
-        phosphor::logging::entry("REDFISH_MESSAGE_ID=%s",
-                                 getRedfishMessageId()),
-        phosphor::logging::entry("REDFISH_MESSAGE_ARGS=%s,%s,%s,%s,%s",
-                                 thresholdNameIn->get().c_str(),
-                                 triggerId.c_str(), sensorName.c_str(),
-                                 value.c_str(), timestampStr.c_str()));
+        phosphor::logging::entry(
+            "REDFISH_MESSAGE_ID=%s",
+            redfish_message_ids::TriggerDiscreteConditionMet),
+        phosphor::logging::entry("REDFISH_MESSAGE_ARGS=%s,%s,%s",
+                                 sensorName.c_str(), value.c_str(),
+                                 triggerId.c_str()));
 }
 
 void fillActions(
@@ -210,7 +224,7 @@ void fillActions(
             case TriggerAction::LogToRedfishEventLog:
             {
                 actionsIf.emplace_back(
-                    std::make_unique<LogToRedfishEventLog>(severity));
+                    std::make_unique<LogToRedfishEventLog>());
                 break;
             }
             case TriggerAction::UpdateReport:
@@ -247,16 +261,15 @@ void LogToRedfishEventLog::commit(const std::string& triggerId,
                                   const TriggerValue triggerValue)
 {
     auto value = triggerValueToString(triggerValue);
-    auto timestampStr = timestampToString(timestamp);
 
     phosphor::logging::log<phosphor::logging::level::INFO>(
         "Logging onChange discrete trigger action to Redfish Event Log.",
-        phosphor::logging::entry("REDFISH_MESSAGE_ID=%s",
-                                 redfish_message_ids::TriggerDiscreteOK),
-        phosphor::logging::entry("REDFISH_MESSAGE_ARGS=%s,%s,%s,%s,%s",
-                                 "OnChange", triggerId.c_str(),
+        phosphor::logging::entry(
+            "REDFISH_MESSAGE_ID=%s",
+            redfish_message_ids::TriggerDiscreteConditionMet),
+        phosphor::logging::entry("REDFISH_MESSAGE_ARGS=%s,%s,%s",
                                  sensorName.c_str(), value.c_str(),
-                                 timestampStr.c_str()));
+                                 triggerId.c_str()));
 }
 
 void fillActions(

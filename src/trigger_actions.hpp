@@ -10,15 +10,22 @@ namespace action
 
 namespace redfish_message_ids
 {
-constexpr const char* TriggerNumericWarning =
-    "OpenBMC.0.1.TriggerNumericWarning";
-constexpr const char* TriggerNumericCritical =
-    "OpenBMC.0.1.TriggerNumericCritical";
-constexpr const char* TriggerDiscreteOK = "OpenBMC.0.1.TriggerDiscreteOK";
-constexpr const char* TriggerDiscreteWarning =
-    "OpenBMC.0.1.TriggerDiscreteWarning";
-constexpr const char* TriggerDiscreteCritical =
-    "OpenBMC.0.1.TriggerDiscreteCritical";
+constexpr const char* TriggerDiscreteConditionMet =
+    "Telemetry.1.0.TriggerDiscreteConditionMet";
+constexpr const char* TriggerNumericAboveLowerCritical =
+    "Telemetry.1.0.TriggerNumericAboveLowerCritical";
+constexpr const char* TriggerNumericAboveUpperCritical =
+    "Telemetry.1.0.TriggerNumericAboveUpperCritical";
+constexpr const char* TriggerNumericAboveUpperWarning =
+    "Telemetry.1.0.TriggerNumericAboveUpperWarning";
+constexpr const char* TriggerNumericBelowLowerCritical =
+    "Telemetry.1.0.TriggerNumericBelowLowerCritical";
+constexpr const char* TriggerNumericBelowLowerWarning =
+    "Telemetry.1.0.TriggerNumericBelowLowerWarning";
+constexpr const char* TriggerNumericBelowUpperCritical =
+    "Telemetry.1.0.TriggerNumericBelowUpperCritical";
+constexpr const char* TriggerNumericReadingNormal =
+    "Telemetry.1.0.TriggerNumericReadingNormal";
 } // namespace redfish_message_ids
 
 namespace numeric
@@ -53,7 +60,7 @@ class LogToRedfishEventLog : public interfaces::TriggerAction
     const ::numeric::Type type;
     const double threshold;
 
-    const char* getRedfishMessageId() const;
+    const char* getRedfishMessageId(const double value) const;
 };
 
 void fillActions(
@@ -81,18 +88,11 @@ class LogToJournal : public interfaces::TriggerAction
 class LogToRedfishEventLog : public interfaces::TriggerAction
 {
   public:
-    explicit LogToRedfishEventLog(::discrete::Severity severity) :
-        severity(severity)
-    {}
+    explicit LogToRedfishEventLog() {}
 
     void commit(const std::string& triggerId, const ThresholdName thresholdName,
                 const std::string& sensorName, const Milliseconds timestamp,
                 const TriggerValue value) override;
-
-  private:
-    const ::discrete::Severity severity;
-
-    const char* getRedfishMessageId() const;
 };
 
 void fillActions(
