@@ -1,5 +1,6 @@
 #pragma once
 
+#include "helpers.hpp"
 #include "report_manager.hpp"
 #include "types/report_types.hpp"
 
@@ -117,6 +118,25 @@ class ReportParams final
     Readings readings() const
     {
         return readingsProperty;
+    }
+
+    friend void PrintTo(const ReportParams& params, std::ostream* os)
+    {
+        *os << "{ Id: \"" << params.reportIdProperty << "\", Name: \""
+            << params.reportNameProperty << "\", ReportingType: \""
+            << utils::enumToString(params.reportingTypeProperty)
+            << "\", ReportActions: ";
+        PrintTo(params.reportActionsProperty, os);
+        *os << ", Interval: " << params.intervalProperty
+            << ", Enabled: " << params.enabledProperty
+            << ", AppendLimit: " << std::to_string(params.appendLimitProperty)
+            << ", ReportUpdates: \""
+            << utils::enumToString(params.reportUpdatesProperty)
+            << "\", MetricParameters: ";
+        PrintTo(params.metricParametersProperty, os);
+        *os << ", Readings: ";
+        PrintTo(params.readingsProperty, os);
+        *os << " }";
     }
 
   private:
