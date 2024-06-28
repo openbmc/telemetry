@@ -898,6 +898,16 @@ struct ReportUpdatesReportParams
     ReportParams reportParams;
     std::vector<ReadingData> expectedReadings;
     bool expectedEnabled;
+
+    friend void PrintTo(const ReportUpdatesReportParams& params,
+                        std::ostream* os)
+    {
+        *os << "{ ReportParams: ";
+        PrintTo(params.reportParams, os);
+        *os << ", ExpectedReadings: ";
+        PrintTo(params.expectedReadings, os);
+        *os << ", ExpectedEnabled: " << params.expectedEnabled << " }";
+    }
 };
 
 class TestReportWithReportUpdatesAndLimit :

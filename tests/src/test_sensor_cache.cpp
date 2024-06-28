@@ -21,6 +21,11 @@ struct IdParam
         service(service), path(path)
     {}
 
+    friend void PrintTo(const IdParam& param, std::ostream* os)
+    {
+        *os << "(" << param.service << "): " << param.path;
+    }
+
     std::string service;
     std::string path;
 };
