@@ -55,6 +55,24 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "b112df80_3293c06b",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1001329
+      },
+      "writtenOn": "2024-06-28T13:11:53Z",
+      "side": 1,
+      "message": "https://gerrit.openbmc.org/c/openbmc/telemetry/+/72494",
+      "parentUuid": "a317bb05_94afd7c7",
+      "revId": "56c8369ea62c8373ddebcbbb2d2720eaa8c3e6fa",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "65abc11d_f55410ac",
         "filename": "src/trigger_actions.cpp",
         "patchSetId": 1
@@ -66,6 +84,24 @@
       "writtenOn": "2024-06-28T11:55:29Z",
       "side": 1,
       "message": "where is the direction defined?",
+      "revId": "56c8369ea62c8373ddebcbbb2d2720eaa8c3e6fa",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "cbcb5621_0e67d673",
+        "filename": "src/trigger_actions.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1001329
+      },
+      "writtenOn": "2024-06-28T13:11:53Z",
+      "side": 1,
+      "message": "Direction value isn\u0027t forwarded to Redfish. I\u0027ve used already existing function only to determine whether value is increasing or decreasing.",
+      "parentUuid": "65abc11d_f55410ac",
       "revId": "56c8369ea62c8373ddebcbbb2d2720eaa8c3e6fa",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
