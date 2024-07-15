@@ -18,6 +18,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "782daa5a_4c619981",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1001329
+      },
+      "writtenOn": "2024-07-15T07:25:40Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "7c2b4238_84b60335",
+      "revId": "3545c34ee5f81eaf994c03379ba4778b233d9a19",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "bcdffc34_38167698",
@@ -31,6 +49,30 @@
       "writtenOn": "2024-07-10T08:31:30Z",
       "side": 1,
       "message": "I don\u0027t get it. Is it a gap in Redfish spec?",
+      "range": {
+        "startLine": 80,
+        "startChar": 0,
+        "endLine": 81,
+        "endChar": 47
+      },
+      "revId": "3545c34ee5f81eaf994c03379ba4778b233d9a19",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "38f43119_599aad8b",
+        "filename": "src/trigger_actions.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1001329
+      },
+      "writtenOn": "2024-07-15T07:25:40Z",
+      "side": 1,
+      "message": "It\u0027s not a gap. When sensor value is decreasing, and crosses upperWarning threshold, it moves back to normal operating range, hence the message. The same goes for lowerWarning, when value is increasing.",
+      "parentUuid": "bcdffc34_38167698",
       "range": {
         "startLine": 80,
         "startChar": 0,
