@@ -290,6 +290,7 @@ std::unique_ptr<sdbusplus::asio::dbus_interface>
         sdbusplus::vtable::property_::emits_change,
         [this, &reportFactory](auto newVal, auto& oldVal) {
         auto labeledMetricParams = reportFactory.convertMetricParams(newVal);
+        verify(labeledMetricParams);
         reportFactory.updateMetrics(metrics, state.get<ReportFlags::enabled>(),
                                     labeledMetricParams);
         readingParameters = toReadingParameters(
@@ -630,4 +631,21 @@ std::vector<ErrorMessage> Report::verify(ReportingType reportingType,
     }
 
     return result;
+}
+
+void Report::verify(const std::vector<LabeledMetricParameters>& readingParams)
+{
+    size_t metricCount = 0;
+    for (const auto& metricParam : readingParams)
+    {
+        auto metricParamsVec =
+            metricParam.at_label<utils::tstring::SensorPath>();
+        metricCount += metricParamsVec.size();
+    }
+
+    if (readingParams.size() > ReportManager::maxNumberMetrics ||
+        metricCount > ReportManager::maxNumberMetrics)
+    {
+        throw errors::InvalidArgument("ReadingParameters", "Too many");
+    }
 }

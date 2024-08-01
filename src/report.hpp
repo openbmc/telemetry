@@ -109,6 +109,8 @@ class Report : public interfaces::Report, public interfaces::MetricListener
     void updateReadings();
     void scheduleTimer();
     static std::vector<ErrorMessage> verify(ReportingType, Milliseconds);
+    static void
+        verify(const std::vector<LabeledMetricParameters>& readingParams);
 
     std::string id;
     const sdbusplus::message::object_path path;
