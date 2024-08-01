@@ -290,6 +290,31 @@ TEST_F(TestReport, setReadingParametersWithNewParams)
         Eq(newParams));
 }
 
+TEST_F(TestReport, setReadingParametersFailsWhenMetricCountExceedsAllowedValue)
+{
+    std::vector<LabeledMetricParameters> readingParams{{LabeledMetricParameters{
+        {LabeledSensorInfo{"Service", "/xyz/openbmc_project/sensors/power/psu",
+                           "NewMetadata123"}},
+        OperationType::avg,
+        CollectionTimeScope::startup,
+        CollectionDuration(250ms)}}};
+
+    auto& metricParamsVec =
+        readingParams[0].at_label<utils::tstring::SensorPath>();
+    for (size_t i = 0; i < ReportManager::maxNumberMetrics; i++)
+    {
+        metricParamsVec.emplace_back(LabeledSensorInfo{
+            "Service", "/xyz/openbmc_project/sensors/power/psu",
+            "NewMetadata123"});
+    }
+
+    ReadingParameters newParams = toReadingParameters(readingParams);
+
+    EXPECT_THAT(
+        setProperty(sut->getPath(), "ReadingParameters", newParams).value(),
+        Eq(boost::system::errc::invalid_argument));
+}
+
 TEST_F(TestReport, setReportActionsWithValidNewActions)
 {
     std::vector<std::string> newActions = {
