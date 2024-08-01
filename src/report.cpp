@@ -290,6 +290,7 @@ std::unique_ptr<sdbusplus::asio::dbus_interface>
         sdbusplus::vtable::property_::emits_change,
         [this, &reportFactory](auto newVal, auto& oldVal) {
         auto labeledMetricParams = reportFactory.convertMetricParams(newVal);
+        ReportManager::verifyMetricParams(labeledMetricParams);
         reportFactory.updateMetrics(metrics, state.get<ReportFlags::enabled>(),
                                     labeledMetricParams);
         readingParameters = toReadingParameters(

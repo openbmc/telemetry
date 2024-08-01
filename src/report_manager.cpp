@@ -119,19 +119,7 @@ void ReportManager::verifyAddReport(
         throw errors::InvalidArgument("Interval");
     }
 
-    size_t metricCount = 0;
-    for (auto metricParam : readingParams)
-    {
-        auto metricParamsVec =
-            metricParam.at_label<utils::tstring::SensorPath>();
-        metricCount += metricParamsVec.size();
-    }
-
-    if (readingParams.size() > maxNumberMetrics ||
-        metricCount > maxNumberMetrics)
-    {
-        throw errors::InvalidArgument("MetricParams", "Too many.");
-    }
+    verifyMetricParams(readingParams);
 
     for (const LabeledMetricParameters& item : readingParams)
     {
@@ -235,5 +223,23 @@ void ReportManager::loadFromPersistent()
                 phosphor::logging::entry("EXCEPTION_MSG=%s", e.what()));
             reportStorage->remove(path);
         }
+    }
+}
+
+void ReportManager::verifyMetricParams(
+    const std::vector<LabeledMetricParameters>& metricParams)
+{
+    size_t metricCount = 0;
+    for (const auto& metricParam : metricParams)
+    {
+        auto metricParamsVec =
+            metricParam.at_label<utils::tstring::SensorPath>();
+        metricCount += metricParamsVec.size();
+    }
+
+    if (metricParams.size() > ReportManager::maxNumberMetrics ||
+        metricCount > ReportManager::maxNumberMetrics)
+    {
+        throw errors::InvalidArgument("ReadingParameters", "Too many");
     }
 }
