@@ -1,0 +1,10 @@
+Code-Review+1: Alicja Rybak <alicja.rybak@intel.com>
+Code-Review+2: Adrian Ambrożewicz <adrian.ambrozewicz@linux.intel.com>
+Verified+1: OpenBMC CI <openbmcbump-ci@yahoo.com>
+Submitted-by: Adrian Ambrożewicz <adrian.ambrozewicz@linux.intel.com>
+Submitted-at: Thu, 08 Aug 2024 07:09:50 +0000
+Reviewed-on: https://gerrit.openbmc.org/c/openbmc/telemetry/+/72367
+Comments-Total: 14
+Comments-Unresolved: 1
+Project: openbmc/telemetry
+Branch: refs/heads/master
