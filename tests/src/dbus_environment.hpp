@@ -82,9 +82,9 @@ class DbusEnvironment : public ::testing::Environment
         std::vector<std::future<T>> futures;
         futures.emplace_back(std::move(future));
 
-        return waitForFutures(
-            std::move(futures), T{},
-            [](auto, const auto& value) { return value; }, timeout);
+        return waitForFutures(std::move(futures), T{},
+                              [](auto, const auto& value) { return value; },
+                              timeout);
     }
 
     static bool waitForFuture(std::string_view name,

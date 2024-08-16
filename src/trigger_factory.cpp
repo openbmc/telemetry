@@ -16,8 +16,8 @@ TriggerFactory::TriggerFactory(
     std::shared_ptr<sdbusplus::asio::connection> bus,
     std::shared_ptr<sdbusplus::asio::object_server> objServer,
     SensorCache& sensorCache) :
-    bus(std::move(bus)),
-    objServer(std::move(objServer)), sensorCache(sensorCache)
+    bus(std::move(bus)), objServer(std::move(objServer)),
+    sensorCache(sensorCache)
 {}
 
 void TriggerFactory::updateDiscreteThresholds(

@@ -11,8 +11,8 @@
 Sensor::Sensor(interfaces::Sensor::Id sensorId,
                const std::string& sensorMetadata, boost::asio::io_context& ioc,
                const std::shared_ptr<sdbusplus::asio::connection>& bus) :
-    sensorId(std::move(sensorId)),
-    sensorMetadata(sensorMetadata), ioc(ioc), bus(bus)
+    sensorId(std::move(sensorId)), sensorMetadata(sensorMetadata), ioc(ioc),
+    bus(bus)
 {}
 
 Sensor::Id Sensor::makeId(std::string_view service, std::string_view path)

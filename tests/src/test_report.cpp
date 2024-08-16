@@ -199,8 +199,7 @@ class TestReport : public Test
         DbusEnvironment::getBus()->async_method_call(
             [&methodPromise](boost::system::error_code ec) {
             methodPromise.set_value(ec);
-        },
-            DbusEnvironment::serviceName(), path, interface, method);
+        }, DbusEnvironment::serviceName(), path, interface, method);
         return DbusEnvironment::waitForFuture(methodPromise.get_future());
     }
 
@@ -642,8 +641,8 @@ INSTANTIATE_TEST_SUITE_P(
         std::make_pair("ReportActions", nlohmann::json(utils::transform(
                                             defaultParams().reportActions(),
                                             [](const auto v) {
-    return utils::toUnderlying(v);
-}))),
+                                                return utils::toUnderlying(v);
+                                            }))),
         std::make_pair("Interval",
                        nlohmann::json(defaultParams().interval().count())),
         std::make_pair("AppendLimit",

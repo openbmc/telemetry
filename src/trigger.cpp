@@ -66,8 +66,7 @@ Trigger::Trigger(
                 persistent = false;
             }
             return 1;
-        },
-            [this](const auto&) { return persistent; });
+        }, [this](const auto&) { return persistent; });
 
         dbusIface.register_property_rw(
             "Thresholds", TriggerThresholdParams{},
@@ -81,8 +80,7 @@ Trigger::Trigger(
                                             newThresholdParams);
             oldVal = std::move(newVal);
             return 1;
-        },
-            [this](const auto&) {
+        }, [this](const auto&) {
             return fromLabeledThresholdParam(getLabeledThresholds());
         });
 
@@ -99,8 +97,7 @@ Trigger::Trigger(
             }
             oldVal = std::move(newVal);
             return 1;
-        },
-            [this](const auto&) {
+        }, [this](const auto&) {
             return utils::fromLabeledSensorsInfo(getLabeledSensorInfo());
         });
 
@@ -117,8 +114,7 @@ Trigger::Trigger(
                 messages::Presence::Exist, *id, *reportIds});
             oldVal = std::move(newVal);
             return 1;
-        },
-            [this](const auto&) {
+        }, [this](const auto&) {
             return utils::transform<std::vector>(*reportIds,
                                                  [](const auto& id) {
                 return utils::pathAppend(utils::constants::reportDirPath, id);
@@ -138,8 +134,7 @@ Trigger::Trigger(
             }
             name = oldVal = newVal;
             return 1;
-        },
-            [this](const auto&) { return name; });
+        }, [this](const auto&) { return name; });
 
         dbusIface.register_property_r(
             "TriggerActions", std::vector<std::string>(),

@@ -11,7 +11,6 @@ struct MetricValue
 
     MetricValue(std::string_view metadataIn, double valueIn,
                 uint64_t timestampIn) :
-        metadata(metadataIn),
-        value(valueIn), timestamp(timestampIn)
+        metadata(metadataIn), value(valueIn), timestamp(timestampIn)
     {}
 };

@@ -89,8 +89,7 @@ struct NumericParams
 
         UpdateParams(size_t sensor, double value,
                      Milliseconds sleepAfter = 0ms) :
-            sensor(sensor),
-            value(value), sleepAfter(sleepAfter)
+            sensor(sensor), value(value), sleepAfter(sleepAfter)
         {}
     };
 
@@ -102,8 +101,7 @@ struct NumericParams
 
         ExpectedParams(size_t sensor, double value,
                        Milliseconds waitMin = 0ms) :
-            sensor(sensor),
-            value(value), waitMin(waitMin)
+            sensor(sensor), value(value), waitMin(waitMin)
         {}
     };
 
