@@ -9,8 +9,7 @@ NumericThreshold::NumericThreshold(
     Milliseconds dwellTimeIn, numeric::Direction directionIn,
     double thresholdValueIn, numeric::Type typeIn,
     std::unique_ptr<interfaces::Clock> clockIn) :
-    ioc(ioc),
-    triggerId(triggerIdIn), actions(std::move(actionsIn)),
+    ioc(ioc), triggerId(triggerIdIn), actions(std::move(actionsIn)),
     dwellTime(dwellTimeIn), direction(directionIn),
     thresholdValue(thresholdValueIn), type(typeIn), clock(std::move(clockIn))
 {
@@ -57,10 +56,10 @@ void NumericThreshold::sensorUpdated(interfaces::Sensor& sensor,
         return;
     }
 
-    bool crossedDecreasing = thresholdValue < prevValue &&
-                             thresholdValue > value;
-    bool crossedIncreasing = thresholdValue > prevValue &&
-                             thresholdValue < value;
+    bool crossedDecreasing =
+        thresholdValue < prevValue && thresholdValue > value;
+    bool crossedIncreasing =
+        thresholdValue > prevValue && thresholdValue < value;
 
     if (!crossedDecreasing && !crossedIncreasing && thresholdValue == prevValue)
     {

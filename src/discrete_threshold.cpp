@@ -12,8 +12,7 @@ DiscreteThreshold::DiscreteThreshold(
     Milliseconds dwellTimeIn, const std::string& thresholdValueIn,
     const std::string& nameIn, const discrete::Severity severityIn,
     std::unique_ptr<interfaces::Clock> clockIn) :
-    ioc(ioc),
-    triggerId(triggerIdIn), actions(std::move(actionsIn)),
+    ioc(ioc), triggerId(triggerIdIn), actions(std::move(actionsIn)),
     dwellTime(dwellTimeIn), thresholdValue(thresholdValueIn),
     numericThresholdValue(utils::stodStrict(thresholdValue)),
     severity(severityIn), name(getNonEmptyName(nameIn)),

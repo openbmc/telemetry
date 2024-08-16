@@ -25,8 +25,9 @@ TEST_F(TestDetachedTimer, executesLambdaAfterTimeout)
         setPromise();
     });
 
-    auto elapsed = DbusEnvironment::measureTime(
-        [] { DbusEnvironment::waitForFuture("timer"); });
+    auto elapsed = DbusEnvironment::measureTime([] {
+        DbusEnvironment::waitForFuture("timer");
+    });
 
     EXPECT_THAT(elapsed, AllOf(Ge(100ms), Lt(200ms)));
     EXPECT_THAT(value, Eq(1u));

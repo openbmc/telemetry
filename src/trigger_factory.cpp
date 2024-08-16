@@ -16,8 +16,8 @@ TriggerFactory::TriggerFactory(
     std::shared_ptr<sdbusplus::asio::connection> bus,
     std::shared_ptr<sdbusplus::asio::object_server> objServer,
     SensorCache& sensorCache) :
-    bus(std::move(bus)),
-    objServer(std::move(objServer)), sensorCache(sensorCache)
+    bus(std::move(bus)), objServer(std::move(objServer)),
+    sensorCache(sensorCache)
 {}
 
 void TriggerFactory::updateDiscreteThresholds(
@@ -223,10 +223,10 @@ std::unique_ptr<interfaces::Trigger> TriggerFactory::make(
     const std::vector<LabeledSensorInfo>& labeledSensorsInfo) const
 {
     const auto& sensors = getSensors(labeledSensorsInfo);
-    auto triggerActions = utils::transform(triggerActionsIn,
-                                           [](const auto& triggerActionStr) {
-        return toTriggerAction(triggerActionStr);
-    });
+    auto triggerActions =
+        utils::transform(triggerActionsIn, [](const auto& triggerActionStr) {
+            return toTriggerAction(triggerActionStr);
+        });
     std::vector<std::shared_ptr<interfaces::Threshold>> thresholds;
     auto id = std::make_unique<const std::string>(idIn);
 
@@ -260,8 +260,9 @@ void TriggerFactory::updateSensors(
     {
         auto existing = std::find_if(oldSensors.begin(), oldSensors.end(),
                                      [labeledSensorInfo](auto sensor) {
-            return labeledSensorInfo == sensor->getLabeledSensorInfo();
-        });
+                                         return labeledSensorInfo ==
+                                                sensor->getLabeledSensorInfo();
+                                     });
 
         if (existing != oldSensors.end())
         {
@@ -281,9 +282,8 @@ void TriggerFactory::updateSensors(
     currentSensors = std::move(newSensors);
 }
 
-std::vector<LabeledSensorInfo>
-    TriggerFactory::getLabeledSensorsInfo(boost::asio::yield_context& yield,
-                                          const SensorsInfo& sensorsInfo) const
+std::vector<LabeledSensorInfo> TriggerFactory::getLabeledSensorsInfo(
+    boost::asio::yield_context& yield, const SensorsInfo& sensorsInfo) const
 {
     if (sensorsInfo.empty())
     {
@@ -304,9 +304,8 @@ std::vector<LabeledSensorInfo>
     return parseSensorTree(tree, sensorsInfo);
 }
 
-std::vector<LabeledSensorInfo>
-    TriggerFactory::parseSensorTree(const std::vector<utils::SensorTree>& tree,
-                                    const SensorsInfo& sensorsInfo)
+std::vector<LabeledSensorInfo> TriggerFactory::parseSensorTree(
+    const std::vector<utils::SensorTree>& tree, const SensorsInfo& sensorsInfo)
 {
     return utils::transform(sensorsInfo, [&tree](const auto& item) {
         const auto& [sensorPath, metadata] = item;

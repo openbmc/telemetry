@@ -6,9 +6,8 @@ OnChangeThreshold::OnChangeThreshold(
     const std::string& triggerIdIn, Sensors sensorsIn,
     std::vector<std::unique_ptr<interfaces::TriggerAction>> actionsIn,
     std::unique_ptr<interfaces::Clock> clockIn) :
-    triggerId(triggerIdIn),
-    sensors(std::move(sensorsIn)), actions(std::move(actionsIn)),
-    clock(std::move(clockIn))
+    triggerId(triggerIdIn), sensors(std::move(sensorsIn)),
+    actions(std::move(actionsIn)), clock(std::move(clockIn))
 {}
 
 void OnChangeThreshold::initialize()

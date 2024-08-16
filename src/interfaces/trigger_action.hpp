@@ -14,10 +14,9 @@ class TriggerAction
   public:
     virtual ~TriggerAction() = default;
 
-    virtual void commit(const std::string& triggerId,
-                        const ThresholdName thresholdName,
-                        const std::string& sensorId,
-                        const Milliseconds timestamp,
-                        const TriggerValue value) = 0;
+    virtual void
+        commit(const std::string& triggerId, const ThresholdName thresholdName,
+               const std::string& sensorId, const Milliseconds timestamp,
+               const TriggerValue value) = 0;
 };
 } // namespace interfaces

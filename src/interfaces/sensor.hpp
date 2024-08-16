@@ -21,9 +21,7 @@ class Sensor
     struct Id
     {
         Id(std::string_view type, std::string_view service,
-           std::string_view path) :
-            type(type),
-            service(service), path(path)
+           std::string_view path) : type(type), service(service), path(path)
         {}
 
         std::string type;

@@ -46,9 +46,9 @@ class TestReportManager : public Test
         EXPECT_CALL(reportFactoryMock, convertMetricParams(_, _))
             .Times(AnyNumber());
 
-        sut = std::make_unique<ReportManager>(std::move(reportFactoryMockPtr),
-                                              std::move(storageMockPtr),
-                                              DbusEnvironment::getObjServer());
+        sut = std::make_unique<ReportManager>(
+            std::move(reportFactoryMockPtr), std::move(storageMockPtr),
+            DbusEnvironment::getObjServer());
     }
 
     void TearDown() override
@@ -65,8 +65,8 @@ class TestReportManager : public Test
         DbusEnvironment::getBus()->async_method_call(
             [&addReportPromise](boost::system::error_code ec,
                                 const std::string& path) {
-            addReportPromise.set_value({ec, path});
-        },
+                addReportPromise.set_value({ec, path});
+            },
             DbusEnvironment::serviceName(), ReportManager::reportManagerPath,
             ReportManager::reportManagerIfaceName, "AddReport",
             std::forward<Args>(args)...);
@@ -79,9 +79,10 @@ class TestReportManager : public Test
             params.reportId(), params.reportName(),
             utils::enumToString(params.reportingType()),
             utils::enumToString(params.reportUpdates()), params.appendLimit(),
-            utils::transform(
-                params.reportActions(),
-                [](const auto v) { return utils::enumToString(v); }),
+            utils::transform(params.reportActions(),
+                             [](const auto v) {
+                                 return utils::enumToString(v);
+                             }),
             params.interval().count(),
             toReadingParameters(params.metricParameters()), params.enabled());
     }
@@ -390,11 +391,11 @@ TEST_F(TestReportManager, DISABLED_failToAddReportWithMoreMetricsThanExpected)
 
     for (size_t i = 0; i < ReportManager::maxNumberMetrics + 1; i++)
     {
-        metricParams.emplace_back(
-            LabeledMetricParameters{{},
-                                    OperationType::avg,
-                                    CollectionTimeScope::point,
-                                    CollectionDuration(Milliseconds(0u))});
+        metricParams.emplace_back(LabeledMetricParameters{
+            {},
+            OperationType::avg,
+            CollectionTimeScope::point,
+            CollectionDuration(Milliseconds(0u))});
     }
 
     reportParams.metricParameters(std::move(metricParams));
@@ -445,8 +446,8 @@ TEST_F(TestReportManager, DISABLED_failToAddReportWhenMaxReportIsReached)
         EXPECT_THAT(ec.value(), Eq(boost::system::errc::success));
     }
 
-    reportParams.reportId(reportParams.reportName() +
-                          std::to_string(ReportManager::maxReports));
+    reportParams.reportId(
+        reportParams.reportName() + std::to_string(ReportManager::maxReports));
     auto [ec, path] = addReport(reportParams);
 
     EXPECT_THAT(ec.value(), Eq(boost::system::errc::too_many_files_open));
@@ -549,9 +550,9 @@ class TestReportManagerStorage : public TestReportManager
 
     void makeReportManager()
     {
-        sut = std::make_unique<ReportManager>(std::move(reportFactoryMockPtr),
-                                              std::move(storageMockPtr),
-                                              DbusEnvironment::getObjServer());
+        sut = std::make_unique<ReportManager>(
+            std::move(reportFactoryMockPtr), std::move(storageMockPtr),
+            DbusEnvironment::getObjServer());
     }
 
     nlohmann::json data = nlohmann::json{

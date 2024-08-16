@@ -61,8 +61,8 @@ TEST_F(TestDiscreteThreshold, initializeThresholdExpectAllSensorsAreRegistered)
     {
         EXPECT_CALL(*sensor,
                     registerForUpdates(Truly([sut = sut.get()](const auto& x) {
-            return x.lock().get() == sut;
-        })));
+                        return x.lock().get() == sut;
+                    })));
     }
 
     sut->initialize();
@@ -135,8 +135,7 @@ struct DiscreteParams
 
         UpdateParams(size_t sensor, double value,
                      Milliseconds sleepAfter = 0ms) :
-            sensor(sensor),
-            value(value), sleepAfter(sleepAfter)
+            sensor(sensor), value(value), sleepAfter(sleepAfter)
         {}
     };
 
@@ -148,8 +147,7 @@ struct DiscreteParams
 
         ExpectedParams(size_t sensor, double value,
                        Milliseconds waitMin = 0ms) :
-            sensor(sensor),
-            value(value), waitMin(waitMin)
+            sensor(sensor), value(value), waitMin(waitMin)
         {}
     };
 
@@ -232,8 +230,9 @@ class TestDiscreteThresholdCommon :
                                TriggerValue(GetParam().thresholdValue)))
                 .WillOnce(DoAll(
                     InvokeWithoutArgs([idx = index, &timestamps] {
-                timestamps[idx] = std::chrono::high_resolution_clock::now();
-            }),
+                        timestamps[idx] =
+                            std::chrono::high_resolution_clock::now();
+                    }),
                     InvokeWithoutArgs(DbusEnvironment::setPromise("commit"))));
         }
 

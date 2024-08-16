@@ -35,8 +35,7 @@ class DataInterval : public CollectionData
   public:
     DataInterval(std::shared_ptr<CollectionFunction> function,
                  CollectionDuration duration) :
-        function(std::move(function)),
-        duration(duration)
+        function(std::move(function)), duration(duration)
     {
         if (duration.t.count() == 0)
         {
@@ -85,8 +84,8 @@ class DataInterval : public CollectionData
 
         if (timestamp > duration.t)
         {
-            readings.front().first = std::max(readings.front().first,
-                                              timestamp - duration.t);
+            readings.front().first =
+                std::max(readings.front().first, timestamp - duration.t);
         }
     }
 
@@ -123,10 +122,9 @@ class DataStartup : public CollectionData
     std::vector<ReadingItem> readings;
 };
 
-std::vector<std::unique_ptr<CollectionData>>
-    makeCollectionData(size_t size, OperationType op,
-                       CollectionTimeScope timeScope,
-                       CollectionDuration duration)
+std::vector<std::unique_ptr<CollectionData>> makeCollectionData(
+    size_t size, OperationType op, CollectionTimeScope timeScope,
+    CollectionDuration duration)
 {
     using namespace std::string_literals;
 
@@ -137,10 +135,11 @@ std::vector<std::unique_ptr<CollectionData>>
     switch (timeScope)
     {
         case CollectionTimeScope::interval:
-            std::generate_n(std::back_inserter(result), size,
-                            [cf = makeCollectionFunction(op), duration] {
-                return std::make_unique<DataInterval>(cf, duration);
-            });
+            std::generate_n(
+                std::back_inserter(result), size,
+                [cf = makeCollectionFunction(op), duration] {
+                    return std::make_unique<DataInterval>(cf, duration);
+                });
             break;
         case CollectionTimeScope::point:
             std::generate_n(std::back_inserter(result), size,
@@ -149,8 +148,8 @@ std::vector<std::unique_ptr<CollectionData>>
         case CollectionTimeScope::startup:
             std::generate_n(std::back_inserter(result), size,
                             [cf = makeCollectionFunction(op)] {
-                return std::make_unique<DataStartup>(cf);
-            });
+                                return std::make_unique<DataStartup>(cf);
+                            });
             break;
     }
 

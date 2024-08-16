@@ -14,15 +14,15 @@ DbusSensorObject::DbusSensorObject(
     boost::asio::io_context& ioc,
     const std::shared_ptr<sdbusplus::asio::connection>& bus,
     const std::shared_ptr<sdbusplus::asio::object_server>& objServer) :
-    ioc(ioc),
-    bus(bus), objServer(objServer)
+    ioc(ioc), bus(bus), objServer(objServer)
 {
-    sensorIface = objServer->add_unique_interface(path(), interface(),
-                                                  [this](auto& iface) {
-        iface.register_property_r(property.value(), value,
-                                  sdbusplus::vtable::property_::emits_change,
-                                  [this](const auto&) { return value; });
-    });
+    sensorIface = objServer->add_unique_interface(
+        path(), interface(), [this](auto& iface) {
+            iface.register_property_r(
+                property.value(), value,
+                sdbusplus::vtable::property_::emits_change,
+                [this](const auto&) { return value; });
+        });
 }
 
 void DbusSensorObject::setValue(double v)
