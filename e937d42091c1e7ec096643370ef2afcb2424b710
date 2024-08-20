@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "8fade7f9_0e7d6492",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000534
+      },
+      "writtenOn": "2024-08-20T08:25:09Z",
+      "side": 1,
+      "message": "This commit is a bit old and there were some changes in the meantime. I suppose we should re-do the formatting.\n\n@Patrick - is the CI ready for it? Can we switch safely already?",
+      "revId": "e937d42091c1e7ec096643370ef2afcb2424b710",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
