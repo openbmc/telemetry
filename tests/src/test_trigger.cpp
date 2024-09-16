@@ -228,7 +228,7 @@ TEST_F(TestTrigger, sendsUpdateWhenReportNamesChangesToSameValue)
 }
 
 TEST_F(TestTrigger,
-       DISABLED_settingPropertyReportNamesThrowsExceptionWhenDuplicateReportIds)
+       settingPropertyReportNamesThrowsExceptionWhenDuplicateReportIds)
 {
     std::vector<object_path> newPropertyVal{
         utils::constants::reportDirPath / "report1",
@@ -241,9 +241,8 @@ TEST_F(TestTrigger,
                 Eq(boost::system::errc::invalid_argument));
 }
 
-TEST_F(
-    TestTrigger,
-    DISABLED_settingPropertyReportNamesThrowsExceptionWhenReportWithTooManyPrefixes)
+TEST_F(TestTrigger,
+       settingPropertyReportNamesThrowsExceptionWhenReportWithTooManyPrefixes)
 {
     std::vector<object_path> newPropertyVal{
         object_path("/xyz/openbmc_project/Telemetry/Reports/P1/P2/MyReport")};
@@ -254,9 +253,8 @@ TEST_F(
                 Eq(boost::system::errc::invalid_argument));
 }
 
-TEST_F(
-    TestTrigger,
-    DISABLED_settingPropertyReportNamesThrowsExceptionWhenReportWithTooLongPrefix)
+TEST_F(TestTrigger,
+       settingPropertyReportNamesThrowsExceptionWhenReportWithTooLongPrefix)
 {
     std::vector<object_path> newPropertyVal{
         object_path("/xyz/openbmc_project/Telemetry/Reports/" +
@@ -268,9 +266,8 @@ TEST_F(
                 Eq(boost::system::errc::invalid_argument));
 }
 
-TEST_F(
-    TestTrigger,
-    DISABLED_settingPropertyReportNamesThrowsExceptionWhenReportWithTooLongId)
+TEST_F(TestTrigger,
+       settingPropertyReportNamesThrowsExceptionWhenReportWithTooLongId)
 {
     std::vector<object_path> newPropertyVal{
         object_path("/xyz/openbmc_project/Telemetry/Reports/Prefix/" +
@@ -283,7 +280,7 @@ TEST_F(
 }
 
 TEST_F(TestTrigger,
-       DISABLED_settingPropertyReportNamesThrowsExceptionWhenReportWithBadPath)
+       settingPropertyReportNamesThrowsExceptionWhenReportWithBadPath)
 {
     std::vector<object_path> newPropertyVal{
         object_path("/xyz/openbmc_project/Telemetry/NotReports/MyReport")};

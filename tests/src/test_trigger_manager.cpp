@@ -106,7 +106,7 @@ TEST_F(TestTriggerManager, addDiscreteTriggerWithoutThresholds)
     EXPECT_THAT(path, Eq(triggerMock.getPath()));
 }
 
-TEST_F(TestTriggerManager, DISABLED_failToAddTriggerTwice)
+TEST_F(TestTriggerManager, failToAddTriggerTwice)
 {
     triggerFactoryMock.expectMake(TriggerParams(), Ref(*sut), Ref(storageMock))
         .WillOnce(Return(ByMove(std::move(triggerMockPtr))));
@@ -118,7 +118,7 @@ TEST_F(TestTriggerManager, DISABLED_failToAddTriggerTwice)
     EXPECT_THAT(path, Eq(std::string()));
 }
 
-TEST_F(TestTriggerManager, DISABLED_failToAddTriggerWithInvalidId)
+TEST_F(TestTriggerManager, failToAddTriggerWithInvalidId)
 {
     triggerFactoryMock.expectMake(std::nullopt, Ref(*sut), Ref(storageMock))
         .Times(0);
@@ -128,7 +128,7 @@ TEST_F(TestTriggerManager, DISABLED_failToAddTriggerWithInvalidId)
     EXPECT_THAT(path, Eq(std::string()));
 }
 
-TEST_F(TestTriggerManager, DISABLED_failToAddTriggerWithDuplicatesInReportsIds)
+TEST_F(TestTriggerManager, failToAddTriggerWithDuplicatesInReportsIds)
 {
     triggerFactoryMock.expectMake(std::nullopt, Ref(*sut), Ref(storageMock))
         .Times(0);
@@ -149,7 +149,7 @@ TEST_F(TestTriggerManager, addTriggerWithProperReportPaths)
     EXPECT_THAT(path, Eq(triggerMock.getPath()));
 }
 
-TEST_F(TestTriggerManager, DISABLED_failToAddTriggerWithBadReportsPath)
+TEST_F(TestTriggerManager, failToAddTriggerWithBadReportsPath)
 {
     triggerFactoryMock.expectMake(std::nullopt, Ref(*sut), Ref(storageMock))
         .Times(0);
@@ -160,7 +160,7 @@ TEST_F(TestTriggerManager, DISABLED_failToAddTriggerWithBadReportsPath)
     EXPECT_THAT(path, Eq(std::string()));
 }
 
-TEST_F(TestTriggerManager, DISABLED_failToAddTriggerWithTooManyReportPrefixes)
+TEST_F(TestTriggerManager, failToAddTriggerWithTooManyReportPrefixes)
 {
     triggerFactoryMock.expectMake(std::nullopt, Ref(*sut), Ref(storageMock))
         .Times(0);
@@ -276,7 +276,7 @@ TEST_F(TestTriggerManager, addTriggerWithMaxLengthDiscreteThresholdName)
     EXPECT_THAT(path, Eq("/"s + triggerParams.id()));
 }
 
-TEST_F(TestTriggerManager, DISABLED_failToAddTriggerWithTooLongFullId)
+TEST_F(TestTriggerManager, failToAddTriggerWithTooLongFullId)
 {
     triggerFactoryMock.expectMake(std::nullopt, Ref(*sut), Ref(storageMock))
         .Times(0);
@@ -290,7 +290,7 @@ TEST_F(TestTriggerManager, DISABLED_failToAddTriggerWithTooLongFullId)
     EXPECT_THAT(path, Eq(std::string()));
 }
 
-TEST_F(TestTriggerManager, DISABLED_failToAddTriggerWithTooLongId)
+TEST_F(TestTriggerManager, failToAddTriggerWithTooLongId)
 {
     triggerFactoryMock.expectMake(std::nullopt, Ref(*sut), Ref(storageMock))
         .Times(0);
@@ -303,7 +303,7 @@ TEST_F(TestTriggerManager, DISABLED_failToAddTriggerWithTooLongId)
     EXPECT_THAT(path, Eq(std::string()));
 }
 
-TEST_F(TestTriggerManager, DISABLED_failToAddTriggerWithTooLongPrefix)
+TEST_F(TestTriggerManager, failToAddTriggerWithTooLongPrefix)
 {
     triggerFactoryMock.expectMake(std::nullopt, Ref(*sut), Ref(storageMock))
         .Times(0);
@@ -316,7 +316,7 @@ TEST_F(TestTriggerManager, DISABLED_failToAddTriggerWithTooLongPrefix)
     EXPECT_THAT(path, Eq(std::string()));
 }
 
-TEST_F(TestTriggerManager, DISABLED_failToAddTriggerWithTooManyPrefixes)
+TEST_F(TestTriggerManager, failToAddTriggerWithTooManyPrefixes)
 {
     triggerFactoryMock.expectMake(std::nullopt, Ref(*sut), Ref(storageMock))
         .Times(0);
@@ -336,7 +336,7 @@ TEST_F(TestTriggerManager, DISABLED_failToAddTriggerWithTooManyPrefixes)
     EXPECT_THAT(path, Eq(std::string()));
 }
 
-TEST_F(TestTriggerManager, DISABLED_failToAddTriggerWithTooLongName)
+TEST_F(TestTriggerManager, failToAddTriggerWithTooLongName)
 {
     triggerFactoryMock.expectMake(std::nullopt, Ref(*sut), Ref(storageMock))
         .Times(0);
@@ -349,7 +349,7 @@ TEST_F(TestTriggerManager, DISABLED_failToAddTriggerWithTooLongName)
     EXPECT_THAT(path, Eq(std::string()));
 }
 
-TEST_F(TestTriggerManager, DISABLED_failToAddTriggerWithTooLongMetricId)
+TEST_F(TestTriggerManager, failToAddTriggerWithTooLongMetricId)
 {
     namespace ts = utils::tstring;
 
@@ -372,7 +372,7 @@ TEST_F(TestTriggerManager, DISABLED_failToAddTriggerWithTooLongMetricId)
     EXPECT_THAT(path, Eq(std::string()));
 }
 
-TEST_F(TestTriggerManager, DISABLED_failToAddTriggerWhenMaxTriggerIsReached)
+TEST_F(TestTriggerManager, failToAddTriggerWhenMaxTriggerIsReached)
 {
     auto triggerParams = TriggerParams();
 
