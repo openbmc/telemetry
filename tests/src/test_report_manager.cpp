@@ -234,7 +234,7 @@ TEST_F(TestReportManager, addReportWithMaxLengthName)
     EXPECT_THAT(path, Eq("/"s + reportParams.reportId()));
 }
 
-TEST_F(TestReportManager, DISABLED_failToAddReportWithTooLongFullId)
+TEST_F(TestReportManager, failToAddReportWithTooLongFullId)
 {
     reportFactoryMock.expectMake(std::nullopt, Ref(*sut), Ref(storageMock))
         .Times(0);
@@ -248,7 +248,7 @@ TEST_F(TestReportManager, DISABLED_failToAddReportWithTooLongFullId)
     EXPECT_THAT(path, Eq(std::string()));
 }
 
-TEST_F(TestReportManager, DISABLED_failToAddReportWithTooLongId)
+TEST_F(TestReportManager, failToAddReportWithTooLongId)
 {
     reportFactoryMock.expectMake(std::nullopt, Ref(*sut), Ref(storageMock))
         .Times(0);
@@ -261,7 +261,7 @@ TEST_F(TestReportManager, DISABLED_failToAddReportWithTooLongId)
     EXPECT_THAT(path, Eq(std::string()));
 }
 
-TEST_F(TestReportManager, DISABLED_failToAddReportWithTooLongPrefix)
+TEST_F(TestReportManager, failToAddReportWithTooLongPrefix)
 {
     reportFactoryMock.expectMake(std::nullopt, Ref(*sut), Ref(storageMock))
         .Times(0);
@@ -274,7 +274,7 @@ TEST_F(TestReportManager, DISABLED_failToAddReportWithTooLongPrefix)
     EXPECT_THAT(path, Eq(std::string()));
 }
 
-TEST_F(TestReportManager, DISABLED_failToAddReportWithTooManyPrefixes)
+TEST_F(TestReportManager, failToAddReportWithTooManyPrefixes)
 {
     reportFactoryMock.expectMake(std::nullopt, Ref(*sut), Ref(storageMock))
         .Times(0);
@@ -294,7 +294,7 @@ TEST_F(TestReportManager, DISABLED_failToAddReportWithTooManyPrefixes)
     EXPECT_THAT(path, Eq(std::string()));
 }
 
-TEST_F(TestReportManager, DISABLED_failToAddReportWithTooLongName)
+TEST_F(TestReportManager, failToAddReportWithTooLongName)
 {
     reportFactoryMock.expectMake(std::nullopt, Ref(*sut), Ref(storageMock))
         .Times(0);
@@ -307,7 +307,7 @@ TEST_F(TestReportManager, DISABLED_failToAddReportWithTooLongName)
     EXPECT_THAT(path, Eq(std::string()));
 }
 
-TEST_F(TestReportManager, DISABLED_failToAddReportTwice)
+TEST_F(TestReportManager, failToAddReportTwice)
 {
     reportFactoryMock.expectMake(reportParams, Ref(*sut), Ref(storageMock))
         .WillOnce(Return(ByMove(std::move(reportMockPtr))));
@@ -320,7 +320,7 @@ TEST_F(TestReportManager, DISABLED_failToAddReportTwice)
     EXPECT_THAT(path, Eq(std::string()));
 }
 
-TEST_F(TestReportManager, DISABLED_failToAddReportWithInvalidInterval)
+TEST_F(TestReportManager, failToAddReportWithInvalidInterval)
 {
     reportFactoryMock.expectMake(std::nullopt, Ref(*sut), Ref(storageMock))
         .Times(0);
@@ -334,7 +334,7 @@ TEST_F(TestReportManager, DISABLED_failToAddReportWithInvalidInterval)
     EXPECT_THAT(path, Eq(std::string()));
 }
 
-TEST_F(TestReportManager, DISABLED_failToAddReportWithInvalidReportingType)
+TEST_F(TestReportManager, failToAddReportWithInvalidReportingType)
 {
     reportFactoryMock.expectMake(std::nullopt, Ref(*sut), Ref(storageMock))
         .Times(0);
@@ -348,8 +348,7 @@ TEST_F(TestReportManager, DISABLED_failToAddReportWithInvalidReportingType)
     EXPECT_THAT(path, Eq(std::string()));
 }
 
-TEST_F(TestReportManager,
-       DISABLED_failToAddReportWithMoreMetricPropertiesThanExpected)
+TEST_F(TestReportManager, failToAddReportWithMoreMetricPropertiesThanExpected)
 {
     reportFactoryMock.expectMake(std::nullopt, Ref(*sut), Ref(storageMock))
         .Times(0);
@@ -381,7 +380,7 @@ TEST_F(TestReportManager,
     EXPECT_THAT(path, Eq(std::string()));
 }
 
-TEST_F(TestReportManager, DISABLED_failToAddReportWithMoreMetricsThanExpected)
+TEST_F(TestReportManager, failToAddReportWithMoreMetricsThanExpected)
 {
     reportFactoryMock.expectMake(std::nullopt, Ref(*sut), Ref(storageMock))
         .Times(0);
@@ -405,7 +404,7 @@ TEST_F(TestReportManager, DISABLED_failToAddReportWithMoreMetricsThanExpected)
     EXPECT_THAT(path, Eq(std::string()));
 }
 
-TEST_F(TestReportManager, DISABLED_failToAddReportWithAppendLimitGreaterThanMax)
+TEST_F(TestReportManager, failToAddReportWithAppendLimitGreaterThanMax)
 {
     reportFactoryMock.expectMake(std::nullopt, Ref(*sut), Ref(storageMock))
         .Times(0);
@@ -432,7 +431,7 @@ TEST_F(TestReportManager, addReportWithAppendLimitEqualToUint64MaxIsAllowed)
     EXPECT_THAT(path, Eq(reportMock.getPath()));
 }
 
-TEST_F(TestReportManager, DISABLED_failToAddReportWhenMaxReportIsReached)
+TEST_F(TestReportManager, failToAddReportWhenMaxReportIsReached)
 {
     reportFactoryMock.expectMake(std::nullopt, Ref(*sut), Ref(storageMock))
         .Times(ReportManager::maxReports);
