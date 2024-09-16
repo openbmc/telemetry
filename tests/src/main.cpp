@@ -11,7 +11,5 @@ int main(int argc, char** argv)
     testing::AddGlobalTestEnvironment(env);
     auto ret = RUN_ALL_TESTS();
 
-    env->teardown();
-
     return ret;
 }
