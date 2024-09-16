@@ -7,7 +7,13 @@
 
 DbusEnvironment::~DbusEnvironment()
 {
-    teardown();
+    if (setUp == true)
+    {
+        setUp = false;
+
+        objServer = nullptr;
+        bus = nullptr;
+    }
 }
 
 void DbusEnvironment::SetUp()
@@ -28,17 +34,6 @@ void DbusEnvironment::TearDown()
     ioc.poll();
 
     futures.clear();
-}
-
-void DbusEnvironment::teardown()
-{
-    if (setUp == true)
-    {
-        setUp = false;
-
-        objServer = nullptr;
-        bus = nullptr;
-    }
 }
 
 boost::asio::io_context& DbusEnvironment::getIoc()

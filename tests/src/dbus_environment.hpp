@@ -18,7 +18,6 @@ class DbusEnvironment : public ::testing::Environment
 
     void SetUp() override;
     void TearDown() override;
-    void teardown();
 
     static boost::asio::io_context& getIoc();
     static std::shared_ptr<sdbusplus::asio::connection> getBus();
