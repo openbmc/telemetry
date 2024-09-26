@@ -65,6 +65,7 @@ test(
             gmock_dep,
             gtest_dep,
             nlohmann_json_dep,
+            phosphor_dbus_interfaces,
             phosphor_logging,
             sdbusplus,
         ],

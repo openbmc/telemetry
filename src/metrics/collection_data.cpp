@@ -39,7 +39,7 @@ class DataInterval : public CollectionData
     {
         if (duration.t.count() == 0)
         {
-            throw errors::InvalidArgument(
+            errors::throwInvalidArgument(
                 "ReadingParameters.CollectionDuration");
         }
     }

@@ -114,7 +114,7 @@ TEST_F(TestTriggerManager, failToAddTriggerTwice)
     addTrigger(TriggerParams());
 
     auto [ec, path] = addTrigger(TriggerParams());
-    EXPECT_THAT(ec.value(), Eq(boost::system::errc::file_exists));
+    EXPECT_THAT(ec.value(), Eq(boost::system::errc::io_error));
     EXPECT_THAT(path, Eq(std::string()));
 }
 
@@ -124,7 +124,7 @@ TEST_F(TestTriggerManager, failToAddTriggerWithInvalidId)
         .Times(0);
 
     auto [ec, path] = addTrigger(TriggerParams().id("not valid?"));
-    EXPECT_THAT(ec.value(), Eq(boost::system::errc::invalid_argument));
+    EXPECT_THAT(ec.value(), Eq(boost::system::errc::io_error));
     EXPECT_THAT(path, Eq(std::string()));
 }
 
@@ -135,7 +135,7 @@ TEST_F(TestTriggerManager, failToAddTriggerWithDuplicatesInReportsIds)
 
     auto [ec, path] = addTrigger(
         TriggerParams().reportIds({"trigger1", "trigger2", "trigger1"}));
-    EXPECT_THAT(ec.value(), Eq(boost::system::errc::invalid_argument));
+    EXPECT_THAT(ec.value(), Eq(boost::system::errc::io_error));
     EXPECT_THAT(path, Eq(std::string()));
 }
 
@@ -156,7 +156,7 @@ TEST_F(TestTriggerManager, failToAddTriggerWithBadReportsPath)
 
     auto [ec, path] = addTrigger(TriggerParams().reports(
         {object_path("/xyz/openbmc_project/Telemetry/NotReports/MyReport")}));
-    EXPECT_THAT(ec.value(), Eq(boost::system::errc::invalid_argument));
+    EXPECT_THAT(ec.value(), Eq(boost::system::errc::io_error));
     EXPECT_THAT(path, Eq(std::string()));
 }
 
@@ -167,7 +167,7 @@ TEST_F(TestTriggerManager, failToAddTriggerWithTooManyReportPrefixes)
 
     auto [ec, path] = addTrigger(TriggerParams().reports({object_path(
         "/xyz/openbmc_project/Telemetry/Reports/P1/P2/MyReport")}));
-    EXPECT_THAT(ec.value(), Eq(boost::system::errc::invalid_argument));
+    EXPECT_THAT(ec.value(), Eq(boost::system::errc::io_error));
     EXPECT_THAT(path, Eq(std::string()));
 }
 
@@ -286,7 +286,7 @@ TEST_F(TestTriggerManager, failToAddTriggerWithTooLongFullId)
 
     auto [ec, path] = addTrigger(triggerParams);
 
-    EXPECT_THAT(ec.value(), Eq(boost::system::errc::invalid_argument));
+    EXPECT_THAT(ec.value(), Eq(boost::system::errc::io_error));
     EXPECT_THAT(path, Eq(std::string()));
 }
 
@@ -299,7 +299,7 @@ TEST_F(TestTriggerManager, failToAddTriggerWithTooLongId)
 
     auto [ec, path] = addTrigger(triggerParams);
 
-    EXPECT_THAT(ec.value(), Eq(boost::system::errc::invalid_argument));
+    EXPECT_THAT(ec.value(), Eq(boost::system::errc::io_error));
     EXPECT_THAT(path, Eq(std::string()));
 }
 
@@ -312,7 +312,7 @@ TEST_F(TestTriggerManager, failToAddTriggerWithTooLongPrefix)
 
     auto [ec, path] = addTrigger(triggerParams);
 
-    EXPECT_THAT(ec.value(), Eq(boost::system::errc::invalid_argument));
+    EXPECT_THAT(ec.value(), Eq(boost::system::errc::io_error));
     EXPECT_THAT(path, Eq(std::string()));
 }
 
@@ -332,7 +332,7 @@ TEST_F(TestTriggerManager, failToAddTriggerWithTooManyPrefixes)
 
     auto [ec, path] = addTrigger(triggerParams);
 
-    EXPECT_THAT(ec.value(), Eq(boost::system::errc::invalid_argument));
+    EXPECT_THAT(ec.value(), Eq(boost::system::errc::io_error));
     EXPECT_THAT(path, Eq(std::string()));
 }
 
@@ -345,7 +345,7 @@ TEST_F(TestTriggerManager, failToAddTriggerWithTooLongName)
 
     auto [ec, path] = addTrigger(triggerParams);
 
-    EXPECT_THAT(ec.value(), Eq(boost::system::errc::invalid_argument));
+    EXPECT_THAT(ec.value(), Eq(boost::system::errc::io_error));
     EXPECT_THAT(path, Eq(std::string()));
 }
 
@@ -368,7 +368,7 @@ TEST_F(TestTriggerManager, failToAddTriggerWithTooLongMetricId)
 
     auto [ec, path] = addTrigger(triggerParams);
 
-    EXPECT_THAT(ec.value(), Eq(boost::system::errc::invalid_argument));
+    EXPECT_THAT(ec.value(), Eq(boost::system::errc::io_error));
     EXPECT_THAT(path, Eq(std::string()));
 }
 
@@ -390,7 +390,7 @@ TEST_F(TestTriggerManager, failToAddTriggerWhenMaxTriggerIsReached)
     triggerParams.id(TriggerParams().id() +
                      std::to_string(TriggerManager::maxTriggers));
     auto [ec, path] = addTrigger(triggerParams);
-    EXPECT_THAT(ec.value(), Eq(boost::system::errc::too_many_files_open));
+    EXPECT_THAT(ec.value(), Eq(boost::system::errc::io_error));
     EXPECT_THAT(path, Eq(std::string()));
 }
 

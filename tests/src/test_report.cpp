@@ -1,4 +1,5 @@
 #include "dbus_environment.hpp"
+#include "errors.hpp"
 #include "fakes/clock_fake.hpp"
 #include "helpers.hpp"
 #include "messages/collect_trigger_id.hpp"
@@ -19,8 +20,6 @@
 #include "utils/string_utils.hpp"
 #include "utils/transform.hpp"
 #include "utils/tstring.hpp"
-
-#include <sdbusplus/exception.hpp>
 
 #include <ranges>
 
@@ -311,7 +310,7 @@ TEST_F(TestReport, setReadingParametersFailsWhenMetricCountExceedsAllowedValue)
 
     EXPECT_THAT(
         setProperty(sut->getPath(), "ReadingParameters", newParams).value(),
-        Eq(boost::system::errc::invalid_argument));
+        Eq(boost::system::errc::io_error));
 }
 
 TEST_F(TestReport, setReportActionsWithValidNewActions)
@@ -377,7 +376,7 @@ TEST_F(TestReport, setReportActionsWithInvalidActions)
     std::vector<std::string> invalidActions = {"EmitsReadingsUpdate_1"};
     EXPECT_THAT(
         setProperty(sut->getPath(), "ReportActions", invalidActions).value(),
-        Eq(boost::system::errc::invalid_argument));
+        Eq(boost::system::errc::io_error));
     EXPECT_THAT(
         getProperty<std::vector<std::string>>(sut->getPath(), "ReportActions"),
         Eq(utils::transform(defaultParams().reportActions(), [](const auto v) {
@@ -441,7 +440,7 @@ TEST_F(TestReport, failsToSetInvalidInterval)
 
     EXPECT_THAT(
         callMethod(sut->getPath(), "SetReportingProperties", "", newValue),
-        Eq(boost::system::errc::invalid_argument));
+        Eq(boost::system::errc::io_error));
 
     EXPECT_THAT(getProperty<uint64_t>(sut->getPath(), "Interval"),
                 Eq(defaultParams().interval().count()));
@@ -458,7 +457,7 @@ TEST_F(TestReport, failsToSetIncompatibleInterval)
 
     EXPECT_THAT(
         callMethod(report->getPath(), "SetReportingProperties", "", newValue),
-        Eq(boost::system::errc::invalid_argument));
+        Eq(boost::system::errc::io_error));
 
     EXPECT_THAT(getProperty<uint64_t>(report->getPath(), "Interval"),
                 Eq(defaultParams().interval().count()));
@@ -473,7 +472,7 @@ TEST_F(TestReport, failsToSetInvalidReportingType)
 
     EXPECT_THAT(callMethod(sut->getPath(), "SetReportingProperties", "XYZ",
                            std::numeric_limits<uint64_t>::max()),
-                Eq(boost::system::errc::invalid_argument));
+                Eq(boost::system::errc::io_error));
 
     EXPECT_THAT(getProperty<std::string>(report->getPath(), "ReportingType"),
                 Eq(utils::enumToString(ReportingType::onRequest)));
@@ -489,7 +488,7 @@ TEST_F(TestReport, failsToSetIncompatibleReportingType)
     EXPECT_THAT(callMethod(sut->getPath(), "SetReportingProperties",
                            utils::enumToString(ReportingType::periodic),
                            std::numeric_limits<uint64_t>::max()),
-                Eq(boost::system::errc::invalid_argument));
+                Eq(boost::system::errc::io_error));
 
     EXPECT_THAT(getProperty<std::string>(report->getPath(), "ReportingType"),
                 Eq(utils::enumToString(ReportingType::onRequest)));
@@ -739,7 +738,7 @@ TEST_P(TestReportInvalidIds, failsToCreateReportWithInvalidName)
 {
     EXPECT_CALL(storageMock, store).Times(0);
 
-    EXPECT_THROW(makeReport(GetParam()), sdbusplus::exception::SdBusError);
+    EXPECT_THROW(makeReport(GetParam()), errors::InvalidArgument);
 }
 
 class TestReportAllReportTypes :

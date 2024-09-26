@@ -63,9 +63,7 @@ void TriggerManager::verifyReportIds(
     if (std::unordered_set(newReportIds.begin(), newReportIds.end()).size() !=
         newReportIds.size())
     {
-        throw sdbusplus::exception::SdBusError(
-            static_cast<int>(std::errc::invalid_argument),
-            "Duplicate element in ReportIds");
+        errors::throwInvalidArgument("Reports", "Duplicate names");
     }
 }
 
@@ -84,8 +82,8 @@ void TriggerManager::verifyThresholdParams(
             if (discreteParam.at_label<ts::UserId>().length() >
                 utils::constants::maxIdNameLength)
             {
-                throw errors::InvalidArgument("ThresholdParams.Id",
-                                              "UserId too long.");
+                errors::throwInvalidArgument("Thresholds.Id",
+                                             "UserId too long.");
             }
         }
     }
@@ -97,9 +95,7 @@ void TriggerManager::verifyAddTrigger(
 {
     if (triggers.size() >= maxTriggers)
     {
-        throw sdbusplus::exception::SdBusError(
-            static_cast<int>(std::errc::too_many_files_open),
-            "Reached maximal trigger count");
+        errors::throwTooManyResources();
     }
 
     verifyReportIds(reportIds);

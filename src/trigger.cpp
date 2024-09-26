@@ -130,7 +130,7 @@ Trigger::Trigger(
             [this](auto newVal, auto& oldVal) {
             if (newVal.length() > utils::constants::maxIdNameLength)
             {
-                throw errors::InvalidArgument("Name", "Name is too long.");
+                errors::throwInvalidArgument("Name", "Name is too long.");
             }
             name = oldVal = newVal;
             return 1;

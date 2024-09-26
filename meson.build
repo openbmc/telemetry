@@ -33,6 +33,7 @@ boost = dependency('boost',
     modules: boost_modules)
 
 nlohmann_json_dep = dependency('nlohmann_json', include_type: 'system')
+phosphor_dbus_interfaces = dependency('phosphor-dbus-interfaces')
 phosphor_logging = dependency('phosphor-logging')
 sdbusplus = dependency('sdbusplus')
 systemd = dependency('systemd')
@@ -84,6 +85,7 @@ executable(
         boost,
         nlohmann_json_dep,
         sdbusplus,
+        phosphor_dbus_interfaces,
         phosphor_logging,
     ],
     include_directories: 'src',

@@ -1,7 +1,6 @@
+#include "errors.hpp"
 #include "helpers.hpp"
 #include "utils/dbus_path_utils.hpp"
-
-#include <sdbusplus/exception.hpp>
 
 #include <gmock/gmock.h>
 
@@ -54,6 +53,5 @@ INSTANTIATE_TEST_SUITE_P(
 TEST_P(TestPathAppendFail, pathAppendsCorrectly)
 {
     auto [basePath, extension] = GetParam();
-    EXPECT_THROW(pathAppend(basePath, extension),
-                 sdbusplus::exception::SdBusError);
+    EXPECT_THROW(pathAppend(basePath, extension), errors::InvalidArgument);
 }

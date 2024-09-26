@@ -4,6 +4,7 @@
 #include "utils/string_utils.hpp"
 
 #include <sdbusplus/exception.hpp>
+#include <xyz/openbmc_project/Common/error.hpp>
 
 #include <gmock/gmock.h>
 
@@ -155,12 +156,11 @@ TYPED_TEST(TestMakeIdName, usesNameWhenThereAreConflicts)
 
 TYPED_TEST(TestMakeIdName, throwsWhenProvidedIdIsTaken)
 {
+    using sdbusplus::error::xyz::openbmc_project::common::NotAllowed;
     this->conflicts = {"id", "prefix/id"};
 
-    EXPECT_THROW(this->makeIdName("id", "name"),
-                 sdbusplus::exception::SdBusError);
-    EXPECT_THROW(this->makeIdName("prefix/id", "name"),
-                 sdbusplus::exception::SdBusError);
+    EXPECT_THROW(this->makeIdName("id", "name"), NotAllowed);
+    EXPECT_THROW(this->makeIdName("prefix/id", "name"), NotAllowed);
 }
 
 TYPED_TEST(TestMakeIdName, usesNameWhenIdNotProvided)

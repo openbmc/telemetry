@@ -33,7 +33,7 @@ struct ConstexprString
 
 [[noreturn]] inline void throwConversionError(std::string_view propertyName)
 {
-    throw errors::InvalidArgument(propertyName, "Cannot convert.");
+    errors::throwInvalidArgument(propertyName, "Cannot convert.");
 }
 
 template <class T>

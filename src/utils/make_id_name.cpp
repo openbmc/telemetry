@@ -35,8 +35,7 @@ std::string generateId(std::string_view idIn, std::string_view nameIn,
         if (std::find(conflictIds.begin(), conflictIds.end(), idIn) !=
             conflictIds.end())
         {
-            throw sdbusplus::exception::SdBusError(
-                static_cast<int>(std::errc::file_exists), "Duplicated id");
+            errors::throwNotAllowed("Duplicated id");
         }
         return std::string(idIn);
     }
@@ -67,9 +66,7 @@ std::string generateId(std::string_view idIn, std::string_view nameIn,
 
         if (digitsInIdx > constants::maxIdNameLength)
         {
-            throw sdbusplus::exception::SdBusError(
-                static_cast<int>(std::errc::file_exists),
-                "Unique indices are depleted");
+            errors::throwNotAllowed("Unique indices are depleted");
         }
 
         tmpId = prefixes +
@@ -90,7 +87,7 @@ std::pair<std::string, std::string>
 {
     if (name.length() > constants::maxIdNameLength)
     {
-        throw errors::InvalidArgument("Name", "Too long.");
+        errors::throwInvalidArgument("Name", "Too long.");
     }
 
     if (name.empty() && !id.ends_with('/'))

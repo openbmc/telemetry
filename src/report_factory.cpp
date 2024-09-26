@@ -160,8 +160,8 @@ std::vector<LabeledMetricParameters>
 
             if (sensorParameters.size() != sensorPaths.size())
             {
-                throw errors::InvalidArgument("ReadingParameters",
-                                              "Service not found.");
+                errors::throwInvalidArgument("ReadingParameters",
+                                             "Service not found.");
             }
 
             if (operationType.empty())
@@ -196,6 +196,6 @@ std::vector<LabeledMetricParameters>
         }
 
         using namespace std::literals::string_literals;
-        throw errors::InvalidArgument("ReadingParameters."s + e.propertyName);
+        errors::throwInvalidArgument("ReadingParameters."s + e.propertyName);
     }
 }

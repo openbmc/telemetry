@@ -244,7 +244,7 @@ TEST_F(TestReportManager, failToAddReportWithTooLongFullId)
 
     auto [ec, path] = addReport(reportParams);
 
-    EXPECT_THAT(ec.value(), Eq(boost::system::errc::invalid_argument));
+    EXPECT_THAT(ec.value(), Eq(boost::system::errc::io_error));
     EXPECT_THAT(path, Eq(std::string()));
 }
 
@@ -257,7 +257,7 @@ TEST_F(TestReportManager, failToAddReportWithTooLongId)
 
     auto [ec, path] = addReport(reportParams);
 
-    EXPECT_THAT(ec.value(), Eq(boost::system::errc::invalid_argument));
+    EXPECT_THAT(ec.value(), Eq(boost::system::errc::io_error));
     EXPECT_THAT(path, Eq(std::string()));
 }
 
@@ -270,7 +270,7 @@ TEST_F(TestReportManager, failToAddReportWithTooLongPrefix)
 
     auto [ec, path] = addReport(reportParams);
 
-    EXPECT_THAT(ec.value(), Eq(boost::system::errc::invalid_argument));
+    EXPECT_THAT(ec.value(), Eq(boost::system::errc::io_error));
     EXPECT_THAT(path, Eq(std::string()));
 }
 
@@ -290,7 +290,7 @@ TEST_F(TestReportManager, failToAddReportWithTooManyPrefixes)
 
     auto [ec, path] = addReport(reportParams);
 
-    EXPECT_THAT(ec.value(), Eq(boost::system::errc::invalid_argument));
+    EXPECT_THAT(ec.value(), Eq(boost::system::errc::io_error));
     EXPECT_THAT(path, Eq(std::string()));
 }
 
@@ -303,7 +303,7 @@ TEST_F(TestReportManager, failToAddReportWithTooLongName)
 
     auto [ec, path] = addReport(reportParams);
 
-    EXPECT_THAT(ec.value(), Eq(boost::system::errc::invalid_argument));
+    EXPECT_THAT(ec.value(), Eq(boost::system::errc::io_error));
     EXPECT_THAT(path, Eq(std::string()));
 }
 
@@ -316,7 +316,7 @@ TEST_F(TestReportManager, failToAddReportTwice)
 
     auto [ec, path] = addReport(reportParams);
 
-    EXPECT_THAT(ec.value(), Eq(boost::system::errc::file_exists));
+    EXPECT_THAT(ec.value(), Eq(boost::system::errc::io_error));
     EXPECT_THAT(path, Eq(std::string()));
 }
 
@@ -330,7 +330,7 @@ TEST_F(TestReportManager, failToAddReportWithInvalidInterval)
 
     auto [ec, path] = addReport(reportParams);
 
-    EXPECT_THAT(ec.value(), Eq(boost::system::errc::invalid_argument));
+    EXPECT_THAT(ec.value(), Eq(boost::system::errc::io_error));
     EXPECT_THAT(path, Eq(std::string()));
 }
 
@@ -344,7 +344,7 @@ TEST_F(TestReportManager, failToAddReportWithInvalidReportingType)
         std::numeric_limits<uint64_t>::max(), std::vector<std::string>(),
         std::numeric_limits<uint64_t>::max(), ReadingParameters(), false);
 
-    EXPECT_THAT(ec.value(), Eq(boost::system::errc::invalid_argument));
+    EXPECT_THAT(ec.value(), Eq(boost::system::errc::io_error));
     EXPECT_THAT(path, Eq(std::string()));
 }
 
@@ -376,7 +376,7 @@ TEST_F(TestReportManager, failToAddReportWithMoreMetricPropertiesThanExpected)
 
     auto [ec, path] = addReport(reportParams);
 
-    EXPECT_THAT(ec.value(), Eq(boost::system::errc::invalid_argument));
+    EXPECT_THAT(ec.value(), Eq(boost::system::errc::io_error));
     EXPECT_THAT(path, Eq(std::string()));
 }
 
@@ -400,7 +400,7 @@ TEST_F(TestReportManager, failToAddReportWithMoreMetricsThanExpected)
 
     auto [ec, path] = addReport(reportParams);
 
-    EXPECT_THAT(ec.value(), Eq(boost::system::errc::invalid_argument));
+    EXPECT_THAT(ec.value(), Eq(boost::system::errc::io_error));
     EXPECT_THAT(path, Eq(std::string()));
 }
 
@@ -413,7 +413,7 @@ TEST_F(TestReportManager, failToAddReportWithAppendLimitGreaterThanMax)
 
     auto [ec, path] = addReport(reportParams);
 
-    EXPECT_THAT(ec.value(), Eq(boost::system::errc::invalid_argument));
+    EXPECT_THAT(ec.value(), Eq(boost::system::errc::io_error));
     EXPECT_THAT(path, Eq(std::string()));
 }
 
@@ -448,7 +448,7 @@ TEST_F(TestReportManager, failToAddReportWhenMaxReportIsReached)
                           std::to_string(ReportManager::maxReports));
     auto [ec, path] = addReport(reportParams);
 
-    EXPECT_THAT(ec.value(), Eq(boost::system::errc::too_many_files_open));
+    EXPECT_THAT(ec.value(), Eq(boost::system::errc::io_error));
     EXPECT_THAT(path, Eq(std::string()));
 }
 
