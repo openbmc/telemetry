@@ -226,10 +226,10 @@ std::unique_ptr<sdbusplus::asio::dbus_interface>
         {
             if (newIntervalT != interval)
             {
-                throw errors::InvalidArgument("Interval");
+                errors::throwInvalidArgument("Interval");
             }
 
-            throw errors::InvalidArgument("ReportingType");
+            errors::throwInvalidArgument("ReportingType");
         }
 
         if (reportingType != newReportingTypeT)
@@ -609,7 +609,7 @@ std::vector<ErrorMessage> Report::verify(ReportingType reportingType,
 {
     if (interval != Milliseconds{0} && interval < ReportManager::minInterval)
     {
-        throw errors::InvalidArgument("Interval");
+        errors::throwInvalidArgument("Interval");
     }
 
     std::vector<ErrorMessage> result;

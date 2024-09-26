@@ -55,7 +55,7 @@ inline void verifyIdCharacters(std::string_view id)
     if (id.find_first_not_of(utils::constants::allowedCharactersInPath) !=
         std::string::npos)
     {
-        throw errors::InvalidArgument("Id", "Invalid character.");
+        errors::throwInvalidArgument("Id", "Invalid character.");
     }
 }
 

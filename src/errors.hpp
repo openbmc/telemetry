@@ -8,7 +8,7 @@
 namespace errors
 {
 
-class InvalidArgument final : public sdbusplus::exception::internal_exception
+class InvalidArgument final : public sdbusplus::exception::exception
 {
   public:
     explicit InvalidArgument(std::string_view propertyName);
@@ -24,5 +24,12 @@ class InvalidArgument final : public sdbusplus::exception::internal_exception
   private:
     std::string errWhatDetailed;
 };
+
+[[noreturn]] void throwInvalidArgument(std::string_view name,
+                                       std::string_view info = "");
+
+[[noreturn]] void throwNotAllowed(const std::string& reason);
+
+[[noreturn]] void throwTooManyResources();
 
 } // namespace errors

@@ -1,11 +1,18 @@
 #include "errors.hpp"
 
+#include <phosphor-logging/elog-errors.hpp>
+#include <phosphor-logging/elog.hpp>
+#include <xyz/openbmc_project/Common/error.hpp>
+
 #include <system_error>
 
 namespace errors
 {
 
 using namespace std::literals::string_literals;
+using phosphor::logging::elog;
+using sdbusplus::error::xyz::openbmc_project::common::NotAllowed;
+using sdbusplus::error::xyz::openbmc_project::common::TooManyResources;
 
 InvalidArgument::InvalidArgument(std::string_view propertyNameArg) :
     propertyName(propertyNameArg),
@@ -23,7 +30,7 @@ InvalidArgument::InvalidArgument(std::string_view propertyNameArg,
 
 const char* InvalidArgument::name() const noexcept
 {
-    return "org.freedesktop.DBus.Error.InvalidArgs";
+    return "xyz.openbmc_project.Common.Error.InvalidArgument";
 }
 
 const char* InvalidArgument::description() const noexcept
@@ -38,7 +45,30 @@ const char* InvalidArgument::what() const noexcept
 
 int InvalidArgument::get_errno() const noexcept
 {
-    return static_cast<int>(std::errc::invalid_argument);
+    return static_cast<int>(std::errc::io_error);
+}
+
+[[noreturn]] void throwInvalidArgument(std::string_view name,
+                                       std::string_view info)
+{
+    if (!info.empty())
+    {
+        throw InvalidArgument(name, info);
+    }
+
+    throw InvalidArgument(name);
+}
+
+[[noreturn]] void throwNotAllowed(const std::string& reason)
+{
+    using Reason =
+        phosphor::logging::xyz::openbmc_project::common::NotAllowed::REASON;
+    elog<NotAllowed>(Reason(reason.c_str()));
+}
+
+[[noreturn]] void throwTooManyResources()
+{
+    elog<TooManyResources>();
 }
 
 } // namespace errors

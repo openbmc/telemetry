@@ -319,6 +319,6 @@ std::vector<LabeledSensorInfo>
             const auto& [service, ifaces] = found->second.front();
             return LabeledSensorInfo(service, sensorPath, metadata);
         }
-        throw std::runtime_error("Not found");
+        errors::throwInvalidArgument("Sensors", "Not found");
     });
 }

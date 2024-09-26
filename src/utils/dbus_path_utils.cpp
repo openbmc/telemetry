@@ -7,9 +7,7 @@ sdbusplus::message::object_path pathAppend(sdbusplus::message::object_path path,
 {
     if (appended.starts_with('/') || !isValidDbusPath(appended))
     {
-        throw sdbusplus::exception::SdBusError(
-            static_cast<int>(std::errc::invalid_argument),
-            "Invalid appended string");
+        errors::throwInvalidArgument("Id", appended);
     }
 
     size_t pos_start = 0;
@@ -18,9 +16,7 @@ sdbusplus::message::object_path pathAppend(sdbusplus::message::object_path path,
     {
         if (pos_start == pos_end)
         {
-            throw sdbusplus::exception::SdBusError(
-                static_cast<int>(std::errc::invalid_argument),
-                "Invalid appended string");
+            errors::throwInvalidArgument("Id", appended);
         }
         path /= std::string_view(appended.begin() + pos_start,
                                  appended.begin() + pos_end);
@@ -38,8 +34,7 @@ std::string reportPathToId(const sdbusplus::message::object_path& path)
         verifyIdPrefixes(id);
         return id;
     }
-    throw sdbusplus::exception::SdBusError(
-        static_cast<int>(std::errc::invalid_argument), "Invalid path prefix");
+    errors::throwInvalidArgument("Reports", "Invalid path prefix");
 }
 
 void verifyIdPrefixes(std::string_view id)
@@ -51,17 +46,17 @@ void verifyIdPrefixes(std::string_view id)
     {
         if (pos_start == pos_end)
         {
-            throw errors::InvalidArgument("Id", "Invalid prefixes in id.");
+            errors::throwInvalidArgument("Id", "Invalid prefixes in id.");
         }
 
         if (++prefix_cnt > constants::maxPrefixesInId)
         {
-            throw errors::InvalidArgument("Id", "Too many prefixes.");
+            errors::throwInvalidArgument("Id", "Too many prefixes.");
         }
 
         if (pos_end - pos_start > constants::maxPrefixLength)
         {
-            throw errors::InvalidArgument("Id", "Prefix too long.");
+            errors::throwInvalidArgument("Id", "Prefix too long.");
         }
 
         pos_start = pos_end + 1;
@@ -69,7 +64,7 @@ void verifyIdPrefixes(std::string_view id)
 
     if (id.length() - pos_start > constants::maxIdNameLength)
     {
-        throw errors::InvalidArgument("Id", "Too long.");
+        errors::throwInvalidArgument("Id", "Too long.");
     }
 }
 } // namespace utils

@@ -1,4 +1,5 @@
 #include "dbus_environment.hpp"
+#include "errors.hpp"
 #include "helpers.hpp"
 #include "messages/collect_trigger_id.hpp"
 #include "messages/trigger_presence_changed_ind.hpp"
@@ -238,7 +239,7 @@ TEST_F(TestTrigger,
     EXPECT_CALL(triggerPresenceChanged, Call(_)).Times(0);
 
     EXPECT_THAT(setProperty(sut->getPath(), "Reports", newPropertyVal),
-                Eq(boost::system::errc::invalid_argument));
+                Eq(boost::system::errc::io_error));
 }
 
 TEST_F(TestTrigger,
@@ -250,7 +251,7 @@ TEST_F(TestTrigger,
     EXPECT_CALL(triggerPresenceChanged, Call(_)).Times(0);
 
     EXPECT_THAT(setProperty(sut->getPath(), "Reports", newPropertyVal),
-                Eq(boost::system::errc::invalid_argument));
+                Eq(boost::system::errc::io_error));
 }
 
 TEST_F(TestTrigger,
@@ -263,7 +264,7 @@ TEST_F(TestTrigger,
     EXPECT_CALL(triggerPresenceChanged, Call(_)).Times(0);
 
     EXPECT_THAT(setProperty(sut->getPath(), "Reports", newPropertyVal),
-                Eq(boost::system::errc::invalid_argument));
+                Eq(boost::system::errc::io_error));
 }
 
 TEST_F(TestTrigger,
@@ -276,7 +277,7 @@ TEST_F(TestTrigger,
     EXPECT_CALL(triggerPresenceChanged, Call(_)).Times(0);
 
     EXPECT_THAT(setProperty(sut->getPath(), "Reports", newPropertyVal),
-                Eq(boost::system::errc::invalid_argument));
+                Eq(boost::system::errc::io_error));
 }
 
 TEST_F(TestTrigger,
@@ -288,7 +289,7 @@ TEST_F(TestTrigger,
     EXPECT_CALL(triggerPresenceChanged, Call(_)).Times(0);
 
     EXPECT_THAT(setProperty(sut->getPath(), "Reports", newPropertyVal),
-                Eq(boost::system::errc::invalid_argument));
+                Eq(boost::system::errc::io_error));
 }
 
 TEST_F(TestTrigger, setPropertySensors)
@@ -332,7 +333,7 @@ TEST_F(TestTrigger, setThresholdParamsWithTooLongDiscreteName)
         sut->getPath(), "Thresholds",
         {.valueBefore = Eq(currentValue),
          .newValue = newThresholds,
-         .ec = Eq(boost::system::errc::invalid_argument),
+         .ec = Eq(boost::system::errc::io_error),
          .valueAfter = Eq(currentValue)});
 }
 
@@ -344,7 +345,7 @@ TEST_F(TestTrigger, setNameTooLong)
         sut->getPath(), "Name",
         {.valueBefore = Eq(currentValue),
          .newValue = utils::string_utils::getTooLongName(),
-         .ec = Eq(boost::system::errc::invalid_argument),
+         .ec = Eq(boost::system::errc::io_error),
          .valueAfter = Eq(currentValue)});
 }
 
@@ -461,7 +462,7 @@ TEST_F(TestTriggerInitialization, creatingTriggerThrowsExceptionWhenIdIsInvalid)
     EXPECT_CALL(storageMock, store(_, _)).Times(0);
 
     EXPECT_THROW(makeTrigger(triggerParams.id("inv?lidId")),
-                 sdbusplus::exception::SdBusError);
+                 errors::InvalidArgument);
 }
 
 TEST_F(TestTriggerInitialization, creatingTriggerUpdatesTriggersIdsInReports)

@@ -101,22 +101,20 @@ void ReportManager::verifyAddReport(
 
     if (reports.size() >= maxReports)
     {
-        throw sdbusplus::exception::SdBusError(
-            static_cast<int>(std::errc::too_many_files_open),
-            "Reached maximal report count");
+        errors::throwTooManyResources();
     }
 
     if (appendLimit > maxAppendLimit &&
         appendLimit != std::numeric_limits<uint64_t>::max())
     {
-        throw errors::InvalidArgument("AppendLimit", "Out of range.");
+        errors::throwInvalidArgument("AppendLimit", "Out of range.");
     }
 
     if ((reportingType == ReportingType::periodic && interval < minInterval) ||
         (reportingType != ReportingType::periodic &&
          interval != Milliseconds{0}))
     {
-        throw errors::InvalidArgument("Interval");
+        errors::throwInvalidArgument("Interval");
     }
 
     verifyMetricParams(readingParams);
@@ -240,6 +238,6 @@ void ReportManager::verifyMetricParams(
     if (metricParams.size() > ReportManager::maxNumberMetrics ||
         metricCount > ReportManager::maxNumberMetrics)
     {
-        throw errors::InvalidArgument("ReadingParameters", "Too many");
+        errors::throwInvalidArgument("ReadingParameters", "Too many");
     }
 }

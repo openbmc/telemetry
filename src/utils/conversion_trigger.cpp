@@ -1,9 +1,8 @@
 #include "utils/conversion_trigger.hpp"
 
+#include "errors.hpp"
 #include "utils/transform.hpp"
 #include "utils/tstring.hpp"
-
-#include <sdbusplus/exception.hpp>
 
 namespace utils
 {
@@ -12,9 +11,7 @@ namespace ts = utils::tstring;
 LabeledTriggerThresholdParams ToLabeledThresholdParamConversion::operator()(
     const std::monostate& arg) const
 {
-    throw sdbusplus::exception::SdBusError(
-        static_cast<int>(std::errc::invalid_argument),
-        "Provided threshold parameter is invalid");
+    errors::throwInvalidArgument("Thresholds");
 }
 
 LabeledTriggerThresholdParams ToLabeledThresholdParamConversion::operator()(
