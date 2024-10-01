@@ -67,6 +67,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "bc969b36_ef9d6d7b",
+        "filename": "src/errors.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1001329
+      },
+      "writtenOn": "2024-10-01T13:05:45Z",
+      "side": 1,
+      "message": "I\u0027ve prepared a spec change in https://gerrit.openbmc.org/c/openbmc/phosphor-dbus-interfaces/+/74968. Could You please take a look?",
+      "parentUuid": "24e038b4_ec9f1966",
+      "range": {
+        "startLine": 12,
+        "startChar": 47,
+        "endLine": 16,
+        "endChar": 0
+      },
+      "revId": "00d48ed2c68248bd7d1f64135439c3d6a995dc6a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "0b3f5858_d60a2a86",
         "filename": "src/errors.cpp",
         "patchSetId": 2
@@ -126,6 +150,30 @@
       "side": 1,
       "message": "I see. But then you don\u0027t have the journal log, like other `elog` entries, right?\n\nI don\u0027t think mimicking \u0027standard\u0027 type (by name) but having non-standard implementation and behavior is the way to go... It\u0027s 2 steps forward and 1 step backward.\n\nDo I see correctly that what you\u0027re trying to achieve is to have `description()` and `what()` passed through D-Bus?\n\nIn that way I suppose we need to at least make implementation behave similarly by:\n- `report()-ing` the intended exception type\n- throwing our custom implementation\n\nThis is short-sighted though, wonder if there are plans for these to support passing metadata as well..",
       "parentUuid": "ce107ca1_493b2873",
+      "range": {
+        "startLine": 31,
+        "startChar": 0,
+        "endLine": 34,
+        "endChar": 1
+      },
+      "revId": "00d48ed2c68248bd7d1f64135439c3d6a995dc6a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "80b5bb49_c9752dd3",
+        "filename": "src/errors.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1001329
+      },
+      "writtenOn": "2024-10-01T13:05:45Z",
+      "side": 1,
+      "message": "What I\u0027m trying to achieve here is:\n1) to be able to use bmcweb\u0027s utility function for setting Dbus properties,\n2) retain already existing error reporting mechanism when any method call fails.\n\nFor 1) to achieve, error name needs to be \"xyz.openbmc_project.Common.Error.InvalidArgument\", whereas 2) requires that error description will be property name.\n\n\n\u003e Do I see correctly that what you\u0027re trying to achieve is to have `description()` and `what()` passed through D-Bus?\n\n`description()` is mapped to `message` field from `sd_bus_error` structure. That is currently used for getting info, which property is incorrect (ref.: https://github.com/openbmc/bmcweb/blob/master/redfish-core/lib/metric_report_definition.hpp#L730-L743).\n\n\u003e In that way I suppose we need to at least make implementation behave similarly by:\n\u003e - `report()-ing` the intended exception type\n\u003e - throwing our custom implementation\n\u003e \n\u003e This is short-sighted though, wonder if there are plans for these to support passing metadata as well..\n\nTBF the more I think of it the more I don\u0027t know if this whole type impersonation can be allowed at all.\n\n@Patrick, could You please share Your opinion on it? Is it OK to provide custom description to error defined in standard? Or perhaps we should think of another solution for that?",
+      "parentUuid": "a0ad092b_a89acdda",
       "range": {
         "startLine": 31,
         "startChar": 0,
