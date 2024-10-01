@@ -18,6 +18,23 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "dc9f3add_aea13fbd",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2024-10-01T13:40:28Z",
+      "side": 1,
+      "message": "Generally seems in a better direction to me.  Seems like you two have a handle on the rest of the details.",
+      "revId": "00d48ed2c68248bd7d1f64135439c3d6a995dc6a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "11983a26_ae44ba28",
@@ -186,6 +203,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "5a6e30eb_2bfa0d06",
+        "filename": "src/errors.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2024-10-01T13:40:28Z",
+      "side": 1,
+      "message": "You should use the ones provided and not make your own.\n\nI\u0027m in the process of working through drastic changes in the event logging.  https://github.com/openbmc/docs/blob/master/designs/event-logging.md .  If you use the phosphor-dbus-interfaces events directly, it is going to be much easier for us to refactor your code to use the new ones (as they get defined).  This will make it so that your Redfish Message Id is consistent with all the other code.\n\nHere is a commit in the chain of work in progress (though these are getting merged as they are completed).  https://gerrit.openbmc.org/c/openbmc/sdbusplus/+/74858",
+      "parentUuid": "80b5bb49_c9752dd3",
+      "range": {
+        "startLine": 31,
+        "startChar": 0,
+        "endLine": 34,
+        "endChar": 1
+      },
+      "revId": "00d48ed2c68248bd7d1f64135439c3d6a995dc6a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "f9aea136_1f0e1ab6",
         "filename": "src/errors.cpp",
         "patchSetId": 2
@@ -233,6 +274,47 @@
       "side": 1,
       "message": "For now, yeah, we\u0027re basing this on the hope it won\u0027t change in the future ;)",
       "parentUuid": "238130c4_c2b82ae0",
+      "revId": "00d48ed2c68248bd7d1f64135439c3d6a995dc6a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "eab195e3_dedd9671",
+        "filename": "src/errors.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2024-10-01T13:40:28Z",
+      "side": 1,
+      "message": "The new code will use a copy anyhow.  It should be safe.",
+      "parentUuid": "d85fe1df_a46bbfbc",
+      "revId": "00d48ed2c68248bd7d1f64135439c3d6a995dc6a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "0e10b414_fbb28a46",
+        "filename": "src/errors.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2024-10-01T13:40:28Z",
+      "side": 1,
+      "message": "Why make a wrapper for something so small?",
+      "range": {
+        "startLine": 69,
+        "startChar": 0,
+        "endLine": 72,
+        "endChar": 1
+      },
       "revId": "00d48ed2c68248bd7d1f64135439c3d6a995dc6a",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
