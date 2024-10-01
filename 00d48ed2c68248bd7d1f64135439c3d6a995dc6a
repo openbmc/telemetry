@@ -114,6 +114,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "a0ad092b_a89acdda",
+        "filename": "src/errors.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1000534
+      },
+      "writtenOn": "2024-10-01T08:07:59Z",
+      "side": 1,
+      "message": "I see. But then you don\u0027t have the journal log, like other `elog` entries, right?\n\nI don\u0027t think mimicking \u0027standard\u0027 type (by name) but having non-standard implementation and behavior is the way to go... It\u0027s 2 steps forward and 1 step backward.\n\nDo I see correctly that what you\u0027re trying to achieve is to have `description()` and `what()` passed through D-Bus?\n\nIn that way I suppose we need to at least make implementation behave similarly by:\n- `report()-ing` the intended exception type\n- throwing our custom implementation\n\nThis is short-sighted though, wonder if there are plans for these to support passing metadata as well..",
+      "parentUuid": "ce107ca1_493b2873",
+      "range": {
+        "startLine": 31,
+        "startChar": 0,
+        "endLine": 34,
+        "endChar": 1
+      },
+      "revId": "00d48ed2c68248bd7d1f64135439c3d6a995dc6a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "f9aea136_1f0e1ab6",
         "filename": "src/errors.cpp",
         "patchSetId": 2
@@ -149,6 +173,24 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "d85fe1df_a46bbfbc",
+        "filename": "src/errors.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1000534
+      },
+      "writtenOn": "2024-10-01T08:07:59Z",
+      "side": 1,
+      "message": "For now, yeah, we\u0027re basing this on the hope it won\u0027t change in the future ;)",
+      "parentUuid": "238130c4_c2b82ae0",
+      "revId": "00d48ed2c68248bd7d1f64135439c3d6a995dc6a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "2ced4823_769f77e1",
         "filename": "subprojects/phosphor-dbus-interfaces.wrap",
         "patchSetId": 2
@@ -178,6 +220,24 @@
       "side": 1,
       "message": "I\u0027m following the format from other wraps, used not only in telemetry, but other upstream projects as well. IIRC, it is preferred here this way, because fixed revisions quickly tend to get out of date. Both CI, and Yocto builds ignore it anyway, as they define subproject versions independently.",
       "parentUuid": "2ced4823_769f77e1",
+      "revId": "00d48ed2c68248bd7d1f64135439c3d6a995dc6a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "22e0cd42_ebb88e7c",
+        "filename": "subprojects/phosphor-dbus-interfaces.wrap",
+        "patchSetId": 2
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 1000534
+      },
+      "writtenOn": "2024-10-01T08:07:59Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "98aebbb2_e910fd2a",
       "revId": "00d48ed2c68248bd7d1f64135439c3d6a995dc6a",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
