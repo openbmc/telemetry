@@ -227,6 +227,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "8ab17ad1_8bb00e03",
+        "filename": "src/errors.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1001329
+      },
+      "writtenOn": "2024-10-02T14:05:54Z",
+      "side": 1,
+      "message": "The new design looks promising and could in fact address the issue I was having here regarding not being able to pass property metadata to Redfish with current API.\n\nWe\u0027ve decided to put this change on hold for now, and we will get back to it once the new implementation is ready. This way we can avoid temporary loss of behavior that is already functioning here.",
+      "parentUuid": "5a6e30eb_2bfa0d06",
+      "range": {
+        "startLine": 31,
+        "startChar": 0,
+        "endLine": 34,
+        "endChar": 1
+      },
+      "revId": "00d48ed2c68248bd7d1f64135439c3d6a995dc6a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "f9aea136_1f0e1ab6",
         "filename": "src/errors.cpp",
         "patchSetId": 2
@@ -296,6 +320,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "b4f75159_4c97c2a6",
+        "filename": "src/errors.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1001329
+      },
+      "writtenOn": "2024-10-02T14:05:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "eab195e3_dedd9671",
+      "revId": "00d48ed2c68248bd7d1f64135439c3d6a995dc6a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "0e10b414_fbb28a46",
@@ -309,6 +351,30 @@
       "writtenOn": "2024-10-01T13:40:28Z",
       "side": 1,
       "message": "Why make a wrapper for something so small?",
+      "range": {
+        "startLine": 69,
+        "startChar": 0,
+        "endLine": 72,
+        "endChar": 1
+      },
+      "revId": "00d48ed2c68248bd7d1f64135439c3d6a995dc6a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "62119946_fa51b10d",
+        "filename": "src/errors.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1001329
+      },
+      "writtenOn": "2024-10-02T14:05:54Z",
+      "side": 1,
+      "message": "My intention was to separate the error-throwing details from the rest of the code. This way, if anything changes in the phosphor-logging/sdbusplus API, we\u0027d only have to refactor error.[h/c]pp files.",
+      "parentUuid": "0e10b414_fbb28a46",
       "range": {
         "startLine": 69,
         "startChar": 0,
