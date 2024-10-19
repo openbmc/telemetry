@@ -69,22 +69,6 @@ Trigger::Trigger(
         }, [this](const auto&) { return persistent; });
 
         dbusIface.register_property_rw(
-            "Thresholds", TriggerThresholdParams{},
-            sdbusplus::vtable::property_::emits_change,
-            [this, &triggerFactory](auto newVal, auto& oldVal) {
-            auto newThresholdParams =
-                std::visit(utils::ToLabeledThresholdParamConversion(), newVal);
-            TriggerManager::verifyThresholdParams(newThresholdParams);
-            triggerFactory.updateThresholds(thresholds, *id, triggerActions,
-                                            reportIds, sensors,
-                                            newThresholdParams);
-            oldVal = std::move(newVal);
-            return 1;
-        }, [this](const auto&) {
-            return fromLabeledThresholdParam(getLabeledThresholds());
-        });
-
-        dbusIface.register_property_rw(
             "DiscreteThresholds", std::vector<discrete::ThresholdParam>{},
             sdbusplus::vtable::property_::emits_change,
             [this, &triggerFactory](
