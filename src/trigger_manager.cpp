@@ -25,16 +25,28 @@ TriggerManager::TriggerManager(
         triggerManagerPath, triggerManagerIfaceName, [this](auto& iface) {
         iface.register_method(
             "AddTrigger",
-            [this](boost::asio::yield_context& yield, const std::string& id,
-                   const std::string& name,
-                   const std::vector<std::string>& triggerActions,
-                   const SensorsInfo& sensors,
-                   const std::vector<sdbusplus::message::object_path>& reports,
-                   const TriggerThresholdParamsExt& thresholds) {
-            LabeledTriggerThresholdParams labeledTriggerThresholdParams =
-                std::visit(utils::ToLabeledThresholdParamConversion(),
-                           thresholds);
-
+            [this](
+                boost::asio::yield_context& yield, const std::string& id,
+                const std::string& name,
+                const std::vector<std::string>& triggerActions,
+                const SensorsInfo& sensors,
+                const std::vector<sdbusplus::message::object_path>& reports,
+                const std::vector<numeric::ThresholdParam>& numericThresholds,
+                const std::vector<discrete::ThresholdParam>&
+                    discreteThresholds) {
+            LabeledTriggerThresholdParams labeledTriggerThresholdParams;
+            if (!numericThresholds.empty())
+            {
+                labeledTriggerThresholdParams =
+                    utils::ToLabeledThresholdParamConversion()(
+                        numericThresholds);
+            }
+            if (!discreteThresholds.empty())
+            {
+                labeledTriggerThresholdParams =
+                    utils::ToLabeledThresholdParamConversion()(
+                        discreteThresholds);
+            }
             std::vector<LabeledSensorInfo> labeledSensorsInfo =
                 triggerFactory->getLabeledSensorsInfo(yield, sensors);
 

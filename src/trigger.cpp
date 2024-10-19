@@ -85,6 +85,61 @@ Trigger::Trigger(
         });
 
         dbusIface.register_property_rw(
+            "DiscreteThresholds", std::vector<discrete::ThresholdParam>{},
+            sdbusplus::vtable::property_::emits_change,
+            [this, &triggerFactory](
+                const std::vector<discrete::ThresholdParam>& newVal,
+                std::vector<discrete::ThresholdParam>& oldVal) {
+            LabeledTriggerThresholdParams newThresholdParams =
+                utils::ToLabeledThresholdParamConversion()(newVal);
+            TriggerManager::verifyThresholdParams(newThresholdParams);
+            triggerFactory.updateThresholds(thresholds, *id, triggerActions,
+                                            reportIds, sensors,
+                                            newThresholdParams);
+            oldVal = std::move(newVal);
+            return 1;
+        },
+            [this](const auto&) {
+            TriggerThresholdParams unlabeled =
+                fromLabeledThresholdParam(getLabeledThresholds());
+            auto* ptr =
+                std::get_if<std::vector<discrete::ThresholdParam>>(&unlabeled);
+            if (ptr == nullptr)
+            {
+                // If internal type doesn't match, return empty set
+                return std::vector<discrete::ThresholdParam>{};
+            }
+            return *ptr;
+        });
+
+        dbusIface.register_property_rw(
+            "NumericThresholds", std::vector<numeric::ThresholdParam>{},
+            sdbusplus::vtable::property_::emits_change,
+            [this, &triggerFactory](
+                const std::vector<numeric::ThresholdParam>& newVal,
+                std::vector<numeric::ThresholdParam>& oldVal) {
+            LabeledTriggerThresholdParams newThresholdParams =
+                utils::ToLabeledThresholdParamConversion()(newVal);
+            TriggerManager::verifyThresholdParams(newThresholdParams);
+            triggerFactory.updateThresholds(thresholds, *id, triggerActions,
+                                            reportIds, sensors,
+                                            newThresholdParams);
+            oldVal = std::move(newVal);
+            return 1;
+        },
+            [this](const auto&) {
+            TriggerThresholdParams unlabeled =
+                fromLabeledThresholdParam(getLabeledThresholds());
+            auto* ptr =
+                std::get_if<std::vector<numeric::ThresholdParam>>(&unlabeled);
+            if (ptr == nullptr)
+            {
+                // If internal type doesn't match, return empty set
+                return std::vector<numeric::ThresholdParam>{};
+            }
+            return *ptr;
+        });
+        dbusIface.register_property_rw(
             "Sensors", SensorsInfo{},
             sdbusplus::vtable::property_::emits_change,
             [this, &triggerFactory](auto newVal, auto& oldVal) {
