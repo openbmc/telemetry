@@ -136,12 +136,9 @@ using LabeledThresholdParam =
                         utils::tstring::ThresholdValue>;
 } // namespace numeric
 
-using TriggerThresholdParamsExt =
-    std::variant<std::monostate, std::vector<numeric::ThresholdParam>,
-                 std::vector<discrete::ThresholdParam>>;
-
 using TriggerThresholdParams =
-    utils::WithoutMonostate<TriggerThresholdParamsExt>;
+    std::variant<std::vector<numeric::ThresholdParam>,
+                 std::vector<discrete::ThresholdParam>>;
 
 using LabeledTriggerThresholdParams =
     std::variant<std::vector<numeric::LabeledThresholdParam>,

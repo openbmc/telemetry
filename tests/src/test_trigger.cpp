@@ -165,10 +165,16 @@ TEST_F(TestTrigger, checkIfPropertiesAreSet)
     EXPECT_THAT(
         getProperty<bool>(sut->getPath(), "Discrete"),
         Eq(isTriggerThresholdDiscrete(triggerParams.thresholdParams())));
-    EXPECT_THAT(
-        getProperty<TriggerThresholdParams>(sut->getPath(), "Thresholds"),
-        Eq(std::visit(utils::FromLabeledThresholdParamConversion(),
-                      triggerParams.thresholdParams())));
+
+    EXPECT_THAT(getProperty<std::vector<numeric::ThresholdParam>>(
+                    sut->getPath(), "NumericThresholds"),
+                Eq(std::get<0>(utils::FromLabeledThresholdParamConversion()(
+                    triggerParams.numericThresholdParams()))));
+
+    EXPECT_THAT(getProperty<std::vector<discrete::ThresholdParam>>(
+                    sut->getPath(), "DiscreteThresholds"),
+                Eq(std::get<1>(utils::FromLabeledThresholdParamConversion()(
+                    triggerParams.discreteThresholdParams()))));
 }
 
 TEST_F(TestTrigger, checkBasicGetters)

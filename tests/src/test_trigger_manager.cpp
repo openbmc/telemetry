@@ -24,6 +24,14 @@ class TestTriggerManager : public Test
     {
         const auto sensorInfos =
             utils::fromLabeledSensorsInfo(params.sensors());
+        const std::vector<numeric::LabeledThresholdParam> numThresh =
+            params.numericThresholdParams();
+        const std::vector<discrete::LabeledThresholdParam> discThresh =
+            params.discreteThresholdParams();
+        const std::vector<numeric::ThresholdParam> numThresh2 = std::get<0>(
+            utils::FromLabeledThresholdParamConversion()(numThresh));
+        const auto discThresh2 = std::get<1>(
+            utils::FromLabeledThresholdParamConversion()(discThresh));
 
         std::promise<std::pair<boost::system::error_code, std::string>>
             addTriggerPromise;
@@ -38,9 +46,7 @@ class TestTriggerManager : public Test
             utils::transform(
                 params.triggerActions(),
                 [](const auto& action) { return actionToString(action); }),
-            sensorInfos, params.reports(),
-            std::visit(utils::FromLabeledThresholdParamConversion(),
-                       params.thresholdParams()));
+            sensorInfos, params.reports(), numThresh2, discThresh2);
         return DbusEnvironment::waitForFuture(addTriggerPromise.get_future());
     }
 

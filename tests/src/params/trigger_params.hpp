@@ -99,6 +99,28 @@ class TriggerParams
         return labeledThresholdsProperty;
     }
 
+    const std::vector<numeric::LabeledThresholdParam>
+        numericThresholdParams() const
+    {
+        const auto* num = std::get_if<0>(&labeledThresholdsProperty);
+        if (num == nullptr)
+        {
+            return {};
+        }
+        return *num;
+    }
+
+    const std::vector<discrete::LabeledThresholdParam>
+        discreteThresholdParams() const
+    {
+        const auto* num = std::get_if<1>(&labeledThresholdsProperty);
+        if (num == nullptr)
+        {
+            return {};
+        }
+        return *num;
+    }
+
   private:
     std::string idProperty = "Trigger1";
     std::string nameProperty = "My Numeric Trigger";
