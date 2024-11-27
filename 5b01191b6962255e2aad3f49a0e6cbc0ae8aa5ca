@@ -16,6 +16,24 @@
       "message": "In this implementation we\u0027ll have a side effect of property, which after writing will \u0027erase\u0027 contents of the other.\n\nThis is intrinsic property of variant concept.\n\nIf it helps bmcweb then it\u0027s OK. I suppose we should also prepare updated interface definition in https://github.com/openbmc/phosphor-dbus-interfaces/blob/master/yaml/xyz/openbmc_project/Telemetry/Trigger.interface.yaml ?",
       "revId": "5b01191b6962255e2aad3f49a0e6cbc0ae8aa5ca",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a23608e7_0a3a849d",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000153
+      },
+      "writtenOn": "2024-11-27T18:40:45Z",
+      "side": 1,
+      "message": "\u003e In this implementation we\u0027ll have a side effect of property, which after writing will \u0027erase\u0027 contents of the other.\n\nI think in user facing behavior, we have that already?  That seems like a small thing.\n\n\u003e updated interface definition in\n\nYep.  can do.",
+      "parentUuid": "2fac7383_7f5c0f93",
+      "revId": "5b01191b6962255e2aad3f49a0e6cbc0ae8aa5ca",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
