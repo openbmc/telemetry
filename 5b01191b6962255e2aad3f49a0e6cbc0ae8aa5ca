@@ -70,6 +70,24 @@
       "parentUuid": "d6813127_e15866f8",
       "revId": "5b01191b6962255e2aad3f49a0e6cbc0ae8aa5ca",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "40dc2f1e_4c0f623a",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000153
+      },
+      "writtenOn": "2024-12-04T16:28:26Z",
+      "side": 1,
+      "message": "\u003e \u003e\u003e In this implementation we\u0027ll have a side effect of property, which after writing \u003e\u003e will \u0027erase\u0027 contents of the other.\n\u003e \u003e\n\u003e \u003e I think in user facing behavior, we have that already? That seems like a small \u003e thing.\n\u003e \n\u003e You are correct. Currently that is the behavior and it\u0027s mandated by type being a `variant`. \n\u003e \n\u003e After splitting to separate properties code still treats them as mutually exclusive. Writing to one clears the other.\n\u003e \n\u003e I believe this behavior should be documented in the updated interface descriptor. Don\u0027t you think?\n\nI didn’t include it because it’s not an issue with the interface, it’s an issue with the implementation.  we can document it somewhere in this repo if you’d like.  ultimately I’d just like to see the constraint removed and have them be independent parameters, but one step at a time.\n\nwhere would you like to see this documented?",
+      "parentUuid": "b9dabfe1_21353b2e",
+      "revId": "5b01191b6962255e2aad3f49a0e6cbc0ae8aa5ca",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
