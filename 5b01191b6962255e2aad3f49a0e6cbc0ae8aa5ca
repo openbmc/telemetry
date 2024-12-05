@@ -88,6 +88,24 @@
       "parentUuid": "b9dabfe1_21353b2e",
       "revId": "5b01191b6962255e2aad3f49a0e6cbc0ae8aa5ca",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "968542e4_cb7c5d3e",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000534
+      },
+      "writtenOn": "2024-12-05T09:59:59Z",
+      "side": 1,
+      "message": "It depends. AFAIK variant was reflecting design of the Redfish interface itself, as you have MetricType enumeration:\nhttps://github.com/openbmc/bmcweb/blob/8274eb11c44f38e51e9c643ae62192bafacf257c/redfish-core/lib/trigger.hpp#L196\n\nIf we assume that openbmc/telemetry serves Redfish only then perhaps requirement coming from the Schema definition itself should be enough and no extra documentation is needed.",
+      "parentUuid": "40dc2f1e_4c0f623a",
+      "revId": "5b01191b6962255e2aad3f49a0e6cbc0ae8aa5ca",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
