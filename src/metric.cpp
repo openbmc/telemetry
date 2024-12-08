@@ -116,10 +116,17 @@ metrics::CollectionData&
 
 LabeledMetricParameters Metric::dumpConfiguration() const
 {
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-lambda-capture"
+#endif
     auto sensorPath = utils::transform(sensors, [this](const auto& sensor) {
         return LabeledSensorInfo(sensor->id().service, sensor->id().path,
                                  sensor->metadata());
     });
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
 
     return LabeledMetricParameters(std::move(sensorPath), operationType,
                                    collectionTimeScope, collectionDuration);
