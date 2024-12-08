@@ -150,7 +150,7 @@ class TestLogToJournalDiscrete :
         commitValue = value;
     }
 
-    void commit()
+    void commit() const
     {
         std::string thresholdName = "MyThreshold";
         sut->commit("MyTrigger", std::cref(thresholdName), "MySensor",
@@ -188,7 +188,7 @@ class TestLogToRedfishEventLogDiscrete : public Test
         sut = std::make_unique<LogToRedfishEventLog>();
     }
 
-    void commit(TriggerValue value)
+    void commit(TriggerValue value) const
     {
         std::string thresholdName = "MyThreshold";
         sut->commit("MyTrigger", std::cref(thresholdName), "MySensor",
@@ -276,7 +276,7 @@ class TestUpdateReport : public Test
             std::make_shared<std::vector<std::string>>(std::move(names)));
     }
 
-    void commit(TriggerValue value)
+    void commit(TriggerValue value) const
     {
         sut->commit(triggerId, std::nullopt, "MySensor", Milliseconds{100'000},
                     value);
