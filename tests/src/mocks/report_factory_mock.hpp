@@ -69,7 +69,7 @@ class ReportFactoryMock : public interfaces::ReportFactory
     auto& expectMake(
         std::optional<std::reference_wrapper<const ReportParams>> paramsRef,
         const testing::Matcher<interfaces::ReportManager&>& rm,
-        const testing::Matcher<interfaces::JsonStorage&>& js)
+        const testing::Matcher<interfaces::JsonStorage&>& js) const
     {
         using testing::_;
         if (paramsRef)

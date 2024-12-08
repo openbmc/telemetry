@@ -98,7 +98,7 @@ class TestReport : public Test
     }
 
     std::vector<std::shared_ptr<interfaces::Metric>>
-        getMetricsFromReadingParams(const ReadingParameters& params)
+        getMetricsFromReadingParams(const ReadingParameters& params) const
     {
         const auto metricParameters =
             reportFactoryMock->convertMetricParams(params);
