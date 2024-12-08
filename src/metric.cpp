@@ -116,7 +116,7 @@ metrics::CollectionData& Metric::findAssociatedData(
 
 LabeledMetricParameters Metric::dumpConfiguration() const
 {
-    auto sensorPath = utils::transform(sensors, [this](const auto& sensor) {
+    auto sensorPath = utils::transform(sensors, [](const auto& sensor) {
         return LabeledSensorInfo(sensor->id().service, sensor->id().path,
                                  sensor->metadata());
     });
