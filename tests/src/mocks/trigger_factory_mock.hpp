@@ -57,7 +57,7 @@ class TriggerFactoryMock : public interfaces::TriggerFactory
     auto& expectMake(
         std::optional<TriggerParams> paramsOpt,
         const testing::Matcher<interfaces::TriggerManager&>& tm,
-        const testing::Matcher<interfaces::JsonStorage&>& triggerStorage)
+        const testing::Matcher<interfaces::JsonStorage&>& triggerStorage) const
     {
         using namespace testing;
 
