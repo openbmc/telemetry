@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "bcb3974a_eb264dd3",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000534
+      },
+      "writtenOn": "2024-12-09T09:47:51Z",
+      "side": 1,
+      "message": "By looking at this code just removing `this` from capture list would be enough. No need to do it in extra commit, don\u0027t you think?",
+      "revId": "223d73c07b6c7545e1346efaed46d847bef3a94a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
