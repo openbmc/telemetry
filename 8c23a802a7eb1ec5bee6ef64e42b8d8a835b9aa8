@@ -88,6 +88,24 @@
       "parentUuid": "55484a91_21bdab0b",
       "revId": "8c23a802a7eb1ec5bee6ef64e42b8d8a835b9aa8",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "aa96ccbb_668badbe",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000086
+      },
+      "writtenOn": "2024-12-09T11:37:41Z",
+      "side": 1,
+      "message": "The fix provided by tidy seems to trivial and minimu, functionality impact. That is why i added , sorry for the confusion and thanks fro bringing-up . That helped to initiate mailing discussion , tahnks",
+      "parentUuid": "677b9ca1_2972c746",
+      "revId": "8c23a802a7eb1ec5bee6ef64e42b8d8a835b9aa8",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
