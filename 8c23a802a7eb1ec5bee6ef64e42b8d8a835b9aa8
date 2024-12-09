@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "7aba6865_62028f11",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000534
+      },
+      "writtenOn": "2024-12-09T09:45:50Z",
+      "side": 1,
+      "message": "@Jayanth\n\nI see you\u0027ve introduced some fixes yourself. Are you planning to continue this work?\n\nAlso - where would i find any discussion or process regarding utilizing clang-tidy in upstream repos?",
+      "revId": "8c23a802a7eb1ec5bee6ef64e42b8d8a835b9aa8",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
