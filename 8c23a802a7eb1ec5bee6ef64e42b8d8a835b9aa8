@@ -106,6 +106,24 @@
       "parentUuid": "677b9ca1_2972c746",
       "revId": "8c23a802a7eb1ec5bee6ef64e42b8d8a835b9aa8",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "ea6aa01a_5d1df3cf",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000534
+      },
+      "writtenOn": "2024-12-09T11:42:34Z",
+      "side": 1,
+      "message": "Sure. Please let me know after final clang-tidy version will be approved and merged.\n\nKeeping this chain of changes dormant until then.",
+      "parentUuid": "aa96ccbb_668badbe",
+      "revId": "8c23a802a7eb1ec5bee6ef64e42b8d8a835b9aa8",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
