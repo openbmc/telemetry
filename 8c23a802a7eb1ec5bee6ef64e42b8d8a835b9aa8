@@ -52,6 +52,24 @@
       "parentUuid": "07720bda_0909bb3a",
       "revId": "8c23a802a7eb1ec5bee6ef64e42b8d8a835b9aa8",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "55484a91_21bdab0b",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000534
+      },
+      "writtenOn": "2024-12-09T11:21:34Z",
+      "side": 1,
+      "message": "I see the email. You\u0027ve stated:\n\n\u003e  Once this update is completed, repository owners can start enabling the disabled checks based on their project needs.\n\nI would assume that the rest of enabling is on me. Thanks",
+      "parentUuid": "2e7554a9_51e321b8",
+      "revId": "8c23a802a7eb1ec5bee6ef64e42b8d8a835b9aa8",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
