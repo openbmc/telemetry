@@ -70,6 +70,24 @@
       "parentUuid": "2e7554a9_51e321b8",
       "revId": "8c23a802a7eb1ec5bee6ef64e42b8d8a835b9aa8",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "677b9ca1_2972c746",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000086
+      },
+      "writtenOn": "2024-12-09T11:29:08Z",
+      "side": 1,
+      "message": "yes , i will get the .clang-tidy commit merged , once docs version approved , taht way we can make sure using agreed version ,  started reviews based on discord discussion template.",
+      "parentUuid": "55484a91_21bdab0b",
+      "revId": "8c23a802a7eb1ec5bee6ef64e42b8d8a835b9aa8",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
