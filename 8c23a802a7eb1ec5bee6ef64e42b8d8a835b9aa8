@@ -34,6 +34,24 @@
       "parentUuid": "7aba6865_62028f11",
       "revId": "8c23a802a7eb1ec5bee6ef64e42b8d8a835b9aa8",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "2e7554a9_51e321b8",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000534
+      },
+      "writtenOn": "2024-12-09T10:25:39Z",
+      "side": 1,
+      "message": "Thank you for the details. \n\n\u003e I will be sending details in mailing list regarding the changes/updates.\n\nLooking forward for mailing list announcement, as I suppose not everyone is tracking discord.\n\n\u003e As i mentioned in the commit message disabled all the failing checks now.\n\nI see and that\u0027s clear for me. However, I was rather asking about the changes you\u0027ve already introduced here: https://gerrit.openbmc.org/c/openbmc/telemetry/+/76348/2\nAre there more coming or should I assume my team need to cover the remaining disabled checks?",
+      "parentUuid": "07720bda_0909bb3a",
+      "revId": "8c23a802a7eb1ec5bee6ef64e42b8d8a835b9aa8",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
