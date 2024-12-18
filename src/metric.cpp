@@ -32,8 +32,8 @@ void Metric::unregisterFromUpdates(interfaces::MetricListener& listener)
     listeners.erase(
         std::remove_if(listeners.begin(), listeners.end(),
                        [&listener](const interfaces::MetricListener& item) {
-        return &item == &listener;
-    }),
+                           return &item == &listener;
+                       }),
         listeners.end());
 }
 

@@ -25,10 +25,10 @@ constexpr size_t maxPrefixLength{TELEMETRY_MAX_PREFIX_LENGTH};
 constexpr size_t maxIdNameLength{TELEMETRY_MAX_ID_NAME_LENGTH};
 constexpr size_t maxDbusPathLength{TELEMETRY_MAX_DBUS_PATH_LENGTH};
 
-constexpr size_t maxTriggeFullIdLength{maxDbusPathLength -
-                                       triggerDirStr.length()};
-constexpr size_t maxReportFullIdLength{maxDbusPathLength -
-                                       reportDirStr.length()};
+constexpr size_t maxTriggeFullIdLength{
+    maxDbusPathLength - triggerDirStr.length()};
+constexpr size_t maxReportFullIdLength{
+    maxDbusPathLength - reportDirStr.length()};
 
 static_assert(maxPrefixesInId * (maxPrefixLength + 1) + maxIdNameLength <=
                   maxTriggeFullIdLength,

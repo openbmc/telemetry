@@ -15,8 +15,8 @@ bool isAnySymlink(const std::filesystem::path& path)
     {
         if (std::filesystem::is_symlink(currentPath))
         {
-            std::string warningStr = std::format("{} is a symlink",
-                                                 currentPath.string());
+            std::string warningStr =
+                std::format("{} is a symlink", currentPath.string());
             phosphor::logging::log<phosphor::logging::level::WARNING>(
                 warningStr.c_str());
             return true;
@@ -143,9 +143,8 @@ std::vector<interfaces::JsonStorage::FilePath>
     return result;
 }
 
-std::filesystem::path
-    PersistentJsonStorage::join(const std::filesystem::path& left,
-                                const std::filesystem::path& right)
+std::filesystem::path PersistentJsonStorage::join(
+    const std::filesystem::path& left, const std::filesystem::path& right)
 {
     return left / right;
 }
