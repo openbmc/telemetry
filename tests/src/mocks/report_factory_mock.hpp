@@ -16,9 +16,10 @@ class ReportFactoryMock : public interfaces::ReportFactory
             return LabeledMetricParameters(
                 utils::transform(std::get<0>(params),
                                  [](const auto& sensorData) {
-                return LabeledSensorInfo("Service", std::get<0>(sensorData),
+                                     return LabeledSensorInfo(
+                                         "Service", std::get<0>(sensorData),
                                          std::get<1>(sensorData));
-            }),
+                                 }),
                 utils::toOperationType(std::get<1>(params)),
                 utils::toCollectionTimeScope(std::get<2>(params)),
                 CollectionDuration(Milliseconds(std::get<3>(params))));
@@ -41,8 +42,8 @@ class ReportFactoryMock : public interfaces::ReportFactory
         ON_CALL(*this,
                 make(A<const std::string&>(), _, _, _, _, _, _, _, _, _, _, _))
             .WillByDefault(WithArgs<0>(Invoke([](const std::string& id) {
-            return std::make_unique<NiceMock<ReportMock>>(id);
-        })));
+                return std::make_unique<NiceMock<ReportMock>>(id);
+            })));
     }
 
     MOCK_METHOD(std::vector<LabeledMetricParameters>, convertMetricParams,

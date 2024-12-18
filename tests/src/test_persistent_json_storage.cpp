@@ -120,10 +120,10 @@ struct TestFileSymlink
         setupSymlinks(const std::filesystem::path& originalFile,
                       const interfaces::JsonStorage::DirectoryPath& directory)
     {
-        auto linkPath = std::filesystem::path(directory) /
-                        "report/symlink.json";
-        std::filesystem::create_directories(std::filesystem::path(directory) /
-                                            "report");
+        auto linkPath =
+            std::filesystem::path(directory) / "report/symlink.json";
+        std::filesystem::create_directories(
+            std::filesystem::path(directory) / "report");
         std::filesystem::create_symlink(originalFile, linkPath);
         return interfaces::JsonStorage::FilePath(linkPath);
     }
@@ -136,12 +136,12 @@ struct TestDirectorySymlink
                       const interfaces::JsonStorage::DirectoryPath& directory)
     {
         auto linkPath = std::filesystem::path(directory) / "reportLink";
-        std::filesystem::create_directories(std::filesystem::path(directory) /
-                                            "report");
+        std::filesystem::create_directories(
+            std::filesystem::path(directory) / "report");
         std::filesystem::create_directory_symlink(originalFile.parent_path(),
                                                   linkPath);
-        return interfaces::JsonStorage::FilePath(linkPath /
-                                                 originalFile.filename());
+        return interfaces::JsonStorage::FilePath(
+            linkPath / originalFile.filename());
     }
 };
 

@@ -25,18 +25,19 @@ std::unique_ptr<interfaces::Report> ReportFactory::make(
     std::vector<LabeledMetricParameters> labeledMetricParams, bool enabled,
     Readings readings) const
 {
-    auto metrics = utils::transform(labeledMetricParams,
-                                    [this](const LabeledMetricParameters& param)
-                                        -> std::shared_ptr<interfaces::Metric> {
-        namespace ts = utils::tstring;
+    auto metrics = utils::transform(
+        labeledMetricParams,
+        [this](const LabeledMetricParameters& param)
+            -> std::shared_ptr<interfaces::Metric> {
+            namespace ts = utils::tstring;
 
-        return std::make_shared<Metric>(
-            getSensors(param.at_label<ts::SensorPath>()),
-            param.at_label<ts::OperationType>(),
-            param.at_label<ts::CollectionTimeScope>(),
-            param.at_label<ts::CollectionDuration>(),
-            std::make_unique<Clock>());
-    });
+            return std::make_shared<Metric>(
+                getSensors(param.at_label<ts::SensorPath>()),
+                param.at_label<ts::OperationType>(),
+                param.at_label<ts::CollectionTimeScope>(),
+                param.at_label<ts::CollectionDuration>(),
+                std::make_unique<Clock>());
+        });
 
     return std::make_unique<Report>(
         bus->get_io_context(), objServer, id, name, reportingType,
@@ -56,8 +57,9 @@ void ReportFactory::updateMetrics(
     {
         auto existing = std::find_if(oldMetrics.begin(), oldMetrics.end(),
                                      [labeledMetricParam](auto metric) {
-            return labeledMetricParam == metric->dumpConfiguration();
-        });
+                                         return labeledMetricParam ==
+                                                metric->dumpConfiguration();
+                                     });
 
         if (existing != oldMetrics.end())
         {
@@ -96,13 +98,14 @@ Sensors ReportFactory::getSensors(
 {
     using namespace utils::tstring;
 
-    return utils::transform(sensorPaths,
-                            [this](const LabeledSensorInfo& sensorPath)
-                                -> std::shared_ptr<interfaces::Sensor> {
-        return sensorCache.makeSensor<Sensor>(
-            sensorPath.at_label<Service>(), sensorPath.at_label<Path>(),
-            sensorPath.at_label<Metadata>(), bus->get_io_context(), bus);
-    });
+    return utils::transform(
+        sensorPaths,
+        [this](const LabeledSensorInfo& sensorPath)
+            -> std::shared_ptr<interfaces::Sensor> {
+            return sensorCache.makeSensor<Sensor>(
+                sensorPath.at_label<Service>(), sensorPath.at_label<Path>(),
+                sensorPath.at_label<Metadata>(), bus->get_io_context(), bus);
+        });
 }
 
 std::vector<LabeledMetricParameters> ReportFactory::convertMetricParams(
@@ -147,8 +150,8 @@ std::vector<LabeledMetricParameters>
             {
                 auto it = std::find_if(tree.begin(), tree.end(),
                                        [path = sensorPath](const auto& v) {
-                    return v.first == path;
-                });
+                                           return v.first == path;
+                                       });
 
                 if (it != tree.end() && it->second.size() == 1)
                 {

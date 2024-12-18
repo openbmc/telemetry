@@ -129,11 +129,10 @@ inline std::string directionToString(Direction v)
 
 using ThresholdParam = std::tuple<std::string, uint64_t, std::string, double>;
 
-using LabeledThresholdParam =
-    utils::LabeledTuple<std::tuple<Type, uint64_t, Direction, double>,
-                        utils::tstring::Type, utils::tstring::DwellTime,
-                        utils::tstring::Direction,
-                        utils::tstring::ThresholdValue>;
+using LabeledThresholdParam = utils::LabeledTuple<
+    std::tuple<Type, uint64_t, Direction, double>, utils::tstring::Type,
+    utils::tstring::DwellTime, utils::tstring::Direction,
+    utils::tstring::ThresholdValue>;
 } // namespace numeric
 
 using TriggerThresholdParamsExt =

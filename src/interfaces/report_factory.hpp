@@ -35,15 +35,14 @@ class ReportFactory
         const std::vector<LabeledMetricParameters>& labeledMetricParams)
         const = 0;
 
-    virtual std::unique_ptr<interfaces::Report>
-        make(const std::string& id, const std::string& name,
-             const ReportingType reportingType,
-             const std::vector<ReportAction>& reportActions,
-             Milliseconds period, uint64_t appendLimit,
-             const ReportUpdates reportUpdates, ReportManager& reportManager,
-             JsonStorage& reportStorage,
-             std::vector<LabeledMetricParameters> labeledMetricParams,
-             bool enabled, Readings) const = 0;
+    virtual std::unique_ptr<interfaces::Report> make(
+        const std::string& id, const std::string& name,
+        const ReportingType reportingType,
+        const std::vector<ReportAction>& reportActions, Milliseconds period,
+        uint64_t appendLimit, const ReportUpdates reportUpdates,
+        ReportManager& reportManager, JsonStorage& reportStorage,
+        std::vector<LabeledMetricParameters> labeledMetricParams, bool enabled,
+        Readings) const = 0;
 };
 
 } // namespace interfaces

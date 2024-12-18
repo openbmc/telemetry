@@ -107,18 +107,18 @@ TEST_F(TestSensor, getLabeledInfoReturnsCorrectly)
 TEST_F(TestSensor, getNameReturnsPathWhenMetadataIsNotSet)
 {
     static const char* path = "/telemetry/ut/DbusSensorObject2";
-    sut = sensorCache.makeSensor<Sensor>(DbusEnvironment::serviceName(), path,
-                                         "", DbusEnvironment::getIoc(),
-                                         DbusEnvironment::getBus());
+    sut = sensorCache.makeSensor<Sensor>(
+        DbusEnvironment::serviceName(), path, "", DbusEnvironment::getIoc(),
+        DbusEnvironment::getBus());
     EXPECT_EQ(sut->getName(), path);
 }
 
 TEST_F(TestSensor, getNameReturnsMetadataWhenMetadataIsSet)
 {
     static const char* path = "/telemetry/ut/DbusSensorObject2";
-    sut = sensorCache.makeSensor<Sensor>(DbusEnvironment::serviceName(), path,
-                                         "metadata2", DbusEnvironment::getIoc(),
-                                         DbusEnvironment::getBus());
+    sut = sensorCache.makeSensor<Sensor>(
+        DbusEnvironment::serviceName(), path, "metadata2",
+        DbusEnvironment::getIoc(), DbusEnvironment::getBus());
     EXPECT_EQ(sut->getName(), "metadata2");
 }
 

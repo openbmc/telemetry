@@ -9,8 +9,8 @@ using namespace std::literals::string_literals;
 
 InvalidArgument::InvalidArgument(std::string_view propertyNameArg) :
     propertyName(propertyNameArg),
-    errWhatDetailed("Invalid argument was given for property: "s +
-                    description())
+    errWhatDetailed(
+        "Invalid argument was given for property: "s + description())
 {}
 
 InvalidArgument::InvalidArgument(std::string_view propertyNameArg,

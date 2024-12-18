@@ -20,13 +20,13 @@ int main()
 
     signals.async_wait(
         [&ioc](const boost::system::error_code ec, const int& sig) {
-        if (ec)
-        {
-            throw std::runtime_error("Signal should not be canceled");
-        }
+            if (ec)
+            {
+                throw std::runtime_error("Signal should not be canceled");
+            }
 
-        ioc.stop();
-    });
+            ioc.stop();
+        });
 
     phosphor::logging::log<phosphor::logging::level::INFO>(
         "Telemetry starting");
