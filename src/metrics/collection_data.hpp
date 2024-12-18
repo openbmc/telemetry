@@ -25,8 +25,7 @@ class CollectionData
     std::optional<double> lastValue;
 };
 
-std::vector<std::unique_ptr<CollectionData>>
-    makeCollectionData(size_t size, OperationType, CollectionTimeScope,
-                       CollectionDuration);
+std::vector<std::unique_ptr<CollectionData>> makeCollectionData(
+    size_t size, OperationType, CollectionTimeScope, CollectionDuration);
 
 } // namespace metrics

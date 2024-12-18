@@ -81,9 +81,9 @@ class DbusEnvironment : public ::testing::Environment
         std::vector<std::future<T>> futures;
         futures.emplace_back(std::move(future));
 
-        return waitForFutures(std::move(futures), T{},
-                              [](auto, const auto& value) { return value; },
-                              timeout);
+        return waitForFutures(
+            std::move(futures), T{},
+            [](auto, const auto& value) { return value; }, timeout);
     }
 
     static bool waitForFuture(std::string_view name,
@@ -103,13 +103,13 @@ class DbusEnvironment : public ::testing::Environment
             *DbusEnvironment::getBus(), DbusEnvironment::serviceName(), path,
             interfaceName, property,
             [&propertyPromise](const boost::system::error_code& ec, T t) {
-            if (ec)
-            {
-                utils::setException(propertyPromise, "GetProperty failed");
-                return;
-            }
-            propertyPromise.set_value(t);
-        });
+                if (ec)
+                {
+                    utils::setException(propertyPromise, "GetProperty failed");
+                    return;
+                }
+                propertyPromise.set_value(t);
+            });
         return DbusEnvironment::waitForFuture(std::move(propertyFuture));
     }
 
@@ -125,8 +125,8 @@ class DbusEnvironment : public ::testing::Environment
             interfaceName, property, std::move(newValue),
             [promise = std::move(promise)](
                 boost::system::error_code ec) mutable {
-            promise.set_value(ec);
-        });
+                promise.set_value(ec);
+            });
         return DbusEnvironment::waitForFuture(std::move(future));
     }
 
@@ -140,8 +140,8 @@ class DbusEnvironment : public ::testing::Environment
         DbusEnvironment::getBus()->async_method_call(
             [promise = std::move(promise)](
                 boost::system::error_code ec) mutable {
-            promise.set_value(ec);
-        },
+                promise.set_value(ec);
+            },
             DbusEnvironment::serviceName(), path, interface, method,
             std::forward<Args>(args)...);
         return DbusEnvironment::waitForFuture(std::move(future));
