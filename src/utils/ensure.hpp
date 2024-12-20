@@ -22,13 +22,13 @@ struct Ensure
 
     ~Ensure()
     {
-        clear();
+        call();
     }
 
     template <class U>
     Ensure& operator=(U&& other)
     {
-        clear();
+        call();
         functor = std::move(other);
         return *this;
     }
@@ -37,7 +37,8 @@ struct Ensure
 
     Ensure& operator=(std::nullptr_t)
     {
-        clear();
+        call();
+        functor = std::nullopt;
         return *this;
     }
 
@@ -49,12 +50,11 @@ struct Ensure
     }
 
   private:
-    void clear()
+    void call()
     {
         if (functor)
         {
             (*functor)();
-            functor = std::nullopt;
         }
     }
 
