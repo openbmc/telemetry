@@ -16,6 +16,23 @@
       "message": "Adrian, could you take a look at https://gerrit.openbmc.org/c/openbmc/phosphor-dbus-interfaces/+/76123\nplease",
       "revId": "2f3480117190227573bf5dd1a097dfeb8d6744ff",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "a7a005f3_63f8242f",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000153
+      },
+      "writtenOn": "2024-12-27T18:57:48Z",
+      "side": 1,
+      "message": "Adrian, can you please review the PDI change so they can all merge?",
+      "revId": "2f3480117190227573bf5dd1a097dfeb8d6744ff",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
