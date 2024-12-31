@@ -1,0 +1,9 @@
+Code-Review+2: Adrian Ambrożewicz <adrian.ambrozewicz@linux.intel.com>
+Verified+1: OpenBMC CI <openbmcbump-ci@yahoo.com>
+Submitted-by: Ed Tanous <ed@tanous.net>
+Submitted-at: Tue, 31 Dec 2024 21:53:14 +0000
+Reviewed-on: https://gerrit.openbmc.org/c/openbmc/telemetry/+/75382
+Comments-Total: 9
+Comments-Unresolved: 2
+Project: openbmc/telemetry
+Branch: refs/heads/master
