@@ -40,12 +40,12 @@ class TriggerManager : public interfaces::TriggerManager
         const std::vector<std::string>& reportIds,
         const LabeledTriggerThresholdParams& thresholdParams) const;
 
-    interfaces::Trigger&
-        addTrigger(const std::string& triggerId, const std::string& triggerName,
-                   const std::vector<std::string>& triggerActions,
-                   const std::vector<LabeledSensorInfo>& labeledSensors,
-                   const std::vector<std::string>& reportIds,
-                   const LabeledTriggerThresholdParams& labeledThresholdParams);
+    interfaces::Trigger& addTrigger(
+        const std::string& triggerId, const std::string& triggerName,
+        const std::vector<std::string>& triggerActions,
+        const std::vector<LabeledSensorInfo>& labeledSensors,
+        const std::vector<std::string>& reportIds,
+        const LabeledTriggerThresholdParams& labeledThresholdParams);
     void loadFromPersistent();
 
   public:

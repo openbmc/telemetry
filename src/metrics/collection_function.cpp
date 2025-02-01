@@ -11,11 +11,15 @@ class FunctionMinimum : public CollectionFunction
     double calculate(const std::vector<ReadingItem>& readings,
                      Milliseconds) const override
     {
-        return std::min_element(readings.begin(), readings.end(),
-                                [](const auto& left, const auto& right) {
-            return std::make_tuple(!std::isfinite(left.second), left.second) <
-                   std::make_tuple(!std::isfinite(right.second), right.second);
-        })->second;
+        return std::min_element(
+                   readings.begin(), readings.end(),
+                   [](const auto& left, const auto& right) {
+                       return std::make_tuple(!std::isfinite(left.second),
+                                              left.second) <
+                              std::make_tuple(!std::isfinite(right.second),
+                                              right.second);
+                   })
+            ->second;
     }
 
     double calculateForStartupInterval(std::vector<ReadingItem>& readings,
@@ -33,11 +37,15 @@ class FunctionMaximum : public CollectionFunction
     double calculate(const std::vector<ReadingItem>& readings,
                      Milliseconds) const override
     {
-        return std::max_element(readings.begin(), readings.end(),
-                                [](const auto& left, const auto& right) {
-            return std::make_tuple(std::isfinite(left.second), left.second) <
-                   std::make_tuple(std::isfinite(right.second), right.second);
-        })->second;
+        return std::max_element(
+                   readings.begin(), readings.end(),
+                   [](const auto& left, const auto& right) {
+                       return std::make_tuple(std::isfinite(left.second),
+                                              left.second) <
+                              std::make_tuple(std::isfinite(right.second),
+                                              right.second);
+                   })
+            ->second;
     }
 
     double calculateForStartupInterval(std::vector<ReadingItem>& readings,
@@ -115,9 +123,9 @@ class FunctionSummation : public CollectionFunction
         return valueSum;
     }
 
-    double
-        calculateForStartupInterval(std::vector<ReadingItem>& readings,
-                                    const Milliseconds timestamp) const override
+    double calculateForStartupInterval(
+        std::vector<ReadingItem>& readings,
+        const Milliseconds timestamp) const override
     {
         const auto result = calculate(readings, timestamp);
         if (readings.size() > 2 && std::isfinite(result))
@@ -143,8 +151,8 @@ class FunctionSummation : public CollectionFunction
     }
 };
 
-std::shared_ptr<CollectionFunction>
-    makeCollectionFunction(OperationType operationType)
+std::shared_ptr<CollectionFunction> makeCollectionFunction(
+    OperationType operationType)
 {
     using namespace std::string_literals;
 
@@ -159,9 +167,9 @@ std::shared_ptr<CollectionFunction>
         case OperationType::sum:
             return std::make_shared<FunctionSummation>();
         default:
-            throw std::runtime_error("op: "s +
-                                     utils::enumToString(operationType) +
-                                     " is not supported"s);
+            throw std::runtime_error(
+                "op: "s + utils::enumToString(operationType) +
+                " is not supported"s);
     }
 }
 

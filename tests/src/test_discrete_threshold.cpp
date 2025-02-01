@@ -27,10 +27,10 @@ class TestDiscreteThreshold : public Test
     std::unique_ptr<NiceMock<ClockMock>> clockMockPtr =
         std::make_unique<NiceMock<ClockMock>>();
 
-    std::shared_ptr<DiscreteThreshold>
-        makeThreshold(Milliseconds dwellTime, std::string thresholdValue,
-                      discrete::Severity severity = discrete::Severity::ok,
-                      std::string thresholdName = "treshold name")
+    std::shared_ptr<DiscreteThreshold> makeThreshold(
+        Milliseconds dwellTime, std::string thresholdValue,
+        discrete::Severity severity = discrete::Severity::ok,
+        std::string thresholdName = "treshold name")
     {
         std::vector<std::unique_ptr<interfaces::TriggerAction>> actions;
         actions.push_back(std::move(actionMockPtr));
@@ -61,8 +61,8 @@ TEST_F(TestDiscreteThreshold, initializeThresholdExpectAllSensorsAreRegistered)
     {
         EXPECT_CALL(*sensor,
                     registerForUpdates(Truly([sut = sut.get()](const auto& x) {
-            return x.lock().get() == sut;
-        })));
+                        return x.lock().get() == sut;
+                    })));
     }
 
     sut->initialize();
@@ -230,8 +230,9 @@ class TestDiscreteThresholdCommon :
                                TriggerValue(GetParam().thresholdValue)))
                 .WillOnce(DoAll(
                     InvokeWithoutArgs([idx = index, &timestamps] {
-                timestamps[idx] = std::chrono::high_resolution_clock::now();
-            }),
+                        timestamps[idx] =
+                            std::chrono::high_resolution_clock::now();
+                    }),
                     InvokeWithoutArgs(DbusEnvironment::setPromise("commit"))));
         }
 

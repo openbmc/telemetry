@@ -20,9 +20,8 @@ class CollectionFunction
 
     virtual double calculate(const std::vector<ReadingItem>& readings,
                              Milliseconds timestamp) const = 0;
-    virtual double
-        calculateForStartupInterval(std::vector<ReadingItem>& readings,
-                                    Milliseconds timestamp) const = 0;
+    virtual double calculateForStartupInterval(
+        std::vector<ReadingItem>& readings, Milliseconds timestamp) const = 0;
 };
 
 std::shared_ptr<CollectionFunction> makeCollectionFunction(OperationType);

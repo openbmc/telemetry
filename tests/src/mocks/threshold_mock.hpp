@@ -20,8 +20,8 @@ class ThresholdMock :
 
     MOCK_METHOD(void, updateSensors, (Sensors newSensors), (override));
 
-    static std::vector<std::shared_ptr<interfaces::Threshold>>
-        makeThresholds(const LabeledTriggerThresholdParams& params)
+    static std::vector<std::shared_ptr<interfaces::Threshold>> makeThresholds(
+        const LabeledTriggerThresholdParams& params)
     {
         using namespace testing;
         std::vector<std::shared_ptr<NiceMock<ThresholdMock>>> result;

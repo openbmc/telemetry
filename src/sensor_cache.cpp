@@ -3,8 +3,9 @@
 SensorCache::SensorsContainer::iterator SensorCache::findExpiredSensor(
     SensorCache::SensorsContainer::iterator begin)
 {
-    return std::find_if(begin, sensors.end(),
-                        [](const auto& item) { return item.second.expired(); });
+    return std::find_if(begin, sensors.end(), [](const auto& item) {
+        return item.second.expired();
+    });
 }
 
 void SensorCache::cleanupExpiredSensors()

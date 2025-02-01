@@ -20,9 +20,9 @@ using SensorTree = std::pair<SensorPath, SensorIfaces>;
 constexpr std::array<const char*, 1> sensorInterfaces = {
     "xyz.openbmc_project.Sensor.Value"};
 
-inline std::vector<SensorTree>
-    getSubTreeSensors(boost::asio::yield_context& yield,
-                      const std::shared_ptr<sdbusplus::asio::connection>& bus)
+inline std::vector<SensorTree> getSubTreeSensors(
+    boost::asio::yield_context& yield,
+    const std::shared_ptr<sdbusplus::asio::connection>& bus)
 {
     boost::system::error_code ec;
 
@@ -38,8 +38,8 @@ inline std::vector<SensorTree>
     return tree;
 }
 
-inline std::vector<SensorTree>
-    getSubTreeSensors(const std::shared_ptr<sdbusplus::asio::connection>& bus)
+inline std::vector<SensorTree> getSubTreeSensors(
+    const std::shared_ptr<sdbusplus::asio::connection>& bus)
 {
     auto method_call =
         bus->new_method_call("xyz.openbmc_project.ObjectMapper",

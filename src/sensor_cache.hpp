@@ -12,9 +12,8 @@ class SensorCache
 {
   public:
     template <class SensorType, class... Args>
-    std::shared_ptr<SensorType> makeSensor(std::string_view service,
-                                           std::string_view path,
-                                           Args&&... args)
+    std::shared_ptr<SensorType> makeSensor(
+        std::string_view service, std::string_view path, Args&&... args)
     {
         cleanupExpiredSensors();
 

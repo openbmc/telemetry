@@ -24,8 +24,8 @@ class SensorMock : public interfaces::Sensor
         return Id("SensorMock", service, path);
     }
 
-    static std::vector<std::shared_ptr<interfaces::Sensor>>
-        makeSensorMocks(const std::vector<LabeledSensorInfo>& sensorsInfo)
+    static std::vector<std::shared_ptr<interfaces::Sensor>> makeSensorMocks(
+        const std::vector<LabeledSensorInfo>& sensorsInfo)
     {
         using namespace testing;
         std::vector<std::shared_ptr<NiceMock<SensorMock>>> result;

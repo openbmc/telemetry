@@ -153,18 +153,16 @@ class TestReport : public Test
     }
 
     template <class T>
-    static boost::system::error_code setProperty(const std::string& path,
-                                                 const std::string& property,
-                                                 const T& newValue)
+    static boost::system::error_code setProperty(
+        const std::string& path, const std::string& property, const T& newValue)
     {
         return DbusEnvironment::setProperty<T>(path, Report::reportIfaceName,
                                                property, newValue);
     }
 
     template <class... Args>
-    static boost::system::error_code callMethod(const std::string& path,
-                                                const std::string& method,
-                                                Args&&... args)
+    static boost::system::error_code callMethod(
+        const std::string& path, const std::string& method, Args&&... args)
     {
         return DbusEnvironment::callMethod(path, Report::reportIfaceName,
                                            "SetReportingProperties",
@@ -198,8 +196,9 @@ class TestReport : public Test
         std::promise<boost::system::error_code> methodPromise;
         DbusEnvironment::getBus()->async_method_call(
             [&methodPromise](boost::system::error_code ec) {
-            methodPromise.set_value(ec);
-        }, DbusEnvironment::serviceName(), path, interface, method);
+                methodPromise.set_value(ec);
+            },
+            DbusEnvironment::serviceName(), path, interface, method);
         return DbusEnvironment::waitForFuture(methodPromise.get_future());
     }
 
@@ -213,9 +212,8 @@ class TestReport : public Test
         return call(path, Report::deleteIfaceName, "Delete");
     }
 
-    static std::pair<std::string, std::vector<std::string>>
-        makeStateDetail(const std::string& detailType,
-                        std::vector<std::string> detailArgs)
+    static std::pair<std::string, std::vector<std::string>> makeStateDetail(
+        const std::string& detailType, std::vector<std::string> detailArgs)
     {
         return make_pair(detailType, detailArgs);
     }
@@ -236,8 +234,8 @@ TEST_F(TestReport, verifyIfPropertiesHaveValidValue)
     EXPECT_THAT(
         getProperty<std::vector<std::string>>(sut->getPath(), "ReportActions"),
         Eq(utils::transform(defaultParams().reportActions(), [](const auto v) {
-        return utils::enumToString(v);
-    })));
+            return utils::enumToString(v);
+        })));
     EXPECT_THAT(getProperty<bool>(sut->getPath(), "EmitsReadingsUpdate"),
                 Eq(utils::contains(defaultParams().reportActions(),
                                    ReportAction::emitsReadingsUpdate)));
@@ -381,8 +379,8 @@ TEST_F(TestReport, setReportActionsWithInvalidActions)
     EXPECT_THAT(
         getProperty<std::vector<std::string>>(sut->getPath(), "ReportActions"),
         Eq(utils::transform(defaultParams().reportActions(), [](const auto v) {
-        return utils::enumToString(v);
-    })));
+            return utils::enumToString(v);
+        })));
 }
 
 TEST_F(TestReport, createReportWithEmptyActions)
@@ -409,8 +407,8 @@ TEST_F(TestReport, createReportWithValidUnsortedActions)
         ReportParams()
             .reportId("TestId_1")
             .reportActions(utils::transform(newActions, [](const auto& action) {
-        return utils::toReportAction(action);
-    })));
+                return utils::toReportAction(action);
+            })));
     EXPECT_THAT(
         getProperty<std::vector<std::string>>(sut->getPath(), "ReportActions"),
         Eq(expectedActions));
@@ -439,9 +437,9 @@ TEST_F(TestReport, failsToSetInvalidInterval)
 {
     uint64_t newValue = ReportManager::minInterval.count() - 1;
 
-    EXPECT_THAT(
-        callMethod(sut->getPath(), "SetReportingProperties", "", newValue),
-        Eq(boost::system::errc::invalid_argument));
+    EXPECT_THAT(callMethod(sut->getPath(), "SetReportingProperties", "",
+                           newValue),
+                Eq(boost::system::errc::invalid_argument));
 
     EXPECT_THAT(getProperty<uint64_t>(sut->getPath(), "Interval"),
                 Eq(defaultParams().interval().count()));
@@ -456,9 +454,9 @@ TEST_F(TestReport, failsToSetIncompatibleInterval)
 
     uint64_t newValue = ReportManager::minInterval.count();
 
-    EXPECT_THAT(
-        callMethod(report->getPath(), "SetReportingProperties", "", newValue),
-        Eq(boost::system::errc::invalid_argument));
+    EXPECT_THAT(callMethod(report->getPath(), "SetReportingProperties", "",
+                           newValue),
+                Eq(boost::system::errc::invalid_argument));
 
     EXPECT_THAT(getProperty<uint64_t>(report->getPath(), "Interval"),
                 Eq(defaultParams().interval().count()));
@@ -728,12 +726,12 @@ class TestReportInvalidIds :
     void SetUp() override {}
 };
 
-INSTANTIATE_TEST_SUITE_P(InvalidNames, TestReportInvalidIds,
-                         Values(defaultParams().reportId("/"),
-                                defaultParams().reportId("/Invalid"),
-                                defaultParams().reportId("Invalid/"),
-                                defaultParams().reportId("Invalid/Invalid/"),
-                                defaultParams().reportId("Invalid?")));
+INSTANTIATE_TEST_SUITE_P(
+    InvalidNames, TestReportInvalidIds,
+    Values(defaultParams().reportId("/"), defaultParams().reportId("/Invalid"),
+           defaultParams().reportId("Invalid/"),
+           defaultParams().reportId("Invalid/Invalid/"),
+           defaultParams().reportId("Invalid?")));
 
 TEST_P(TestReportInvalidIds, failsToCreateReportWithInvalidName)
 {
@@ -773,8 +771,8 @@ TEST_P(TestReportAllReportTypes, readingsAreUpdated)
     clockFake.system.advance(10ms);
 
     messanger.send(messages::UpdateReportInd{{sut->getId()}});
-    const auto [timestamp, readings] = getProperty<Readings>(sut->getPath(),
-                                                             "Readings");
+    const auto [timestamp, readings] =
+        getProperty<Readings>(sut->getPath(), "Readings");
 
     EXPECT_THAT(Milliseconds{timestamp}, Eq(systemTimestamp + 10ms));
 }
@@ -785,8 +783,8 @@ TEST_P(TestReportAllReportTypes, readingsAreNotUpdatedWhenReportIsDisabled)
 
     setProperty(sut->getPath(), "Enabled", false);
     messanger.send(messages::UpdateReportInd{{sut->getId()}});
-    const auto [timestamp, readings] = getProperty<Readings>(sut->getPath(),
-                                                             "Readings");
+    const auto [timestamp, readings] =
+        getProperty<Readings>(sut->getPath(), "Readings");
 
     EXPECT_THAT(Milliseconds{timestamp}, Eq(0ms));
 }
@@ -796,8 +794,8 @@ TEST_P(TestReportAllReportTypes, readingsAreNotUpdatedWhenReportIdDiffers)
     clockFake.system.advance(10ms);
 
     messanger.send(messages::UpdateReportInd{{sut->getId() + "x"s}});
-    const auto [timestamp, readings] = getProperty<Readings>(sut->getPath(),
-                                                             "Readings");
+    const auto [timestamp, readings] =
+        getProperty<Readings>(sut->getPath(), "Readings");
 
     EXPECT_THAT(Milliseconds{timestamp}, Eq(0ms));
 }
@@ -817,8 +815,8 @@ TEST_F(TestReportOnRequestType, updatesReadingTimestamp)
 
     ASSERT_THAT(update(sut->getPath()), Eq(boost::system::errc::success));
 
-    const auto [timestamp, readings] = getProperty<Readings>(sut->getPath(),
-                                                             "Readings");
+    const auto [timestamp, readings] =
+        getProperty<Readings>(sut->getPath(), "Readings");
 
     EXPECT_THAT(Milliseconds{timestamp}, Eq(systemTimestamp + 10ms));
 }
@@ -827,8 +825,8 @@ TEST_F(TestReportOnRequestType, updatesReadingWhenUpdateIsCalled)
 {
     ASSERT_THAT(update(sut->getPath()), Eq(boost::system::errc::success));
 
-    const auto [timestamp, readings] = getProperty<Readings>(sut->getPath(),
-                                                             "Readings");
+    const auto [timestamp, readings] =
+        getProperty<Readings>(sut->getPath(), "Readings");
 
     EXPECT_THAT(readings, ElementsAre(std::make_tuple("b"s, 17.1, 114u),
                                       std::make_tuple("bb"s, 42.0, 74u)));
@@ -900,8 +898,8 @@ TEST_F(TestReportPeriodicReport, readingTimestampIsUpdatedAfterIntervalExpires)
     clockFake.system.advance(10ms);
     DbusEnvironment::sleepFor(ReportManager::minInterval + 1ms);
 
-    const auto [timestamp, readings] = getProperty<Readings>(sut->getPath(),
-                                                             "Readings");
+    const auto [timestamp, readings] =
+        getProperty<Readings>(sut->getPath(), "Readings");
 
     EXPECT_THAT(Milliseconds{timestamp}, Eq(systemTimestamp + 10ms));
 }
@@ -910,8 +908,8 @@ TEST_F(TestReportPeriodicReport, readingsAreUpdatedAfterIntervalExpires)
 {
     DbusEnvironment::sleepFor(ReportManager::minInterval + 1ms);
 
-    const auto [timestamp, readings] = getProperty<Readings>(sut->getPath(),
-                                                             "Readings");
+    const auto [timestamp, readings] =
+        getProperty<Readings>(sut->getPath(), "Readings");
 
     EXPECT_THAT(readings, ElementsAre(std::make_tuple("b"s, 17.1, 114u),
                                       std::make_tuple("bb"s, 42.0, 74u)));
@@ -949,8 +947,8 @@ class TestReportWithReportUpdatesAndLimit :
 
     auto readings()
     {
-        auto [timestamp, readings] = getProperty<Readings>(sut->getPath(),
-                                                           "Readings");
+        auto [timestamp,
+              readings] = getProperty<Readings>(sut->getPath(), "Readings");
         return readings;
     }
 
@@ -1150,8 +1148,8 @@ TEST_F(TestReportInitialization,
     {
         EXPECT_CALL(*metric, registerForUpdates(_))
             .WillOnce(Invoke([&args](const interfaces::MetricListener& report) {
-            args.emplace_back(&report);
-        }));
+                args.emplace_back(&report);
+            }));
         ;
     }
 
@@ -1238,8 +1236,8 @@ TEST_F(TestReportInitialization, triggerIdsPropertyIsInitialzed)
     {
         messanger.on_receive<messages::CollectTriggerIdReq>(
             [this, triggerId](const auto& msg) {
-            messanger.send(messages::CollectTriggerIdResp{triggerId});
-        });
+                messanger.send(messages::CollectTriggerIdResp{triggerId});
+            });
     }
 
     sut = makeReport(ReportParams());

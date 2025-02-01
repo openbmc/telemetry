@@ -34,8 +34,8 @@ void DiscreteThreshold::updateSensors(Sensors newSensors)
     ThresholdOperations::updateSensors(this, std::move(newSensors));
 }
 
-DiscreteThreshold::ThresholdDetail&
-    DiscreteThreshold::getDetails(const interfaces::Sensor& sensor)
+DiscreteThreshold::ThresholdDetail& DiscreteThreshold::getDetails(
+    const interfaces::Sensor& sensor)
 {
     return ThresholdOperations::getDetails(this, sensor);
 }

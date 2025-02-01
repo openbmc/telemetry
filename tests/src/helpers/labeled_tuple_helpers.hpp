@@ -8,9 +8,9 @@ namespace utils
 {
 
 template <class... Args, class... Labels>
-inline void
-    PrintTo(const LabeledTuple<std::tuple<Args...>, Labels...>& labeledTuple,
-            std::ostream* os)
+inline void PrintTo(
+    const LabeledTuple<std::tuple<Args...>, Labels...>& labeledTuple,
+    std::ostream* os)
 {
     nlohmann::json json;
     to_json(json, labeledTuple);

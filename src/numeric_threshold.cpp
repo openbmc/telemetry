@@ -29,8 +29,8 @@ void NumericThreshold::updateSensors(Sensors newSensors)
     ThresholdOperations::updateSensors(this, std::move(newSensors));
 }
 
-NumericThreshold::ThresholdDetail&
-    NumericThreshold::getDetails(const interfaces::Sensor& sensor)
+NumericThreshold::ThresholdDetail& NumericThreshold::getDetails(
+    const interfaces::Sensor& sensor)
 {
     return ThresholdOperations::getDetails(this, sensor);
 }
@@ -56,10 +56,10 @@ void NumericThreshold::sensorUpdated(interfaces::Sensor& sensor,
         return;
     }
 
-    bool crossedDecreasing = thresholdValue < prevValue &&
-                             thresholdValue > value;
-    bool crossedIncreasing = thresholdValue > prevValue &&
-                             thresholdValue < value;
+    bool crossedDecreasing =
+        thresholdValue < prevValue && thresholdValue > value;
+    bool crossedIncreasing =
+        thresholdValue > prevValue && thresholdValue < value;
 
     if (!crossedDecreasing && !crossedIncreasing && thresholdValue == prevValue)
     {

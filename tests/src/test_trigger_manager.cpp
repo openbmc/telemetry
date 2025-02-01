@@ -19,8 +19,8 @@ class TestTriggerManager : public Test
 {
   public:
     TriggerParams triggerParams;
-    std::pair<boost::system::error_code, std::string>
-        addTrigger(const TriggerParams& params)
+    std::pair<boost::system::error_code, std::string> addTrigger(
+        const TriggerParams& params)
     {
         const auto sensorInfos =
             utils::fromLabeledSensorsInfo(params.sensors());
@@ -38,14 +38,15 @@ class TestTriggerManager : public Test
         DbusEnvironment::getBus()->async_method_call(
             [&addTriggerPromise](boost::system::error_code ec,
                                  const std::string& path) {
-            addTriggerPromise.set_value({ec, path});
-        },
+                addTriggerPromise.set_value({ec, path});
+            },
             DbusEnvironment::serviceName(), TriggerManager::triggerManagerPath,
             TriggerManager::triggerManagerIfaceName, "AddTrigger", params.id(),
             params.name(),
-            utils::transform(
-                params.triggerActions(),
-                [](const auto& action) { return actionToString(action); }),
+            utils::transform(params.triggerActions(),
+                             [](const auto& action) {
+                                 return actionToString(action);
+                             }),
             sensorInfos, params.reports(), numThresh2, discThresh2);
         return DbusEnvironment::waitForFuture(addTriggerPromise.get_future());
     }
@@ -393,8 +394,8 @@ TEST_F(TestTriggerManager, failToAddTriggerWhenMaxTriggerIsReached)
         EXPECT_THAT(ec.value(), Eq(boost::system::errc::success));
     }
 
-    triggerParams.id(TriggerParams().id() +
-                     std::to_string(TriggerManager::maxTriggers));
+    triggerParams.id(
+        TriggerParams().id() + std::to_string(TriggerManager::maxTriggers));
     auto [ec, path] = addTrigger(triggerParams);
     EXPECT_THAT(ec.value(), Eq(boost::system::errc::too_many_files_open));
     EXPECT_THAT(path, Eq(std::string()));
@@ -473,8 +474,8 @@ class TestTriggerManagerStorage : public TestTriggerManager
          TriggerParams().thresholdParams().index()},
         {"TriggerActions", utils::transform(TriggerParams().triggerActions(),
                                             [](const auto& action) {
-        return actionToString(action);
-    })},
+                                                return actionToString(action);
+                                            })},
         {"ThresholdParams", utils::labeledThresholdParamsToJson(
                                 TriggerParams().thresholdParams())},
         {"ReportIds", TriggerParams().reportIds()},

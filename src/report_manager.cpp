@@ -28,59 +28,65 @@ ReportManager::ReportManager(
 
     reportManagerIface = objServer->add_unique_interface(
         reportManagerPath, reportManagerIfaceName, [this](auto& dbusIface) {
-        dbusIface.register_property_r("MaxReports", size_t{},
-                                      sdbusplus::vtable::property_::const_,
-                                      [](const auto&) { return maxReports; });
-        dbusIface.register_property_r(
-            "MinInterval", uint64_t{}, sdbusplus::vtable::property_::const_,
-            [](const auto&) -> uint64_t { return minInterval.count(); });
-        dbusIface.register_property_r(
-            "SupportedOperationTypes", std::vector<std::string>{},
-            sdbusplus::vtable::property_::const_,
-            [](const auto&) -> std::vector<std::string> {
-            return utils::transform<std::vector>(
-                utils::convDataOperationType,
-                [](const auto& item) { return std::string(item.first); });
+            dbusIface.register_property_r(
+                "MaxReports", size_t{}, sdbusplus::vtable::property_::const_,
+                [](const auto&) { return maxReports; });
+            dbusIface.register_property_r(
+                "MinInterval", uint64_t{}, sdbusplus::vtable::property_::const_,
+                [](const auto&) -> uint64_t { return minInterval.count(); });
+            dbusIface.register_property_r(
+                "SupportedOperationTypes", std::vector<std::string>{},
+                sdbusplus::vtable::property_::const_,
+                [](const auto&) -> std::vector<std::string> {
+                    return utils::transform<std::vector>(
+                        utils::convDataOperationType, [](const auto& item) {
+                            return std::string(item.first);
+                        });
+                });
+            dbusIface.register_method(
+                "AddReport",
+                [this](boost::asio::yield_context& yield, std::string reportId,
+                       std::string reportName, std::string reportingType,
+                       std::string reportUpdates, uint64_t appendLimit,
+                       std::vector<std::string> reportActions,
+                       uint64_t interval, ReadingParameters readingParameters,
+                       bool enabled) {
+                    if (reportingType.empty())
+                    {
+                        reportingType =
+                            utils::enumToString(ReportingType::onRequest);
+                    }
+
+                    if (reportUpdates.empty())
+                    {
+                        reportUpdates =
+                            utils::enumToString(ReportUpdates::overwrite);
+                    }
+
+                    if (appendLimit == std::numeric_limits<uint64_t>::max())
+                    {
+                        appendLimit = maxAppendLimit;
+                    }
+
+                    if (interval == std::numeric_limits<uint64_t>::max())
+                    {
+                        interval = 0;
+                    }
+
+                    return addReport(yield, reportId, reportName,
+                                     utils::toReportingType(reportingType),
+                                     utils::transform(
+                                         reportActions,
+                                         [](const auto& reportAction) {
+                                             return utils::toReportAction(
+                                                 reportAction);
+                                         }),
+                                     Milliseconds(interval), appendLimit,
+                                     utils::toReportUpdates(reportUpdates),
+                                     readingParameters, enabled)
+                        .getPath();
+                });
         });
-        dbusIface.register_method(
-            "AddReport",
-            [this](boost::asio::yield_context& yield, std::string reportId,
-                   std::string reportName, std::string reportingType,
-                   std::string reportUpdates, uint64_t appendLimit,
-                   std::vector<std::string> reportActions, uint64_t interval,
-                   ReadingParameters readingParameters, bool enabled) {
-            if (reportingType.empty())
-            {
-                reportingType = utils::enumToString(ReportingType::onRequest);
-            }
-
-            if (reportUpdates.empty())
-            {
-                reportUpdates = utils::enumToString(ReportUpdates::overwrite);
-            }
-
-            if (appendLimit == std::numeric_limits<uint64_t>::max())
-            {
-                appendLimit = maxAppendLimit;
-            }
-
-            if (interval == std::numeric_limits<uint64_t>::max())
-            {
-                interval = 0;
-            }
-
-            return addReport(yield, reportId, reportName,
-                             utils::toReportingType(reportingType),
-                             utils::transform(reportActions,
-                                              [](const auto& reportAction) {
-                return utils::toReportAction(reportAction);
-            }),
-                             Milliseconds(interval), appendLimit,
-                             utils::toReportUpdates(reportUpdates),
-                             readingParameters, enabled)
-                .getPath();
-        });
-    });
 }
 
 void ReportManager::removeReport(const interfaces::Report* report)
@@ -135,8 +141,8 @@ interfaces::Report& ReportManager::addReport(
     const uint64_t appendLimit, const ReportUpdates reportUpdates,
     ReadingParameters metricParams, const bool enabled)
 {
-    auto labeledMetricParams = reportFactory->convertMetricParams(yield,
-                                                                  metricParams);
+    auto labeledMetricParams =
+        reportFactory->convertMetricParams(yield, metricParams);
 
     return addReport(reportId, reportName, reportingType, reportActions,
                      interval, appendLimit, reportUpdates,
@@ -190,8 +196,8 @@ void ReportManager::loadFromPersistent()
             std::vector<ReportAction> reportActions = utils::transform(
                 data->at("ReportActions").get<std::vector<uint32_t>>(),
                 [](const auto reportAction) {
-                return utils::toReportAction(reportAction);
-            });
+                    return utils::toReportAction(reportAction);
+                });
             uint64_t interval = data->at("Interval").get<uint64_t>();
             uint64_t appendLimit = data->at("AppendLimit").get<uint64_t>();
             uint32_t reportUpdates = data->at("ReportUpdates").get<uint32_t>();

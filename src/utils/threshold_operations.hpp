@@ -18,9 +18,8 @@ struct ThresholdOperations
     }
 
     template <typename ThresholdType>
-    static typename ThresholdType::ThresholdDetail&
-        getDetails(ThresholdType* thresholdPtr,
-                   const interfaces::Sensor& sensor)
+    static typename ThresholdType::ThresholdDetail& getDetails(
+        ThresholdType* thresholdPtr, const interfaces::Sensor& sensor)
     {
         auto it = std::find_if(
             thresholdPtr->sensorDetails.begin(),

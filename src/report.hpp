@@ -87,8 +87,8 @@ class Report : public interfaces::Report, public interfaces::MetricListener
     void deactivate();
 
   private:
-    std::unique_ptr<sdbusplus::asio::dbus_interface>
-        makeReportInterface(const interfaces::ReportFactory& reportFactory);
+    std::unique_ptr<sdbusplus::asio::dbus_interface> makeReportInterface(
+        const interfaces::ReportFactory& reportFactory);
     static void timerProcForPeriodicReport(boost::system::error_code,
                                            Report& self);
     static void timerProcForOnChangeReport(boost::system::error_code,
@@ -102,8 +102,8 @@ class Report : public interfaces::Report, public interfaces::MetricListener
     static uint64_t getMetricCount(
         const std::vector<std::shared_ptr<interfaces::Metric>>& metrics);
     interfaces::JsonStorage::FilePath reportFileName() const;
-    std::unordered_set<std::string>
-        collectTriggerIds(boost::asio::io_context& ioc) const;
+    std::unordered_set<std::string> collectTriggerIds(
+        boost::asio::io_context& ioc) const;
     bool storeConfiguration() const;
     bool shouldStoreMetricValues() const;
     void updateReadings();

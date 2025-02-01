@@ -60,8 +60,8 @@ TEST_F(TestNumericThreshold, initializeThresholdExpectAllSensorsAreRegistered)
     {
         EXPECT_CALL(*sensor,
                     registerForUpdates(Truly([sut = sut.get()](const auto& x) {
-            return x.lock().get() == sut;
-        })));
+                        return x.lock().get() == sut;
+                    })));
     }
 
     sut->initialize();
@@ -205,8 +205,9 @@ class TestNumericThresholdCommon :
                                _, TriggerValue(value)))
                 .WillOnce(DoAll(
                     InvokeWithoutArgs([idx = index, &timestamps] {
-                timestamps[idx] = std::chrono::high_resolution_clock::now();
-            }),
+                        timestamps[idx] =
+                            std::chrono::high_resolution_clock::now();
+                    }),
                     InvokeWithoutArgs(DbusEnvironment::setPromise("commit"))));
         }
 
@@ -251,109 +252,111 @@ class TestNumericThresholdNoDwellTime : public TestNumericThresholdCommon
     }
 };
 
-INSTANTIATE_TEST_SUITE_P(_, TestNumericThresholdNoDwellTime,
-                         Values(NumericParams()
-                                    .ThresholdValue(90.0)
-                                    .Direction(numeric::Direction::increasing)
-                                    .InitialValues({80.0})
-                                    .Updates({{0, 89.0}})
-                                    .Expected({}),
-                                NumericParams()
-                                    .ThresholdValue(90.0)
-                                    .Direction(numeric::Direction::increasing)
-                                    .InitialValues({80.0})
-                                    .Updates({{0, 91.0}})
-                                    .Expected({{0, 91.0}}),
-                                NumericParams()
-                                    .ThresholdValue(90.0)
-                                    .Direction(numeric::Direction::increasing)
-                                    .InitialValues({80.0})
-                                    .Updates({{0, 99.0}, {0, 80.0}, {0, 98.0}})
-                                    .Expected({{0, 99.0}, {0, 98.0}}),
-                                NumericParams()
-                                    .ThresholdValue(90.0)
-                                    .Direction(numeric::Direction::increasing)
-                                    .InitialValues({80.0, 100.0})
-                                    .Updates({{0, 99.0}, {1, 98.0}})
-                                    .Expected({{0, 99.0}}),
-                                NumericParams()
-                                    .ThresholdValue(90.0)
-                                    .Direction(numeric::Direction::decreasing)
-                                    .InitialValues({100.0})
-                                    .Updates({{0, 91.0}})
-                                    .Expected({}),
-                                NumericParams()
-                                    .ThresholdValue(90.0)
-                                    .Direction(numeric::Direction::decreasing)
-                                    .InitialValues({100.0})
-                                    .Updates({{0, 80.0}})
-                                    .Expected({{0, 80.0}}),
-                                NumericParams()
-                                    .ThresholdValue(90.0)
-                                    .Direction(numeric::Direction::decreasing)
-                                    .InitialValues({100.0})
-                                    .Updates({{0, 80.0}, {0, 99.0}, {0, 85.0}})
-                                    .Expected({{0, 80.0}, {0, 85.0}}),
-                                NumericParams()
-                                    .ThresholdValue(90.0)
-                                    .Direction(numeric::Direction::decreasing)
-                                    .InitialValues({100.0, 99.0})
-                                    .Updates({{0, 80.0}, {1, 88.0}})
-                                    .Expected({{0, 80.0}, {1, 88.0}}),
-                                NumericParams()
-                                    .ThresholdValue(90.0)
-                                    .Direction(numeric::Direction::either)
-                                    .InitialValues({98.0})
-                                    .Updates({{0, 91.0}})
-                                    .Expected({}),
-                                NumericParams()
-                                    .ThresholdValue(90.0)
-                                    .Direction(numeric::Direction::either)
-                                    .InitialValues({100.0})
-                                    .Updates({{0, 80.0}, {0, 85.0}, {0, 91.0}})
-                                    .Expected({{0, 80.0}, {0, 91.0}}),
-                                NumericParams()
-                                    .ThresholdValue(90.0)
-                                    .Direction(numeric::Direction::either)
-                                    .InitialValues({100.0, 80.0})
-                                    .Updates({{0, 85.0}, {1, 91.0}})
-                                    .Expected({{0, 85.0}, {1, 91.0}}),
-                                NumericParams()
-                                    .ThresholdValue(30.0)
-                                    .Direction(numeric::Direction::decreasing)
-                                    .InitialValues({40.0})
-                                    .Updates({{0, 30.0}, {0, 20.0}})
-                                    .Expected({{0, 20.0}}),
-                                NumericParams()
-                                    .ThresholdValue(30.0)
-                                    .Direction(numeric::Direction::decreasing)
-                                    .InitialValues({20.0})
-                                    .Updates({{0, 30.0}, {0, 20.0}})
-                                    .Expected({}),
-                                NumericParams()
-                                    .ThresholdValue(30.0)
-                                    .Direction(numeric::Direction::either)
-                                    .InitialValues({20.0})
-                                    .Updates({{0, 30.0}, {0, 20.0}})
-                                    .Expected({}),
-                                NumericParams()
-                                    .ThresholdValue(30.0)
-                                    .Direction(numeric::Direction::increasing)
-                                    .InitialValues({20.0})
-                                    .Updates({{0, 30.0}, {0, 40.0}})
-                                    .Expected({{0, 40.0}}),
-                                NumericParams()
-                                    .ThresholdValue(30.0)
-                                    .Direction(numeric::Direction::increasing)
-                                    .InitialValues({40.0})
-                                    .Updates({{0, 30.0}, {0, 40.0}})
-                                    .Expected({}),
-                                NumericParams()
-                                    .ThresholdValue(30.0)
-                                    .Direction(numeric::Direction::either)
-                                    .InitialValues({40.0})
-                                    .Updates({{0, 30.0}, {0, 40.0}})
-                                    .Expected({})));
+INSTANTIATE_TEST_SUITE_P(
+    _, TestNumericThresholdNoDwellTime,
+    Values(
+        NumericParams()
+            .ThresholdValue(90.0)
+            .Direction(numeric::Direction::increasing)
+            .InitialValues({80.0})
+            .Updates({{0, 89.0}})
+            .Expected({}),
+        NumericParams()
+            .ThresholdValue(90.0)
+            .Direction(numeric::Direction::increasing)
+            .InitialValues({80.0})
+            .Updates({{0, 91.0}})
+            .Expected({{0, 91.0}}),
+        NumericParams()
+            .ThresholdValue(90.0)
+            .Direction(numeric::Direction::increasing)
+            .InitialValues({80.0})
+            .Updates({{0, 99.0}, {0, 80.0}, {0, 98.0}})
+            .Expected({{0, 99.0}, {0, 98.0}}),
+        NumericParams()
+            .ThresholdValue(90.0)
+            .Direction(numeric::Direction::increasing)
+            .InitialValues({80.0, 100.0})
+            .Updates({{0, 99.0}, {1, 98.0}})
+            .Expected({{0, 99.0}}),
+        NumericParams()
+            .ThresholdValue(90.0)
+            .Direction(numeric::Direction::decreasing)
+            .InitialValues({100.0})
+            .Updates({{0, 91.0}})
+            .Expected({}),
+        NumericParams()
+            .ThresholdValue(90.0)
+            .Direction(numeric::Direction::decreasing)
+            .InitialValues({100.0})
+            .Updates({{0, 80.0}})
+            .Expected({{0, 80.0}}),
+        NumericParams()
+            .ThresholdValue(90.0)
+            .Direction(numeric::Direction::decreasing)
+            .InitialValues({100.0})
+            .Updates({{0, 80.0}, {0, 99.0}, {0, 85.0}})
+            .Expected({{0, 80.0}, {0, 85.0}}),
+        NumericParams()
+            .ThresholdValue(90.0)
+            .Direction(numeric::Direction::decreasing)
+            .InitialValues({100.0, 99.0})
+            .Updates({{0, 80.0}, {1, 88.0}})
+            .Expected({{0, 80.0}, {1, 88.0}}),
+        NumericParams()
+            .ThresholdValue(90.0)
+            .Direction(numeric::Direction::either)
+            .InitialValues({98.0})
+            .Updates({{0, 91.0}})
+            .Expected({}),
+        NumericParams()
+            .ThresholdValue(90.0)
+            .Direction(numeric::Direction::either)
+            .InitialValues({100.0})
+            .Updates({{0, 80.0}, {0, 85.0}, {0, 91.0}})
+            .Expected({{0, 80.0}, {0, 91.0}}),
+        NumericParams()
+            .ThresholdValue(90.0)
+            .Direction(numeric::Direction::either)
+            .InitialValues({100.0, 80.0})
+            .Updates({{0, 85.0}, {1, 91.0}})
+            .Expected({{0, 85.0}, {1, 91.0}}),
+        NumericParams()
+            .ThresholdValue(30.0)
+            .Direction(numeric::Direction::decreasing)
+            .InitialValues({40.0})
+            .Updates({{0, 30.0}, {0, 20.0}})
+            .Expected({{0, 20.0}}),
+        NumericParams()
+            .ThresholdValue(30.0)
+            .Direction(numeric::Direction::decreasing)
+            .InitialValues({20.0})
+            .Updates({{0, 30.0}, {0, 20.0}})
+            .Expected({}),
+        NumericParams()
+            .ThresholdValue(30.0)
+            .Direction(numeric::Direction::either)
+            .InitialValues({20.0})
+            .Updates({{0, 30.0}, {0, 20.0}})
+            .Expected({}),
+        NumericParams()
+            .ThresholdValue(30.0)
+            .Direction(numeric::Direction::increasing)
+            .InitialValues({20.0})
+            .Updates({{0, 30.0}, {0, 40.0}})
+            .Expected({{0, 40.0}}),
+        NumericParams()
+            .ThresholdValue(30.0)
+            .Direction(numeric::Direction::increasing)
+            .InitialValues({40.0})
+            .Updates({{0, 30.0}, {0, 40.0}})
+            .Expected({}),
+        NumericParams()
+            .ThresholdValue(30.0)
+            .Direction(numeric::Direction::either)
+            .InitialValues({40.0})
+            .Updates({{0, 30.0}, {0, 40.0}})
+            .Expected({})));
 
 TEST_P(TestNumericThresholdNoDwellTime, senorsIsUpdatedMultipleTimes)
 {
@@ -378,163 +381,165 @@ class TestNumericThresholdWithDwellTime : public TestNumericThresholdCommon
 
 INSTANTIATE_TEST_SUITE_P(
     SleepAfterEveryUpdate, TestNumericThresholdWithDwellTime,
-    Values(NumericParams()
-               .DwellTime(200ms)
-               .ThresholdValue(90.0)
-               .Direction(numeric::Direction::increasing)
-               .InitialValues({80.0})
-               .Updates({{0, 89.0, 200ms}})
-               .Expected({}),
-           NumericParams()
-               .DwellTime(200ms)
-               .ThresholdValue(90.0)
-               .Direction(numeric::Direction::increasing)
-               .InitialValues({80.0})
-               .Updates({{0, 91.0, 200ms}})
-               .Expected({{0, 91.0, 200ms}}),
-           NumericParams()
-               .DwellTime(200ms)
-               .ThresholdValue(90.0)
-               .Direction(numeric::Direction::increasing)
-               .InitialValues({80.0})
-               .Updates({{0, 99.0, 200ms}, {0, 80.0, 100ms}, {0, 98.0, 200ms}})
-               .Expected({{0, 99.0, 200ms}, {0, 98.0, 500ms}}),
-           NumericParams()
-               .DwellTime(200ms)
-               .ThresholdValue(90.0)
-               .Direction(numeric::Direction::increasing)
-               .InitialValues({80.0, 99.0})
-               .Updates({{0, 100.0, 100ms}, {1, 86.0, 100ms}})
-               .Expected({{0, 100.0, 200ms}}),
-           NumericParams()
-               .DwellTime(200ms)
-               .ThresholdValue(90.0)
-               .Direction(numeric::Direction::decreasing)
-               .InitialValues({100.0})
-               .Updates({{0, 91.0, 200ms}})
-               .Expected({}),
-           NumericParams()
-               .DwellTime(200ms)
-               .ThresholdValue(90.0)
-               .Direction(numeric::Direction::decreasing)
-               .InitialValues({100.0})
-               .Updates({{0, 80.0, 200ms}})
-               .Expected({{0, 80.0, 200ms}}),
-           NumericParams()
-               .DwellTime(200ms)
-               .ThresholdValue(90.0)
-               .Direction(numeric::Direction::decreasing)
-               .InitialValues({100.0})
-               .Updates({{0, 80.0, 200ms}, {0, 99.0, 100ms}, {0, 85.0, 200ms}})
-               .Expected({{0, 80.0, 200ms}, {0, 85.0, 500ms}}),
-           NumericParams()
-               .DwellTime(200ms)
-               .ThresholdValue(90.0)
-               .Direction(numeric::Direction::decreasing)
-               .InitialValues({100.0, 99.0})
-               .Updates({{0, 80.0, 200ms}, {1, 88.0, 200ms}})
-               .Expected({{0, 80.0, 200ms}, {1, 88.0, 400ms}}),
-           NumericParams()
-               .DwellTime(200ms)
-               .ThresholdValue(90.0)
-               .Direction(numeric::Direction::either)
-               .InitialValues({98.0})
-               .Updates({{0, 91.0, 200ms}})
-               .Expected({}),
-           NumericParams()
-               .DwellTime(200ms)
-               .ThresholdValue(90.0)
-               .Direction(numeric::Direction::either)
-               .InitialValues({100.0})
-               .Updates({{0, 80.0, 100ms}, {0, 85.0, 100ms}, {0, 91.0, 200ms}})
-               .Expected({{0, 80.0, 200ms}, {0, 91.0, 400ms}}),
-           NumericParams()
-               .DwellTime(200ms)
-               .ThresholdValue(90.0)
-               .Direction(numeric::Direction::either)
-               .InitialValues({100.0, 80.0})
-               .Updates({{0, 85.0, 100ms}, {1, 91.0, 200ms}})
-               .Expected({{0, 85.0, 200ms}, {1, 91.0, 300ms}})));
+    Values(
+        NumericParams()
+            .DwellTime(200ms)
+            .ThresholdValue(90.0)
+            .Direction(numeric::Direction::increasing)
+            .InitialValues({80.0})
+            .Updates({{0, 89.0, 200ms}})
+            .Expected({}),
+        NumericParams()
+            .DwellTime(200ms)
+            .ThresholdValue(90.0)
+            .Direction(numeric::Direction::increasing)
+            .InitialValues({80.0})
+            .Updates({{0, 91.0, 200ms}})
+            .Expected({{0, 91.0, 200ms}}),
+        NumericParams()
+            .DwellTime(200ms)
+            .ThresholdValue(90.0)
+            .Direction(numeric::Direction::increasing)
+            .InitialValues({80.0})
+            .Updates({{0, 99.0, 200ms}, {0, 80.0, 100ms}, {0, 98.0, 200ms}})
+            .Expected({{0, 99.0, 200ms}, {0, 98.0, 500ms}}),
+        NumericParams()
+            .DwellTime(200ms)
+            .ThresholdValue(90.0)
+            .Direction(numeric::Direction::increasing)
+            .InitialValues({80.0, 99.0})
+            .Updates({{0, 100.0, 100ms}, {1, 86.0, 100ms}})
+            .Expected({{0, 100.0, 200ms}}),
+        NumericParams()
+            .DwellTime(200ms)
+            .ThresholdValue(90.0)
+            .Direction(numeric::Direction::decreasing)
+            .InitialValues({100.0})
+            .Updates({{0, 91.0, 200ms}})
+            .Expected({}),
+        NumericParams()
+            .DwellTime(200ms)
+            .ThresholdValue(90.0)
+            .Direction(numeric::Direction::decreasing)
+            .InitialValues({100.0})
+            .Updates({{0, 80.0, 200ms}})
+            .Expected({{0, 80.0, 200ms}}),
+        NumericParams()
+            .DwellTime(200ms)
+            .ThresholdValue(90.0)
+            .Direction(numeric::Direction::decreasing)
+            .InitialValues({100.0})
+            .Updates({{0, 80.0, 200ms}, {0, 99.0, 100ms}, {0, 85.0, 200ms}})
+            .Expected({{0, 80.0, 200ms}, {0, 85.0, 500ms}}),
+        NumericParams()
+            .DwellTime(200ms)
+            .ThresholdValue(90.0)
+            .Direction(numeric::Direction::decreasing)
+            .InitialValues({100.0, 99.0})
+            .Updates({{0, 80.0, 200ms}, {1, 88.0, 200ms}})
+            .Expected({{0, 80.0, 200ms}, {1, 88.0, 400ms}}),
+        NumericParams()
+            .DwellTime(200ms)
+            .ThresholdValue(90.0)
+            .Direction(numeric::Direction::either)
+            .InitialValues({98.0})
+            .Updates({{0, 91.0, 200ms}})
+            .Expected({}),
+        NumericParams()
+            .DwellTime(200ms)
+            .ThresholdValue(90.0)
+            .Direction(numeric::Direction::either)
+            .InitialValues({100.0})
+            .Updates({{0, 80.0, 100ms}, {0, 85.0, 100ms}, {0, 91.0, 200ms}})
+            .Expected({{0, 80.0, 200ms}, {0, 91.0, 400ms}}),
+        NumericParams()
+            .DwellTime(200ms)
+            .ThresholdValue(90.0)
+            .Direction(numeric::Direction::either)
+            .InitialValues({100.0, 80.0})
+            .Updates({{0, 85.0, 100ms}, {1, 91.0, 200ms}})
+            .Expected({{0, 85.0, 200ms}, {1, 91.0, 300ms}})));
 
 INSTANTIATE_TEST_SUITE_P(
     SleepAfterLastUpdate, TestNumericThresholdWithDwellTime,
-    Values(NumericParams()
-               .DwellTime(200ms)
-               .ThresholdValue(90.0)
-               .Direction(numeric::Direction::increasing)
-               .InitialValues({80.0})
-               .Updates({{0, 89.0, 300ms}})
-               .Expected({}),
-           NumericParams()
-               .DwellTime(200ms)
-               .ThresholdValue(90.0)
-               .Direction(numeric::Direction::increasing)
-               .InitialValues({80.0})
-               .Updates({{0, 91.0, 300ms}})
-               .Expected({{0, 91.0, 200ms}}),
-           NumericParams()
-               .DwellTime(200ms)
-               .ThresholdValue(90.0)
-               .Direction(numeric::Direction::increasing)
-               .InitialValues({80.0})
-               .Updates({{0, 99.0}, {0, 80.0}, {0, 98.0, 300ms}})
-               .Expected({{0, 98.0, 200ms}}),
-           NumericParams()
-               .DwellTime(200ms)
-               .ThresholdValue(90.0)
-               .Direction(numeric::Direction::increasing)
-               .InitialValues({80.0, 99.0})
-               .Updates({{0, 100.0}, {1, 98.0, 300ms}})
-               .Expected({{0, 100.0, 200ms}}),
-           NumericParams()
-               .DwellTime(200ms)
-               .ThresholdValue(90.0)
-               .Direction(numeric::Direction::decreasing)
-               .InitialValues({100.0})
-               .Updates({{0, 91.0, 300ms}})
-               .Expected({}),
-           NumericParams()
-               .DwellTime(200ms)
-               .ThresholdValue(90.0)
-               .Direction(numeric::Direction::decreasing)
-               .InitialValues({100.0})
-               .Updates({{0, 80.0, 300ms}})
-               .Expected({{0, 80.0, 200ms}}),
-           NumericParams()
-               .DwellTime(200ms)
-               .ThresholdValue(90.0)
-               .Direction(numeric::Direction::decreasing)
-               .InitialValues({100.0})
-               .Updates({{0, 80.0}, {0, 99.0}, {0, 85.0, 300ms}})
-               .Expected({{0, 85.0, 200ms}}),
-           NumericParams()
-               .DwellTime(200ms)
-               .ThresholdValue(90.0)
-               .Direction(numeric::Direction::decreasing)
-               .InitialValues({100.0, 99.0})
-               .Updates({{0, 80.0}, {1, 88.0, 300ms}})
-               .Expected({{0, 80.0, 200ms}, {1, 88.0, 200ms}}),
-           NumericParams()
-               .DwellTime(200ms)
-               .ThresholdValue(90.0)
-               .Direction(numeric::Direction::either)
-               .InitialValues({98.0})
-               .Updates({{0, 91.0, 300ms}})
-               .Expected({}),
-           NumericParams()
-               .DwellTime(200ms)
-               .ThresholdValue(90.0)
-               .Direction(numeric::Direction::either)
-               .InitialValues({100.0})
-               .Updates({{0, 80.0}, {0, 85.0}, {0, 91.0, 300ms}})
-               .Expected({{0, 91.0, 200ms}}),
-           NumericParams()
-               .DwellTime(200ms)
-               .ThresholdValue(90.0)
-               .Direction(numeric::Direction::either)
-               .InitialValues({100.0, 80.0})
-               .Updates({{0, 85.0}, {1, 91.0, 300ms}})
-               .Expected({{0, 85.0, 200ms}, {1, 91.0, 200ms}})));
+    Values(
+        NumericParams()
+            .DwellTime(200ms)
+            .ThresholdValue(90.0)
+            .Direction(numeric::Direction::increasing)
+            .InitialValues({80.0})
+            .Updates({{0, 89.0, 300ms}})
+            .Expected({}),
+        NumericParams()
+            .DwellTime(200ms)
+            .ThresholdValue(90.0)
+            .Direction(numeric::Direction::increasing)
+            .InitialValues({80.0})
+            .Updates({{0, 91.0, 300ms}})
+            .Expected({{0, 91.0, 200ms}}),
+        NumericParams()
+            .DwellTime(200ms)
+            .ThresholdValue(90.0)
+            .Direction(numeric::Direction::increasing)
+            .InitialValues({80.0})
+            .Updates({{0, 99.0}, {0, 80.0}, {0, 98.0, 300ms}})
+            .Expected({{0, 98.0, 200ms}}),
+        NumericParams()
+            .DwellTime(200ms)
+            .ThresholdValue(90.0)
+            .Direction(numeric::Direction::increasing)
+            .InitialValues({80.0, 99.0})
+            .Updates({{0, 100.0}, {1, 98.0, 300ms}})
+            .Expected({{0, 100.0, 200ms}}),
+        NumericParams()
+            .DwellTime(200ms)
+            .ThresholdValue(90.0)
+            .Direction(numeric::Direction::decreasing)
+            .InitialValues({100.0})
+            .Updates({{0, 91.0, 300ms}})
+            .Expected({}),
+        NumericParams()
+            .DwellTime(200ms)
+            .ThresholdValue(90.0)
+            .Direction(numeric::Direction::decreasing)
+            .InitialValues({100.0})
+            .Updates({{0, 80.0, 300ms}})
+            .Expected({{0, 80.0, 200ms}}),
+        NumericParams()
+            .DwellTime(200ms)
+            .ThresholdValue(90.0)
+            .Direction(numeric::Direction::decreasing)
+            .InitialValues({100.0})
+            .Updates({{0, 80.0}, {0, 99.0}, {0, 85.0, 300ms}})
+            .Expected({{0, 85.0, 200ms}}),
+        NumericParams()
+            .DwellTime(200ms)
+            .ThresholdValue(90.0)
+            .Direction(numeric::Direction::decreasing)
+            .InitialValues({100.0, 99.0})
+            .Updates({{0, 80.0}, {1, 88.0, 300ms}})
+            .Expected({{0, 80.0, 200ms}, {1, 88.0, 200ms}}),
+        NumericParams()
+            .DwellTime(200ms)
+            .ThresholdValue(90.0)
+            .Direction(numeric::Direction::either)
+            .InitialValues({98.0})
+            .Updates({{0, 91.0, 300ms}})
+            .Expected({}),
+        NumericParams()
+            .DwellTime(200ms)
+            .ThresholdValue(90.0)
+            .Direction(numeric::Direction::either)
+            .InitialValues({100.0})
+            .Updates({{0, 80.0}, {0, 85.0}, {0, 91.0, 300ms}})
+            .Expected({{0, 91.0, 200ms}}),
+        NumericParams()
+            .DwellTime(200ms)
+            .ThresholdValue(90.0)
+            .Direction(numeric::Direction::either)
+            .InitialValues({100.0, 80.0})
+            .Updates({{0, 85.0}, {1, 91.0, 300ms}})
+            .Expected({{0, 85.0, 200ms}, {1, 91.0, 200ms}})));
 
 TEST_P(TestNumericThresholdWithDwellTime, senorsIsUpdatedMultipleTimes)
 {
