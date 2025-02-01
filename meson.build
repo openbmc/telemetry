@@ -14,23 +14,23 @@ project(
 
 cxx = meson.get_compiler('cpp')
 add_project_arguments(
-    cxx.get_supported_arguments([
-        '-DBOOST_ASIO_DISABLE_THREADS',
-        '-DBOOST_ALL_NO_LIB',
-        '-DBOOST_SYSTEM_NO_DEPRECATED',
-        '-DBOOST_ASIO_NO_DEPRECATED',
-        '-DBOOST_NO_RTTI',
-        '-DBOOST_NO_TYPEID',
-        '-Wno-unused-parameter',
-    ]),
-    language: 'cpp'
+    cxx.get_supported_arguments(
+        [
+            '-DBOOST_ASIO_DISABLE_THREADS',
+            '-DBOOST_ALL_NO_LIB',
+            '-DBOOST_SYSTEM_NO_DEPRECATED',
+            '-DBOOST_ASIO_NO_DEPRECATED',
+            '-DBOOST_NO_RTTI',
+            '-DBOOST_NO_TYPEID',
+            '-Wno-unused-parameter',
+        ],
+    ),
+    language: 'cpp',
 )
 
 boost_version = '>=1.79.0'
 boost_modules = ['coroutine', 'context']
-boost = dependency('boost',
-    version: boost_version,
-    modules: boost_modules)
+boost = dependency('boost', version: boost_version, modules: boost_modules)
 
 nlohmann_json_dep = dependency('nlohmann_json', include_type: 'system')
 phosphor_logging = dependency('phosphor-logging')
@@ -39,17 +39,14 @@ systemd = dependency('systemd')
 
 add_project_arguments(
     '-DTELEMETRY_MAX_REPORTS=' + get_option('max-reports').to_string(),
-    '-DTELEMETRY_MAX_READING_PARAMS=' +
-        get_option('max-reading-parameters').to_string(),
+    '-DTELEMETRY_MAX_READING_PARAMS=' + get_option('max-reading-parameters').to_string(),
     '-DTELEMETRY_MIN_INTERVAL=' + get_option('min-interval').to_string(),
     '-DTELEMETRY_MAX_TRIGGERS=' + get_option('max-triggers').to_string(),
-    '-DTELEMETRY_MAX_DBUS_PATH_LENGTH=' +
-        get_option('max-dbus-path-length').to_string(),
-    '-DTELEMETRY_MAX_APPEND_LIMIT=' +
-        get_option('max-append-limit').to_string(),
+    '-DTELEMETRY_MAX_DBUS_PATH_LENGTH=' + get_option('max-dbus-path-length').to_string(),
+    '-DTELEMETRY_MAX_APPEND_LIMIT=' + get_option('max-append-limit').to_string(),
     '-DTELEMETRY_MAX_ID_NAME_LENGTH=' + get_option('max-id-name-length').to_string(),
     '-DTELEMETRY_MAX_PREFIX_LENGTH=' + get_option('max-prefix-length').to_string(),
-    language: 'cpp'
+    language: 'cpp',
 )
 
 executable(
@@ -80,12 +77,7 @@ executable(
         'src/utils/make_id_name.cpp',
         'src/utils/messanger_service.cpp',
     ],
-    dependencies: [
-        boost,
-        nlohmann_json_dep,
-        sdbusplus,
-        phosphor_logging,
-    ],
+    dependencies: [boost, nlohmann_json_dep, sdbusplus, phosphor_logging],
     include_directories: 'src',
     install: true,
     install_dir: get_option('prefix') / get_option('bindir'),
@@ -120,7 +112,7 @@ configure_file(
         'wants': service_wants,
         'requires': service_requires,
         'before': service_before,
-        'after': service_after
+        'after': service_after,
     },
     install: true,
     install_dir: systemd.get_variable('systemdsystemunitdir'),

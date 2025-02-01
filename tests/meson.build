@@ -1,4 +1,9 @@
-gtest_dep = dependency('gtest', main: false, required: false, version: '>=1.11.0')
+gtest_dep = dependency(
+    'gtest',
+    main: false,
+    required: false,
+    version: '>=1.11.0',
+)
 gmock_dep = dependency('gmock', required: false, version: '>=1.11.0')
 if not gtest_dep.found() or not gmock_dep.found()
     gtest_proj = import('cmake').subproject('googletest')
@@ -69,7 +74,7 @@ test(
             sdbusplus,
         ],
         include_directories: ['../src', 'src'],
-        cpp_args: '-fno-lto'
+        cpp_args: '-fno-lto',
     ),
     timeout: 120,
 )
