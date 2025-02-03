@@ -51,8 +51,8 @@ TEST_F(TestOnChangeThreshold, initializeThresholdExpectAllSensorsAreRegistered)
     {
         EXPECT_CALL(*sensor,
                     registerForUpdates(Truly([sut = sut.get()](const auto& x) {
-            return x.lock().get() == sut;
-        })));
+                        return x.lock().get() == sut;
+                    })));
     }
 
     sut->initialize();

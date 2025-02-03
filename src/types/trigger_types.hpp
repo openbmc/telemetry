@@ -129,11 +129,10 @@ inline std::string directionToString(Direction v)
 
 using ThresholdParam = std::tuple<std::string, uint64_t, std::string, double>;
 
-using LabeledThresholdParam =
-    utils::LabeledTuple<std::tuple<Type, uint64_t, Direction, double>,
-                        utils::tstring::Type, utils::tstring::DwellTime,
-                        utils::tstring::Direction,
-                        utils::tstring::ThresholdValue>;
+using LabeledThresholdParam = utils::LabeledTuple<
+    std::tuple<Type, uint64_t, Direction, double>, utils::tstring::Type,
+    utils::tstring::DwellTime, utils::tstring::Direction,
+    utils::tstring::ThresholdValue>;
 } // namespace numeric
 
 using TriggerThresholdParams =
@@ -148,8 +147,8 @@ using LabeledThresholdParam =
     std::variant<std::monostate, numeric::LabeledThresholdParam,
                  discrete::LabeledThresholdParam>;
 
-inline bool
-    isTriggerThresholdDiscrete(const LabeledTriggerThresholdParams& params)
+inline bool isTriggerThresholdDiscrete(
+    const LabeledTriggerThresholdParams& params)
 {
     return std::holds_alternative<std::vector<discrete::LabeledThresholdParam>>(
         params);

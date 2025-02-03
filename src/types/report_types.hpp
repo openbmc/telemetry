@@ -30,5 +30,5 @@ using AddReportVariant =
     std::variant<std::monostate, bool, uint64_t, std::string,
                  std::vector<std::string>, ReadingParameters>;
 
-ReadingParameters
-    toReadingParameters(const std::vector<LabeledMetricParameters>& labeled);
+ReadingParameters toReadingParameters(
+    const std::vector<LabeledMetricParameters>& labeled);

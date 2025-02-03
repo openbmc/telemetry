@@ -31,12 +31,12 @@ class TriggerFactory
         const LabeledTriggerThresholdParams& labeledThresholdParams,
         const std::vector<LabeledSensorInfo>& labeledSensorsInfo) const = 0;
 
-    virtual std::vector<LabeledSensorInfo>
-        getLabeledSensorsInfo(boost::asio::yield_context& yield,
-                              const SensorsInfo& sensorsInfo) const = 0;
+    virtual std::vector<LabeledSensorInfo> getLabeledSensorsInfo(
+        boost::asio::yield_context& yield,
+        const SensorsInfo& sensorsInfo) const = 0;
 
-    virtual std::vector<LabeledSensorInfo>
-        getLabeledSensorsInfo(const SensorsInfo& sensorsInfo) const = 0;
+    virtual std::vector<LabeledSensorInfo> getLabeledSensorsInfo(
+        const SensorsInfo& sensorsInfo) const = 0;
 
     virtual void updateThresholds(
         std::vector<std::shared_ptr<interfaces::Threshold>>& currentThresholds,

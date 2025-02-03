@@ -23,8 +23,8 @@ class Metric
     virtual LabeledMetricParameters dumpConfiguration() const = 0;
     virtual uint64_t metricCount() const = 0;
     virtual void registerForUpdates(interfaces::MetricListener& listener) = 0;
-    virtual void
-        unregisterFromUpdates(interfaces::MetricListener& listener) = 0;
+    virtual void unregisterFromUpdates(
+        interfaces::MetricListener& listener) = 0;
     virtual void updateReadings(Milliseconds) = 0;
     virtual bool isTimerRequired() const = 0;
 };

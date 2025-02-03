@@ -81,9 +81,9 @@ class DbusEnvironment : public ::testing::Environment
         std::vector<std::future<T>> futures;
         futures.emplace_back(std::move(future));
 
-        return waitForFutures(std::move(futures), T{},
-                              [](auto, const auto& value) { return value; },
-                              timeout);
+        return waitForFutures(
+            std::move(futures), T{},
+            [](auto, const auto& value) { return value; }, timeout);
     }
 
     static bool waitForFuture(std::string_view name,
@@ -103,20 +103,20 @@ class DbusEnvironment : public ::testing::Environment
             *DbusEnvironment::getBus(), DbusEnvironment::serviceName(), path,
             interfaceName, property,
             [&propertyPromise](const boost::system::error_code& ec, T t) {
-            if (ec)
-            {
-                utils::setException(propertyPromise, "GetProperty failed");
-                return;
-            }
-            propertyPromise.set_value(t);
-        });
+                if (ec)
+                {
+                    utils::setException(propertyPromise, "GetProperty failed");
+                    return;
+                }
+                propertyPromise.set_value(t);
+            });
         return DbusEnvironment::waitForFuture(std::move(propertyFuture));
     }
 
     template <class T>
-    static boost::system::error_code
-        setProperty(const std::string& path, const std::string& interfaceName,
-                    const std::string& property, const T& newValue)
+    static boost::system::error_code setProperty(
+        const std::string& path, const std::string& interfaceName,
+        const std::string& property, const T& newValue)
     {
         auto promise = std::promise<boost::system::error_code>();
         auto future = promise.get_future();
@@ -125,23 +125,23 @@ class DbusEnvironment : public ::testing::Environment
             interfaceName, property, std::move(newValue),
             [promise = std::move(promise)](
                 boost::system::error_code ec) mutable {
-            promise.set_value(ec);
-        });
+                promise.set_value(ec);
+            });
         return DbusEnvironment::waitForFuture(std::move(future));
     }
 
     template <class... Args>
-    static boost::system::error_code
-        callMethod(const std::string& path, const std::string& interface,
-                   const std::string& method, Args&&... args)
+    static boost::system::error_code callMethod(
+        const std::string& path, const std::string& interface,
+        const std::string& method, Args&&... args)
     {
         auto promise = std::promise<boost::system::error_code>();
         auto future = promise.get_future();
         DbusEnvironment::getBus()->async_method_call(
             [promise = std::move(promise)](
                 boost::system::error_code ec) mutable {
-            promise.set_value(ec);
-        },
+                promise.set_value(ec);
+            },
             DbusEnvironment::serviceName(), path, interface, method,
             std::forward<Args>(args)...);
         return DbusEnvironment::waitForFuture(std::move(future));

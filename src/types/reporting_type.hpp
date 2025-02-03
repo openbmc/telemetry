@@ -37,8 +37,8 @@ constexpr std::array<std::pair<std::string_view, ReportingType>, 3>
              "xyz.openbmc_project.Telemetry.Report.ReportingType.Periodic",
              ReportingType::periodic)}};
 
-inline ReportingType
-    toReportingType(std::underlying_type_t<ReportingType> value)
+inline ReportingType toReportingType(
+    std::underlying_type_t<ReportingType> value)
 {
     return toEnum<ReportingType, minEnumValue(convDataReportingType),
                   maxEnumValue(convDataReportingType)>(value);

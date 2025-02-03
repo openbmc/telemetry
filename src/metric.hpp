@@ -30,8 +30,8 @@ class Metric :
     bool isTimerRequired() const override;
 
   private:
-    metrics::CollectionData&
-        findAssociatedData(const interfaces::Sensor& notifier);
+    metrics::CollectionData& findAssociatedData(
+        const interfaces::Sensor& notifier);
 
     std::vector<MetricValue> readings;
     Sensors sensors;

@@ -110,8 +110,8 @@ struct has_utils_to_json
     static U& ref();
 
     template <class U>
-    static std::true_type
-        check(decltype(utils::to_json(ref<nlohmann::json>(), ref<const U>()))*);
+    static std::true_type check(decltype(utils::to_json(ref<nlohmann::json>(),
+                                                        ref<const U>()))*);
 
     template <class>
     static std::false_type check(...);
@@ -205,11 +205,15 @@ struct LabeledTuple<std::tuple<Args...>, Labels...>
 
     bool operator==(const LabeledTuple& other) const
     {
-        return std::apply([&](auto&&... x) {
-            return std::apply([&](auto&&... y) {
-                return (true && ... && detail::eq(x, y));
-            }, value);
-        }, other.value);
+        return std::apply(
+            [&](auto&&... x) {
+                return std::apply(
+                    [&](auto&&... y) {
+                        return (true && ... && detail::eq(x, y));
+                    },
+                    value);
+            },
+            other.value);
     }
 
     bool operator<(const LabeledTuple& other) const

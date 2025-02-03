@@ -16,21 +16,21 @@ class TriggerFactory : public interfaces::TriggerFactory
                    std::shared_ptr<sdbusplus::asio::object_server> objServer,
                    SensorCache& sensorCache);
 
-    std::unique_ptr<interfaces::Trigger>
-        make(const std::string& id, const std::string& name,
-             const std::vector<std::string>& triggerActions,
-             const std::vector<std::string>& reportIds,
-             interfaces::TriggerManager& triggerManager,
-             interfaces::JsonStorage& triggerStorage,
-             const LabeledTriggerThresholdParams& labeledThresholdParams,
-             const std::vector<LabeledSensorInfo>& labeledSensorsinfo)
-            const override;
+    std::unique_ptr<interfaces::Trigger> make(
+        const std::string& id, const std::string& name,
+        const std::vector<std::string>& triggerActions,
+        const std::vector<std::string>& reportIds,
+        interfaces::TriggerManager& triggerManager,
+        interfaces::JsonStorage& triggerStorage,
+        const LabeledTriggerThresholdParams& labeledThresholdParams,
+        const std::vector<LabeledSensorInfo>& labeledSensorsinfo)
+        const override;
 
-    std::vector<LabeledSensorInfo>
-        getLabeledSensorsInfo(boost::asio::yield_context& yield,
-                              const SensorsInfo& sensorsInfo) const override;
-    std::vector<LabeledSensorInfo>
-        getLabeledSensorsInfo(const SensorsInfo& sensorsInfo) const override;
+    std::vector<LabeledSensorInfo> getLabeledSensorsInfo(
+        boost::asio::yield_context& yield,
+        const SensorsInfo& sensorsInfo) const override;
+    std::vector<LabeledSensorInfo> getLabeledSensorsInfo(
+        const SensorsInfo& sensorsInfo) const override;
 
     void updateThresholds(
         std::vector<std::shared_ptr<interfaces::Threshold>>& currentThresholds,
@@ -52,9 +52,9 @@ class TriggerFactory : public interfaces::TriggerFactory
     Sensors getSensors(
         const std::vector<LabeledSensorInfo>& labeledSensorsInfo) const;
 
-    static std::vector<LabeledSensorInfo>
-        parseSensorTree(const std::vector<utils::SensorTree>& tree,
-                        const SensorsInfo& sensorsInfo);
+    static std::vector<LabeledSensorInfo> parseSensorTree(
+        const std::vector<utils::SensorTree>& tree,
+        const SensorsInfo& sensorsInfo);
 
     void updateDiscreteThresholds(
         std::vector<std::shared_ptr<interfaces::Threshold>>& currentThresholds,

@@ -57,8 +57,8 @@ constexpr inline std::underlying_type_t<T> toUnderlying(T value)
 }
 
 template <class T, size_t N>
-constexpr inline T
-    minEnumValue(std::array<std::pair<std::string_view, T>, N> data)
+constexpr inline T minEnumValue(
+    std::array<std::pair<std::string_view, T>, N> data)
 {
     auto min = data[0].second;
     for (auto [key, value] : data)
@@ -72,8 +72,8 @@ constexpr inline T
 }
 
 template <class T, size_t N>
-constexpr inline T
-    maxEnumValue(std::array<std::pair<std::string_view, T>, N> data)
+constexpr inline T maxEnumValue(
+    std::array<std::pair<std::string_view, T>, N> data)
 {
     auto max = data[0].second;
     for (auto [key, value] : data)
@@ -101,9 +101,8 @@ inline T toEnum(const std::array<std::pair<std::string_view, T>, N>& data,
 }
 
 template <class T, size_t N>
-inline std::string_view
-    enumToString(const std::array<std::pair<std::string_view, T>, N>& data,
-                 T value)
+inline std::string_view enumToString(
+    const std::array<std::pair<std::string_view, T>, N>& data, T value)
 {
     auto it = std::find_if(
         std::begin(data), std::end(data),

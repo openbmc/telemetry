@@ -72,9 +72,9 @@ bool DbusEnvironment::waitForFutures(std::string_view name,
                                      Milliseconds timeout)
 {
     auto& data = futures[std::string(name)];
-    auto ret = waitForFutures(std::move(data), true, [](auto sum, auto val) {
-        return sum && val;
-    }, timeout);
+    auto ret = waitForFutures(
+        std::move(data), true, [](auto sum, auto val) { return sum && val; },
+        timeout);
     data = std::vector<std::future<bool>>{};
     return ret;
 }

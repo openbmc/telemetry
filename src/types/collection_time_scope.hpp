@@ -37,8 +37,8 @@ constexpr std::array<std::pair<std::string_view, CollectionTimeScope>, 3>
              "StartupInterval",
              CollectionTimeScope::startup)}};
 
-inline CollectionTimeScope
-    toCollectionTimeScope(std::underlying_type_t<CollectionTimeScope> value)
+inline CollectionTimeScope toCollectionTimeScope(
+    std::underlying_type_t<CollectionTimeScope> value)
 {
     return toEnum<CollectionTimeScope,
                   minEnumValue(convDataCollectionTimeScope),

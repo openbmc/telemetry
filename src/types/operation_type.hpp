@@ -38,8 +38,8 @@ constexpr std::array<std::pair<std::string_view, OperationType>, 4>
              "xyz.openbmc_project.Telemetry.Report.OperationType.Summation",
              OperationType::sum)}};
 
-inline OperationType
-    toOperationType(std::underlying_type_t<OperationType> value)
+inline OperationType toOperationType(
+    std::underlying_type_t<OperationType> value)
 {
     return toEnum<OperationType, minEnumValue(convDataOperationType),
                   maxEnumValue(convDataOperationType)>(value);

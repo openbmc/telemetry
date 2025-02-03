@@ -49,19 +49,19 @@ void Sensor::async_read(std::shared_ptr<utils::UniqueCall::Lock> lock)
         "xyz.openbmc_project.Sensor.Value", "Value",
         [lock, id = sensorId, weakSelf = weak_from_this()](
             boost::system::error_code ec, double newValue) {
-        if (ec)
-        {
-            phosphor::logging::log<phosphor::logging::level::WARNING>(
-                "DBus 'GetProperty' call failed on Sensor Value",
-                phosphor::logging::entry("SENSOR_PATH=%s", id.path.c_str()),
-                phosphor::logging::entry("ERROR_CODE=%d", ec.value()));
-            return;
-        }
-        if (auto self = weakSelf.lock())
-        {
-            self->updateValue(newValue);
-        }
-    });
+            if (ec)
+            {
+                phosphor::logging::log<phosphor::logging::level::WARNING>(
+                    "DBus 'GetProperty' call failed on Sensor Value",
+                    phosphor::logging::entry("SENSOR_PATH=%s", id.path.c_str()),
+                    phosphor::logging::entry("ERROR_CODE=%d", ec.value()));
+                return;
+            }
+            if (auto self = weakSelf.lock())
+            {
+                self->updateValue(newValue);
+            }
+        });
 }
 
 void Sensor::registerForUpdates(
@@ -92,13 +92,14 @@ void Sensor::unregisterFromUpdates(
 {
     if (auto listener = weakListener.lock())
     {
-        listeners.erase(std::remove_if(listeners.begin(), listeners.end(),
-                                       [listenerToUnregister = listener.get()](
-                                           const auto& listener) {
-            return (listener.expired() ||
-                    listener.lock().get() == listenerToUnregister);
-        }),
-                        listeners.end());
+        listeners.erase(
+            std::remove_if(
+                listeners.begin(), listeners.end(),
+                [listenerToUnregister = listener.get()](const auto& listener) {
+                    return (listener.expired() ||
+                            listener.lock().get() == listenerToUnregister);
+                }),
+            listeners.end());
     }
 }
 
@@ -129,15 +130,15 @@ void Sensor::makeSignalMonitor()
 
     using namespace std::string_literals;
 
-    const auto param = "type='signal',member='PropertiesChanged',path='"s +
-                       sensorId.path +
-                       "',arg0='xyz.openbmc_project.Sensor.Value'"s;
+    const auto param =
+        "type='signal',member='PropertiesChanged',path='"s + sensorId.path +
+        "',arg0='xyz.openbmc_project.Sensor.Value'"s;
 
     signalMonitor = std::make_unique<sdbusplus::bus::match_t>(
         *bus, param,
         [weakSelf = weak_from_this()](sdbusplus::message_t& message) {
-        signalProc(weakSelf, message);
-    });
+            signalProc(weakSelf, message);
+        });
 }
 
 void Sensor::signalProc(const std::weak_ptr<Sensor>& weakSelf,

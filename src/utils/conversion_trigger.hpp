@@ -10,10 +10,10 @@ class ToLabeledThresholdParamConversion
 {
   public:
     LabeledTriggerThresholdParams operator()(const std::monostate& arg) const;
-    LabeledTriggerThresholdParams
-        operator()(const std::vector<numeric::ThresholdParam>& arg) const;
-    LabeledTriggerThresholdParams
-        operator()(const std::vector<discrete::ThresholdParam>& arg) const;
+    LabeledTriggerThresholdParams operator()(
+        const std::vector<numeric::ThresholdParam>& arg) const;
+    LabeledTriggerThresholdParams operator()(
+        const std::vector<discrete::ThresholdParam>& arg) const;
 };
 
 class FromLabeledThresholdParamConversion
@@ -27,8 +27,8 @@ class FromLabeledThresholdParamConversion
 
 SensorsInfo fromLabeledSensorsInfo(const std::vector<LabeledSensorInfo>& infos);
 
-TriggerThresholdParams
-    fromLabeledThresholdParam(const std::vector<LabeledThresholdParam>& params);
+TriggerThresholdParams fromLabeledThresholdParam(
+    const std::vector<LabeledThresholdParam>& params);
 
 nlohmann::json labeledThresholdParamsToJson(
     const LabeledTriggerThresholdParams& labeledThresholdParams);

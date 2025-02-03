@@ -26,8 +26,8 @@ class TestMetric : public Test
         clockFake.system.set(systemTimestamp);
     }
 
-    static std::vector<std::shared_ptr<SensorMock>>
-        makeSensorMocks(size_t amount)
+    static std::vector<std::shared_ptr<SensorMock>> makeSensorMocks(
+        size_t amount)
     {
         std::vector<std::shared_ptr<SensorMock>> result;
         for (size_t i = 0; i < amount; ++i)
@@ -66,8 +66,8 @@ TEST_F(TestMetric, subscribesForSensorDuringInitialization)
 
     EXPECT_CALL(*sensorMocks.front(),
                 registerForUpdates(Truly([sut = sut.get()](const auto& a0) {
-        return a0.lock().get() == sut;
-    })));
+                    return a0.lock().get() == sut;
+                })));
 
     sut->initialize();
 }
@@ -78,8 +78,8 @@ TEST_F(TestMetric, unsubscribesForSensorDuringDeinitialization)
 
     EXPECT_CALL(*sensorMocks.front(),
                 unregisterFromUpdates(Truly([sut = sut.get()](const auto& a0) {
-        return a0.lock().get() == sut;
-    })));
+                    return a0.lock().get() == sut;
+                })));
 
     sut->deinitialize();
 }
@@ -351,8 +351,8 @@ TEST_P(TestMetricCalculationFunctions, calculatesReadingValue)
         clockFake.advance(timestamp);
     }
 
-    const auto [expectedTimestamp,
-                expectedReading] = GetParam().expectedReading();
+    const auto [expectedTimestamp, expectedReading] =
+        GetParam().expectedReading();
     const auto readings = sut->getUpdatedReadings();
 
     EXPECT_THAT(readings, ElementsAre(MetricValue{"metadata0", expectedReading,
@@ -370,8 +370,8 @@ TEST_P(TestMetricCalculationFunctions,
         sut->getUpdatedReadings();
     }
 
-    const auto [expectedTimestamp,
-                expectedReading] = GetParam().expectedReading();
+    const auto [expectedTimestamp, expectedReading] =
+        GetParam().expectedReading();
     const auto readings = sut->getUpdatedReadings();
 
     EXPECT_THAT(readings, ElementsAre(MetricValue{"metadata0", expectedReading,

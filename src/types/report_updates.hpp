@@ -38,8 +38,8 @@ constexpr auto convDataReportUpdates = std::array{
         "AppendWrapsWhenFull",
         ReportUpdates::appendWrapsWhenFull)};
 
-inline ReportUpdates
-    toReportUpdates(std::underlying_type_t<ReportUpdates> value)
+inline ReportUpdates toReportUpdates(
+    std::underlying_type_t<ReportUpdates> value)
 {
     return toEnum<ReportUpdates, minEnumValue(convDataReportUpdates),
                   maxEnumValue(convDataReportUpdates)>(value);

@@ -18,19 +18,18 @@
 #include <numeric>
 #include <optional>
 
-Report::Report(boost::asio::io_context& ioc,
-               const std::shared_ptr<sdbusplus::asio::object_server>& objServer,
-               const std::string& reportId, const std::string& reportName,
-               const ReportingType reportingTypeIn,
-               std::vector<ReportAction> reportActionsIn,
-               const Milliseconds intervalIn, const uint64_t appendLimitIn,
-               const ReportUpdates reportUpdatesIn,
-               interfaces::ReportManager& reportManager,
-               interfaces::JsonStorage& reportStorageIn,
-               std::vector<std::shared_ptr<interfaces::Metric>> metricsIn,
-               const interfaces::ReportFactory& reportFactory,
-               const bool enabledIn, std::unique_ptr<interfaces::Clock> clock,
-               Readings readingsIn) :
+Report::Report(
+    boost::asio::io_context& ioc,
+    const std::shared_ptr<sdbusplus::asio::object_server>& objServer,
+    const std::string& reportId, const std::string& reportName,
+    const ReportingType reportingTypeIn,
+    std::vector<ReportAction> reportActionsIn, const Milliseconds intervalIn,
+    const uint64_t appendLimitIn, const ReportUpdates reportUpdatesIn,
+    interfaces::ReportManager& reportManager,
+    interfaces::JsonStorage& reportStorageIn,
+    std::vector<std::shared_ptr<interfaces::Metric>> metricsIn,
+    const interfaces::ReportFactory& reportFactory, const bool enabledIn,
+    std::unique_ptr<interfaces::Clock> clock, Readings readingsIn) :
     id(reportId), path(utils::pathAppend(utils::constants::reportDirPath, id)),
     name(reportName), reportingType(reportingTypeIn), interval(intervalIn),
     reportActions(reportActionsIn.begin(), reportActionsIn.end()),
@@ -44,27 +43,27 @@ Report::Report(boost::asio::io_context& ioc,
 {
     readingParameters =
         toReadingParameters(utils::transform(metrics, [](const auto& metric) {
-        return metric->dumpConfiguration();
-    }));
+            return metric->dumpConfiguration();
+        }));
 
     reportActions.insert(ReportAction::logToMetricReportsCollection);
 
     deleteIface = objServer->add_unique_interface(
         getPath(), deleteIfaceName,
         [this, &ioc, &reportManager](auto& dbusIface) {
-        dbusIface.register_method("Delete", [this, &ioc, &reportManager] {
-            if (persistency)
-            {
-                persistency = false;
+            dbusIface.register_method("Delete", [this, &ioc, &reportManager] {
+                if (persistency)
+                {
+                    persistency = false;
 
-                reportIface->signal_property("Persistency");
-            }
+                    reportIface->signal_property("Persistency");
+                }
 
-            boost::asio::post(ioc, [this, &reportManager] {
-                reportManager.removeReport(this);
+                boost::asio::post(ioc, [this, &reportManager] {
+                    reportManager.removeReport(this);
+                });
             });
         });
-    });
 
     auto errorMessages = verify(reportingType, interval);
     state.set<ReportFlags::enabled, ReportFlags::valid>(enabledIn,
@@ -75,29 +74,29 @@ Report::Report(boost::asio::io_context& ioc,
 
     messanger.on_receive<messages::TriggerPresenceChangedInd>(
         [this](const auto& msg) {
-        const auto oldSize = triggerIds.size();
+            const auto oldSize = triggerIds.size();
 
-        if (msg.presence == messages::Presence::Exist)
-        {
-            if (utils::contains(msg.reportIds, id))
+            if (msg.presence == messages::Presence::Exist)
             {
-                triggerIds.insert(msg.triggerId);
+                if (utils::contains(msg.reportIds, id))
+                {
+                    triggerIds.insert(msg.triggerId);
+                }
+                else if (!utils::contains(msg.reportIds, id))
+                {
+                    triggerIds.erase(msg.triggerId);
+                }
             }
-            else if (!utils::contains(msg.reportIds, id))
+            else if (msg.presence == messages::Presence::Removed)
             {
                 triggerIds.erase(msg.triggerId);
             }
-        }
-        else if (msg.presence == messages::Presence::Removed)
-        {
-            triggerIds.erase(msg.triggerId);
-        }
 
-        if (triggerIds.size() != oldSize)
-        {
-            reportIface->signal_property("Triggers");
-        }
-    });
+            if (triggerIds.size() != oldSize)
+            {
+                reportIface->signal_property("Triggers");
+            }
+        });
 
     messanger.on_receive<messages::UpdateReportInd>([this](const auto& msg) {
         if (utils::contains(msg.reportIds, id))
@@ -170,8 +169,8 @@ uint64_t Report::deduceBufferSize(const ReportUpdates reportUpdatesIn,
 
 void Report::setReadingBuffer(const ReportUpdates newReportUpdates)
 {
-    const auto newBufferSize = deduceBufferSize(newReportUpdates,
-                                                reportingType);
+    const auto newBufferSize =
+        deduceBufferSize(newReportUpdates, reportingType);
     if (readingsBuffer.size() != newBufferSize)
     {
         readingsBuffer.clearAndResize(newBufferSize);
@@ -187,94 +186,96 @@ void Report::setReportUpdates(const ReportUpdates newReportUpdates)
     }
 }
 
-std::unique_ptr<sdbusplus::asio::dbus_interface>
-    Report::makeReportInterface(const interfaces::ReportFactory& reportFactory)
+std::unique_ptr<sdbusplus::asio::dbus_interface> Report::makeReportInterface(
+    const interfaces::ReportFactory& reportFactory)
 {
-    auto dbusIface = objServer->add_unique_interface(getPath(),
-                                                     reportIfaceName);
+    auto dbusIface =
+        objServer->add_unique_interface(getPath(), reportIfaceName);
     dbusIface->register_property_rw<bool>(
         "Enabled", sdbusplus::vtable::property_::emits_change,
         [this](bool newVal, auto& oldValue) {
-        if (newVal != state.get<ReportFlags::enabled>())
-        {
-            state.set<ReportFlags::enabled>(oldValue = newVal);
+            if (newVal != state.get<ReportFlags::enabled>())
+            {
+                state.set<ReportFlags::enabled>(oldValue = newVal);
 
-            persistency = storeConfiguration();
-        }
-        return 1;
-    }, [this](const auto&) { return state.get<ReportFlags::enabled>(); });
+                persistency = storeConfiguration();
+            }
+            return 1;
+        },
+        [this](const auto&) { return state.get<ReportFlags::enabled>(); });
     dbusIface->register_method(
         "SetReportingProperties",
         [this](std::string newReportingType, uint64_t newInterval) {
-        ReportingType newReportingTypeT = reportingType;
+            ReportingType newReportingTypeT = reportingType;
 
-        if (!newReportingType.empty())
-        {
-            newReportingTypeT = utils::toReportingType(newReportingType);
-        }
-
-        Milliseconds newIntervalT = interval;
-
-        if (newInterval != std::numeric_limits<uint64_t>::max())
-        {
-            newIntervalT = Milliseconds(newInterval);
-        }
-
-        auto errorMessages = verify(newReportingTypeT, newIntervalT);
-
-        if (!errorMessages.empty())
-        {
-            if (newIntervalT != interval)
+            if (!newReportingType.empty())
             {
-                throw errors::InvalidArgument("Interval");
+                newReportingTypeT = utils::toReportingType(newReportingType);
             }
 
-            throw errors::InvalidArgument("ReportingType");
-        }
+            Milliseconds newIntervalT = interval;
 
-        if (reportingType != newReportingTypeT)
-        {
-            reportingType = newReportingTypeT;
-            reportIface->signal_property("ReportingType");
-        }
+            if (newInterval != std::numeric_limits<uint64_t>::max())
+            {
+                newIntervalT = Milliseconds(newInterval);
+            }
 
-        if (interval != newIntervalT)
-        {
-            interval = newIntervalT;
-            reportIface->signal_property("Interval");
-        }
+            auto errorMessages = verify(newReportingTypeT, newIntervalT);
 
-        if (state.set<ReportFlags::valid>(errorMessages.empty()) ==
-            StateEvent::active)
-        {
-            scheduleTimer();
-        }
+            if (!errorMessages.empty())
+            {
+                if (newIntervalT != interval)
+                {
+                    throw errors::InvalidArgument("Interval");
+                }
 
-        persistency = storeConfiguration();
+                throw errors::InvalidArgument("ReportingType");
+            }
 
-        setReadingBuffer(reportUpdates);
-    });
+            if (reportingType != newReportingTypeT)
+            {
+                reportingType = newReportingTypeT;
+                reportIface->signal_property("ReportingType");
+            }
+
+            if (interval != newIntervalT)
+            {
+                interval = newIntervalT;
+                reportIface->signal_property("Interval");
+            }
+
+            if (state.set<ReportFlags::valid>(errorMessages.empty()) ==
+                StateEvent::active)
+            {
+                scheduleTimer();
+            }
+
+            persistency = storeConfiguration();
+
+            setReadingBuffer(reportUpdates);
+        });
     dbusIface->register_property_r<uint64_t>(
         "Interval", sdbusplus::vtable::property_::emits_change,
         [this](const auto&) { return interval.count(); });
     dbusIface->register_property_rw<bool>(
         "Persistency", sdbusplus::vtable::property_::emits_change,
         [this](bool newVal, auto& oldVal) {
-        if (newVal == persistency)
-        {
+            if (newVal == persistency)
+            {
+                return 1;
+            }
+            if (newVal)
+            {
+                persistency = oldVal = storeConfiguration();
+            }
+            else
+            {
+                reportStorage.remove(reportFileName());
+                persistency = oldVal = false;
+            }
             return 1;
-        }
-        if (newVal)
-        {
-            persistency = oldVal = storeConfiguration();
-        }
-        else
-        {
-            reportStorage.remove(reportFileName());
-            persistency = oldVal = false;
-        }
-        return 1;
-    }, [this](const auto&) { return persistency; });
+        },
+        [this](const auto&) { return persistency; });
 
     dbusIface->register_property_r("Readings", readings,
                                    sdbusplus::vtable::property_::emits_change,
@@ -286,75 +287,81 @@ std::unique_ptr<sdbusplus::asio::dbus_interface>
         "ReadingParameters", readingParameters,
         sdbusplus::vtable::property_::emits_change,
         [this, &reportFactory](auto newVal, auto& oldVal) {
-        auto labeledMetricParams = reportFactory.convertMetricParams(newVal);
-        ReportManager::verifyMetricParams(labeledMetricParams);
-        reportFactory.updateMetrics(metrics, state.get<ReportFlags::enabled>(),
-                                    labeledMetricParams);
-        readingParameters = toReadingParameters(
-            utils::transform(metrics, [](const auto& metric) {
-            return metric->dumpConfiguration();
-        }));
-        metricCount = getMetricCount(metrics);
-        setReadingBuffer(reportUpdates);
-        persistency = storeConfiguration();
-        oldVal = std::move(newVal);
-        return 1;
-    }, [this](const auto&) { return readingParameters; });
-    dbusIface->register_property_r<bool>("EmitsReadingsUpdate",
-                                         sdbusplus::vtable::property_::none,
-                                         [this](const auto&) {
-        return reportActions.contains(ReportAction::emitsReadingsUpdate);
-    });
+            auto labeledMetricParams =
+                reportFactory.convertMetricParams(newVal);
+            ReportManager::verifyMetricParams(labeledMetricParams);
+            reportFactory.updateMetrics(metrics,
+                                        state.get<ReportFlags::enabled>(),
+                                        labeledMetricParams);
+            readingParameters = toReadingParameters(
+                utils::transform(metrics, [](const auto& metric) {
+                    return metric->dumpConfiguration();
+                }));
+            metricCount = getMetricCount(metrics);
+            setReadingBuffer(reportUpdates);
+            persistency = storeConfiguration();
+            oldVal = std::move(newVal);
+            return 1;
+        },
+        [this](const auto&) { return readingParameters; });
+    dbusIface->register_property_r<bool>(
+        "EmitsReadingsUpdate", sdbusplus::vtable::property_::none,
+        [this](const auto&) {
+            return reportActions.contains(ReportAction::emitsReadingsUpdate);
+        });
     dbusIface->register_property_r<std::string>(
         "Name", sdbusplus::vtable::property_::const_,
         [this](const auto&) { return name; });
-    dbusIface->register_property_r<bool>("LogToMetricReportsCollection",
-                                         sdbusplus::vtable::property_::const_,
-                                         [this](const auto&) {
-        return reportActions.contains(
-            ReportAction::logToMetricReportsCollection);
-    });
+    dbusIface->register_property_r<bool>(
+        "LogToMetricReportsCollection", sdbusplus::vtable::property_::const_,
+        [this](const auto&) {
+            return reportActions.contains(
+                ReportAction::logToMetricReportsCollection);
+        });
     dbusIface->register_property_rw<std::vector<std::string>>(
         "ReportActions", sdbusplus::vtable::property_::emits_change,
         [this](auto newVal, auto& oldVal) {
-        auto tmp = utils::transform<std::unordered_set>(
-            newVal, [](const auto& reportAction) {
-            return utils::toReportAction(reportAction);
-        });
-        tmp.insert(ReportAction::logToMetricReportsCollection);
+            auto tmp = utils::transform<std::unordered_set>(
+                newVal, [](const auto& reportAction) {
+                    return utils::toReportAction(reportAction);
+                });
+            tmp.insert(ReportAction::logToMetricReportsCollection);
 
-        if (tmp != reportActions)
-        {
-            reportActions = tmp;
-            persistency = storeConfiguration();
-            oldVal = std::move(newVal);
-        }
-        return 1;
-    }, [this](const auto&) {
-        return utils::transform<std::vector>(reportActions,
-                                             [](const auto reportAction) {
-            return utils::enumToString(reportAction);
+            if (tmp != reportActions)
+            {
+                reportActions = tmp;
+                persistency = storeConfiguration();
+                oldVal = std::move(newVal);
+            }
+            return 1;
+        },
+        [this](const auto&) {
+            return utils::transform<std::vector>(
+                reportActions, [](const auto reportAction) {
+                    return utils::enumToString(reportAction);
+                });
         });
-    });
     dbusIface->register_property_r<uint64_t>(
         "AppendLimit", sdbusplus::vtable::property_::emits_change,
         [this](const auto&) { return appendLimit; });
-    dbusIface->register_property_rw("ReportUpdates", std::string(),
-                                    sdbusplus::vtable::property_::emits_change,
-                                    [this](auto newVal, auto& oldVal) {
-        setReportUpdates(utils::toReportUpdates(newVal));
-        oldVal = newVal;
-        return 1;
-    }, [this](const auto&) { return utils::enumToString(reportUpdates); });
+    dbusIface->register_property_rw(
+        "ReportUpdates", std::string(),
+        sdbusplus::vtable::property_::emits_change,
+        [this](auto newVal, auto& oldVal) {
+            setReportUpdates(utils::toReportUpdates(newVal));
+            oldVal = newVal;
+            return 1;
+        },
+        [this](const auto&) { return utils::enumToString(reportUpdates); });
     dbusIface->register_property_r(
         "Triggers", std::vector<sdbusplus::message::object_path>{},
         sdbusplus::vtable::property_::emits_change, [this](const auto&) {
-        return utils::transform<std::vector>(triggerIds,
-                                             [](const auto& triggerId) {
-            return utils::pathAppend(utils::constants::triggerDirPath,
-                                     triggerId);
+            return utils::transform<std::vector>(
+                triggerIds, [](const auto& triggerId) {
+                    return utils::pathAppend(utils::constants::triggerDirPath,
+                                             triggerId);
+                });
         });
-    });
     dbusIface->register_method("Update", [this] {
         if (reportingType == ReportingType::onRequest)
         {
@@ -489,16 +496,17 @@ bool Report::storeConfiguration() const
         data["Id"] = id;
         data["Name"] = name;
         data["ReportingType"] = utils::toUnderlying(reportingType);
-        data["ReportActions"] = utils::transform(reportActions,
-                                                 [](const auto reportAction) {
-            return utils::toUnderlying(reportAction);
-        });
+        data["ReportActions"] =
+            utils::transform(reportActions, [](const auto reportAction) {
+                return utils::toUnderlying(reportAction);
+            });
         data["Interval"] = interval.count();
         data["AppendLimit"] = appendLimit;
         data["ReportUpdates"] = utils::toUnderlying(reportUpdates);
-        data["ReadingParameters"] = utils::transform(
-            metrics,
-            [](const auto& metric) { return metric->dumpConfiguration(); });
+        data["ReadingParameters"] =
+            utils::transform(metrics, [](const auto& metric) {
+                return metric->dumpConfiguration();
+            });
 
         if (shouldStoreMetricValues())
         {
@@ -524,15 +532,16 @@ interfaces::JsonStorage::FilePath Report::reportFileName() const
         std::to_string(std::hash<std::string>{}(id))};
 }
 
-std::unordered_set<std::string>
-    Report::collectTriggerIds(boost::asio::io_context& ioc) const
+std::unordered_set<std::string> Report::collectTriggerIds(
+    boost::asio::io_context& ioc) const
 {
     utils::Messanger tmp(ioc);
 
     auto result = std::unordered_set<std::string>();
 
-    tmp.on_receive<messages::CollectTriggerIdResp>(
-        [&result](const auto& msg) { result.insert(msg.triggerId); });
+    tmp.on_receive<messages::CollectTriggerIdResp>([&result](const auto& msg) {
+        result.insert(msg.triggerId);
+    });
 
     tmp.send(messages::CollectTriggerIdReq{id});
 

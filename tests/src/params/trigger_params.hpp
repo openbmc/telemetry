@@ -18,10 +18,10 @@ class TriggerParams
   public:
     TriggerParams()
     {
-        reportsProperty = utils::transform(reportIdsProperty,
-                                           [](const auto& id) {
-            return utils::pathAppend(utils::constants::reportDirPath, id);
-        });
+        reportsProperty =
+            utils::transform(reportIdsProperty, [](const auto& id) {
+                return utils::pathAppend(utils::constants::reportDirPath, id);
+            });
     }
 
     TriggerParams& id(std::string_view val)
@@ -70,10 +70,10 @@ class TriggerParams
     TriggerParams& reportIds(std::vector<std::string> val)
     {
         reportIdsProperty = std::move(val);
-        reportsProperty = utils::transform<std::vector>(reportIdsProperty,
-                                                        [](const auto& id) {
-            return utils::pathAppend(utils::constants::reportDirPath, id);
-        });
+        reportsProperty = utils::transform<std::vector>(
+            reportIdsProperty, [](const auto& id) {
+                return utils::pathAppend(utils::constants::reportDirPath, id);
+            });
         return *this;
     }
 
@@ -99,8 +99,8 @@ class TriggerParams
         return labeledThresholdsProperty;
     }
 
-    const std::vector<numeric::LabeledThresholdParam>
-        numericThresholdParams() const
+    const std::vector<numeric::LabeledThresholdParam> numericThresholdParams()
+        const
     {
         const auto* num = std::get_if<0>(&labeledThresholdsProperty);
         if (num == nullptr)
@@ -110,8 +110,8 @@ class TriggerParams
         return *num;
     }
 
-    const std::vector<discrete::LabeledThresholdParam>
-        discreteThresholdParams() const
+    const std::vector<discrete::LabeledThresholdParam> discreteThresholdParams()
+        const
     {
         const auto* num = std::get_if<1>(&labeledThresholdsProperty);
         if (num == nullptr)

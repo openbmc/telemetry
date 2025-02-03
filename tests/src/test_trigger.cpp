@@ -67,8 +67,8 @@ class TestTrigger : public Test
         sut = makeTrigger(triggerParams);
     }
 
-    static std::vector<LabeledSensorInfo>
-        convertToLabeledSensor(const SensorsInfo& sensorsInfo)
+    static std::vector<LabeledSensorInfo> convertToLabeledSensor(
+        const SensorsInfo& sensorsInfo)
     {
         return utils::transform(sensorsInfo, [](const auto& sensorInfo) {
             const auto& [sensorPath, sensorMetadata] = sensorInfo;
@@ -107,9 +107,8 @@ class TestTrigger : public Test
     }
 
     template <class T>
-    static boost::system::error_code setProperty(const std::string& path,
-                                                 const std::string& property,
-                                                 const T& newValue)
+    static boost::system::error_code setProperty(
+        const std::string& path, const std::string& property, const T& newValue)
     {
         return DbusEnvironment::setProperty<T>(path, Trigger::triggerIfaceName,
                                                property, newValue);
@@ -140,8 +139,9 @@ class TestTrigger : public Test
         std::promise<boost::system::error_code> methodPromise;
         DbusEnvironment::getBus()->async_method_call(
             [&methodPromise](boost::system::error_code ec) {
-            methodPromise.set_value(ec);
-        }, DbusEnvironment::serviceName(), path, Trigger::deleteIfaceName,
+                methodPromise.set_value(ec);
+            },
+            DbusEnvironment::serviceName(), path, Trigger::deleteIfaceName,
             "Delete");
         return DbusEnvironment::waitForFuture(methodPromise.get_future());
     }
@@ -519,8 +519,8 @@ TEST_F(TestTriggerStore, settingPersistencyToTrueStoresTriggerTriggerActions)
     ASSERT_THAT(storedConfiguration.at("TriggerActions"),
                 Eq(utils::transform(triggerParams.triggerActions(),
                                     [](const auto& action) {
-        return actionToString(action);
-    })));
+                                        return actionToString(action);
+                                    })));
 }
 
 TEST_F(TestTriggerStore, settingPersistencyToTrueStoresTriggerReportIds)
