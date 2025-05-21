@@ -401,8 +401,8 @@ INSTANTIATE_TEST_SUITE_P(
             .ThresholdValue(90.0)
             .Direction(numeric::Direction::increasing)
             .InitialValues({80.0})
-            .Updates({{0, 99.0, 200ms}, {0, 80.0, 100ms}, {0, 98.0, 200ms}})
-            .Expected({{0, 99.0, 200ms}, {0, 98.0, 500ms}}),
+            .Updates({{0, 99.0, 210ms}, {0, 80.0, 100ms}, {0, 98.0, 200ms}})
+            .Expected({{0, 99.0, 210ms}, {0, 98.0, 510ms}}),
         NumericParams()
             .DwellTime(200ms)
             .ThresholdValue(90.0)
@@ -429,8 +429,8 @@ INSTANTIATE_TEST_SUITE_P(
             .ThresholdValue(90.0)
             .Direction(numeric::Direction::decreasing)
             .InitialValues({100.0})
-            .Updates({{0, 80.0, 200ms}, {0, 99.0, 100ms}, {0, 85.0, 200ms}})
-            .Expected({{0, 80.0, 200ms}, {0, 85.0, 500ms}}),
+            .Updates({{0, 80.0, 210ms}, {0, 99.0, 100ms}, {0, 85.0, 200ms}})
+            .Expected({{0, 80.0, 210ms}, {0, 85.0, 510ms}}),
         NumericParams()
             .DwellTime(200ms)
             .ThresholdValue(90.0)
@@ -450,8 +450,8 @@ INSTANTIATE_TEST_SUITE_P(
             .ThresholdValue(90.0)
             .Direction(numeric::Direction::either)
             .InitialValues({100.0})
-            .Updates({{0, 80.0, 100ms}, {0, 85.0, 100ms}, {0, 91.0, 200ms}})
-            .Expected({{0, 80.0, 200ms}, {0, 91.0, 400ms}}),
+            .Updates({{0, 80.0, 100ms}, {0, 85.0, 110ms}, {0, 91.0, 200ms}})
+            .Expected({{0, 80.0, 200ms}, {0, 91.0, 410ms}}),
         NumericParams()
             .DwellTime(200ms)
             .ThresholdValue(90.0)
