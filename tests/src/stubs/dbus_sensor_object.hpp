@@ -30,7 +30,7 @@ class DbusSensorObject
     static constexpr Properties property = {};
 
   private:
-    boost::asio::io_context& ioc;
+    [[maybe_unused]] boost::asio::io_context& ioc;
     std::shared_ptr<sdbusplus::asio::connection> bus;
     std::shared_ptr<sdbusplus::asio::object_server> objServer;
 
