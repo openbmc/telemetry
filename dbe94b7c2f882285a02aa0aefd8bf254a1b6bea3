@@ -1,4 +1,22 @@
 {
-  "comments": [],
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "9fe5f5b7_2c7fb992",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000534
+      },
+      "writtenOn": "2025-06-09T11:15:10Z",
+      "side": 1,
+      "message": "@Jajanth\n\nCould you elaborate on your recent comment?",
+      "revId": "dbe94b7c2f882285a02aa0aefd8bf254a1b6bea3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ],
   "submitRequirementResults": []
 }
