@@ -16,6 +16,23 @@
       "message": "@ojayanth@gmail.com\n\nI see you maintain some of the patches, while abandoning the others. On the other hand , last comment on https://gerrit.openbmc.org/c/openbmc/docs/+/76369 suggest abandoning the effort altogether.\n\nWhat should I expect next?:)",
       "revId": "1d9685cc6a9ab0639d55e432f3cd863bcb8091f9",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "708219ae_58dea9fd",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2025-06-09T13:09:33Z",
+      "side": 1,
+      "message": "Please use `config-clang-tidy`.",
+      "revId": "1d9685cc6a9ab0639d55e432f3cd863bcb8091f9",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
