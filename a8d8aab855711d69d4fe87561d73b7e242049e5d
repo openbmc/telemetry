@@ -34,6 +34,24 @@
       "parentUuid": "cae45006_7e1f65fb",
       "revId": "a8d8aab855711d69d4fe87561d73b7e242049e5d",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "69b3ddc2_1e8ccde1",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 6
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000086
+      },
+      "writtenOn": "2025-06-25T12:22:35Z",
+      "side": 1,
+      "message": "Thanks for going through the other reviews. While I agree with the general direction and the format you shared, that doesn’t mean we have to enable all the approved checks here. You can check other repos for similar discussions—we’ve also talked about this on Discord (like readability-function-size and readability-function-cognitive-complexity). We\u0027re currently following the same format from the reference doc, but not enabling every test right now\nhttps://discord.com/channels/775381525260664832/1318185382906560544/1381627485518827612",
+      "parentUuid": "b67ec91d_5cb216fd",
+      "revId": "a8d8aab855711d69d4fe87561d73b7e242049e5d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
