@@ -16,6 +16,24 @@
       "message": "@adrian.ambrozewicz@linux.intel.com Can you please look.",
       "revId": "a8d8aab855711d69d4fe87561d73b7e242049e5d",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b67ec91d_5cb216fd",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 6
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000534
+      },
+      "writtenOn": "2025-06-25T11:33:02Z",
+      "side": 1,
+      "message": "I see it doesn\u0027t adhere to the https://github.com/openbmc/docs/blob/bf6b6004c460c077e3aea088bec077268d698dbb/style/cpp/.clang-tidy#L23\n\nI also saw and approved some of your fixups in the code.\n\nWill you also carry forward adjustments necessary to align local clang-tidy with the upstream one?",
+      "parentUuid": "cae45006_7e1f65fb",
+      "revId": "a8d8aab855711d69d4fe87561d73b7e242049e5d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
