@@ -52,6 +52,24 @@
       "parentUuid": "b67ec91d_5cb216fd",
       "revId": "a8d8aab855711d69d4fe87561d73b7e242049e5d",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b08060b0_cd058034",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 6
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000534
+      },
+      "writtenOn": "2025-06-25T13:07:22Z",
+      "side": 1,
+      "message": "Okay, so I gather general consensus is that from now on it\u0027s the maintainers responsibility to keep .clang-tidy up to date and make conscious decision on enabled checks.\n\nIs that correct?",
+      "parentUuid": "69b3ddc2_1e8ccde1",
+      "revId": "a8d8aab855711d69d4fe87561d73b7e242049e5d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
