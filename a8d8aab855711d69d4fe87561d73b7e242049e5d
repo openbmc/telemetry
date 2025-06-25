@@ -70,6 +70,24 @@
       "parentUuid": "69b3ddc2_1e8ccde1",
       "revId": "a8d8aab855711d69d4fe87561d73b7e242049e5d",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "dbab0c1c_8ec9379f",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 6
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000086
+      },
+      "writtenOn": "2025-06-25T13:28:53Z",
+      "side": 1,
+      "message": "Yes , Yes, that\u0027s exactly the idea. The current commit series is focused on integrating .clang-tidy support into the repository by establishing a baseline. Making .clang-tidy UpToDate and align to BMC approved checks is  a maintainer’s responsibility,",
+      "parentUuid": "b08060b0_cd058034",
+      "revId": "a8d8aab855711d69d4fe87561d73b7e242049e5d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
