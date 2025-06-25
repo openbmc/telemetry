@@ -1,0 +1,7 @@
+Verified+1: OpenBMC CI <openbmcbump-ci@yahoo.com>
+Code-Review+2: Adrian Ambrożewicz <adrian.ambrozewicz@linux.intel.com>
+Submitted-by: Jayanth Othayoth <ojayanth@gmail.com>
+Submitted-at: Wed, 25 Jun 2025 11:03:35 +0000
+Reviewed-on: https://gerrit.openbmc.org/c/openbmc/telemetry/+/80919
+Project: openbmc/telemetry
+Branch: refs/heads/master
