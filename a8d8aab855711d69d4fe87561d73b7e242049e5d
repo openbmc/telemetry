@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "cae45006_7e1f65fb",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 6
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000086
+      },
+      "writtenOn": "2025-06-25T11:04:38Z",
+      "side": 1,
+      "message": "@adrian.ambrozewicz@linux.intel.com Can you please look.",
+      "revId": "a8d8aab855711d69d4fe87561d73b7e242049e5d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
