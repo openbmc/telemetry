@@ -115,7 +115,7 @@ configure_file(
         'after': service_after,
     },
     install: true,
-    install_dir: systemd.get_variable('systemdsystemunitdir'),
+    install_dir: systemd.get_variable('systemd_system_unit_dir'),
 )
 
 if get_option('buildtest')
