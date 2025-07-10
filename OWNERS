@@ -40,7 +40,7 @@ reviewers:
 matchers:
 
 openbmc:
-- name: Adrian Ambrozewicz
+- name: Adrian Ambrozewiczz
   email: adrian.ambrozewicz@linux.intel.com
   discord: aambroze
 - name: Michal Orzel
