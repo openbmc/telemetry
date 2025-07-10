@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "14705541_3abdcec4",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000534
+      },
+      "writtenOn": "2025-07-10T12:31:39Z",
+      "side": 1,
+      "message": "I\u0027d like to enable newly added Reviewer to have a vote (https://gerrit.openbmc.org/c/openbmc/telemetry/+/81468)",
+      "revId": "27d0b40e12677037a16c21feb8f8668cb2830b3a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
