@@ -186,8 +186,8 @@ Trigger::Trigger(
                 });
 
             dbusIface.register_property_r(
-                "Discrete", isDiscreate(), sdbusplus::vtable::property_::const_,
-                [this](const auto& x) { return isDiscreate(); });
+                "Discrete", isDiscrete(), sdbusplus::vtable::property_::const_,
+                [this](const auto& x) { return isDiscrete(); });
 
             dbusIface.register_property_rw(
                 "Name", name, sdbusplus::vtable::property_::emits_change,
@@ -278,9 +278,13 @@ std::vector<LabeledThresholdParam> Trigger::getLabeledThresholds() const
     });
 }
 
-bool Trigger::isDiscreate() const
+bool Trigger::isDiscrete() const
 {
     const auto labeledThresholds = getLabeledThresholds();
+    if (labeledThresholds.empty())
+    {
+        return true;
+    }
 
     return utils::isFirstElementOfType<std::monostate>(labeledThresholds) ||
            utils::isFirstElementOfType<discrete::LabeledThresholdParam>(

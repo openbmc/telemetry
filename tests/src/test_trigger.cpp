@@ -443,6 +443,26 @@ TEST_F(TestTrigger, settingPersistencyToFalseRemovesTriggerFromStorage)
                 Eq(persistent));
 }
 
+class TestOnChangeTrigger : public TestTrigger
+{
+  public:
+    TriggerParams onChangeTriggerParams =
+        TriggerParams()
+            .id("DiscreteOnChangeTrigger")
+            .name("My Discrete On Change Trigger")
+            .thresholdParams(std::vector<numeric::LabeledThresholdParam>{});
+
+    void SetUp() override
+    {
+        sut = makeTrigger(onChangeTriggerParams);
+    }
+};
+
+TEST_F(TestOnChangeTrigger, isDiscrete)
+{
+    EXPECT_THAT(getProperty<bool>(sut->getPath(), "Discrete"), Eq(true));
+}
+
 class TestTriggerInitialization : public TestTrigger
 {
   public:

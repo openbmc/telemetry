@@ -48,7 +48,7 @@ class Trigger : public interfaces::Trigger
   private:
     std::vector<LabeledSensorInfo> getLabeledSensorInfo() const;
     std::vector<LabeledThresholdParam> getLabeledThresholds() const;
-    bool isDiscreate() const;
+    bool isDiscrete() const;
 
     const TriggerId id;
     const sdbusplus::message::object_path path;
