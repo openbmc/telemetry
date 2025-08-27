@@ -312,30 +312,39 @@ TEST_F(TestTrigger, setPropertySensors)
                 Eq(boost::system::errc::success));
 }
 
-TEST_F(TestTrigger, setPropertyThresholds)
+TEST_F(TestTrigger, setPropertyNumericThresholds)
 {
     EXPECT_CALL(*triggerFactoryMockPtr, updateThresholds(_, _, _, _, _, _));
-    TriggerThresholdParams newThresholds =
-        std::vector<discrete::ThresholdParam>({std::make_tuple(
-            "discrete threshold", utils::enumToString(discrete::Severity::ok),
-            10, "12.3")});
-    EXPECT_THAT(setProperty(sut->getPath(), "Thresholds", newThresholds),
+    auto newThresholds = std::vector<numeric::ThresholdParam>({std::make_tuple(
+        numeric::typeToString(numeric::Type::upperWarning), 10,
+        numeric::directionToString(numeric::Direction::increasing), 12.3)});
+    EXPECT_THAT(setProperty(sut->getPath(), "NumericThresholds", newThresholds),
+                Eq(boost::system::errc::success));
+}
+
+TEST_F(TestTrigger, setPropertyDiscreteThresholds)
+{
+    EXPECT_CALL(*triggerFactoryMockPtr, updateThresholds(_, _, _, _, _, _));
+    auto newThresholds = std::vector<discrete::ThresholdParam>({std::make_tuple(
+        "discrete threshold", utils::enumToString(discrete::Severity::ok), 10,
+        "12.3")});
+    EXPECT_THAT(setProperty(sut->getPath(), "DiscreteThresholds",
+                            newThresholds),
                 Eq(boost::system::errc::success));
 }
 
 TEST_F(TestTrigger, setThresholdParamsWithTooLongDiscreteName)
 {
-    const TriggerThresholdParams currentValue =
-        std::visit(utils::FromLabeledThresholdParamConversion(),
-                   triggerParams.thresholdParams());
+    const std::vector<discrete::ThresholdParam> currentValue =
+        std::get<1>(utils::FromLabeledThresholdParamConversion()(
+            triggerParams.discreteThresholdParams()));
 
-    TriggerThresholdParams newThresholds =
-        std::vector<discrete::ThresholdParam>({std::make_tuple(
-            utils::string_utils::getTooLongName(),
-            utils::enumToString(discrete::Severity::ok), 10, "12.3")});
+    auto newThresholds = std::vector<discrete::ThresholdParam>({std::make_tuple(
+        utils::string_utils::getTooLongName(),
+        utils::enumToString(discrete::Severity::ok), 10, "12.3")});
 
-    changeProperty<TriggerThresholdParams>(
-        sut->getPath(), "Thresholds",
+    changeProperty<std::vector<discrete::ThresholdParam>>(
+        sut->getPath(), "DiscreteThresholds",
         {.valueBefore = Eq(currentValue),
          .newValue = newThresholds,
          .ec = Eq(boost::system::errc::invalid_argument),
