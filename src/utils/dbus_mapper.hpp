@@ -48,8 +48,7 @@ inline std::vector<SensorTree> getSubTreeSensors(
     method_call.append("/xyz/openbmc_project/sensors/", 2, sensorInterfaces);
     auto reply = bus->call(method_call);
 
-    std::vector<SensorTree> tree;
-    reply.read(tree);
+    auto tree = reply.unpack<std::vector<SensorTree>>();
 
     return tree;
 }
