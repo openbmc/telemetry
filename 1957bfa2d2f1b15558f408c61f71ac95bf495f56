@@ -54,6 +54,23 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "0181b93b_c190e555",
+        "filename": "src/trigger_actions.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1001329
+      },
+      "writtenOn": "2025-11-12T13:53:14Z",
+      "side": 1,
+      "message": "Please double-check the usage of comma operator. Should it work this way?\n\nRef.: https://godbolt.org/z/91cGanTne",
+      "revId": "1957bfa2d2f1b15558f408c61f71ac95bf495f56",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "a8a52910_0b1550b6",
         "filename": "src/utils/messanger.hpp",
         "patchSetId": 1
