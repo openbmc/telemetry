@@ -16,6 +16,9 @@ class MessangerT
         context_(service_.create())
     {}
 
+    MessangerT(const MessangerT&) = delete;
+    MessangerT& operator=(const MessangerT&) = delete;
+
     ~MessangerT()
     {
         service_.destroy(context_);

@@ -29,8 +29,11 @@ class DiscreteThreshold :
         Milliseconds dwellTime, const std::string& thresholdValue,
         const std::string& name, const discrete::Severity severity,
         std::unique_ptr<interfaces::Clock> clock);
+    ~DiscreteThreshold() = default;
     DiscreteThreshold(const DiscreteThreshold&) = delete;
+    DiscreteThreshold& operator=(const DiscreteThreshold&) = delete;
     DiscreteThreshold(DiscreteThreshold&&) = delete;
+    DiscreteThreshold& operator=(DiscreteThreshold&&) = delete;
 
     void initialize() override;
     void sensorUpdated(interfaces::Sensor&, Milliseconds, double) override;
@@ -58,8 +61,11 @@ class DiscreteThreshold :
                         boost::asio::io_context& ioc) :
             timer(ioc), sensorName(sensorNameIn)
         {}
+        ~ThresholdDetail() = default;
         ThresholdDetail(const ThresholdDetail&) = delete;
+        ThresholdDetail& operator=(const ThresholdDetail&) = delete;
         ThresholdDetail(ThresholdDetail&&) = delete;
+        ThresholdDetail& operator=(ThresholdDetail&&) = delete;
 
         const std::string& getSensorName()
         {

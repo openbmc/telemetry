@@ -29,8 +29,11 @@ class NumericThreshold :
         Milliseconds dwellTime, numeric::Direction direction,
         double thresholdValue, numeric::Type type,
         std::unique_ptr<interfaces::Clock> clock);
+    ~NumericThreshold() = default;
     NumericThreshold(const NumericThreshold&) = delete;
+    NumericThreshold& operator=(const NumericThreshold&) = delete;
     NumericThreshold(NumericThreshold&&) = delete;
+    NumericThreshold& operator=(NumericThreshold&&) = delete;
 
     void initialize() override;
     void sensorUpdated(interfaces::Sensor&, Milliseconds, double) override;
@@ -59,8 +62,11 @@ class NumericThreshold :
                         boost::asio::io_context& ioc) :
             timer(ioc), sensorName(sensorNameIn)
         {}
+        ~ThresholdDetail() = default;
         ThresholdDetail(const ThresholdDetail&) = delete;
+        ThresholdDetail& operator=(const ThresholdDetail&) = delete;
         ThresholdDetail(ThresholdDetail&&) = delete;
+        ThresholdDetail& operator=(ThresholdDetail&&) = delete;
 
         const std::string& getSensorName()
         {

@@ -28,6 +28,7 @@ class Trigger : public interfaces::Trigger
             const interfaces::TriggerFactory& triggerFactory,
             Sensors sensorsIn);
 
+    ~Trigger() = default;
     Trigger(const Trigger&) = delete;
     Trigger(Trigger&&) = delete;
     Trigger& operator=(const Trigger&) = delete;

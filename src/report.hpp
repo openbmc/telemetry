@@ -34,6 +34,8 @@ class Report : public interfaces::Report, public interfaces::MetricListener
       public:
         OnChangeContext(Report& report) : report(report) {}
 
+        OnChangeContext(const OnChangeContext&) = delete;
+        OnChangeContext& operator=(const OnChangeContext&) = delete;
         ~OnChangeContext()
         {
             if (updated)
