@@ -37,6 +37,24 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "f20dc02c_63ee2115",
+        "filename": "src/report.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1002669
+      },
+      "writtenOn": "2025-11-12T14:10:17Z",
+      "side": 1,
+      "message": "done",
+      "parentUuid": "d73dd1ff_923826ba",
+      "revId": "1957bfa2d2f1b15558f408c61f71ac95bf495f56",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "a54f1a02_41f27594",
         "filename": "src/sensor.hpp",
         "patchSetId": 1
@@ -48,6 +66,24 @@
       "writtenOn": "2025-11-12T13:48:21Z",
       "side": 1,
       "message": "Please also add move constructor/assignment operator definitions.",
+      "revId": "1957bfa2d2f1b15558f408c61f71ac95bf495f56",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d06a2896_34e1ad65",
+        "filename": "src/sensor.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1002669
+      },
+      "writtenOn": "2025-11-12T14:10:17Z",
+      "side": 1,
+      "message": "done",
+      "parentUuid": "a54f1a02_41f27594",
       "revId": "1957bfa2d2f1b15558f408c61f71ac95bf495f56",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
@@ -71,6 +107,24 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "ebbd6a56_7a2f5824",
+        "filename": "src/trigger_actions.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1002669
+      },
+      "writtenOn": "2025-11-12T14:10:17Z",
+      "side": 1,
+      "message": "It shouldn\u0027t, thanks! It was acciddental change, there should be \"\u003d\u003d\", not sure how this happen...",
+      "parentUuid": "0181b93b_c190e555",
+      "revId": "1957bfa2d2f1b15558f408c61f71ac95bf495f56",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "a8a52910_0b1550b6",
         "filename": "src/utils/messanger.hpp",
         "patchSetId": 1
@@ -82,6 +136,24 @@
       "writtenOn": "2025-11-12T13:48:21Z",
       "side": 1,
       "message": "Please also add move constructor/assignment operator definitions.",
+      "revId": "1957bfa2d2f1b15558f408c61f71ac95bf495f56",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "69d33b7c_d9d11f00",
+        "filename": "src/utils/messanger.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1002669
+      },
+      "writtenOn": "2025-11-12T14:10:17Z",
+      "side": 1,
+      "message": "done",
+      "parentUuid": "a8a52910_0b1550b6",
       "revId": "1957bfa2d2f1b15558f408c61f71ac95bf495f56",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
