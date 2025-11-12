@@ -22,8 +22,11 @@ class Sensor final :
            boost::asio::io_context& ioc,
            const std::shared_ptr<sdbusplus::asio::connection>& bus);
 
+    ~Sensor() = default;
     Sensor(const Sensor&) = delete;
     Sensor& operator=(const Sensor&) = delete;
+    Sensor(Sensor&&) = delete;
+    Sensor& operator=(Sensor&&) = delete;
 
     static Id makeId(std::string_view service, std::string_view path);
 

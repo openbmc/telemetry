@@ -108,7 +108,8 @@ void LogToRedfishEventLog::commit(
     double value = std::get<double>(triggerValue);
     auto messageId = getRedfishMessageId(value);
 
-    if (messageId == redfish_message_ids::TriggerNumericReadingNormal)
+    if (std::string_view(messageId) ==
+        redfish_message_ids::TriggerNumericReadingNormal)
     {
         phosphor::logging::log<phosphor::logging::level::INFO>(
             "Logging numeric trigger action to Redfish Event Log.",
