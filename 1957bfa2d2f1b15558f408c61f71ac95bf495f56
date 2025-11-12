@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "f7a968e4_d31122a8",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1001329
+      },
+      "writtenOn": "2025-11-12T13:48:21Z",
+      "side": 1,
+      "message": "Make sure that rule of five is fully applied in all modified classes.",
+      "revId": "1957bfa2d2f1b15558f408c61f71ac95bf495f56",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d73dd1ff_923826ba",
+        "filename": "src/report.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1001329
+      },
+      "writtenOn": "2025-11-12T13:48:21Z",
+      "side": 1,
+      "message": "Please also add move constructor/assignment operator definitions.",
+      "revId": "1957bfa2d2f1b15558f408c61f71ac95bf495f56",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a54f1a02_41f27594",
+        "filename": "src/sensor.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1001329
+      },
+      "writtenOn": "2025-11-12T13:48:21Z",
+      "side": 1,
+      "message": "Please also add move constructor/assignment operator definitions.",
+      "revId": "1957bfa2d2f1b15558f408c61f71ac95bf495f56",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a8a52910_0b1550b6",
+        "filename": "src/utils/messanger.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1001329
+      },
+      "writtenOn": "2025-11-12T13:48:21Z",
+      "side": 1,
+      "message": "Please also add move constructor/assignment operator definitions.",
+      "revId": "1957bfa2d2f1b15558f408c61f71ac95bf495f56",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
