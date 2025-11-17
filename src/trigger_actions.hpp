@@ -30,20 +30,6 @@ constexpr const char* TriggerNumericReadingNormal =
 
 namespace numeric
 {
-class LogToJournal : public interfaces::TriggerAction
-{
-  public:
-    LogToJournal(::numeric::Type type, double val) : type(type), threshold(val)
-    {}
-
-    void commit(const std::string& triggerId, const ThresholdName thresholdName,
-                const std::string& sensorName, const Milliseconds timestamp,
-                const TriggerValue value) override;
-
-  private:
-    const ::numeric::Type type;
-    const double threshold;
-};
 
 class LogToRedfishEventLog : public interfaces::TriggerAction
 {
@@ -72,18 +58,6 @@ void fillActions(
 
 namespace discrete
 {
-class LogToJournal : public interfaces::TriggerAction
-{
-  public:
-    explicit LogToJournal(::discrete::Severity severity) : severity(severity) {}
-
-    void commit(const std::string& triggerId, const ThresholdName thresholdName,
-                const std::string& sensorName, const Milliseconds timestamp,
-                const TriggerValue value) override;
-
-  private:
-    const ::discrete::Severity severity;
-};
 
 class LogToRedfishEventLog : public interfaces::TriggerAction
 {
@@ -103,15 +77,6 @@ void fillActions(
 
 namespace onChange
 {
-class LogToJournal : public interfaces::TriggerAction
-{
-  public:
-    LogToJournal() {}
-
-    void commit(const std::string& triggerId, const ThresholdName thresholdName,
-                const std::string& sensorName, const Milliseconds timestamp,
-                const TriggerValue value) override;
-};
 
 class LogToRedfishEventLog : public interfaces::TriggerAction
 {
