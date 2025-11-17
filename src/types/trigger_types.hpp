@@ -14,7 +14,6 @@
 
 enum class TriggerAction
 {
-    LogToJournal = 0,
     LogToRedfishEventLog,
     UpdateReport,
 };
@@ -23,9 +22,6 @@ namespace details
 {
 constexpr std::array<std::pair<std::string_view, TriggerAction>, 3>
     convDataTriggerAction = {
-        std::make_pair(
-            "xyz.openbmc_project.Telemetry.Trigger.TriggerAction.LogToJournal",
-            TriggerAction::LogToJournal),
         std::make_pair("xyz.openbmc_project.Telemetry.Trigger.TriggerAction."
                        "LogToRedfishEventLog",
                        TriggerAction::LogToRedfishEventLog),
