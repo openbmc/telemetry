@@ -66,27 +66,6 @@ class TestActionNumeric : public Test, public WithParamInterface<LogParam>
     TriggerValue commmitValue;
 };
 
-class TestLogToJournalNumeric : public TestActionNumeric<LogToJournal>
-{};
-
-INSTANTIATE_TEST_SUITE_P(LogToJournalNumericParams, TestLogToJournalNumeric,
-                         getCorrectParams());
-
-TEST_P(TestLogToJournalNumeric, commitAnActionDoesNotThrow)
-{
-    EXPECT_NO_THROW(commit());
-}
-
-class TestLogToJournalNumericThrow : public TestLogToJournalNumeric
-{};
-
-INSTANTIATE_TEST_SUITE_P(_, TestLogToJournalNumericThrow, getIncorrectParams());
-
-TEST_P(TestLogToJournalNumericThrow, commitAnActionExpectThrow)
-{
-    EXPECT_ANY_THROW(commit());
-}
-
 class TestLogToRedfishEventLogNumeric :
     public TestActionNumeric<LogToRedfishEventLog>
 {};
@@ -115,70 +94,6 @@ TEST_P(TestLogToRedfishEventLogNumericThrow, commitExpectToThrow)
 
 namespace discrete
 {
-using LogParam = std::tuple<::discrete::Severity, TriggerValue>;
-
-static auto getCorrectParams()
-{
-    return Values(
-        std::make_tuple(::discrete::Severity::critical,
-                        TriggerValue("DiscreteVal")),
-        std::make_tuple(::discrete::Severity::warning, TriggerValue("On")),
-        std::make_tuple(::discrete::Severity::ok, TriggerValue("Off")));
-}
-
-static auto getIncorrectParams()
-{
-    return Values(
-        std::make_tuple(static_cast<::discrete::Severity>(-1),
-                        TriggerValue("DiscreteVal42")),
-        std::make_tuple(static_cast<::discrete::Severity>(42),
-                        TriggerValue("On")),
-        std::make_tuple(::discrete::Severity::critical, TriggerValue(42.0)),
-        std::make_tuple(::discrete::Severity::warning, TriggerValue(0.0)),
-        std::make_tuple(::discrete::Severity::ok, TriggerValue(0.1)));
-}
-
-class TestLogToJournalDiscrete :
-    public Test,
-    public WithParamInterface<LogParam>
-{
-  public:
-    void SetUp() override
-    {
-        auto [severity, value] = GetParam();
-        sut = std::make_unique<LogToJournal>(severity);
-        commitValue = value;
-    }
-
-    void commit() const
-    {
-        std::string thresholdName = "MyThreshold";
-        sut->commit("MyTrigger", std::cref(thresholdName), "MySensor",
-                    Milliseconds{100'000}, commitValue);
-    }
-
-    TriggerValue commitValue;
-    std::unique_ptr<LogToJournal> sut;
-};
-
-INSTANTIATE_TEST_SUITE_P(LogToJournalDiscreteParams, TestLogToJournalDiscrete,
-                         getCorrectParams());
-
-TEST_P(TestLogToJournalDiscrete, commitAnActionWIthDiscreteValueDoesNotThrow)
-{
-    EXPECT_NO_THROW(commit());
-}
-
-class TestLogToJournalDiscreteThrow : public TestLogToJournalDiscrete
-{};
-
-INSTANTIATE_TEST_SUITE_P(_, TestLogToJournalDiscreteThrow,
-                         getIncorrectParams());
-
-TEST_P(TestLogToJournalDiscreteThrow, commitAnActionExpectThrow)
-{
-    EXPECT_ANY_THROW(commit());
-}
 
 class TestLogToRedfishEventLogDiscrete : public Test
 {
@@ -228,19 +143,6 @@ class TestActionOnChange : public Test
 
     std::unique_ptr<ActionType> sut;
 };
-
-class TestLogToJournalDiscreteOnChange : public TestActionOnChange<LogToJournal>
-{};
-
-TEST_F(TestLogToJournalDiscreteOnChange, commitNumericValueExpectNoThrow)
-{
-    EXPECT_NO_THROW(commit(90.0));
-}
-
-TEST_F(TestLogToJournalDiscreteOnChange, commitDiscreteValueExpectNoThrow)
-{
-    EXPECT_NO_THROW(commit("Off"));
-}
 
 class TestLogToRedfishEventLogDiscreteOnChange :
     public TestActionOnChange<LogToRedfishEventLog>
