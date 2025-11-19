@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "b6b373e2_5e0d5cab",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000534
+      },
+      "writtenOn": "2025-11-19T14:27:47Z",
+      "side": 1,
+      "message": "Please try to merge related changes in single shot.",
+      "revId": "ea9b77666a3601d31469d3f74356e6ab7c0d90ff",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
