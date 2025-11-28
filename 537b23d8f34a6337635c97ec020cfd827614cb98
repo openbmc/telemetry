@@ -1,0 +1,8 @@
+Code-Review+1: Michal Orzel <michalx.orzel@intel.com>
+Code-Review+2: Adrian Ambrożewicz <adrian.ambrozewicz@linux.intel.com>
+Verified+1: OpenBMC CI <openbmcbump-ci@yahoo.com>
+Submitted-by: Adrian Ambrożewicz <adrian.ambrozewicz@linux.intel.com>
+Submitted-at: Fri, 28 Nov 2025 11:58:29 +0000
+Reviewed-on: https://gerrit.openbmc.org/c/openbmc/telemetry/+/85633
+Project: openbmc/telemetry
+Branch: refs/heads/master
