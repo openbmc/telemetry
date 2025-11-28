@@ -32,17 +32,17 @@
 # data within them will be kept sorted.
 
 owners:
-- adrian.ambrozewicz@linux.intel.com
+- michalx.orzel@intel.com
 
 reviewers:
-- michalx.orzel@intel.com
+- boleslawx.ogonczyk-makowski@intel.com
 
 matchers:
 
 openbmc:
-- name: Adrian Ambrozewicz
-  email: adrian.ambrozewicz@linux.intel.com
-  discord: aambroze
 - name: Michal Orzel
   email: michalx.orzel@intel.com
   discord: morzelx
+- name: Boleslaw Ogonczyk-Makowski
+  email: boleslawx.ogonczyk-makowski@intel.com
+  discord: qndel
