@@ -34,6 +34,24 @@
       "parentUuid": "3c78d3da_9a77b3ac",
       "revId": "05416a00d7809f33a56fc2e56712ab3f60bcef46",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "9cd812eb_a26efc15",
+        "filename": "project.config",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000004
+      },
+      "writtenOn": "2025-12-10T17:20:03Z",
+      "side": 1,
+      "message": "Yeah makes sense, not clear to me what impact (if any) that will have on all the other repos though.",
+      "parentUuid": "ae13b043_7e772776",
+      "revId": "05416a00d7809f33a56fc2e56712ab3f60bcef46",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
