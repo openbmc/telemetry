@@ -181,33 +181,41 @@ void ReportManager::loadFromPersistent()
     for (const auto& path : paths)
     {
         std::optional<nlohmann::json> data = reportStorage->load(path);
+
+        if (!data)
+        {
+            reportStorage->remove(path);
+            continue;
+        }
+        const auto& j = *data;
+
         try
         {
-            size_t version = data->at("Version").get<size_t>();
+            size_t version = j.at("Version").get<size_t>();
             if (version != Report::reportVersion)
             {
                 throw std::logic_error("Invalid version");
             }
-            bool enabled = data->at("Enabled").get<bool>();
-            std::string& id = data->at("Id").get_ref<std::string&>();
-            std::string& name = data->at("Name").get_ref<std::string&>();
-
-            uint32_t reportingType = data->at("ReportingType").get<uint32_t>();
+            bool enabled = j.at("Enabled").get<bool>();
+            const std::string& id = j.at("Id").get_ref<const std::string&>();
+            const std::string& name =
+                j.at("Name").get_ref<const std::string&>();
+            uint32_t reportingType = j.at("ReportingType").get<uint32_t>();
             std::vector<ReportAction> reportActions = utils::transform(
-                data->at("ReportActions").get<std::vector<uint32_t>>(),
+                j.at("ReportActions").get<std::vector<uint32_t>>(),
                 [](const auto reportAction) {
                     return utils::toReportAction(reportAction);
                 });
-            uint64_t interval = data->at("Interval").get<uint64_t>();
-            uint64_t appendLimit = data->at("AppendLimit").get<uint64_t>();
-            uint32_t reportUpdates = data->at("ReportUpdates").get<uint32_t>();
+            uint64_t interval = j.at("Interval").get<uint64_t>();
+            uint64_t appendLimit = j.at("AppendLimit").get<uint64_t>();
+            uint32_t reportUpdates = j.at("ReportUpdates").get<uint32_t>();
             auto readingParameters =
-                data->at("ReadingParameters")
+                j.at("ReadingParameters")
                     .get<std::vector<LabeledMetricParameters>>();
 
             Readings readings = {};
 
-            if (auto it = data->find("MetricValues"); it != data->end())
+            if (auto it = j.find("MetricValues"); it != j.end())
             {
                 const auto labeledReadings = it->get<LabeledReadings>();
                 readings = utils::toReadings(labeledReadings);
