@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "5574fecc_1b60ef32",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1002091
+      },
+      "writtenOn": "2025-12-29T13:05:41Z",
+      "side": 1,
+      "message": "Please change the commit message. The initial commit for clang-tidy is already present",
+      "revId": "10f59f74cd5688a8c8f059f7c3f5682e6b34b97d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
