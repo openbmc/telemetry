@@ -16,6 +16,24 @@
       "message": "`data-\u003e` and `j` are mixed throughout the code",
       "revId": "03f718a14931e2055777acb859b9bb28eb8ac7cf",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "f461319a_ed041ed6",
+        "filename": "src/report_manager.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 213,
+      "author": {
+        "id": 1000086
+      },
+      "writtenOn": "2025-12-29T13:50:12Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "b1824196_2ffd0182",
+      "revId": "03f718a14931e2055777acb859b9bb28eb8ac7cf",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
