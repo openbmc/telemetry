@@ -14,11 +14,19 @@
 #include "utils/tstring.hpp"
 #include "utils/variant_utils.hpp"
 
+#include <xyz/openbmc_project/Telemetry/Report/common.hpp>
+#include <xyz/openbmc_project/Telemetry/ReportManager/common.hpp>
+
 using namespace testing;
 using namespace std::string_literals;
 using namespace std::chrono_literals;
 
 using AddReportVariantForSet = utils::WithoutMonostate<AddReportVariant>;
+
+using TelemetryReport =
+    sdbusplus::common::xyz::openbmc_project::telemetry::Report;
+using TelemetryReportManager =
+    sdbusplus::common::xyz::openbmc_project::telemetry::ReportManager;
 
 class TestReportManager : public Test
 {
@@ -67,8 +75,9 @@ class TestReportManager : public Test
                                 const std::string& path) {
                 addReportPromise.set_value({ec, path});
             },
-            DbusEnvironment::serviceName(), ReportManager::reportManagerPath,
-            ReportManager::reportManagerIfaceName, "AddReport",
+            DbusEnvironment::serviceName(), TelemetryReport::namespace_path,
+            TelemetryReportManager::interface,
+            TelemetryReportManager::method_names::add_report,
             std::forward<Args>(args)...);
         return DbusEnvironment::waitForFuture(addReportPromise.get_future());
     }
@@ -91,27 +100,30 @@ class TestReportManager : public Test
     static T getProperty(const std::string& property)
     {
         return DbusEnvironment::getProperty<T>(
-            ReportManager::reportManagerPath,
-            ReportManager::reportManagerIfaceName, property);
+            TelemetryReport::namespace_path, TelemetryReportManager::interface,
+            property);
     }
 };
 
 TEST_F(TestReportManager, minInterval)
 {
-    EXPECT_THAT(getProperty<uint64_t>("MinInterval"),
+    EXPECT_THAT(getProperty<uint64_t>(
+                    TelemetryReportManager::property_names::min_interval),
                 Eq(ReportManager::minInterval.count()));
 }
 
 TEST_F(TestReportManager, maxReports)
 {
-    EXPECT_THAT(getProperty<size_t>("MaxReports"),
+    EXPECT_THAT(getProperty<size_t>(
+                    TelemetryReportManager::property_names::max_reports),
                 Eq(ReportManager::maxReports));
 }
 
 TEST_F(TestReportManager, returnsPropertySupportedOperationTypes)
 {
     EXPECT_THAT(
-        getProperty<std::vector<std::string>>("SupportedOperationTypes"),
+        getProperty<std::vector<std::string>>(
+            TelemetryReportManager::property_names::supported_operation_types),
         UnorderedElementsAre(utils::enumToString(OperationType::max),
                              utils::enumToString(OperationType::min),
                              utils::enumToString(OperationType::avg),
