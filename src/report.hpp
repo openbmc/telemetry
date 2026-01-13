@@ -143,9 +143,5 @@ class Report : public interfaces::Report, public interfaces::MetricListener
         *this};
 
   public:
-    static constexpr const char* reportIfaceName =
-        "xyz.openbmc_project.Telemetry.Report";
-    static constexpr const char* deleteIfaceName =
-        "xyz.openbmc_project.Object.Delete";
     static constexpr size_t reportVersion = 7;
 };

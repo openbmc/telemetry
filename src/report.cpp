@@ -13,10 +13,17 @@
 
 #include <phosphor-logging/log.hpp>
 #include <sdbusplus/vtable.hpp>
+#include <xyz/openbmc_project/Object/Delete/common.hpp>
+#include <xyz/openbmc_project/Telemetry/Report/common.hpp>
 
 #include <limits>
 #include <numeric>
 #include <optional>
+
+using TelemetryReport =
+    sdbusplus::common::xyz::openbmc_project::telemetry::Report;
+
+using ObjectDelete = sdbusplus::common::xyz::openbmc_project::object::Delete;
 
 Report::Report(
     boost::asio::io_context& ioc,
@@ -49,20 +56,23 @@ Report::Report(
     reportActions.insert(ReportAction::logToMetricReportsCollection);
 
     deleteIface = objServer->add_unique_interface(
-        getPath(), deleteIfaceName,
+        getPath(), ObjectDelete::interface,
         [this, &ioc, &reportManager](auto& dbusIface) {
-            dbusIface.register_method("Delete", [this, &ioc, &reportManager] {
-                if (persistency)
-                {
-                    persistency = false;
+            dbusIface.register_method(
+                ObjectDelete::method_names::delete_,
+                [this, &ioc, &reportManager] {
+                    if (persistency)
+                    {
+                        persistency = false;
 
-                    reportIface->signal_property("Persistency");
-                }
+                        reportIface->signal_property(
+                            TelemetryReport::property_names::persistency);
+                    }
 
-                boost::asio::post(ioc, [this, &reportManager] {
-                    reportManager.removeReport(this);
+                    boost::asio::post(ioc, [this, &reportManager] {
+                        reportManager.removeReport(this);
+                    });
                 });
-            });
         });
 
     auto errorMessages = verify(reportingType, interval);
@@ -94,7 +104,8 @@ Report::Report(
 
             if (triggerIds.size() != oldSize)
             {
-                reportIface->signal_property("Triggers");
+                reportIface->signal_property(
+                    TelemetryReport::property_names::triggers);
             }
         });
 
@@ -190,9 +201,10 @@ std::unique_ptr<sdbusplus::asio::dbus_interface> Report::makeReportInterface(
     const interfaces::ReportFactory& reportFactory)
 {
     auto dbusIface =
-        objServer->add_unique_interface(getPath(), reportIfaceName);
+        objServer->add_unique_interface(getPath(), TelemetryReport::interface);
     dbusIface->register_property_rw<bool>(
-        "Enabled", sdbusplus::vtable::property_::emits_change,
+        TelemetryReport::property_names::enabled,
+        sdbusplus::vtable::property_::emits_change,
         [this](bool newVal, auto& oldValue) {
             if (newVal != state.get<ReportFlags::enabled>())
             {
@@ -235,13 +247,15 @@ std::unique_ptr<sdbusplus::asio::dbus_interface> Report::makeReportInterface(
             if (reportingType != newReportingTypeT)
             {
                 reportingType = newReportingTypeT;
-                reportIface->signal_property("ReportingType");
+                reportIface->signal_property(
+                    TelemetryReport::property_names::reporting_type);
             }
 
             if (interval != newIntervalT)
             {
                 interval = newIntervalT;
-                reportIface->signal_property("Interval");
+                reportIface->signal_property(
+                    TelemetryReport::property_names::interval);
             }
 
             if (state.set<ReportFlags::valid>(errorMessages.empty()) ==
@@ -255,10 +269,12 @@ std::unique_ptr<sdbusplus::asio::dbus_interface> Report::makeReportInterface(
             setReadingBuffer(reportUpdates);
         });
     dbusIface->register_property_r<uint64_t>(
-        "Interval", sdbusplus::vtable::property_::emits_change,
+        TelemetryReport::property_names::interval,
+        sdbusplus::vtable::property_::emits_change,
         [this](const auto&) { return interval.count(); });
     dbusIface->register_property_rw<bool>(
-        "Persistency", sdbusplus::vtable::property_::emits_change,
+        TelemetryReport::property_names::persistency,
+        sdbusplus::vtable::property_::emits_change,
         [this](bool newVal, auto& oldVal) {
             if (newVal == persistency)
             {
@@ -277,14 +293,16 @@ std::unique_ptr<sdbusplus::asio::dbus_interface> Report::makeReportInterface(
         },
         [this](const auto&) { return persistency; });
 
-    dbusIface->register_property_r("Readings", readings,
-                                   sdbusplus::vtable::property_::emits_change,
-                                   [this](const auto&) { return readings; });
+    dbusIface->register_property_r(
+        TelemetryReport::property_names::readings, readings,
+        sdbusplus::vtable::property_::emits_change,
+        [this](const auto&) { return readings; });
     dbusIface->register_property_r<std::string>(
-        "ReportingType", sdbusplus::vtable::property_::emits_change,
+        TelemetryReport::property_names::reporting_type,
+        sdbusplus::vtable::property_::emits_change,
         [this](const auto&) { return utils::enumToString(reportingType); });
     dbusIface->register_property_rw(
-        "ReadingParameters", readingParameters,
+        TelemetryReport::property_names::reading_parameters, readingParameters,
         sdbusplus::vtable::property_::emits_change,
         [this, &reportFactory](auto newVal, auto& oldVal) {
             auto labeledMetricParams =
@@ -310,7 +328,8 @@ std::unique_ptr<sdbusplus::asio::dbus_interface> Report::makeReportInterface(
             return reportActions.contains(ReportAction::emitsReadingsUpdate);
         });
     dbusIface->register_property_r<std::string>(
-        "Name", sdbusplus::vtable::property_::const_,
+        TelemetryReport::property_names::name,
+        sdbusplus::vtable::property_::const_,
         [this](const auto&) { return name; });
     dbusIface->register_property_r<bool>(
         "LogToMetricReportsCollection", sdbusplus::vtable::property_::const_,
@@ -319,7 +338,8 @@ std::unique_ptr<sdbusplus::asio::dbus_interface> Report::makeReportInterface(
                 ReportAction::logToMetricReportsCollection);
         });
     dbusIface->register_property_rw<std::vector<std::string>>(
-        "ReportActions", sdbusplus::vtable::property_::emits_change,
+        TelemetryReport::property_names::report_actions,
+        sdbusplus::vtable::property_::emits_change,
         [this](auto newVal, auto& oldVal) {
             auto tmp = utils::transform<std::unordered_set>(
                 newVal, [](const auto& reportAction) {
@@ -342,10 +362,11 @@ std::unique_ptr<sdbusplus::asio::dbus_interface> Report::makeReportInterface(
                 });
         });
     dbusIface->register_property_r<uint64_t>(
-        "AppendLimit", sdbusplus::vtable::property_::emits_change,
+        TelemetryReport::property_names::append_limit,
+        sdbusplus::vtable::property_::emits_change,
         [this](const auto&) { return appendLimit; });
     dbusIface->register_property_rw(
-        "ReportUpdates", std::string(),
+        TelemetryReport::property_names::report_updates, std::string(),
         sdbusplus::vtable::property_::emits_change,
         [this](auto newVal, auto& oldVal) {
             setReportUpdates(utils::toReportUpdates(newVal));
@@ -354,7 +375,8 @@ std::unique_ptr<sdbusplus::asio::dbus_interface> Report::makeReportInterface(
         },
         [this](const auto&) { return utils::enumToString(reportUpdates); });
     dbusIface->register_property_r(
-        "Triggers", std::vector<sdbusplus::message::object_path>{},
+        TelemetryReport::property_names::triggers,
+        std::vector<sdbusplus::message::object_path>{},
         sdbusplus::vtable::property_::emits_change, [this](const auto&) {
             return utils::transform<std::vector>(
                 triggerIds, [](const auto& triggerId) {
@@ -362,7 +384,7 @@ std::unique_ptr<sdbusplus::asio::dbus_interface> Report::makeReportInterface(
                                              triggerId);
                 });
         });
-    dbusIface->register_method("Update", [this] {
+    dbusIface->register_method(TelemetryReport::method_names::update, [this] {
         if (reportingType == ReportingType::onRequest)
         {
             updateReadings();
@@ -462,7 +484,8 @@ void Report::updateReadings()
                 readingsBuffer.isFull())
             {
                 state.set<ReportFlags::enabled>(false);
-                reportIface->signal_property("Enabled");
+                reportIface->signal_property(
+                    TelemetryReport::property_names::enabled);
                 break;
             }
             readingsBuffer.emplace(metadata, value, timestamp);
@@ -475,7 +498,7 @@ void Report::updateReadings()
 
     if (utils::contains(reportActions, ReportAction::emitsReadingsUpdate))
     {
-        reportIface->signal_property("Readings");
+        reportIface->signal_property(TelemetryReport::property_names::readings);
     }
 }
 
