@@ -21,6 +21,7 @@
 #include "utils/tstring.hpp"
 
 #include <sdbusplus/exception.hpp>
+#include <xyz/openbmc_project/Telemetry/Report/common.hpp>
 
 #include <ranges>
 
@@ -32,6 +33,9 @@ namespace tstring = utils::tstring;
 
 using ErrorMessageDbusType = std::tuple<std::string, std::string>;
 using ErrorMessagesDbusType = std::vector<ErrorMessageDbusType>;
+
+using TelemetryReport =
+    sdbusplus::common::xyz::openbmc_project::telemetry::Report;
 
 constexpr Milliseconds systemTimestamp = 55ms;
 
@@ -148,7 +152,7 @@ class TestReport : public Test
     template <class T>
     static T getProperty(const std::string& path, const std::string& property)
     {
-        return DbusEnvironment::getProperty<T>(path, Report::reportIfaceName,
+        return DbusEnvironment::getProperty<T>(path, TelemetryReport::interface,
                                                property);
     }
 
@@ -156,7 +160,7 @@ class TestReport : public Test
     static boost::system::error_code setProperty(
         const std::string& path, const std::string& property, const T& newValue)
     {
-        return DbusEnvironment::setProperty<T>(path, Report::reportIfaceName,
+        return DbusEnvironment::setProperty<T>(path, TelemetryReport::interface,
                                                property, newValue);
     }
 
@@ -164,7 +168,7 @@ class TestReport : public Test
     static boost::system::error_code callMethod(
         const std::string& path, const std::string& method, Args&&... args)
     {
-        return DbusEnvironment::callMethod(path, Report::reportIfaceName,
+        return DbusEnvironment::callMethod(path, TelemetryReport::interface,
                                            "SetReportingProperties",
                                            std::forward<Args>(args)...);
     }
@@ -204,7 +208,8 @@ class TestReport : public Test
 
     boost::system::error_code update(const std::string& path)
     {
-        return call(path, Report::reportIfaceName, "Update");
+        return call(path, TelemetryReport::interface,
+                    TelemetryReport::method_names::update);
     }
 
     boost::system::error_code deleteReport(const std::string& path)
@@ -226,42 +231,56 @@ TEST_F(TestReport, returnsId)
 
 TEST_F(TestReport, verifyIfPropertiesHaveValidValue)
 {
-    EXPECT_THAT(getProperty<bool>(sut->getPath(), "Enabled"),
+    EXPECT_THAT(getProperty<bool>(sut->getPath(),
+                                  TelemetryReport::property_names::enabled),
                 Eq(defaultParams().enabled()));
-    EXPECT_THAT(getProperty<uint64_t>(sut->getPath(), "Interval"),
+    EXPECT_THAT(getProperty<uint64_t>(
+                    sut->getPath(), TelemetryReport::property_names::interval),
                 Eq(defaultParams().interval().count()));
-    EXPECT_THAT(getProperty<bool>(sut->getPath(), "Persistency"), Eq(true));
+    EXPECT_THAT(getProperty<bool>(sut->getPath(),
+                                  TelemetryReport::property_names::persistency),
+                Eq(true));
     EXPECT_THAT(
-        getProperty<std::vector<std::string>>(sut->getPath(), "ReportActions"),
+        getProperty<std::vector<std::string>>(
+            sut->getPath(), TelemetryReport::property_names::report_actions),
         Eq(utils::transform(defaultParams().reportActions(), [](const auto v) {
             return utils::enumToString(v);
         })));
     EXPECT_THAT(getProperty<bool>(sut->getPath(), "EmitsReadingsUpdate"),
                 Eq(utils::contains(defaultParams().reportActions(),
                                    ReportAction::emitsReadingsUpdate)));
-    EXPECT_THAT(getProperty<uint64_t>(sut->getPath(), "AppendLimit"),
-                Eq(defaultParams().appendLimit()));
-    EXPECT_THAT(getProperty<std::string>(sut->getPath(), "ReportingType"),
+    EXPECT_THAT(
+        getProperty<uint64_t>(sut->getPath(),
+                              TelemetryReport::property_names::append_limit),
+        Eq(defaultParams().appendLimit()));
+    EXPECT_THAT(getProperty<std::string>(
+                    sut->getPath(),
+                    TelemetryReport::property_names::reporting_type),
                 Eq(utils::enumToString(defaultParams().reportingType())));
-    EXPECT_THAT(getProperty<std::string>(sut->getPath(), "ReportUpdates"),
+    EXPECT_THAT(getProperty<std::string>(
+                    sut->getPath(),
+                    TelemetryReport::property_names::report_updates),
                 Eq(utils::enumToString(defaultParams().reportUpdates())));
     EXPECT_THAT(
         getProperty<bool>(sut->getPath(), "LogToMetricReportsCollection"),
         Eq(utils::contains(defaultParams().reportActions(),
                            ReportAction::logToMetricReportsCollection)));
-    EXPECT_THAT(
-        getProperty<ReadingParameters>(sut->getPath(), "ReadingParameters"),
-        Eq(toReadingParameters(defaultParams().metricParameters())));
-    EXPECT_THAT(getProperty<std::string>(sut->getPath(), "Name"),
+    EXPECT_THAT(getProperty<ReadingParameters>(
+                    sut->getPath(),
+                    TelemetryReport::property_names::reading_parameters),
+                Eq(toReadingParameters(defaultParams().metricParameters())));
+    EXPECT_THAT(getProperty<std::string>(sut->getPath(),
+                                         TelemetryReport::property_names::name),
                 Eq(defaultParams().reportName()));
-    EXPECT_THAT(
-        getProperty<std::vector<object_path>>(sut->getPath(), "Triggers"),
-        IsEmpty());
+    EXPECT_THAT(getProperty<std::vector<object_path>>(
+                    sut->getPath(), TelemetryReport::property_names::triggers),
+                IsEmpty());
 }
 
 TEST_F(TestReport, readingsAreInitialyEmpty)
 {
-    EXPECT_THAT(getProperty<Readings>(sut->getPath(), "Readings"),
+    EXPECT_THAT(getProperty<Readings>(
+                    sut->getPath(), TelemetryReport::property_names::readings),
                 Eq(Readings{}));
 }
 
@@ -279,12 +298,15 @@ TEST_F(TestReport, setReadingParametersWithNewParams)
 
     EXPECT_CALL(*reportFactoryMock, updateMetrics(_, _, _))
         .WillOnce(SetArgReferee<0>(metrics));
-    EXPECT_THAT(
-        setProperty(sut->getPath(), "ReadingParameters", newParams).value(),
-        Eq(boost::system::errc::success));
-    EXPECT_THAT(
-        getProperty<ReadingParameters>(sut->getPath(), "ReadingParameters"),
-        Eq(newParams));
+    EXPECT_THAT(setProperty(sut->getPath(),
+                            TelemetryReport::property_names::reading_parameters,
+                            newParams)
+                    .value(),
+                Eq(boost::system::errc::success));
+    EXPECT_THAT(getProperty<ReadingParameters>(
+                    sut->getPath(),
+                    TelemetryReport::property_names::reading_parameters),
+                Eq(newParams));
 }
 
 TEST_F(TestReport, setReadingParametersFailsWhenMetricCountExceedsAllowedValue)
@@ -307,9 +329,11 @@ TEST_F(TestReport, setReadingParametersFailsWhenMetricCountExceedsAllowedValue)
 
     ReadingParameters newParams = toReadingParameters(readingParams);
 
-    EXPECT_THAT(
-        setProperty(sut->getPath(), "ReadingParameters", newParams).value(),
-        Eq(boost::system::errc::invalid_argument));
+    EXPECT_THAT(setProperty(sut->getPath(),
+                            TelemetryReport::property_names::reading_parameters,
+                            newParams)
+                    .value(),
+                Eq(boost::system::errc::invalid_argument));
 }
 
 TEST_F(TestReport, setReportActionsWithValidNewActions)
@@ -321,11 +345,14 @@ TEST_F(TestReport, setReportActionsWithValidNewActions)
                          [](const auto v) { return utils::enumToString(v); });
 
     EXPECT_THAT(newActions, Ne(currActions));
+    EXPECT_THAT(setProperty(sut->getPath(),
+                            TelemetryReport::property_names::report_actions,
+                            newActions)
+                    .value(),
+                Eq(boost::system::errc::success));
     EXPECT_THAT(
-        setProperty(sut->getPath(), "ReportActions", newActions).value(),
-        Eq(boost::system::errc::success));
-    EXPECT_THAT(
-        getProperty<std::vector<std::string>>(sut->getPath(), "ReportActions"),
+        getProperty<std::vector<std::string>>(
+            sut->getPath(), TelemetryReport::property_names::report_actions),
         UnorderedElementsAre(
             utils::enumToString(ReportAction::emitsReadingsUpdate),
             utils::enumToString(ReportAction::logToMetricReportsCollection)));
@@ -344,12 +371,15 @@ TEST_F(TestReport, setReportActionsWithValidUnsortedActions)
                          [](const auto v) { return utils::enumToString(v); });
 
     EXPECT_THAT(newActions, Ne(currActions));
-    EXPECT_THAT(
-        setProperty(sut->getPath(), "ReportActions", newActions).value(),
-        Eq(boost::system::errc::success));
-    EXPECT_THAT(
-        getProperty<std::vector<std::string>>(sut->getPath(), "ReportActions"),
-        Eq(expectedActions));
+    EXPECT_THAT(setProperty(sut->getPath(),
+                            TelemetryReport::property_names::report_actions,
+                            newActions)
+                    .value(),
+                Eq(boost::system::errc::success));
+    EXPECT_THAT(getProperty<std::vector<std::string>>(
+                    sut->getPath(),
+                    TelemetryReport::property_names::report_actions),
+                Eq(expectedActions));
 }
 
 TEST_F(TestReport, setReportActionsWithEmptyActions)
@@ -362,22 +392,28 @@ TEST_F(TestReport, setReportActionsWithEmptyActions)
                          [](const auto v) { return utils::enumToString(v); });
 
     EXPECT_THAT(newActions, Ne(currActions));
-    EXPECT_THAT(
-        setProperty(sut->getPath(), "ReportActions", newActions).value(),
-        Eq(boost::system::errc::success));
-    EXPECT_THAT(
-        getProperty<std::vector<std::string>>(sut->getPath(), "ReportActions"),
-        Eq(expectedActions));
+    EXPECT_THAT(setProperty(sut->getPath(),
+                            TelemetryReport::property_names::report_actions,
+                            newActions)
+                    .value(),
+                Eq(boost::system::errc::success));
+    EXPECT_THAT(getProperty<std::vector<std::string>>(
+                    sut->getPath(),
+                    TelemetryReport::property_names::report_actions),
+                Eq(expectedActions));
 }
 
 TEST_F(TestReport, setReportActionsWithInvalidActions)
 {
     std::vector<std::string> invalidActions = {"EmitsReadingsUpdate_1"};
+    EXPECT_THAT(setProperty(sut->getPath(),
+                            TelemetryReport::property_names::report_actions,
+                            invalidActions)
+                    .value(),
+                Eq(boost::system::errc::invalid_argument));
     EXPECT_THAT(
-        setProperty(sut->getPath(), "ReportActions", invalidActions).value(),
-        Eq(boost::system::errc::invalid_argument));
-    EXPECT_THAT(
-        getProperty<std::vector<std::string>>(sut->getPath(), "ReportActions"),
+        getProperty<std::vector<std::string>>(
+            sut->getPath(), TelemetryReport::property_names::report_actions),
         Eq(utils::transform(defaultParams().reportActions(), [](const auto v) {
             return utils::enumToString(v);
         })));
@@ -389,9 +425,10 @@ TEST_F(TestReport, createReportWithEmptyActions)
         utils::enumToString(ReportAction::logToMetricReportsCollection)};
 
     sut = makeReport(ReportParams().reportId("TestId_1").reportActions({}));
-    EXPECT_THAT(
-        getProperty<std::vector<std::string>>(sut->getPath(), "ReportActions"),
-        Eq(expectedActions));
+    EXPECT_THAT(getProperty<std::vector<std::string>>(
+                    sut->getPath(),
+                    TelemetryReport::property_names::report_actions),
+                Eq(expectedActions));
 }
 
 TEST_F(TestReport, createReportWithValidUnsortedActions)
@@ -409,17 +446,22 @@ TEST_F(TestReport, createReportWithValidUnsortedActions)
             .reportActions(utils::transform(newActions, [](const auto& action) {
                 return utils::toReportAction(action);
             })));
-    EXPECT_THAT(
-        getProperty<std::vector<std::string>>(sut->getPath(), "ReportActions"),
-        Eq(expectedActions));
+    EXPECT_THAT(getProperty<std::vector<std::string>>(
+                    sut->getPath(),
+                    TelemetryReport::property_names::report_actions),
+                Eq(expectedActions));
 }
 
 TEST_F(TestReport, setEnabledWithNewValue)
 {
     bool newValue = !defaultParams().enabled();
-    EXPECT_THAT(setProperty(sut->getPath(), "Enabled", newValue).value(),
+    EXPECT_THAT(setProperty(sut->getPath(),
+                            TelemetryReport::property_names::enabled, newValue)
+                    .value(),
                 Eq(boost::system::errc::success));
-    EXPECT_THAT(getProperty<bool>(sut->getPath(), "Enabled"), Eq(newValue));
+    EXPECT_THAT(getProperty<bool>(sut->getPath(),
+                                  TelemetryReport::property_names::enabled),
+                Eq(newValue));
 }
 
 TEST_F(TestReport, setReportingPropertiesWithValidValues)
@@ -429,7 +471,8 @@ TEST_F(TestReport, setReportingPropertiesWithValidValues)
                            utils::enumToString(ReportingType::periodic),
                            newValue),
                 Eq(boost::system::errc::success));
-    EXPECT_THAT(getProperty<uint64_t>(sut->getPath(), "Interval"),
+    EXPECT_THAT(getProperty<uint64_t>(
+                    sut->getPath(), TelemetryReport::property_names::interval),
                 Eq(newValue));
 }
 
@@ -441,7 +484,8 @@ TEST_F(TestReport, failsToSetInvalidInterval)
                            newValue),
                 Eq(boost::system::errc::invalid_argument));
 
-    EXPECT_THAT(getProperty<uint64_t>(sut->getPath(), "Interval"),
+    EXPECT_THAT(getProperty<uint64_t>(
+                    sut->getPath(), TelemetryReport::property_names::interval),
                 Eq(defaultParams().interval().count()));
 }
 
@@ -458,8 +502,10 @@ TEST_F(TestReport, failsToSetIncompatibleInterval)
                            newValue),
                 Eq(boost::system::errc::invalid_argument));
 
-    EXPECT_THAT(getProperty<uint64_t>(report->getPath(), "Interval"),
-                Eq(defaultParams().interval().count()));
+    EXPECT_THAT(
+        getProperty<uint64_t>(report->getPath(),
+                              TelemetryReport::property_names::interval),
+        Eq(defaultParams().interval().count()));
 }
 
 TEST_F(TestReport, failsToSetInvalidReportingType)
@@ -473,7 +519,9 @@ TEST_F(TestReport, failsToSetInvalidReportingType)
                            std::numeric_limits<uint64_t>::max()),
                 Eq(boost::system::errc::invalid_argument));
 
-    EXPECT_THAT(getProperty<std::string>(report->getPath(), "ReportingType"),
+    EXPECT_THAT(getProperty<std::string>(
+                    report->getPath(),
+                    TelemetryReport::property_names::reporting_type),
                 Eq(utils::enumToString(ReportingType::onRequest)));
 }
 
@@ -489,7 +537,9 @@ TEST_F(TestReport, failsToSetIncompatibleReportingType)
                            std::numeric_limits<uint64_t>::max()),
                 Eq(boost::system::errc::invalid_argument));
 
-    EXPECT_THAT(getProperty<std::string>(report->getPath(), "ReportingType"),
+    EXPECT_THAT(getProperty<std::string>(
+                    report->getPath(),
+                    TelemetryReport::property_names::reporting_type),
                 Eq(utils::enumToString(ReportingType::onRequest)));
 }
 
@@ -522,9 +572,13 @@ TEST_F(TestReport, settingPersistencyToFalseRemovesReportFromStorage)
         .Times(AtLeast(1));
 
     bool persistency = false;
-    EXPECT_THAT(setProperty(sut->getPath(), "Persistency", persistency).value(),
+    EXPECT_THAT(setProperty(sut->getPath(),
+                            TelemetryReport::property_names::persistency,
+                            persistency)
+                    .value(),
                 Eq(boost::system::errc::success));
-    EXPECT_THAT(getProperty<bool>(sut->getPath(), "Persistency"),
+    EXPECT_THAT(getProperty<bool>(sut->getPath(),
+                                  TelemetryReport::property_names::persistency),
                 Eq(persistency));
 }
 
@@ -568,7 +622,8 @@ TEST_F(TestReport, updatesTriggerIdWhenTriggerIsAdded)
         {"someOtherReport", defaultParams().reportId()}});
 
     EXPECT_THAT(
-        getProperty<std::vector<object_path>>(sut->getPath(), "Triggers"),
+        getProperty<std::vector<object_path>>(
+            sut->getPath(), TelemetryReport::property_names::triggers),
         UnorderedElementsAre(utils::constants::triggerDirPath / "trigger1",
                              utils::constants::triggerDirPath / "trigger3"));
 }
@@ -592,7 +647,8 @@ TEST_F(TestReport, updatesTriggerIdWhenTriggerIsRemoved)
         messages::Presence::Removed, "trigger1", {defaultParams().reportId()}});
 
     EXPECT_THAT(
-        getProperty<std::vector<object_path>>(sut->getPath(), "Triggers"),
+        getProperty<std::vector<object_path>>(
+            sut->getPath(), TelemetryReport::property_names::triggers),
         UnorderedElementsAre(utils::constants::triggerDirPath / "trigger3"));
 }
 
@@ -615,7 +671,8 @@ TEST_F(TestReport, updatesTriggerIdWhenTriggerIsModified)
         messages::Presence::Exist, "trigger3", {defaultParams().reportId()}});
 
     EXPECT_THAT(
-        getProperty<std::vector<object_path>>(sut->getPath(), "Triggers"),
+        getProperty<std::vector<object_path>>(
+            sut->getPath(), TelemetryReport::property_names::triggers),
         UnorderedElementsAre(utils::constants::triggerDirPath / "trigger1",
                              utils::constants::triggerDirPath / "trigger3"));
 }
@@ -678,9 +735,11 @@ TEST_P(TestReportStore, settingPersistencyToTrueStoresReport)
         EXPECT_CALL(storageMock, store(to_file_path(sut->getId()), _));
     }
 
-    setProperty(sut->getPath(), "Persistency", false);
+    setProperty(sut->getPath(), TelemetryReport::property_names::persistency,
+                false);
     checkPoint.Call();
-    setProperty(sut->getPath(), "Persistency", true);
+    setProperty(sut->getPath(), TelemetryReport::property_names::persistency,
+                true);
 
     const auto& [key, value] = GetParam();
 
@@ -761,9 +820,10 @@ INSTANTIATE_TEST_SUITE_P(
 
 TEST_P(TestReportAllReportTypes, returnPropertValueOfReportType)
 {
-    EXPECT_THAT(utils::toReportingType(
-                    getProperty<std::string>(sut->getPath(), "ReportingType")),
-                Eq(GetParam().reportingType()));
+    EXPECT_THAT(
+        utils::toReportingType(getProperty<std::string>(
+            sut->getPath(), TelemetryReport::property_names::reporting_type)),
+        Eq(GetParam().reportingType()));
 }
 
 TEST_P(TestReportAllReportTypes, readingsAreUpdated)
@@ -771,8 +831,8 @@ TEST_P(TestReportAllReportTypes, readingsAreUpdated)
     clockFake.system.advance(10ms);
 
     messanger.send(messages::UpdateReportInd{{sut->getId()}});
-    const auto [timestamp, readings] =
-        getProperty<Readings>(sut->getPath(), "Readings");
+    const auto [timestamp, readings] = getProperty<Readings>(
+        sut->getPath(), TelemetryReport::property_names::readings);
 
     EXPECT_THAT(Milliseconds{timestamp}, Eq(systemTimestamp + 10ms));
 }
@@ -781,10 +841,11 @@ TEST_P(TestReportAllReportTypes, readingsAreNotUpdatedWhenReportIsDisabled)
 {
     clockFake.system.advance(10ms);
 
-    setProperty(sut->getPath(), "Enabled", false);
+    setProperty(sut->getPath(), TelemetryReport::property_names::enabled,
+                false);
     messanger.send(messages::UpdateReportInd{{sut->getId()}});
-    const auto [timestamp, readings] =
-        getProperty<Readings>(sut->getPath(), "Readings");
+    const auto [timestamp, readings] = getProperty<Readings>(
+        sut->getPath(), TelemetryReport::property_names::readings);
 
     EXPECT_THAT(Milliseconds{timestamp}, Eq(0ms));
 }
@@ -794,8 +855,8 @@ TEST_P(TestReportAllReportTypes, readingsAreNotUpdatedWhenReportIdDiffers)
     clockFake.system.advance(10ms);
 
     messanger.send(messages::UpdateReportInd{{sut->getId() + "x"s}});
-    const auto [timestamp, readings] =
-        getProperty<Readings>(sut->getPath(), "Readings");
+    const auto [timestamp, readings] = getProperty<Readings>(
+        sut->getPath(), TelemetryReport::property_names::readings);
 
     EXPECT_THAT(Milliseconds{timestamp}, Eq(0ms));
 }
@@ -815,8 +876,8 @@ TEST_F(TestReportOnRequestType, updatesReadingTimestamp)
 
     ASSERT_THAT(update(sut->getPath()), Eq(boost::system::errc::success));
 
-    const auto [timestamp, readings] =
-        getProperty<Readings>(sut->getPath(), "Readings");
+    const auto [timestamp, readings] = getProperty<Readings>(
+        sut->getPath(), TelemetryReport::property_names::readings);
 
     EXPECT_THAT(Milliseconds{timestamp}, Eq(systemTimestamp + 10ms));
 }
@@ -825,8 +886,8 @@ TEST_F(TestReportOnRequestType, updatesReadingWhenUpdateIsCalled)
 {
     ASSERT_THAT(update(sut->getPath()), Eq(boost::system::errc::success));
 
-    const auto [timestamp, readings] =
-        getProperty<Readings>(sut->getPath(), "Readings");
+    const auto [timestamp, readings] = getProperty<Readings>(
+        sut->getPath(), TelemetryReport::property_names::readings);
 
     EXPECT_THAT(readings, ElementsAre(std::make_tuple("b"s, 17.1, 114u),
                                       std::make_tuple("bb"s, 42.0, 74u)));
@@ -854,7 +915,8 @@ TEST_P(TestReportNonOnRequestType, readingsAreNotUpdateOnUpdateCall)
 {
     ASSERT_THAT(update(sut->getPath()), Eq(boost::system::errc::success));
 
-    EXPECT_THAT(getProperty<Readings>(sut->getPath(), "Readings"),
+    EXPECT_THAT(getProperty<Readings>(
+                    sut->getPath(), TelemetryReport::property_names::readings),
                 Eq(Readings{}));
 }
 
@@ -878,7 +940,8 @@ TEST_P(TestReportNonPeriodicReport, readingsAreNotUpdatedAfterIntervalExpires)
 {
     DbusEnvironment::sleepFor(ReportManager::minInterval + 1ms);
 
-    EXPECT_THAT(getProperty<Readings>(sut->getPath(), "Readings"),
+    EXPECT_THAT(getProperty<Readings>(
+                    sut->getPath(), TelemetryReport::property_names::readings),
                 Eq(Readings{}));
 }
 
@@ -898,8 +961,8 @@ TEST_F(TestReportPeriodicReport, readingTimestampIsUpdatedAfterIntervalExpires)
     clockFake.system.advance(10ms);
     DbusEnvironment::sleepFor(ReportManager::minInterval + 1ms);
 
-    const auto [timestamp, readings] =
-        getProperty<Readings>(sut->getPath(), "Readings");
+    const auto [timestamp, readings] = getProperty<Readings>(
+        sut->getPath(), TelemetryReport::property_names::readings);
 
     EXPECT_THAT(Milliseconds{timestamp}, Eq(systemTimestamp + 10ms));
 }
@@ -908,8 +971,8 @@ TEST_F(TestReportPeriodicReport, readingsAreUpdatedAfterIntervalExpires)
 {
     DbusEnvironment::sleepFor(ReportManager::minInterval + 1ms);
 
-    const auto [timestamp, readings] =
-        getProperty<Readings>(sut->getPath(), "Readings");
+    const auto [timestamp, readings] = getProperty<Readings>(
+        sut->getPath(), TelemetryReport::property_names::readings);
 
     EXPECT_THAT(readings, ElementsAre(std::make_tuple("b"s, 17.1, 114u),
                                       std::make_tuple("bb"s, 42.0, 74u)));
@@ -947,8 +1010,8 @@ class TestReportWithReportUpdatesAndLimit :
 
     auto readings()
     {
-        auto [timestamp,
-              readings] = getProperty<Readings>(sut->getPath(), "Readings");
+        auto [timestamp, readings] = getProperty<Readings>(
+            sut->getPath(), TelemetryReport::property_names::readings);
         return readings;
     }
 
@@ -1064,7 +1127,8 @@ TEST_P(TestReportWithReportUpdatesAndLimit,
     updateReportFourTimes();
 
     EXPECT_THAT(readings(), ElementsAreArray(GetParam().expectedReadings));
-    EXPECT_THAT(getProperty<bool>(sut->getPath(), "Enabled"),
+    EXPECT_THAT(getProperty<bool>(sut->getPath(),
+                                  TelemetryReport::property_names::enabled),
                 Eq(GetParam().expectedEnabled));
 }
 
@@ -1080,7 +1144,8 @@ TEST_P(TestReportWithReportUpdatesAndLimit,
     updateReportFourTimes();
 
     EXPECT_THAT(readings(), ElementsAreArray(GetParam().expectedReadings));
-    EXPECT_THAT(getProperty<bool>(sut->getPath(), "Enabled"),
+    EXPECT_THAT(getProperty<bool>(sut->getPath(),
+                                  TelemetryReport::property_names::enabled),
                 Eq(GetParam().expectedEnabled));
 }
 
@@ -1095,7 +1160,9 @@ TEST_P(TestReportWithReportUpdatesAndLimit,
     updateReportFourTimes();
 
     EXPECT_THAT(readings(), SizeIs(2u));
-    EXPECT_THAT(getProperty<bool>(sut->getPath(), "Enabled"), Eq(true));
+    EXPECT_THAT(getProperty<bool>(sut->getPath(),
+                                  TelemetryReport::property_names::enabled),
+                Eq(true));
 }
 
 class TestReportInitialization : public TestReport
@@ -1115,11 +1182,11 @@ class TestReportInitialization : public TestReport
 
         msg.read(iface, changed_properties, invalidated_properties);
 
-        if (iface == Report::reportIfaceName)
+        if (iface == TelemetryReport::interface)
         {
             for (const auto& [name, value] : changed_properties)
             {
-                if (name == "Readings")
+                if (name == TelemetryReport::property_names::readings)
                 {
                     readingsUpdated.Call();
                 }
@@ -1132,7 +1199,7 @@ class TestReportInitialization : public TestReport
         monitor = std::make_unique<sdbusplus::bus::match_t>(
             *DbusEnvironment::getBus(),
             sdbusplus::bus::match::rules::propertiesChanged(
-                sut->getPath(), Report::reportIfaceName),
+                sut->getPath(), TelemetryReport::interface),
             [this](auto& msg) { monitorProc(msg); });
     }
 
@@ -1243,7 +1310,8 @@ TEST_F(TestReportInitialization, triggerIdsPropertyIsInitialzed)
     sut = makeReport(ReportParams());
 
     EXPECT_THAT(
-        getProperty<std::vector<object_path>>(sut->getPath(), "Triggers"),
+        getProperty<std::vector<object_path>>(
+            sut->getPath(), TelemetryReport::property_names::triggers),
         UnorderedElementsAre(utils::constants::triggerDirPath / "trigger1",
                              utils::constants::triggerDirPath / "trigger2"));
 }
