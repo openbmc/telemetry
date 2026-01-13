@@ -68,8 +68,6 @@ class ReportManager : public interfaces::ReportManager
     static constexpr size_t maxNumberMetrics{TELEMETRY_MAX_READING_PARAMS};
     static constexpr Milliseconds minInterval{TELEMETRY_MIN_INTERVAL};
     static constexpr size_t maxAppendLimit{TELEMETRY_MAX_APPEND_LIMIT};
-    static constexpr const char* reportManagerIfaceName =
-        "xyz.openbmc_project.Telemetry.ReportManager";
     static constexpr const char* reportManagerPath =
         "/xyz/openbmc_project/Telemetry/Reports";
     static constexpr std::string_view reportNameDefault = "Report";

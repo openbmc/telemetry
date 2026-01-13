@@ -11,9 +11,19 @@
 #include <sdbusplus/exception.hpp>
 #include <sdbusplus/unpack_properties.hpp>
 
+// Need to include Telemetry.Report here as well since the
+// Telemetry.ReportManager header depends on types defined there.
+// TODO: fixup the PDI header gen such that ReportManager header will include
+// any headers it depends on.
+#include <xyz/openbmc_project/Telemetry/Report/common.hpp>
+#include <xyz/openbmc_project/Telemetry/ReportManager/common.hpp>
+
 #include <optional>
 #include <stdexcept>
 #include <system_error>
+
+using TelemetryReportManager =
+    sdbusplus::common::xyz::openbmc_project::telemetry::ReportManager;
 
 ReportManager::ReportManager(
     std::unique_ptr<interfaces::ReportFactory> reportFactoryIn,
@@ -27,15 +37,20 @@ ReportManager::ReportManager(
     loadFromPersistent();
 
     reportManagerIface = objServer->add_unique_interface(
-        reportManagerPath, reportManagerIfaceName, [this](auto& dbusIface) {
+        reportManagerPath, TelemetryReportManager::interface,
+        [this](auto& dbusIface) {
             dbusIface.register_property_r(
-                "MaxReports", size_t{}, sdbusplus::vtable::property_::const_,
+                TelemetryReportManager::property_names::max_reports, size_t{},
+                sdbusplus::vtable::property_::const_,
                 [](const auto&) { return maxReports; });
             dbusIface.register_property_r(
-                "MinInterval", uint64_t{}, sdbusplus::vtable::property_::const_,
+                TelemetryReportManager::property_names::min_interval,
+                uint64_t{}, sdbusplus::vtable::property_::const_,
                 [](const auto&) -> uint64_t { return minInterval.count(); });
             dbusIface.register_property_r(
-                "SupportedOperationTypes", std::vector<std::string>{},
+                TelemetryReportManager::property_names::
+                    supported_operation_types,
+                std::vector<std::string>{},
                 sdbusplus::vtable::property_::const_,
                 [](const auto&) -> std::vector<std::string> {
                     return utils::transform<std::vector>(
@@ -44,7 +59,7 @@ ReportManager::ReportManager(
                         });
                 });
             dbusIface.register_method(
-                "AddReport",
+                TelemetryReportManager::method_names::add_report,
                 [this](boost::asio::yield_context& yield, std::string reportId,
                        std::string reportName, std::string reportingType,
                        std::string reportUpdates, uint64_t appendLimit,
