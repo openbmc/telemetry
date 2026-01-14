@@ -5,8 +5,11 @@
 #include <boost/container/flat_map.hpp>
 #include <phosphor-logging/log.hpp>
 #include <sdbusplus/asio/property.hpp>
+#include <xyz/openbmc_project/Sensor/Value/common.hpp>
 
 #include <functional>
+
+using SensorValue = sdbusplus::common::xyz::openbmc_project::sensor::Value;
 
 Sensor::Sensor(interfaces::Sensor::Id sensorId,
                const std::string& sensorMetadata, boost::asio::io_context& ioc,
@@ -45,8 +48,8 @@ void Sensor::async_read(std::shared_ptr<utils::UniqueCall::Lock> lock)
     makeSignalMonitor();
 
     sdbusplus::asio::getProperty<double>(
-        *bus, sensorId.service, sensorId.path,
-        "xyz.openbmc_project.Sensor.Value", "Value",
+        *bus, sensorId.service, sensorId.path, SensorValue::interface,
+        SensorValue::property_names::value,
         [lock, id = sensorId, weakSelf = weak_from_this()](
             boost::system::error_code ec, double newValue) {
             if (ec)
@@ -132,7 +135,7 @@ void Sensor::makeSignalMonitor()
 
     const auto param =
         "type='signal',member='PropertiesChanged',path='"s + sensorId.path +
-        "',arg0='xyz.openbmc_project.Sensor.Value'"s;
+        "',arg0='" + SensorValue::interface + "'"s;
 
     signalMonitor = std::make_unique<sdbusplus::bus::match_t>(
         *bus, param,
@@ -153,9 +156,10 @@ void Sensor::signalProc(const std::weak_ptr<Sensor>& weakSelf,
 
         message.read(iface, changed_properties, invalidated_properties);
 
-        if (iface == "xyz.openbmc_project.Sensor.Value")
+        if (iface == SensorValue::interface)
         {
-            const auto it = changed_properties.find("Value");
+            const auto it =
+                changed_properties.find(SensorValue::property_names::value);
             if (it != changed_properties.end())
             {
                 if (auto val = std::get_if<double>(&it->second))
