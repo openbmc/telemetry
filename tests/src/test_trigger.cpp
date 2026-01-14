@@ -19,6 +19,12 @@
 #include "utils/tstring.hpp"
 
 #include <boost/range/combine.hpp>
+#include <xyz/openbmc_project/Object/Delete/common.hpp>
+#include <xyz/openbmc_project/Telemetry/Trigger/common.hpp>
+
+using TelemetryTrigger =
+    sdbusplus::common::xyz::openbmc_project::telemetry::Trigger;
+using ObjectDelete = sdbusplus::common::xyz::openbmc_project::object::Delete;
 
 using namespace testing;
 using namespace std::literals::string_literals;
@@ -102,16 +108,16 @@ class TestTrigger : public Test
     template <class T>
     static T getProperty(const std::string& path, const std::string& property)
     {
-        return DbusEnvironment::getProperty<T>(path, Trigger::triggerIfaceName,
-                                               property);
+        return DbusEnvironment::getProperty<T>(
+            path, TelemetryTrigger::interface, property);
     }
 
     template <class T>
     static boost::system::error_code setProperty(
         const std::string& path, const std::string& property, const T& newValue)
     {
-        return DbusEnvironment::setProperty<T>(path, Trigger::triggerIfaceName,
-                                               property, newValue);
+        return DbusEnvironment::setProperty<T>(
+            path, TelemetryTrigger::interface, property, newValue);
     }
 
     template <class T>
@@ -141,38 +147,46 @@ class TestTrigger : public Test
             [&methodPromise](boost::system::error_code ec) {
                 methodPromise.set_value(ec);
             },
-            DbusEnvironment::serviceName(), path, Trigger::deleteIfaceName,
-            "Delete");
+            DbusEnvironment::serviceName(), path, ObjectDelete::interface,
+            ObjectDelete::method_names::delete_);
         return DbusEnvironment::waitForFuture(methodPromise.get_future());
     }
 };
 
 TEST_F(TestTrigger, checkIfPropertiesAreSet)
 {
-    EXPECT_THAT(getProperty<std::string>(sut->getPath(), "Name"),
+    EXPECT_THAT(getProperty<std::string>(
+                    sut->getPath(), TelemetryTrigger::property_names::name),
                 Eq(triggerParams.name()));
-    EXPECT_THAT(getProperty<bool>(sut->getPath(), "Persistent"), Eq(true));
+    EXPECT_THAT(getProperty<bool>(sut->getPath(),
+                                  TelemetryTrigger::property_names::persistent),
+                Eq(true));
     EXPECT_THAT(
-        getProperty<std::vector<std::string>>(sut->getPath(), "TriggerActions"),
+        getProperty<std::vector<std::string>>(
+            sut->getPath(), TelemetryTrigger::property_names::trigger_actions),
         Eq(utils::transform(
             triggerParams.triggerActions(),
             [](const auto& action) { return actionToString(action); })));
-    EXPECT_THAT((getProperty<SensorsInfo>(sut->getPath(), "Sensors")),
+    EXPECT_THAT((getProperty<SensorsInfo>(
+                    sut->getPath(), TelemetryTrigger::property_names::sensors)),
                 Eq(utils::fromLabeledSensorsInfo(triggerParams.sensors())));
+    EXPECT_THAT(getProperty<std::vector<object_path>>(
+                    sut->getPath(), TelemetryTrigger::property_names::reports),
+                Eq(triggerParams.reports()));
     EXPECT_THAT(
-        getProperty<std::vector<object_path>>(sut->getPath(), "Reports"),
-        Eq(triggerParams.reports()));
-    EXPECT_THAT(
-        getProperty<bool>(sut->getPath(), "Discrete"),
+        getProperty<bool>(sut->getPath(),
+                          TelemetryTrigger::property_names::discrete),
         Eq(isTriggerThresholdDiscrete(triggerParams.thresholdParams())));
 
     EXPECT_THAT(getProperty<std::vector<numeric::ThresholdParam>>(
-                    sut->getPath(), "NumericThresholds"),
+                    sut->getPath(),
+                    TelemetryTrigger::property_names::numeric_thresholds),
                 Eq(std::get<0>(utils::FromLabeledThresholdParamConversion()(
                     triggerParams.numericThresholdParams()))));
 
     EXPECT_THAT(getProperty<std::vector<discrete::ThresholdParam>>(
-                    sut->getPath(), "DiscreteThresholds"),
+                    sut->getPath(),
+                    TelemetryTrigger::property_names::discrete_thresholds),
                 Eq(std::get<1>(utils::FromLabeledThresholdParamConversion()(
                     triggerParams.discreteThresholdParams()))));
 }
@@ -187,9 +201,12 @@ TEST_F(TestTrigger, checkBasicGetters)
 TEST_F(TestTrigger, setPropertyNameToCorrectValue)
 {
     std::string name = "custom name 1234 %^#5";
-    EXPECT_THAT(setProperty(sut->getPath(), "Name", name),
+    EXPECT_THAT(setProperty(sut->getPath(),
+                            TelemetryTrigger::property_names::name, name),
                 Eq(boost::system::errc::success));
-    EXPECT_THAT(getProperty<std::string>(sut->getPath(), "Name"), Eq(name));
+    EXPECT_THAT(getProperty<std::string>(
+                    sut->getPath(), TelemetryTrigger::property_names::name),
+                Eq(name));
 }
 
 TEST_F(TestTrigger, setPropertyReportNames)
@@ -198,11 +215,13 @@ TEST_F(TestTrigger, setPropertyReportNames)
         utils::constants::reportDirPath / "abc",
         utils::constants::reportDirPath / "one",
         utils::constants::reportDirPath / "prefix" / "two"};
-    EXPECT_THAT(setProperty(sut->getPath(), "Reports", newNames),
+    EXPECT_THAT(setProperty(sut->getPath(),
+                            TelemetryTrigger::property_names::reports,
+                            newNames),
                 Eq(boost::system::errc::success));
-    EXPECT_THAT(
-        getProperty<std::vector<object_path>>(sut->getPath(), "Reports"),
-        Eq(newNames));
+    EXPECT_THAT(getProperty<std::vector<object_path>>(
+                    sut->getPath(), TelemetryTrigger::property_names::reports),
+                Eq(newNames));
 }
 
 TEST_F(TestTrigger, sendsUpdateWhenReportNamesChanges)
@@ -216,7 +235,9 @@ TEST_F(TestTrigger, sendsUpdateWhenReportNamesChanges)
                 Call(FieldsAre(messages::Presence::Exist, triggerParams.id(),
                                UnorderedElementsAre("abc", "one", "two"))));
 
-    EXPECT_THAT(setProperty(sut->getPath(), "Reports", newPropertyVal),
+    EXPECT_THAT(setProperty(sut->getPath(),
+                            TelemetryTrigger::property_names::reports,
+                            newPropertyVal),
                 Eq(boost::system::errc::success));
 }
 
@@ -229,7 +250,9 @@ TEST_F(TestTrigger, sendsUpdateWhenReportNamesChangesToSameValue)
         Call(FieldsAre(messages::Presence::Exist, triggerParams.id(),
                        UnorderedElementsAreArray(triggerParams.reportIds()))));
 
-    EXPECT_THAT(setProperty(sut->getPath(), "Reports", newPropertyVal),
+    EXPECT_THAT(setProperty(sut->getPath(),
+                            TelemetryTrigger::property_names::reports,
+                            newPropertyVal),
                 Eq(boost::system::errc::success));
 }
 
@@ -243,7 +266,9 @@ TEST_F(TestTrigger,
 
     EXPECT_CALL(triggerPresenceChanged, Call(_)).Times(0);
 
-    EXPECT_THAT(setProperty(sut->getPath(), "Reports", newPropertyVal),
+    EXPECT_THAT(setProperty(sut->getPath(),
+                            TelemetryTrigger::property_names::reports,
+                            newPropertyVal),
                 Eq(boost::system::errc::invalid_argument));
 }
 
@@ -255,7 +280,9 @@ TEST_F(TestTrigger,
 
     EXPECT_CALL(triggerPresenceChanged, Call(_)).Times(0);
 
-    EXPECT_THAT(setProperty(sut->getPath(), "Reports", newPropertyVal),
+    EXPECT_THAT(setProperty(sut->getPath(),
+                            TelemetryTrigger::property_names::reports,
+                            newPropertyVal),
                 Eq(boost::system::errc::invalid_argument));
 }
 
@@ -268,7 +295,9 @@ TEST_F(TestTrigger,
 
     EXPECT_CALL(triggerPresenceChanged, Call(_)).Times(0);
 
-    EXPECT_THAT(setProperty(sut->getPath(), "Reports", newPropertyVal),
+    EXPECT_THAT(setProperty(sut->getPath(),
+                            TelemetryTrigger::property_names::reports,
+                            newPropertyVal),
                 Eq(boost::system::errc::invalid_argument));
 }
 
@@ -281,7 +310,9 @@ TEST_F(TestTrigger,
 
     EXPECT_CALL(triggerPresenceChanged, Call(_)).Times(0);
 
-    EXPECT_THAT(setProperty(sut->getPath(), "Reports", newPropertyVal),
+    EXPECT_THAT(setProperty(sut->getPath(),
+                            TelemetryTrigger::property_names::reports,
+                            newPropertyVal),
                 Eq(boost::system::errc::invalid_argument));
 }
 
@@ -293,7 +324,9 @@ TEST_F(TestTrigger,
 
     EXPECT_CALL(triggerPresenceChanged, Call(_)).Times(0);
 
-    EXPECT_THAT(setProperty(sut->getPath(), "Reports", newPropertyVal),
+    EXPECT_THAT(setProperty(sut->getPath(),
+                            TelemetryTrigger::property_names::reports,
+                            newPropertyVal),
                 Eq(boost::system::errc::invalid_argument));
 }
 
@@ -308,7 +341,9 @@ TEST_F(TestTrigger, setPropertySensors)
     }
     SensorsInfo newSensors(
         {std::make_pair(object_path("/abc/def"), "metadata")});
-    EXPECT_THAT(setProperty(sut->getPath(), "Sensors", newSensors),
+    EXPECT_THAT(setProperty(sut->getPath(),
+                            TelemetryTrigger::property_names::sensors,
+                            newSensors),
                 Eq(boost::system::errc::success));
 }
 
@@ -318,8 +353,11 @@ TEST_F(TestTrigger, setPropertyNumericThresholds)
     auto newThresholds = std::vector<numeric::ThresholdParam>({std::make_tuple(
         numeric::typeToString(numeric::Type::upperWarning), 10,
         numeric::directionToString(numeric::Direction::increasing), 12.3)});
-    EXPECT_THAT(setProperty(sut->getPath(), "NumericThresholds", newThresholds),
-                Eq(boost::system::errc::success));
+    EXPECT_THAT(
+        setProperty(sut->getPath(),
+                    TelemetryTrigger::property_names::numeric_thresholds,
+                    newThresholds),
+        Eq(boost::system::errc::success));
 }
 
 TEST_F(TestTrigger, setPropertyDiscreteThresholds)
@@ -328,9 +366,11 @@ TEST_F(TestTrigger, setPropertyDiscreteThresholds)
     auto newThresholds = std::vector<discrete::ThresholdParam>({std::make_tuple(
         "discrete threshold", utils::enumToString(discrete::Severity::ok), 10,
         "12.3")});
-    EXPECT_THAT(setProperty(sut->getPath(), "DiscreteThresholds",
-                            newThresholds),
-                Eq(boost::system::errc::success));
+    EXPECT_THAT(
+        setProperty(sut->getPath(),
+                    TelemetryTrigger::property_names::discrete_thresholds,
+                    newThresholds),
+        Eq(boost::system::errc::success));
 }
 
 TEST_F(TestTrigger, setThresholdParamsWithTooLongDiscreteName)
@@ -344,7 +384,7 @@ TEST_F(TestTrigger, setThresholdParamsWithTooLongDiscreteName)
         utils::enumToString(discrete::Severity::ok), 10, "12.3")});
 
     changeProperty<std::vector<discrete::ThresholdParam>>(
-        sut->getPath(), "DiscreteThresholds",
+        sut->getPath(), TelemetryTrigger::property_names::discrete_thresholds,
         {.valueBefore = Eq(currentValue),
          .newValue = newThresholds,
          .ec = Eq(boost::system::errc::invalid_argument),
@@ -356,7 +396,7 @@ TEST_F(TestTrigger, setNameTooLong)
     std::string currentValue = TriggerParams().name();
 
     changeProperty<std::string>(
-        sut->getPath(), "Name",
+        sut->getPath(), TelemetryTrigger::property_names::name,
         {.valueBefore = Eq(currentValue),
          .newValue = utils::string_utils::getTooLongName(),
          .ec = Eq(boost::system::errc::invalid_argument),
@@ -446,9 +486,12 @@ TEST_F(TestTrigger, settingPersistencyToFalseRemovesTriggerFromStorage)
     EXPECT_CALL(storageMock, remove(to_file_path(sut->getId())));
 
     bool persistent = false;
-    EXPECT_THAT(setProperty(sut->getPath(), "Persistent", persistent),
+    EXPECT_THAT(setProperty(sut->getPath(),
+                            TelemetryTrigger::property_names::persistent,
+                            persistent),
                 Eq(boost::system::errc::success));
-    EXPECT_THAT(getProperty<bool>(sut->getPath(), "Persistent"),
+    EXPECT_THAT(getProperty<bool>(sut->getPath(),
+                                  TelemetryTrigger::property_names::persistent),
                 Eq(persistent));
 }
 
@@ -469,7 +512,9 @@ class TestOnChangeTrigger : public TestTrigger
 
 TEST_F(TestOnChangeTrigger, isDiscrete)
 {
-    EXPECT_THAT(getProperty<bool>(sut->getPath(), "Discrete"), Eq(true));
+    EXPECT_THAT(getProperty<bool>(sut->getPath(),
+                                  TelemetryTrigger::property_names::discrete),
+                Eq(true));
 }
 
 class TestTriggerInitialization : public TestTrigger
@@ -488,7 +533,9 @@ TEST_F(TestTriggerInitialization,
 
     sut = makeTrigger(triggerParams);
 
-    EXPECT_THAT(getProperty<bool>(sut->getPath(), "Persistent"), Eq(false));
+    EXPECT_THAT(getProperty<bool>(sut->getPath(),
+                                  TelemetryTrigger::property_names::persistent),
+                Eq(false));
 }
 
 TEST_F(TestTriggerInitialization, creatingTriggerThrowsExceptionWhenIdIsInvalid)
