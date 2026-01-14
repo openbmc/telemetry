@@ -67,9 +67,5 @@ class Trigger : public interfaces::Trigger
     utils::Messanger messanger;
 
   public:
-    static constexpr const char* triggerIfaceName =
-        "xyz.openbmc_project.Telemetry.Trigger";
-    static constexpr const char* deleteIfaceName =
-        "xyz.openbmc_project.Object.Delete";
     static constexpr size_t triggerVersion = 2;
 };

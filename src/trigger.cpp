@@ -11,6 +11,12 @@
 #include "utils/transform.hpp"
 
 #include <phosphor-logging/log.hpp>
+#include <xyz/openbmc_project/Object/Delete/common.hpp>
+#include <xyz/openbmc_project/Telemetry/Trigger/common.hpp>
+
+using ObjectDelete = sdbusplus::common::xyz::openbmc_project::object::Delete;
+using TelemetryTrigger =
+    sdbusplus::common::xyz::openbmc_project::telemetry::Trigger;
 
 Trigger::Trigger(
     boost::asio::io_context& ioc,
@@ -31,25 +37,29 @@ Trigger::Trigger(
     messanger(ioc)
 {
     deleteIface = objServer->add_unique_interface(
-        path, deleteIfaceName, [this, &ioc, &triggerManager](auto& dbusIface) {
-            dbusIface.register_method("Delete", [this, &ioc, &triggerManager] {
-                if (persistent)
-                {
-                    triggerStorage.remove(fileName);
-                }
-                messanger.send(messages::TriggerPresenceChangedInd{
-                    messages::Presence::Removed, *id, {}});
-                boost::asio::post(ioc, [this, &triggerManager] {
-                    triggerManager.removeTrigger(this);
+        path, ObjectDelete::interface,
+        [this, &ioc, &triggerManager](auto& dbusIface) {
+            dbusIface.register_method(
+                ObjectDelete::method_names::delete_,
+                [this, &ioc, &triggerManager] {
+                    if (persistent)
+                    {
+                        triggerStorage.remove(fileName);
+                    }
+                    messanger.send(messages::TriggerPresenceChangedInd{
+                        messages::Presence::Removed, *id, {}});
+                    boost::asio::post(ioc, [this, &triggerManager] {
+                        triggerManager.removeTrigger(this);
+                    });
                 });
-            });
         });
 
     triggerIface = objServer->add_unique_interface(
-        path, triggerIfaceName, [this, &triggerFactory](auto& dbusIface) {
+        path, TelemetryTrigger::interface,
+        [this, &triggerFactory](auto& dbusIface) {
             persistent = storeConfiguration();
             dbusIface.register_property_rw(
-                "Persistent", persistent,
+                TelemetryTrigger::property_names::persistent, persistent,
                 sdbusplus::vtable::property_::emits_change,
                 [this](bool newVal, const auto&) {
                     if (newVal == persistent)
@@ -70,7 +80,8 @@ Trigger::Trigger(
                 [this](const auto&) { return persistent; });
 
             dbusIface.register_property_rw(
-                "DiscreteThresholds", std::vector<discrete::ThresholdParam>{},
+                TelemetryTrigger::property_names::discrete_thresholds,
+                std::vector<discrete::ThresholdParam>{},
                 sdbusplus::vtable::property_::emits_change,
                 [this, &triggerFactory](
                     const std::vector<discrete::ThresholdParam>& newVal,
@@ -99,7 +110,8 @@ Trigger::Trigger(
                 });
 
             dbusIface.register_property_rw(
-                "NumericThresholds", std::vector<numeric::ThresholdParam>{},
+                TelemetryTrigger::property_names::numeric_thresholds,
+                std::vector<numeric::ThresholdParam>{},
                 sdbusplus::vtable::property_::emits_change,
                 [this, &triggerFactory](
                     const std::vector<numeric::ThresholdParam>& newVal,
@@ -127,7 +139,7 @@ Trigger::Trigger(
                     return *ptr;
                 });
             dbusIface.register_property_rw(
-                "Sensors", SensorsInfo{},
+                TelemetryTrigger::property_names::sensors, SensorsInfo{},
                 sdbusplus::vtable::property_::emits_change,
                 [this, &triggerFactory](auto newVal, auto& oldVal) {
                     auto labeledSensorInfo =
@@ -146,7 +158,8 @@ Trigger::Trigger(
                 });
 
             dbusIface.register_property_rw(
-                "Reports", std::vector<sdbusplus::message::object_path>(),
+                TelemetryTrigger::property_names::reports,
+                std::vector<sdbusplus::message::object_path>(),
                 sdbusplus::vtable::property_::emits_change,
                 [this](auto newVal, auto& oldVal) {
                     auto newReportIds = utils::transform<std::vector>(
@@ -169,11 +182,13 @@ Trigger::Trigger(
                 });
 
             dbusIface.register_property_r(
-                "Discrete", isDiscrete(), sdbusplus::vtable::property_::const_,
+                TelemetryTrigger::property_names::discrete, isDiscrete(),
+                sdbusplus::vtable::property_::const_,
                 [this](const auto& x) { return isDiscrete(); });
 
             dbusIface.register_property_rw(
-                "Name", name, sdbusplus::vtable::property_::emits_change,
+                TelemetryTrigger::property_names::name, name,
+                sdbusplus::vtable::property_::emits_change,
                 [this](auto newVal, auto& oldVal) {
                     if (newVal.length() > utils::constants::maxIdNameLength)
                     {
@@ -186,7 +201,8 @@ Trigger::Trigger(
                 [this](const auto&) { return name; });
 
             dbusIface.register_property_r(
-                "TriggerActions", std::vector<std::string>(),
+                TelemetryTrigger::property_names::trigger_actions,
+                std::vector<std::string>(),
                 sdbusplus::vtable::property_::const_, [this](const auto&) {
                     return utils::transform(triggerActions,
                                             [](const auto& action) {
