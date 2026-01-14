@@ -6,6 +6,9 @@
 #include <sdbusplus/asio/connection.hpp>
 #include <sdbusplus/asio/object_server.hpp>
 #include <sdbusplus/bus.hpp>
+#include <xyz/openbmc_project/Sensor/Value/common.hpp>
+
+using SensorValue = sdbusplus::common::xyz::openbmc_project::sensor::Value;
 
 namespace stubs
 {
@@ -44,12 +47,12 @@ const char* DbusSensorObject::path()
 
 const char* DbusSensorObject::interface()
 {
-    return "xyz.openbmc_project.Sensor.Value";
+    return SensorValue::interface;
 }
 
 const char* DbusSensorObject::Properties::value()
 {
-    return "Value";
+    return SensorValue::property_names::value;
 }
 
 } // namespace stubs
