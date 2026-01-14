@@ -51,8 +51,6 @@ class TriggerManager : public interfaces::TriggerManager
 
   public:
     static constexpr size_t maxTriggers{TELEMETRY_MAX_TRIGGERS};
-    static constexpr const char* triggerManagerIfaceName =
-        "xyz.openbmc_project.Telemetry.TriggerManager";
     static constexpr const char* triggerManagerPath =
         "/xyz/openbmc_project/Telemetry/Triggers";
     static constexpr std::string_view triggerNameDefault = "Trigger";

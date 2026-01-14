@@ -9,8 +9,12 @@
 #include "utils/tstring.hpp"
 
 #include <phosphor-logging/log.hpp>
+#include <xyz/openbmc_project/Telemetry/TriggerManager/common.hpp>
 
 #include <unordered_set>
+
+using TelemetryTriggerManager =
+    sdbusplus::common::xyz::openbmc_project::telemetry::TriggerManager;
 
 TriggerManager::TriggerManager(
     std::unique_ptr<interfaces::TriggerFactory> triggerFactoryIn,
@@ -22,9 +26,10 @@ TriggerManager::TriggerManager(
     loadFromPersistent();
 
     managerIface = objServer->add_unique_interface(
-        triggerManagerPath, triggerManagerIfaceName, [this](auto& iface) {
+        triggerManagerPath, TelemetryTriggerManager::interface,
+        [this](auto& iface) {
             iface.register_method(
-                "AddTrigger",
+                TelemetryTriggerManager::method_names::add_trigger,
                 [this](
                     boost::asio::yield_context& yield, const std::string& id,
                     const std::string& name,
