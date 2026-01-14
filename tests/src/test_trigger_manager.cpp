@@ -11,9 +11,14 @@
 #include "utils/string_utils.hpp"
 #include "utils/transform.hpp"
 
+#include <xyz/openbmc_project/Telemetry/TriggerManager/common.hpp>
+
 using namespace testing;
 using sdbusplus::message::object_path;
 using namespace std::literals::string_literals;
+
+using TelemetryTriggerManager =
+    sdbusplus::common::xyz::openbmc_project::telemetry::TriggerManager;
 
 class TestTriggerManager : public Test
 {
@@ -41,7 +46,8 @@ class TestTriggerManager : public Test
                 addTriggerPromise.set_value({ec, path});
             },
             DbusEnvironment::serviceName(), TriggerManager::triggerManagerPath,
-            TriggerManager::triggerManagerIfaceName, "AddTrigger", params.id(),
+            TelemetryTriggerManager::interface,
+            TelemetryTriggerManager::method_names::add_trigger, params.id(),
             params.name(),
             utils::transform(params.triggerActions(),
                              [](const auto& action) {
