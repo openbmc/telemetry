@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ded1078b_c0e65a93",
+        "filename": "src/report_manager.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1001329
+      },
+      "writtenOn": "2026-01-19T10:37:53Z",
+      "side": 1,
+      "message": "Will You investigate that or is it up to Patrick to handle?",
+      "range": {
+        "startLine": 16,
+        "startChar": 0,
+        "endLine": 17,
+        "endChar": 29
+      },
+      "revId": "96f1a6a1e2c7023131ee9527a91da9f6e2fdcbf6",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
