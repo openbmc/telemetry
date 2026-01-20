@@ -22,6 +22,30 @@
       },
       "revId": "96f1a6a1e2c7023131ee9527a91da9f6e2fdcbf6",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "663004be_23c33609",
+        "filename": "src/report_manager.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1001712
+      },
+      "writtenOn": "2026-01-20T00:13:38Z",
+      "side": 1,
+      "message": "Reflecting on it more, i am not sure if it is design intent that PDI headers do not include each other.\n\n### Alternative 1 (i prefer this one)\n\n- PDI headers do not include each other\n- including one header might cause compilation failure if a dependent header is not also included\n- all interfaces which are used must be included \u003d\u003e code remains searchable\n\n### Alternative 2\n\n- This is a bug and the `ReportManager/common.hpp` must include the header it depends on\n- An interface can be used without explicitly including it -\u003e code is less searchable\n\n@patrick@stwcx.xyz what are your thoughts on it?\n\nFor now i removed these comments again since the PDI change for the namespace paths has been merged and we can include the `Telemetry.Report` header for the namespace path.",
+      "parentUuid": "ded1078b_c0e65a93",
+      "range": {
+        "startLine": 16,
+        "startChar": 0,
+        "endLine": 17,
+        "endChar": 29
+      },
+      "revId": "96f1a6a1e2c7023131ee9527a91da9f6e2fdcbf6",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
