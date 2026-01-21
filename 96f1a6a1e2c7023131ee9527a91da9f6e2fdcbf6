@@ -46,6 +46,30 @@
       },
       "revId": "96f1a6a1e2c7023131ee9527a91da9f6e2fdcbf6",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "7477e3ea_f7823e91",
+        "filename": "src/report_manager.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2026-01-21T13:46:36Z",
+      "side": 1,
+      "message": "I thought there was code in the generator to add includes for enums from one interface to another that are used.  I\u0027m surprised this didn\u0027t work but I\u0027m not sure off-hand why it is broken.\n\nAs far as the search-ability, I think that clang-tidy IWYU can take care of this.  If someone really is using the other header, then it should be included, but if it is just a transitive use then it wouldn\u0027t be included.",
+      "parentUuid": "663004be_23c33609",
+      "range": {
+        "startLine": 16,
+        "startChar": 0,
+        "endLine": 17,
+        "endChar": 29
+      },
+      "revId": "96f1a6a1e2c7023131ee9527a91da9f6e2fdcbf6",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
