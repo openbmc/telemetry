@@ -70,6 +70,30 @@
       },
       "revId": "96f1a6a1e2c7023131ee9527a91da9f6e2fdcbf6",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "0f204116_844adc19",
+        "filename": "src/report_manager.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1001712
+      },
+      "writtenOn": "2026-01-22T03:56:12Z",
+      "side": 1,
+      "message": "Agree. It\u0027s not an issue in this patch anymore (since both headers are used), marking as resolved.",
+      "parentUuid": "7477e3ea_f7823e91",
+      "range": {
+        "startLine": 16,
+        "startChar": 0,
+        "endLine": 17,
+        "endChar": 29
+      },
+      "revId": "96f1a6a1e2c7023131ee9527a91da9f6e2fdcbf6",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
