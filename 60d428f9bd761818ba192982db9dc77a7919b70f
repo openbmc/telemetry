@@ -1,0 +1,9 @@
+Code-Review+1: Bolesław Ogończyk Mąkowski <boleslawx.ogonczyk-makowski@intel.com>
+Code-Review+2: Michal Orzel <michalx.orzel@intel.com>
+Verified+1: OpenBMC CI <openbmcbump-ci@yahoo.com>
+Submitted-by: Alexander <alexander.hansen@9elements.com>
+Submitted-at: Fri, 23 Jan 2026 03:29:16 +0000
+Reviewed-on: https://gerrit.openbmc.org/c/openbmc/telemetry/+/86640
+Comments-Total: 4
+Project: openbmc/telemetry
+Branch: refs/heads/master
