@@ -94,6 +94,30 @@
       },
       "revId": "96f1a6a1e2c7023131ee9527a91da9f6e2fdcbf6",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "78101644_36c456e6",
+        "filename": "src/report_manager.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1001712
+      },
+      "writtenOn": "2026-02-10T05:35:14Z",
+      "side": 1,
+      "message": "new change to include the headers that `common.hpp` depends on:\n\nhttps://gerrit.openbmc.org/c/openbmc/sdbusplus/+/87327",
+      "parentUuid": "0f204116_844adc19",
+      "range": {
+        "startLine": 16,
+        "startChar": 0,
+        "endLine": 17,
+        "endChar": 29
+      },
+      "revId": "96f1a6a1e2c7023131ee9527a91da9f6e2fdcbf6",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
