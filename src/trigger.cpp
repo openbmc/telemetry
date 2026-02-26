@@ -30,7 +30,7 @@ Trigger::Trigger(
     const interfaces::TriggerFactory& triggerFactory, Sensors sensorsIn) :
     id(std::move(idIn)),
     path(utils::pathAppend(utils::constants::triggerDirPath, *id)),
-    name(nameIn), triggerActions(std::move(triggerActionsIn)),
+    name(nameIn), triggerActions(triggerActionsIn),
     reportIds(std::move(reportIdsIn)), thresholds(std::move(thresholdsIn)),
     fileName(std::to_string(std::hash<std::string>{}(*id))),
     triggerStorage(triggerStorageIn), sensors(std::move(sensorsIn)),
@@ -92,7 +92,7 @@ Trigger::Trigger(
                     triggerFactory.updateThresholds(
                         thresholds, *id, triggerActions, reportIds, sensors,
                         newThresholdParams);
-                    oldVal = std::move(newVal);
+                    oldVal = newVal;
                     return 1;
                 },
                 [this](const auto&) {
@@ -122,7 +122,7 @@ Trigger::Trigger(
                     triggerFactory.updateThresholds(
                         thresholds, *id, triggerActions, reportIds, sensors,
                         newThresholdParams);
-                    oldVal = std::move(newVal);
+                    oldVal = newVal;
                     return 1;
                 },
                 [this](const auto&) {
