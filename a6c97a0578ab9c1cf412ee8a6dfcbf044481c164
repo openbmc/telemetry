@@ -1,0 +1,7 @@
+Code-Review+2: Michal Orzel <michalx.orzel@intel.com>
+Verified+1: OpenBMC CI <openbmcbump-ci@yahoo.com>
+Submitted-by: Ewelina Walkusz <ewelinax.walkusz@intel.com>
+Submitted-at: Fri, 27 Feb 2026 06:50:45 +0000
+Reviewed-on: https://gerrit.openbmc.org/c/openbmc/telemetry/+/87871
+Project: openbmc/telemetry
+Branch: refs/heads/master
