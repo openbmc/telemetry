@@ -31,7 +31,13 @@
 # It is expected that these 4 sections will be listed in the order above and
 # data within them will be kept sorted.
 
+
+# This repository is functionally unmaintained.  The maintainers below are
+# Technical oversight forum members;  This repo is actively looking for
+# maintainers.
+
 owners:
+- ed@tanous.net
 
 reviewers:
 
