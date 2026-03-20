@@ -15,6 +15,7 @@ class DbusSensorObject
         boost::asio::io_context& ioc,
         const std::shared_ptr<sdbusplus::asio::connection>& bus,
         const std::shared_ptr<sdbusplus::asio::object_server>& objServer);
+    ~DbusSensorObject();
 
     static const char* path();
     static const char* interface();
@@ -34,7 +35,7 @@ class DbusSensorObject
     std::shared_ptr<sdbusplus::asio::connection> bus;
     std::shared_ptr<sdbusplus::asio::object_server> objServer;
 
-    std::unique_ptr<sdbusplus::asio::dbus_interface> sensorIface;
+    std::shared_ptr<sdbusplus::asio::dbus_interface> sensorIface;
 
     double value = 0.0;
 };
