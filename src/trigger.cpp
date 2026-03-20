@@ -31,185 +31,179 @@ Trigger::Trigger(
     id(std::move(idIn)),
     path(utils::pathAppend(utils::constants::triggerDirPath, *id)),
     name(nameIn), triggerActions(triggerActionsIn),
-    reportIds(std::move(reportIdsIn)), thresholds(std::move(thresholdsIn)),
+    reportIds(std::move(reportIdsIn)), objServer(objServer),
+    thresholds(std::move(thresholdsIn)),
     fileName(std::to_string(std::hash<std::string>{}(*id))),
     triggerStorage(triggerStorageIn), sensors(std::move(sensorsIn)),
     messanger(ioc)
 {
-    deleteIface = objServer->add_unique_interface(
-        path, ObjectDelete::interface,
-        [this, &ioc, &triggerManager](auto& dbusIface) {
-            dbusIface.register_method(
-                ObjectDelete::method_names::delete_,
-                [this, &ioc, &triggerManager] {
-                    if (persistent)
-                    {
-                        triggerStorage.remove(fileName);
-                    }
-                    messanger.send(messages::TriggerPresenceChangedInd{
-                        messages::Presence::Removed, *id, {}});
-                    boost::asio::post(ioc, [this, &triggerManager] {
-                        triggerManager.removeTrigger(this);
+    deleteIface = objServer->add_interface(path, ObjectDelete::interface);
+    deleteIface->register_method(
+        ObjectDelete::method_names::delete_, [this, &ioc, &triggerManager] {
+            if (persistent)
+            {
+                triggerStorage.remove(fileName);
+            }
+            messanger.send(messages::TriggerPresenceChangedInd{
+                messages::Presence::Removed, *id, {}});
+            boost::asio::post(ioc, [this, &triggerManager] {
+                triggerManager.removeTrigger(this);
+            });
+        });
+    deleteIface->initialize();
+
+    triggerIface = objServer->add_interface(path, TelemetryTrigger::interface);
+    {
+        auto& dbusIface = *triggerIface;
+        persistent = storeConfiguration();
+        dbusIface.register_property_rw(
+            TelemetryTrigger::property_names::persistent, persistent,
+            sdbusplus::vtable::property_::emits_change,
+            [this](bool newVal, const auto&) {
+                if (newVal == persistent)
+                {
+                    return 1;
+                }
+                if (newVal)
+                {
+                    persistent = storeConfiguration();
+                }
+                else
+                {
+                    triggerStorage.remove(fileName);
+                    persistent = false;
+                }
+                return 1;
+            },
+            [this](const auto&) { return persistent; });
+
+        dbusIface.register_property_rw(
+            TelemetryTrigger::property_names::discrete_thresholds,
+            std::vector<discrete::ThresholdParam>{},
+            sdbusplus::vtable::property_::emits_change,
+            [this, &triggerFactory](
+                const std::vector<discrete::ThresholdParam>& newVal,
+                std::vector<discrete::ThresholdParam>& oldVal) {
+                LabeledTriggerThresholdParams newThresholdParams =
+                    utils::ToLabeledThresholdParamConversion()(newVal);
+                TriggerManager::verifyThresholdParams(newThresholdParams);
+                triggerFactory.updateThresholds(thresholds, *id, triggerActions,
+                                                reportIds, sensors,
+                                                newThresholdParams);
+                oldVal = newVal;
+                return 1;
+            },
+            [this](const auto&) {
+                TriggerThresholdParams unlabeled =
+                    fromLabeledThresholdParam(getLabeledThresholds());
+                auto* ptr = std::get_if<std::vector<discrete::ThresholdParam>>(
+                    &unlabeled);
+                if (ptr == nullptr)
+                {
+                    // If internal type doesn't match, return empty set
+                    return std::vector<discrete::ThresholdParam>{};
+                }
+                return *ptr;
+            });
+
+        dbusIface.register_property_rw(
+            TelemetryTrigger::property_names::numeric_thresholds,
+            std::vector<numeric::ThresholdParam>{},
+            sdbusplus::vtable::property_::emits_change,
+            [this, &triggerFactory](
+                const std::vector<numeric::ThresholdParam>& newVal,
+                std::vector<numeric::ThresholdParam>& oldVal) {
+                LabeledTriggerThresholdParams newThresholdParams =
+                    utils::ToLabeledThresholdParamConversion()(newVal);
+                TriggerManager::verifyThresholdParams(newThresholdParams);
+                triggerFactory.updateThresholds(thresholds, *id, triggerActions,
+                                                reportIds, sensors,
+                                                newThresholdParams);
+                oldVal = newVal;
+                return 1;
+            },
+            [this](const auto&) {
+                TriggerThresholdParams unlabeled =
+                    fromLabeledThresholdParam(getLabeledThresholds());
+                auto* ptr = std::get_if<std::vector<numeric::ThresholdParam>>(
+                    &unlabeled);
+                if (ptr == nullptr)
+                {
+                    // If internal type doesn't match, return empty set
+                    return std::vector<numeric::ThresholdParam>{};
+                }
+                return *ptr;
+            });
+        dbusIface.register_property_rw(
+            TelemetryTrigger::property_names::sensors, SensorsInfo{},
+            sdbusplus::vtable::property_::emits_change,
+            [this, &triggerFactory](auto newVal, auto& oldVal) {
+                auto labeledSensorInfo =
+                    triggerFactory.getLabeledSensorsInfo(newVal);
+                triggerFactory.updateSensors(sensors, labeledSensorInfo);
+                for (const auto& threshold : thresholds)
+                {
+                    threshold->updateSensors(sensors);
+                }
+                oldVal = std::move(newVal);
+                return 1;
+            },
+            [this](const auto&) {
+                return utils::fromLabeledSensorsInfo(getLabeledSensorInfo());
+            });
+
+        dbusIface.register_property_rw(
+            TelemetryTrigger::property_names::reports,
+            std::vector<sdbusplus::message::object_path>(),
+            sdbusplus::vtable::property_::emits_change,
+            [this](auto newVal, auto& oldVal) {
+                auto newReportIds =
+                    utils::transform<std::vector>(newVal, [](const auto& path) {
+                        return utils::reportPathToId(path);
                     });
+                TriggerManager::verifyReportIds(newReportIds);
+                *reportIds = newReportIds;
+                messanger.send(messages::TriggerPresenceChangedInd{
+                    messages::Presence::Exist, *id, *reportIds});
+                oldVal = std::move(newVal);
+                return 1;
+            },
+            [this](const auto&) {
+                return utils::transform<std::vector>(
+                    *reportIds, [](const auto& id) {
+                        return utils::pathAppend(
+                            utils::constants::reportDirPath, id);
+                    });
+            });
+
+        dbusIface.register_property_r(
+            TelemetryTrigger::property_names::discrete, isDiscrete(),
+            sdbusplus::vtable::property_::const_,
+            [this](const auto& x) { return isDiscrete(); });
+
+        dbusIface.register_property_rw(
+            TelemetryTrigger::property_names::name, name,
+            sdbusplus::vtable::property_::emits_change,
+            [this](auto newVal, auto& oldVal) {
+                if (newVal.length() > utils::constants::maxIdNameLength)
+                {
+                    throw errors::InvalidArgument("Name", "Name is too long.");
+                }
+                name = oldVal = newVal;
+                return 1;
+            },
+            [this](const auto&) { return name; });
+
+        dbusIface.register_property_r(
+            TelemetryTrigger::property_names::trigger_actions,
+            std::vector<std::string>(), sdbusplus::vtable::property_::const_,
+            [this](const auto&) {
+                return utils::transform(triggerActions, [](const auto& action) {
+                    return actionToString(action);
                 });
-        });
-
-    triggerIface = objServer->add_unique_interface(
-        path, TelemetryTrigger::interface,
-        [this, &triggerFactory](auto& dbusIface) {
-            persistent = storeConfiguration();
-            dbusIface.register_property_rw(
-                TelemetryTrigger::property_names::persistent, persistent,
-                sdbusplus::vtable::property_::emits_change,
-                [this](bool newVal, const auto&) {
-                    if (newVal == persistent)
-                    {
-                        return 1;
-                    }
-                    if (newVal)
-                    {
-                        persistent = storeConfiguration();
-                    }
-                    else
-                    {
-                        triggerStorage.remove(fileName);
-                        persistent = false;
-                    }
-                    return 1;
-                },
-                [this](const auto&) { return persistent; });
-
-            dbusIface.register_property_rw(
-                TelemetryTrigger::property_names::discrete_thresholds,
-                std::vector<discrete::ThresholdParam>{},
-                sdbusplus::vtable::property_::emits_change,
-                [this, &triggerFactory](
-                    const std::vector<discrete::ThresholdParam>& newVal,
-                    std::vector<discrete::ThresholdParam>& oldVal) {
-                    LabeledTriggerThresholdParams newThresholdParams =
-                        utils::ToLabeledThresholdParamConversion()(newVal);
-                    TriggerManager::verifyThresholdParams(newThresholdParams);
-                    triggerFactory.updateThresholds(
-                        thresholds, *id, triggerActions, reportIds, sensors,
-                        newThresholdParams);
-                    oldVal = newVal;
-                    return 1;
-                },
-                [this](const auto&) {
-                    TriggerThresholdParams unlabeled =
-                        fromLabeledThresholdParam(getLabeledThresholds());
-                    auto* ptr =
-                        std::get_if<std::vector<discrete::ThresholdParam>>(
-                            &unlabeled);
-                    if (ptr == nullptr)
-                    {
-                        // If internal type doesn't match, return empty set
-                        return std::vector<discrete::ThresholdParam>{};
-                    }
-                    return *ptr;
-                });
-
-            dbusIface.register_property_rw(
-                TelemetryTrigger::property_names::numeric_thresholds,
-                std::vector<numeric::ThresholdParam>{},
-                sdbusplus::vtable::property_::emits_change,
-                [this, &triggerFactory](
-                    const std::vector<numeric::ThresholdParam>& newVal,
-                    std::vector<numeric::ThresholdParam>& oldVal) {
-                    LabeledTriggerThresholdParams newThresholdParams =
-                        utils::ToLabeledThresholdParamConversion()(newVal);
-                    TriggerManager::verifyThresholdParams(newThresholdParams);
-                    triggerFactory.updateThresholds(
-                        thresholds, *id, triggerActions, reportIds, sensors,
-                        newThresholdParams);
-                    oldVal = newVal;
-                    return 1;
-                },
-                [this](const auto&) {
-                    TriggerThresholdParams unlabeled =
-                        fromLabeledThresholdParam(getLabeledThresholds());
-                    auto* ptr =
-                        std::get_if<std::vector<numeric::ThresholdParam>>(
-                            &unlabeled);
-                    if (ptr == nullptr)
-                    {
-                        // If internal type doesn't match, return empty set
-                        return std::vector<numeric::ThresholdParam>{};
-                    }
-                    return *ptr;
-                });
-            dbusIface.register_property_rw(
-                TelemetryTrigger::property_names::sensors, SensorsInfo{},
-                sdbusplus::vtable::property_::emits_change,
-                [this, &triggerFactory](auto newVal, auto& oldVal) {
-                    auto labeledSensorInfo =
-                        triggerFactory.getLabeledSensorsInfo(newVal);
-                    triggerFactory.updateSensors(sensors, labeledSensorInfo);
-                    for (const auto& threshold : thresholds)
-                    {
-                        threshold->updateSensors(sensors);
-                    }
-                    oldVal = std::move(newVal);
-                    return 1;
-                },
-                [this](const auto&) {
-                    return utils::fromLabeledSensorsInfo(
-                        getLabeledSensorInfo());
-                });
-
-            dbusIface.register_property_rw(
-                TelemetryTrigger::property_names::reports,
-                std::vector<sdbusplus::message::object_path>(),
-                sdbusplus::vtable::property_::emits_change,
-                [this](auto newVal, auto& oldVal) {
-                    auto newReportIds = utils::transform<std::vector>(
-                        newVal, [](const auto& path) {
-                            return utils::reportPathToId(path);
-                        });
-                    TriggerManager::verifyReportIds(newReportIds);
-                    *reportIds = newReportIds;
-                    messanger.send(messages::TriggerPresenceChangedInd{
-                        messages::Presence::Exist, *id, *reportIds});
-                    oldVal = std::move(newVal);
-                    return 1;
-                },
-                [this](const auto&) {
-                    return utils::transform<std::vector>(
-                        *reportIds, [](const auto& id) {
-                            return utils::pathAppend(
-                                utils::constants::reportDirPath, id);
-                        });
-                });
-
-            dbusIface.register_property_r(
-                TelemetryTrigger::property_names::discrete, isDiscrete(),
-                sdbusplus::vtable::property_::const_,
-                [this](const auto& x) { return isDiscrete(); });
-
-            dbusIface.register_property_rw(
-                TelemetryTrigger::property_names::name, name,
-                sdbusplus::vtable::property_::emits_change,
-                [this](auto newVal, auto& oldVal) {
-                    if (newVal.length() > utils::constants::maxIdNameLength)
-                    {
-                        throw errors::InvalidArgument("Name",
-                                                      "Name is too long.");
-                    }
-                    name = oldVal = newVal;
-                    return 1;
-                },
-                [this](const auto&) { return name; });
-
-            dbusIface.register_property_r(
-                TelemetryTrigger::property_names::trigger_actions,
-                std::vector<std::string>(),
-                sdbusplus::vtable::property_::const_, [this](const auto&) {
-                    return utils::transform(triggerActions,
-                                            [](const auto& action) {
-                                                return actionToString(action);
-                                            });
-                });
-        });
+            });
+    }
+    triggerIface->initialize();
 
     for (const auto& threshold : thresholds)
     {
@@ -226,6 +220,12 @@ Trigger::Trigger(
 
     messanger.send(messages::TriggerPresenceChangedInd{
         messages::Presence::Exist, *id, *reportIds});
+}
+
+Trigger::~Trigger()
+{
+    objServer->remove_interface(triggerIface);
+    objServer->remove_interface(deleteIface);
 }
 
 bool Trigger::storeConfiguration() const

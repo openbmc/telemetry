@@ -33,72 +33,69 @@ ReportManager::ReportManager(
 
     loadFromPersistent();
 
-    reportManagerIface = objServer->add_unique_interface(
-        TelemetryReport::namespace_path, TelemetryReportManager::interface,
-        [this](auto& dbusIface) {
-            dbusIface.register_property_r(
-                TelemetryReportManager::property_names::max_reports, size_t{},
-                sdbusplus::vtable::property_::const_,
-                [](const auto&) { return maxReports; });
-            dbusIface.register_property_r(
-                TelemetryReportManager::property_names::min_interval,
-                uint64_t{}, sdbusplus::vtable::property_::const_,
-                [](const auto&) -> uint64_t { return minInterval.count(); });
-            dbusIface.register_property_r(
-                TelemetryReportManager::property_names::
-                    supported_operation_types,
-                std::vector<std::string>{},
-                sdbusplus::vtable::property_::const_,
-                [](const auto&) -> std::vector<std::string> {
-                    return utils::transform<std::vector>(
-                        utils::convDataOperationType, [](const auto& item) {
-                            return std::string(item.first);
-                        });
-                });
-            dbusIface.register_method(
-                TelemetryReportManager::method_names::add_report,
-                [this](boost::asio::yield_context& yield, std::string reportId,
-                       std::string reportName, std::string reportingType,
-                       std::string reportUpdates, uint64_t appendLimit,
-                       std::vector<std::string> reportActions,
-                       uint64_t interval, ReadingParameters readingParameters,
-                       bool enabled) {
-                    if (reportingType.empty())
-                    {
-                        reportingType =
-                            utils::enumToString(ReportingType::onRequest);
-                    }
-
-                    if (reportUpdates.empty())
-                    {
-                        reportUpdates =
-                            utils::enumToString(ReportUpdates::overwrite);
-                    }
-
-                    if (appendLimit == std::numeric_limits<uint64_t>::max())
-                    {
-                        appendLimit = maxAppendLimit;
-                    }
-
-                    if (interval == std::numeric_limits<uint64_t>::max())
-                    {
-                        interval = 0;
-                    }
-
-                    return addReport(yield, reportId, reportName,
-                                     utils::toReportingType(reportingType),
-                                     utils::transform(
-                                         reportActions,
-                                         [](const auto& reportAction) {
-                                             return utils::toReportAction(
-                                                 reportAction);
-                                         }),
-                                     Milliseconds(interval), appendLimit,
-                                     utils::toReportUpdates(reportUpdates),
-                                     readingParameters, enabled)
-                        .getPath();
-                });
+    reportManagerIface = objServer->add_interface(
+        TelemetryReport::namespace_path, TelemetryReportManager::interface);
+    reportManagerIface->register_property_r(
+        TelemetryReportManager::property_names::max_reports, size_t{},
+        sdbusplus::vtable::property_::const_,
+        [](const auto&) { return maxReports; });
+    reportManagerIface->register_property_r(
+        TelemetryReportManager::property_names::min_interval, uint64_t{},
+        sdbusplus::vtable::property_::const_,
+        [](const auto&) -> uint64_t { return minInterval.count(); });
+    reportManagerIface->register_property_r(
+        TelemetryReportManager::property_names::supported_operation_types,
+        std::vector<std::string>{}, sdbusplus::vtable::property_::const_,
+        [](const auto&) -> std::vector<std::string> {
+            return utils::transform<std::vector>(
+                utils::convDataOperationType,
+                [](const auto& item) { return std::string(item.first); });
         });
+    reportManagerIface->register_method(
+        TelemetryReportManager::method_names::add_report,
+        [this](boost::asio::yield_context& yield, std::string reportId,
+               std::string reportName, std::string reportingType,
+               std::string reportUpdates, uint64_t appendLimit,
+               std::vector<std::string> reportActions, uint64_t interval,
+               ReadingParameters readingParameters, bool enabled) {
+            if (reportingType.empty())
+            {
+                reportingType = utils::enumToString(ReportingType::onRequest);
+            }
+
+            if (reportUpdates.empty())
+            {
+                reportUpdates = utils::enumToString(ReportUpdates::overwrite);
+            }
+
+            if (appendLimit == std::numeric_limits<uint64_t>::max())
+            {
+                appendLimit = maxAppendLimit;
+            }
+
+            if (interval == std::numeric_limits<uint64_t>::max())
+            {
+                interval = 0;
+            }
+
+            return addReport(yield, reportId, reportName,
+                             utils::toReportingType(reportingType),
+                             utils::transform(reportActions,
+                                              [](const auto& reportAction) {
+                                                  return utils::toReportAction(
+                                                      reportAction);
+                                              }),
+                             Milliseconds(interval), appendLimit,
+                             utils::toReportUpdates(reportUpdates),
+                             readingParameters, enabled)
+                .getPath();
+        });
+    reportManagerIface->initialize();
+}
+
+ReportManager::~ReportManager()
+{
+    objServer->remove_interface(reportManagerIface);
 }
 
 void ReportManager::removeReport(const interfaces::Report* report)
