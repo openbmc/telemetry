@@ -24,7 +24,7 @@ class ReportManager : public interfaces::ReportManager
         std::unique_ptr<interfaces::ReportFactory> reportFactory,
         std::unique_ptr<interfaces::JsonStorage> reportStorage,
         const std::shared_ptr<sdbusplus::asio::object_server>& objServer);
-    ~ReportManager() = default;
+    ~ReportManager();
 
     ReportManager(const ReportManager&) = delete;
     ReportManager(ReportManager&&) = delete;
@@ -40,7 +40,7 @@ class ReportManager : public interfaces::ReportManager
     std::unique_ptr<interfaces::ReportFactory> reportFactory;
     std::unique_ptr<interfaces::JsonStorage> reportStorage;
     std::shared_ptr<sdbusplus::asio::object_server> objServer;
-    std::unique_ptr<sdbusplus::asio::dbus_interface> reportManagerIface;
+    std::shared_ptr<sdbusplus::asio::dbus_interface> reportManagerIface;
     std::vector<std::unique_ptr<interfaces::Report>> reports;
 
     void verifyAddReport(

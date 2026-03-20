@@ -21,52 +21,53 @@ TriggerManager::TriggerManager(
     std::unique_ptr<interfaces::JsonStorage> triggerStorageIn,
     const std::shared_ptr<sdbusplus::asio::object_server>& objServer) :
     triggerFactory(std::move(triggerFactoryIn)),
-    triggerStorage(std::move(triggerStorageIn))
+    triggerStorage(std::move(triggerStorageIn)), objServer(objServer)
 {
     loadFromPersistent();
 
-    managerIface = objServer->add_unique_interface(
-        triggerManagerPath, TelemetryTriggerManager::interface,
-        [this](auto& iface) {
-            iface.register_method(
-                TelemetryTriggerManager::method_names::add_trigger,
-                [this](
-                    boost::asio::yield_context& yield, const std::string& id,
-                    const std::string& name,
-                    const std::vector<std::string>& triggerActions,
-                    const SensorsInfo& sensors,
-                    const std::vector<sdbusplus::message::object_path>& reports,
-                    const std::vector<numeric::ThresholdParam>&
-                        numericThresholds,
-                    const std::vector<discrete::ThresholdParam>&
-                        discreteThresholds) {
-                    LabeledTriggerThresholdParams labeledTriggerThresholdParams;
-                    if (!numericThresholds.empty())
-                    {
-                        labeledTriggerThresholdParams =
-                            utils::ToLabeledThresholdParamConversion()(
-                                numericThresholds);
-                    }
-                    if (!discreteThresholds.empty())
-                    {
-                        labeledTriggerThresholdParams =
-                            utils::ToLabeledThresholdParamConversion()(
-                                discreteThresholds);
-                    }
-                    std::vector<LabeledSensorInfo> labeledSensorsInfo =
-                        triggerFactory->getLabeledSensorsInfo(yield, sensors);
+    managerIface = objServer->add_interface(triggerManagerPath,
+                                            TelemetryTriggerManager::interface);
+    managerIface->register_method(
+        TelemetryTriggerManager::method_names::add_trigger,
+        [this](
+            boost::asio::yield_context& yield, const std::string& id,
+            const std::string& name,
+            const std::vector<std::string>& triggerActions,
+            const SensorsInfo& sensors,
+            const std::vector<sdbusplus::message::object_path>& reports,
+            const std::vector<numeric::ThresholdParam>& numericThresholds,
+            const std::vector<discrete::ThresholdParam>& discreteThresholds) {
+            LabeledTriggerThresholdParams labeledTriggerThresholdParams;
+            if (!numericThresholds.empty())
+            {
+                labeledTriggerThresholdParams =
+                    utils::ToLabeledThresholdParamConversion()(
+                        numericThresholds);
+            }
+            if (!discreteThresholds.empty())
+            {
+                labeledTriggerThresholdParams =
+                    utils::ToLabeledThresholdParamConversion()(
+                        discreteThresholds);
+            }
+            std::vector<LabeledSensorInfo> labeledSensorsInfo =
+                triggerFactory->getLabeledSensorsInfo(yield, sensors);
 
-                    auto reportIds = utils::transform<std::vector>(
-                        reports, [](const auto& item) {
-                            return utils::reportPathToId(item);
-                        });
-
-                    return addTrigger(id, name, triggerActions,
-                                      labeledSensorsInfo, reportIds,
-                                      labeledTriggerThresholdParams)
-                        .getPath();
+            auto reportIds =
+                utils::transform<std::vector>(reports, [](const auto& item) {
+                    return utils::reportPathToId(item);
                 });
+
+            return addTrigger(id, name, triggerActions, labeledSensorsInfo,
+                              reportIds, labeledTriggerThresholdParams)
+                .getPath();
         });
+    managerIface->initialize();
+}
+
+TriggerManager::~TriggerManager()
+{
+    objServer->remove_interface(managerIface);
 }
 
 void TriggerManager::removeTrigger(const interfaces::Trigger* trigger)

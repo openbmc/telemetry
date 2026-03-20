@@ -91,7 +91,7 @@ class Report : public interfaces::Report, public interfaces::MetricListener
     void deactivate();
 
   private:
-    std::unique_ptr<sdbusplus::asio::dbus_interface> makeReportInterface(
+    std::shared_ptr<sdbusplus::asio::dbus_interface> makeReportInterface(
         const interfaces::ReportFactory& reportFactory);
     static void timerProcForPeriodicReport(boost::system::error_code,
                                            Report& self);
@@ -128,8 +128,8 @@ class Report : public interfaces::Report, public interfaces::MetricListener
     Readings readings = {};
     CircularVector<ReadingData> readingsBuffer;
     std::shared_ptr<sdbusplus::asio::object_server> objServer;
-    std::unique_ptr<sdbusplus::asio::dbus_interface> reportIface;
-    std::unique_ptr<sdbusplus::asio::dbus_interface> deleteIface;
+    std::shared_ptr<sdbusplus::asio::dbus_interface> reportIface;
+    std::shared_ptr<sdbusplus::asio::dbus_interface> deleteIface;
     std::vector<std::shared_ptr<interfaces::Metric>> metrics;
     boost::asio::steady_timer timer;
     std::unordered_set<std::string> triggerIds;
