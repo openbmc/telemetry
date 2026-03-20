@@ -55,25 +55,22 @@ Report::Report(
 
     reportActions.insert(ReportAction::logToMetricReportsCollection);
 
-    deleteIface = objServer->add_unique_interface(
-        getPath(), ObjectDelete::interface,
-        [this, &ioc, &reportManager](auto& dbusIface) {
-            dbusIface.register_method(
-                ObjectDelete::method_names::delete_,
-                [this, &ioc, &reportManager] {
-                    if (persistency)
-                    {
-                        persistency = false;
+    deleteIface = objServer->add_interface(getPath(), ObjectDelete::interface);
+    deleteIface->register_method(
+        ObjectDelete::method_names::delete_, [this, &ioc, &reportManager] {
+            if (persistency)
+            {
+                persistency = false;
 
-                        reportIface->signal_property(
-                            TelemetryReport::property_names::persistency);
-                    }
+                reportIface->signal_property(
+                    TelemetryReport::property_names::persistency);
+            }
 
-                    boost::asio::post(ioc, [this, &reportManager] {
-                        reportManager.removeReport(this);
-                    });
-                });
+            boost::asio::post(ioc, [this, &reportManager] {
+                reportManager.removeReport(this);
+            });
         });
+    deleteIface->initialize();
 
     auto errorMessages = verify(reportingType, interval);
     state.set<ReportFlags::enabled, ReportFlags::valid>(enabledIn,
@@ -119,6 +116,9 @@ Report::Report(
 
 Report::~Report()
 {
+    objServer->remove_interface(reportIface);
+    objServer->remove_interface(deleteIface);
+
     if (persistency)
     {
         if (shouldStoreMetricValues())
@@ -197,11 +197,11 @@ void Report::setReportUpdates(const ReportUpdates newReportUpdates)
     }
 }
 
-std::unique_ptr<sdbusplus::asio::dbus_interface> Report::makeReportInterface(
+std::shared_ptr<sdbusplus::asio::dbus_interface> Report::makeReportInterface(
     const interfaces::ReportFactory& reportFactory)
 {
     auto dbusIface =
-        objServer->add_unique_interface(getPath(), TelemetryReport::interface);
+        objServer->add_interface(getPath(), TelemetryReport::interface);
     dbusIface->register_property_rw<bool>(
         TelemetryReport::property_names::enabled,
         sdbusplus::vtable::property_::emits_change,

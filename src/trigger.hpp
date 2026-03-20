@@ -28,7 +28,7 @@ class Trigger : public interfaces::Trigger
             const interfaces::TriggerFactory& triggerFactory,
             Sensors sensorsIn);
 
-    ~Trigger() = default;
+    ~Trigger();
     Trigger(const Trigger&) = delete;
     Trigger(Trigger&&) = delete;
     Trigger& operator=(const Trigger&) = delete;
@@ -57,8 +57,9 @@ class Trigger : public interfaces::Trigger
     std::vector<TriggerAction> triggerActions;
     bool persistent = false;
     std::shared_ptr<std::vector<std::string>> reportIds;
-    std::unique_ptr<sdbusplus::asio::dbus_interface> deleteIface;
-    std::unique_ptr<sdbusplus::asio::dbus_interface> triggerIface;
+    std::shared_ptr<sdbusplus::asio::object_server> objServer;
+    std::shared_ptr<sdbusplus::asio::dbus_interface> deleteIface;
+    std::shared_ptr<sdbusplus::asio::dbus_interface> triggerIface;
     std::vector<std::shared_ptr<interfaces::Threshold>> thresholds;
 
     interfaces::JsonStorage::FilePath fileName;
