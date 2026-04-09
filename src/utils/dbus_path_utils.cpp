@@ -2,8 +2,8 @@
 
 namespace utils
 {
-sdbusplus::message::object_path pathAppend(sdbusplus::message::object_path path,
-                                           const std::string& appended)
+sdbusplus::object_path pathAppend(sdbusplus::object_path path,
+                                  const std::string& appended)
 {
     if (appended.starts_with('/') || !isValidDbusPath(appended))
     {
@@ -30,7 +30,7 @@ sdbusplus::message::object_path pathAppend(sdbusplus::message::object_path path,
     return path;
 }
 
-std::string reportPathToId(const sdbusplus::message::object_path& path)
+std::string reportPathToId(const sdbusplus::object_path& path)
 {
     if (path.str.starts_with(constants::reportDirStr))
     {
