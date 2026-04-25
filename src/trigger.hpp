@@ -52,7 +52,7 @@ class Trigger : public interfaces::Trigger
     bool isDiscrete() const;
 
     const TriggerId id;
-    const sdbusplus::message::object_path path;
+    const sdbusplus::object_path path;
     std::string name;
     std::vector<TriggerAction> triggerActions;
     bool persistent = false;
