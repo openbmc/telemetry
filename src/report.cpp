@@ -376,7 +376,7 @@ std::unique_ptr<sdbusplus::asio::dbus_interface> Report::makeReportInterface(
         [this](const auto&) { return utils::enumToString(reportUpdates); });
     dbusIface->register_property_r(
         TelemetryReport::property_names::triggers,
-        std::vector<sdbusplus::message::object_path>{},
+        std::vector<sdbusplus::object_path>{},
         sdbusplus::vtable::property_::emits_change, [this](const auto&) {
             return utils::transform<std::vector>(
                 triggerIds, [](const auto& triggerId) {
