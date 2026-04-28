@@ -16,14 +16,13 @@ constexpr std::string_view infinity = "inf";
 constexpr std::string_view infinity_negative = "-inf";
 } // namespace numeric_literals
 
-inline void from_json(const nlohmann::json& j,
-                      sdbusplus::message::object_path& o)
+inline void from_json(const nlohmann::json& j, sdbusplus::object_path& o)
 {
     o = j.get<std::string>();
 }
 
 inline void from_json(const nlohmann::json& j,
-                      std::vector<sdbusplus::message::object_path>& o)
+                      std::vector<sdbusplus::object_path>& o)
 {
     o.clear();
     for (const nlohmann::json& item : j)
