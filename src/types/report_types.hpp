@@ -16,9 +16,9 @@
 #include <variant>
 #include <vector>
 
-using ReadingParameters = std::vector<std::tuple<
-    std::vector<std::tuple<sdbusplus::message::object_path, std::string>>,
-    std::string, std::string, uint64_t>>;
+using ReadingParameters = std::vector<
+    std::tuple<std::vector<std::tuple<sdbusplus::object_path, std::string>>,
+               std::string, std::string, uint64_t>>;
 
 using LabeledMetricParameters = utils::LabeledTuple<
     std::tuple<std::vector<LabeledSensorInfo>, OperationType,
