@@ -29,7 +29,7 @@
 using namespace testing;
 using namespace std::literals::string_literals;
 using namespace std::chrono_literals;
-using sdbusplus::message::object_path;
+using sdbusplus::object_path;
 namespace tstring = utils::tstring;
 
 using ErrorMessageDbusType = std::tuple<std::string, std::string>;

@@ -30,16 +30,15 @@ TriggerManager::TriggerManager(
         [this](auto& iface) {
             iface.register_method(
                 TelemetryTriggerManager::method_names::add_trigger,
-                [this](
-                    boost::asio::yield_context& yield, const std::string& id,
-                    const std::string& name,
-                    const std::vector<std::string>& triggerActions,
-                    const SensorsInfo& sensors,
-                    const std::vector<sdbusplus::message::object_path>& reports,
-                    const std::vector<numeric::ThresholdParam>&
-                        numericThresholds,
-                    const std::vector<discrete::ThresholdParam>&
-                        discreteThresholds) {
+                [this](boost::asio::yield_context& yield, const std::string& id,
+                       const std::string& name,
+                       const std::vector<std::string>& triggerActions,
+                       const SensorsInfo& sensors,
+                       const std::vector<sdbusplus::object_path>& reports,
+                       const std::vector<numeric::ThresholdParam>&
+                           numericThresholds,
+                       const std::vector<discrete::ThresholdParam>&
+                           discreteThresholds) {
                     LabeledTriggerThresholdParams labeledTriggerThresholdParams;
                     if (!numericThresholds.empty())
                     {
