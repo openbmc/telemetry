@@ -6,7 +6,7 @@
 #include <gmock/gmock.h>
 
 using namespace testing;
-using sdbusplus::message::object_path;
+using sdbusplus::object_path;
 using utils::pathAppend;
 
 class TestPathAppend :
