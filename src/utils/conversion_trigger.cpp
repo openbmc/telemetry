@@ -73,7 +73,7 @@ SensorsInfo fromLabeledSensorsInfo(const std::vector<LabeledSensorInfo>& infos)
 {
     return utils::transform(infos, [](const LabeledSensorInfo& val) {
         return SensorsInfo::value_type(
-            sdbusplus::message::object_path(val.at_label<ts::Path>()),
+            sdbusplus::object_path(val.at_label<ts::Path>()),
             val.at_label<ts::Metadata>());
     });
 }
