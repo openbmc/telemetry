@@ -30,12 +30,14 @@ class DataPoint : public CollectionData
     std::optional<double> lastReading;
 };
 
+// Streaming version of DataInterval - uses O(1) memory with fixed intervals
 class DataInterval : public CollectionData
 {
   public:
     DataInterval(std::shared_ptr<CollectionFunction> function,
                  CollectionDuration duration) :
-        function(std::move(function)), duration(duration)
+        function(std::move(function)), duration(duration),
+        intervalStart(Milliseconds{0})
     {
         if (duration.t.count() == 0)
         {
@@ -46,52 +48,49 @@ class DataInterval : public CollectionData
 
     std::optional<double> update(Milliseconds timestamp) override
     {
-        if (readings.empty())
+        if (stats.count == 0)
         {
             return std::nullopt;
         }
 
-        cleanup(timestamp);
-
-        return function->calculate(readings, timestamp);
+        // Don't reset on query - just return current stats
+        return function->calculate(stats, timestamp);
     }
 
     double update(Milliseconds timestamp, double reading) override
     {
-        readings.emplace_back(timestamp, reading);
+        // Initialize interval start on first reading
+        if (stats.count == 0 && intervalStart.count() == 0)
+        {
+            intervalStart = timestamp;
+        }
 
-        cleanup(timestamp);
+        // Check if we need to start a new interval before adding reading
+        checkIntervalBoundary(timestamp);
 
-        return function->calculate(readings, timestamp);
+        // Add reading to current interval's streaming stats
+        stats.addReading(timestamp, reading);
+
+        return function->calculate(stats, timestamp);
     }
 
   private:
-    void cleanup(Milliseconds timestamp)
+    void checkIntervalBoundary(Milliseconds timestamp)
     {
-        auto it = readings.begin();
-        for (auto kt = std::next(readings.rbegin()); kt != readings.rend();
-             ++kt)
+        // If we've exceeded the duration, start a new interval
+        if (intervalStart.count() > 0 &&
+            timestamp >= intervalStart + duration.t)
         {
-            const auto& [nextItemTimestamp, nextItemReading] = *std::prev(kt);
-            if (timestamp >= nextItemTimestamp &&
-                timestamp - nextItemTimestamp > duration.t)
-            {
-                it = kt.base();
-                break;
-            }
-        }
-        readings.erase(readings.begin(), it);
-
-        if (timestamp > duration.t)
-        {
-            readings.front().first =
-                std::max(readings.front().first, timestamp - duration.t);
+            // Reset stats for new interval
+            stats.reset();
+            intervalStart = timestamp;
         }
     }
 
     std::shared_ptr<CollectionFunction> function;
-    std::vector<ReadingItem> readings;
-    CollectionDuration duration;
+    StreamingStats stats;        // O(1) memory - only current interval stats
+    CollectionDuration duration; // Interval duration
+    Milliseconds intervalStart;  // Start of current interval
 };
 
 class DataStartup : public CollectionData
@@ -103,23 +102,27 @@ class DataStartup : public CollectionData
 
     std::optional<double> update(Milliseconds timestamp) override
     {
-        if (readings.empty())
+        if (stats.count == 0)
         {
             return std::nullopt;
         }
 
-        return function->calculateForStartupInterval(readings, timestamp);
+        // Use streaming calculation - no readings stored!
+        return function->calculate(stats, timestamp);
     }
 
     double update(Milliseconds timestamp, double reading) override
     {
-        readings.emplace_back(timestamp, reading);
-        return function->calculateForStartupInterval(readings, timestamp);
+        // Update streaming stats - O(1) operation
+        stats.addReading(timestamp, reading);
+
+        // Calculate from stats - no readings needed!
+        return function->calculate(stats, timestamp);
     }
 
   private:
     std::shared_ptr<CollectionFunction> function;
-    std::vector<ReadingItem> readings;
+    StreamingStats stats; // O(1) memory
 };
 
 std::vector<std::unique_ptr<CollectionData>> makeCollectionData(
@@ -135,6 +138,7 @@ std::vector<std::unique_ptr<CollectionData>> makeCollectionData(
     switch (timeScope)
     {
         case CollectionTimeScope::interval:
+            // Use fixed-interval streaming for O(1) memory
             std::generate_n(
                 std::back_inserter(result), size,
                 [cf = makeCollectionFunction(op), duration] {
