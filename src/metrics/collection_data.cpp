@@ -35,7 +35,8 @@ class DataInterval : public CollectionData
   public:
     DataInterval(std::shared_ptr<CollectionFunction> function,
                  CollectionDuration duration) :
-        function(std::move(function)), duration(duration)
+        function(std::move(function)), duration(duration),
+        intervalStart(Milliseconds{0})
     {
         if (duration.t.count() == 0)
         {
@@ -46,52 +47,37 @@ class DataInterval : public CollectionData
 
     std::optional<double> update(Milliseconds timestamp) override
     {
-        if (readings.empty())
+        if (stats.count == 0)
         {
             return std::nullopt;
         }
 
-        cleanup(timestamp);
-
-        return function->calculate(readings, timestamp);
+        return function->calculate(stats, timestamp);
     }
 
     double update(Milliseconds timestamp, double reading) override
     {
-        readings.emplace_back(timestamp, reading);
-
-        cleanup(timestamp);
-
-        return function->calculate(readings, timestamp);
-    }
-
-  private:
-    void cleanup(Milliseconds timestamp)
-    {
-        auto it = readings.begin();
-        for (auto kt = std::next(readings.rbegin()); kt != readings.rend();
-             ++kt)
+        if (stats.count == 0)
         {
-            const auto& [nextItemTimestamp, nextItemReading] = *std::prev(kt);
-            if (timestamp >= nextItemTimestamp &&
-                timestamp - nextItemTimestamp > duration.t)
-            {
-                it = kt.base();
-                break;
-            }
+            intervalStart = timestamp;
         }
-        readings.erase(readings.begin(), it);
 
-        if (timestamp > duration.t)
+        if (intervalStart.count() > 0 &&
+            timestamp >= intervalStart + duration.t)
         {
-            readings.front().first =
-                std::max(readings.front().first, timestamp - duration.t);
+            stats.reset();
+            intervalStart = timestamp;
         }
+
+        stats.addReading(timestamp, reading);
+
+        return function->calculate(stats, timestamp);
     }
 
     std::shared_ptr<CollectionFunction> function;
-    std::vector<ReadingItem> readings;
+    StreamingStats stats;
     CollectionDuration duration;
+    Milliseconds intervalStart;
 };
 
 class DataStartup : public CollectionData
@@ -103,23 +89,24 @@ class DataStartup : public CollectionData
 
     std::optional<double> update(Milliseconds timestamp) override
     {
-        if (readings.empty())
+        if (stats.count == 0)
         {
             return std::nullopt;
         }
 
-        return function->calculateForStartupInterval(readings, timestamp);
+        return function->calculate(stats, timestamp);
     }
 
     double update(Milliseconds timestamp, double reading) override
     {
-        readings.emplace_back(timestamp, reading);
-        return function->calculateForStartupInterval(readings, timestamp);
+        stats.addReading(timestamp, reading);
+
+        return function->calculate(stats, timestamp);
     }
 
   private:
     std::shared_ptr<CollectionFunction> function;
-    std::vector<ReadingItem> readings;
+    StreamingStats stats;
 };
 
 std::vector<std::unique_ptr<CollectionData>> makeCollectionData(
