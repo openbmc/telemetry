@@ -8,91 +8,50 @@ namespace metrics
 class FunctionMinimum : public CollectionFunction
 {
   public:
-    double calculate(const std::vector<ReadingItem>& readings,
-                     Milliseconds) const override
+    double calculate(const StreamingStats& stats,
+                              Milliseconds) const override
     {
-        return std::min_element(
-                   readings.begin(), readings.end(),
-                   [](const auto& left, const auto& right) {
-                       return std::make_tuple(!std::isfinite(left.second),
-                                              left.second) <
-                              std::make_tuple(!std::isfinite(right.second),
-                                              right.second);
-                   })
-            ->second;
-    }
-
-    double calculateForStartupInterval(std::vector<ReadingItem>& readings,
-                                       Milliseconds timestamp) const override
-    {
-        readings.assign(
-            {ReadingItem(timestamp, calculate(readings, timestamp))});
-        return readings.back().second;
+        return stats.getMin();
     }
 };
 
 class FunctionMaximum : public CollectionFunction
 {
   public:
-    double calculate(const std::vector<ReadingItem>& readings,
-                     Milliseconds) const override
+    double calculate(const StreamingStats& stats,
+                              Milliseconds) const override
     {
-        return std::max_element(
-                   readings.begin(), readings.end(),
-                   [](const auto& left, const auto& right) {
-                       return std::make_tuple(std::isfinite(left.second),
-                                              left.second) <
-                              std::make_tuple(std::isfinite(right.second),
-                                              right.second);
-                   })
-            ->second;
-    }
-
-    double calculateForStartupInterval(std::vector<ReadingItem>& readings,
-                                       Milliseconds timestamp) const override
-    {
-        readings.assign(
-            {ReadingItem(timestamp, calculate(readings, timestamp))});
-        return readings.back().second;
+        return stats.getMax();
     }
 };
 
 class FunctionAverage : public CollectionFunction
 {
   public:
-    double calculate(const std::vector<ReadingItem>& readings,
-                     Milliseconds timestamp) const override
+    double calculate(const StreamingStats& stats,
+                              Milliseconds timestamp) const override
     {
-        auto valueSum = 0.0;
-        auto timeSum = Milliseconds{0};
-        for (auto it = readings.begin(); it != std::prev(readings.end()); ++it)
+        // Time-weighted average (value * milliseconds / total_milliseconds)
+        if (stats.count == 0)
         {
-            if (std::isfinite(it->second))
-            {
-                const auto kt = std::next(it);
-                const auto duration = kt->first - it->first;
-                valueSum += it->second * duration.count();
-                timeSum += duration;
-            }
+            return 0.0;
         }
 
-        const auto duration = timestamp - readings.back().first;
-        valueSum += readings.back().second * duration.count();
-        timeSum += duration;
+        // Calculate total time-weighted sum including the last reading
+        double totalTimeWeightedSum = stats.getTimeWeightedSumMs();
+        Milliseconds totalDuration = stats.getTotalDuration();
 
-        return valueSum / std::max(timeSum.count(), uint64_t{1u});
-    }
-
-    double calculateForStartupInterval(std::vector<ReadingItem>& readings,
-                                       Milliseconds timestamp) const override
-    {
-        auto result = calculate(readings, timestamp);
-        if (std::isfinite(result))
+        // Add contribution from last reading to current timestamp
+        if (timestamp > stats.lastTimestamp)
         {
-            readings.assign({ReadingItem(readings.front().first, result),
-                             ReadingItem(timestamp, readings.back().second)});
+            Milliseconds lastDuration = timestamp - stats.lastTimestamp;
+            totalTimeWeightedSum += stats.lastValue * lastDuration.count();
+            totalDuration += lastDuration;
         }
-        return result;
+
+        // Return time-weighted average
+        return totalTimeWeightedSum /
+               std::max(totalDuration.count(), uint64_t{1u});
     }
 };
 
@@ -101,46 +60,27 @@ class FunctionSummation : public CollectionFunction
     using Multiplier = std::chrono::duration<double>;
 
   public:
-    double calculate(const std::vector<ReadingItem>& readings,
-                     const Milliseconds timestamp) const override
+    double calculate(const StreamingStats& stats,
+                              Milliseconds timestamp) const override
     {
-        auto valueSum = 0.0;
-        for (auto it = readings.begin(); it != std::prev(readings.end()); ++it)
+        // Time-weighted sum (integral) - value * seconds
+        if (stats.count == 0)
         {
-            if (std::isfinite(it->second))
-            {
-                const auto kt = std::next(it);
-                const auto multiplier =
-                    calculateMultiplier(kt->first - it->first);
-                valueSum += it->second * multiplier.count();
-            }
+            return 0.0;
         }
 
-        const auto multiplier =
-            calculateMultiplier(timestamp - readings.back().first);
-        valueSum += readings.back().second * multiplier.count();
+        // Get accumulated time-weighted sum (already in seconds)
+        double totalTimeWeightedSum = stats.getTimeWeightedSumSec();
 
-        return valueSum;
-    }
-
-    double calculateForStartupInterval(
-        std::vector<ReadingItem>& readings,
-        const Milliseconds timestamp) const override
-    {
-        const auto result = calculate(readings, timestamp);
-        if (readings.size() > 2 && std::isfinite(result))
+        // Add contribution from last reading to current timestamp
+        if (timestamp > stats.lastTimestamp)
         {
-            const auto multiplier =
-                calculateMultiplier(timestamp - readings.front().first).count();
-            if (multiplier > 0.)
-            {
-                const auto prevValue = result / multiplier;
-                readings.assign(
-                    {ReadingItem(readings.front().first, prevValue),
-                     ReadingItem(timestamp, readings.back().second)});
-            }
+            Milliseconds lastDuration = timestamp - stats.lastTimestamp;
+            const auto multiplier = calculateMultiplier(lastDuration);
+            totalTimeWeightedSum += stats.lastValue * multiplier.count();
         }
-        return result;
+
+        return totalTimeWeightedSum;
     }
 
   private:
