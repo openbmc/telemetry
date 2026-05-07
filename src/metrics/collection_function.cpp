@@ -29,6 +29,12 @@ class FunctionMinimum : public CollectionFunction
             {ReadingItem(timestamp, calculate(readings, timestamp))});
         return readings.back().second;
     }
+
+    double calculateStreaming(const StreamingStats& stats,
+                              Milliseconds) const override
+    {
+        return stats.getMin();
+    }
 };
 
 class FunctionMaximum : public CollectionFunction
@@ -54,6 +60,12 @@ class FunctionMaximum : public CollectionFunction
         readings.assign(
             {ReadingItem(timestamp, calculate(readings, timestamp))});
         return readings.back().second;
+    }
+
+    double calculateStreaming(const StreamingStats& stats,
+                              Milliseconds) const override
+    {
+        return stats.getMax();
     }
 };
 
@@ -93,6 +105,32 @@ class FunctionAverage : public CollectionFunction
                              ReadingItem(timestamp, readings.back().second)});
         }
         return result;
+    }
+
+    double calculateStreaming(const StreamingStats& stats,
+                              Milliseconds timestamp) const override
+    {
+        // Time-weighted average (value * milliseconds / total_milliseconds)
+        if (stats.count == 0)
+        {
+            return 0.0;
+        }
+
+        // Calculate total time-weighted sum including the last reading
+        double totalTimeWeightedSum = stats.getTimeWeightedSumMs();
+        Milliseconds totalDuration = stats.getTotalDuration();
+
+        // Add contribution from last reading to current timestamp
+        if (timestamp > stats.lastTimestamp)
+        {
+            Milliseconds lastDuration = timestamp - stats.lastTimestamp;
+            totalTimeWeightedSum += stats.lastValue * lastDuration.count();
+            totalDuration += lastDuration;
+        }
+
+        // Return time-weighted average
+        return totalTimeWeightedSum /
+               std::max(totalDuration.count(), uint64_t{1u});
     }
 };
 
@@ -141,6 +179,29 @@ class FunctionSummation : public CollectionFunction
             }
         }
         return result;
+    }
+
+    double calculateStreaming(const StreamingStats& stats,
+                              Milliseconds timestamp) const override
+    {
+        // Time-weighted sum (integral) - value * seconds
+        if (stats.count == 0)
+        {
+            return 0.0;
+        }
+
+        // Get accumulated time-weighted sum (already in seconds)
+        double totalTimeWeightedSum = stats.getTimeWeightedSumSec();
+
+        // Add contribution from last reading to current timestamp
+        if (timestamp > stats.lastTimestamp)
+        {
+            Milliseconds lastDuration = timestamp - stats.lastTimestamp;
+            const auto multiplier = calculateMultiplier(lastDuration);
+            totalTimeWeightedSum += stats.lastValue * multiplier.count();
+        }
+
+        return totalTimeWeightedSum;
     }
 
   private:

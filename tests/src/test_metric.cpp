@@ -260,7 +260,7 @@ INSTANTIATE_TEST_SUITE_P(
            defaultMinParams()
                .collectionTimeScope(CollectionTimeScope::interval)
                .collectionDuration(CollectionDuration(3ms))
-               .expectedReading(systemTimestamp + 16ms, 7.0),
+               .expectedReading(systemTimestamp + 16ms, 3.0),
            defaultMinParams()
                .collectionTimeScope(CollectionTimeScope::startup)
                .expectedReading(systemTimestamp + 16ms, 3.0)
@@ -284,7 +284,7 @@ INSTANTIATE_TEST_SUITE_P(
            defaultMaxParams()
                .collectionTimeScope(CollectionTimeScope::interval)
                .collectionDuration(CollectionDuration(5ms))
-               .expectedReading(systemTimestamp + 16ms, 7.0),
+               .expectedReading(systemTimestamp + 16ms, 14.0),
            defaultMaxParams()
                .collectionTimeScope(CollectionTimeScope::startup)
                .expectedReading(systemTimestamp + 16ms, 14.0)
@@ -306,11 +306,12 @@ INSTANTIATE_TEST_SUITE_P(
                .collectionTimeScope(CollectionTimeScope::interval)
                .collectionDuration(CollectionDuration(8ms))
                .expectedReading(systemTimestamp + 16ms,
-                                14. * 0.002 + 3. * 0.001 + 7 * 0.005),
+                                14. * 0.01 + 3. * 0.001 + 7 * 0.005),
            defaultSumParams()
                .collectionTimeScope(CollectionTimeScope::interval)
                .collectionDuration(CollectionDuration(6ms))
-               .expectedReading(systemTimestamp + 16ms, 3. * 0.001 + 7 * 0.005),
+               .expectedReading(systemTimestamp + 16ms,
+                                14. * 0.01 + 3 * 0.001 + 7 * 0.005),
            defaultSumParams()
                .collectionTimeScope(CollectionTimeScope::startup)
                .expectedReading(systemTimestamp + 16ms,
@@ -332,11 +333,12 @@ INSTANTIATE_TEST_SUITE_P(
                .collectionTimeScope(CollectionTimeScope::interval)
                .collectionDuration(CollectionDuration(8ms))
                .expectedReading(systemTimestamp + 16ms,
-                                (14. * 2 + 3. * 1 + 7 * 5) / 8.),
+                                (14. * 10 + 3. * 1 + 7 * 5) / 16.),
            defaultAvgParams()
                .collectionTimeScope(CollectionTimeScope::interval)
                .collectionDuration(CollectionDuration(6ms))
-               .expectedReading(systemTimestamp + 16ms, (3. * 1 + 7 * 5) / 6.),
+               .expectedReading(systemTimestamp + 16ms,
+                                (14. * 10 + 3. * 1 + 7 * 5) / 16.),
            defaultAvgParams()
                .collectionTimeScope(CollectionTimeScope::startup)
                .expectedReading(systemTimestamp + 16ms,
@@ -346,8 +348,8 @@ TEST_P(TestMetricCalculationFunctions, calculatesReadingValue)
 {
     for (auto [timestamp, reading] : GetParam().readings())
     {
-        sut->sensorUpdated(*sensorMocks.front(), clockFake.steadyTimestamp(),
-                           reading);
+        sut->sensorUpdated(*sensorMocks.front(),
+                           clockFake.steadyTimestamp(), reading);
         clockFake.advance(timestamp);
     }
 
@@ -355,8 +357,9 @@ TEST_P(TestMetricCalculationFunctions, calculatesReadingValue)
         GetParam().expectedReading();
     const auto readings = sut->getUpdatedReadings();
 
-    EXPECT_THAT(readings, ElementsAre(MetricValue{"metadata0", expectedReading,
-                                                  expectedTimestamp.count()}));
+    EXPECT_THAT(readings,
+                ElementsAre(MetricValue{"metadata0", expectedReading,
+                                        expectedTimestamp.count()}));
 }
 
 TEST_P(TestMetricCalculationFunctions,
@@ -364,8 +367,8 @@ TEST_P(TestMetricCalculationFunctions,
 {
     for (auto [timestamp, reading] : GetParam().readings())
     {
-        sut->sensorUpdated(*sensorMocks.front(), clockFake.steadyTimestamp(),
-                           reading);
+        sut->sensorUpdated(*sensorMocks.front(),
+                           clockFake.steadyTimestamp(), reading);
         clockFake.advance(timestamp);
         sut->getUpdatedReadings();
     }
@@ -374,8 +377,9 @@ TEST_P(TestMetricCalculationFunctions,
         GetParam().expectedReading();
     const auto readings = sut->getUpdatedReadings();
 
-    EXPECT_THAT(readings, ElementsAre(MetricValue{"metadata0", expectedReading,
-                                                  expectedTimestamp.count()}));
+    EXPECT_THAT(readings,
+                ElementsAre(MetricValue{"metadata0", expectedReading,
+                                        expectedTimestamp.count()}));
 }
 
 TEST_P(TestMetricCalculationFunctions, returnsIsTimerRequired)
@@ -396,11 +400,13 @@ class TestMetricWithMultipleSensors : public TestMetric
     }
 };
 
-TEST_F(TestMetricWithMultipleSensors, readingsContainsAllReadingsInOrder)
+TEST_F(TestMetricWithMultipleSensors,
+       readingsContainsAllReadingsInOrder)
 {
     for (size_t i = 0; i < sensorMocks.size(); ++i)
     {
-        sut->sensorUpdated(*sensorMocks[i], Milliseconds{i + 100}, i + 10.0);
+        sut->sensorUpdated(*sensorMocks[i], Milliseconds{i + 100},
+                           i + 10.0);
         sut->getUpdatedReadings();
     }
 
@@ -416,11 +422,13 @@ TEST_F(TestMetricWithMultipleSensors, readingsContainsAllReadingsInOrder)
                             MetricValue{"metadata6", 16.0, 72}));
 }
 
-TEST_F(TestMetricWithMultipleSensors, readingsContainOnlyAvailableSensors)
+TEST_F(TestMetricWithMultipleSensors,
+       readingsContainOnlyAvailableSensors)
 {
     for (auto i : {5u, 3u, 6u, 0u})
     {
-        sut->sensorUpdated(*sensorMocks[i], Milliseconds{i + 100}, i + 10.0);
+        sut->sensorUpdated(*sensorMocks[i], Milliseconds{i + 100},
+                           i + 10.0);
         sut->getUpdatedReadings();
     }
 
@@ -433,11 +441,13 @@ TEST_F(TestMetricWithMultipleSensors, readingsContainOnlyAvailableSensors)
                             MetricValue{"metadata0", 10.0, 62}));
 }
 
-TEST_F(TestMetricWithMultipleSensors, readingsContainsAllReadingsOutOfOrder)
+TEST_F(TestMetricWithMultipleSensors,
+       readingsContainsAllReadingsOutOfOrder)
 {
     for (auto i : {6u, 5u, 3u, 4u, 0u, 2u, 1u})
     {
-        sut->sensorUpdated(*sensorMocks[i], Milliseconds{i + 100}, i + 10.0);
+        sut->sensorUpdated(*sensorMocks[i], Milliseconds{i + 100},
+                           i + 10.0);
         sut->getUpdatedReadings();
     }
 
