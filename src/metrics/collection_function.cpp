@@ -29,6 +29,12 @@ class FunctionMinimum : public CollectionFunction
             {ReadingItem(timestamp, calculate(readings, timestamp))});
         return readings.back().second;
     }
+
+    double calculateStreaming(const StreamingStats& stats,
+                             Milliseconds) const override
+    {
+        return stats.getMin();
+    }
 };
 
 class FunctionMaximum : public CollectionFunction
@@ -54,6 +60,12 @@ class FunctionMaximum : public CollectionFunction
         readings.assign(
             {ReadingItem(timestamp, calculate(readings, timestamp))});
         return readings.back().second;
+    }
+
+    double calculateStreaming(const StreamingStats& stats,
+                             Milliseconds) const override
+    {
+        return stats.getMax();
     }
 };
 
@@ -93,6 +105,17 @@ class FunctionAverage : public CollectionFunction
                              ReadingItem(timestamp, readings.back().second)});
         }
         return result;
+    }
+
+    double calculateStreaming(const StreamingStats& stats,
+                             Milliseconds) const override
+    {
+        // Simple average: sum / count
+        if (stats.count == 0)
+        {
+            return 0.0;
+        }
+        return stats.sum / stats.count;
     }
 };
 
@@ -141,6 +164,12 @@ class FunctionSummation : public CollectionFunction
             }
         }
         return result;
+    }
+
+    double calculateStreaming(const StreamingStats& stats,
+                             Milliseconds) const override
+    {
+        return stats.getSum();
     }
 
   private:
