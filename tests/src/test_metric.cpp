@@ -260,7 +260,7 @@ INSTANTIATE_TEST_SUITE_P(
            defaultMinParams()
                .collectionTimeScope(CollectionTimeScope::interval)
                .collectionDuration(CollectionDuration(3ms))
-               .expectedReading(systemTimestamp + 16ms, 7.0),
+               .expectedReading(systemTimestamp + 16ms, 3.0),
            defaultMinParams()
                .collectionTimeScope(CollectionTimeScope::startup)
                .expectedReading(systemTimestamp + 16ms, 3.0)
@@ -284,7 +284,7 @@ INSTANTIATE_TEST_SUITE_P(
            defaultMaxParams()
                .collectionTimeScope(CollectionTimeScope::interval)
                .collectionDuration(CollectionDuration(5ms))
-               .expectedReading(systemTimestamp + 16ms, 7.0),
+               .expectedReading(systemTimestamp + 16ms, 14.0),
            defaultMaxParams()
                .collectionTimeScope(CollectionTimeScope::startup)
                .expectedReading(systemTimestamp + 16ms, 14.0)
@@ -306,11 +306,12 @@ INSTANTIATE_TEST_SUITE_P(
                .collectionTimeScope(CollectionTimeScope::interval)
                .collectionDuration(CollectionDuration(8ms))
                .expectedReading(systemTimestamp + 16ms,
-                                14. * 0.002 + 3. * 0.001 + 7 * 0.005),
+                                14. * 0.01 + 3. * 0.001 + 7 * 0.005),
            defaultSumParams()
                .collectionTimeScope(CollectionTimeScope::interval)
                .collectionDuration(CollectionDuration(6ms))
-               .expectedReading(systemTimestamp + 16ms, 3. * 0.001 + 7 * 0.005),
+               .expectedReading(systemTimestamp + 16ms,
+                                14. * 0.01 + 3 * 0.001 + 7 * 0.005),
            defaultSumParams()
                .collectionTimeScope(CollectionTimeScope::startup)
                .expectedReading(systemTimestamp + 16ms,
@@ -332,11 +333,12 @@ INSTANTIATE_TEST_SUITE_P(
                .collectionTimeScope(CollectionTimeScope::interval)
                .collectionDuration(CollectionDuration(8ms))
                .expectedReading(systemTimestamp + 16ms,
-                                (14. * 2 + 3. * 1 + 7 * 5) / 8.),
+                                (14. * 10 + 3. * 1 + 7 * 5) / 16.),
            defaultAvgParams()
                .collectionTimeScope(CollectionTimeScope::interval)
                .collectionDuration(CollectionDuration(6ms))
-               .expectedReading(systemTimestamp + 16ms, (3. * 1 + 7 * 5) / 6.),
+               .expectedReading(systemTimestamp + 16ms,
+                                (14. * 10 + 3. * 1 + 7 * 5) / 16.),
            defaultAvgParams()
                .collectionTimeScope(CollectionTimeScope::startup)
                .expectedReading(systemTimestamp + 16ms,
