@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d88aa77c_03f7698e",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 16
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1001604
+      },
+      "writtenOn": "2026-05-13T13:26:09Z",
+      "side": 1,
+      "message": "It may be better to show the actual output of memory consumptions before/after the changes, as an example.",
+      "revId": "46f16bb5a720370e14b73c9097bf90ca94e00e6f",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "9b8e12ca_fe2e141c",
+        "filename": "src/metrics/collection_data.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1001604
+      },
+      "writtenOn": "2026-05-13T13:26:09Z",
+      "side": 1,
+      "message": "After this, is `DataInterval` needed?\nI think - should this logic replace the existing `DataInterval` method?",
+      "range": {
+        "startLine": 98,
+        "startChar": 6,
+        "endLine": 98,
+        "endChar": 27
+      },
+      "revId": "46f16bb5a720370e14b73c9097bf90ca94e00e6f",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
