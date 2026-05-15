@@ -26,6 +26,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "90f0dc52_fa9df1f4",
+        "filename": "src/metrics/collection_data.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1002328
+      },
+      "writtenOn": "2026-05-15T01:33:59Z",
+      "side": 1,
+      "message": "Updated to keep using \"DataInterval\".",
+      "parentUuid": "50a1e6b0_c86f5c49",
+      "range": {
+        "startLine": 34,
+        "startChar": 6,
+        "endLine": 34,
+        "endChar": 27
+      },
+      "revId": "5545cd1488ae8f2132b312459d7d0b3a007d6b5b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "26f40a1c_b4383f38",
         "filename": "src/metrics/collection_function.cpp",
         "patchSetId": 17
@@ -37,6 +61,24 @@
       "writtenOn": "2026-05-14T10:40:07Z",
       "side": 1,
       "message": "This can replace `calculate()`",
+      "revId": "5545cd1488ae8f2132b312459d7d0b3a007d6b5b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "eb27e30f_f0e010e8",
+        "filename": "src/metrics/collection_function.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1002328
+      },
+      "writtenOn": "2026-05-15T01:33:59Z",
+      "side": 1,
+      "message": "calculateStreaming has been switched back to use the original name calculate.",
+      "parentUuid": "26f40a1c_b4383f38",
       "revId": "5545cd1488ae8f2132b312459d7d0b3a007d6b5b",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
@@ -58,6 +100,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "529963eb_2ca8a701",
+        "filename": "src/metrics/collection_function.hpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1002328
+      },
+      "writtenOn": "2026-05-15T01:33:59Z",
+      "side": 1,
+      "message": "calculateForStartupInterval was in master, but with my recent changes, I have removed it.",
+      "parentUuid": "bede98d8_17840833",
+      "revId": "5545cd1488ae8f2132b312459d7d0b3a007d6b5b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "75eda6a8_08b97e8c",
@@ -71,6 +131,30 @@
       "writtenOn": "2026-05-14T10:40:07Z",
       "side": 1,
       "message": "Can this also replace `calculate()`?",
+      "range": {
+        "startLine": 119,
+        "startChar": 19,
+        "endLine": 119,
+        "endChar": 37
+      },
+      "revId": "5545cd1488ae8f2132b312459d7d0b3a007d6b5b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d4d81c8c_cb2b4fc7",
+        "filename": "src/metrics/collection_function.hpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1002328
+      },
+      "writtenOn": "2026-05-15T01:33:59Z",
+      "side": 1,
+      "message": "calculateStreaming has been switched back to use the original name calculate.",
+      "parentUuid": "75eda6a8_08b97e8c",
       "range": {
         "startLine": 119,
         "startChar": 19,
