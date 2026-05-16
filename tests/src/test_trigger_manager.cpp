@@ -14,7 +14,7 @@
 #include <xyz/openbmc_project/Telemetry/TriggerManager/common.hpp>
 
 using namespace testing;
-using sdbusplus::message::object_path;
+using sdbusplus::object_path;
 using namespace std::literals::string_literals;
 
 using TelemetryTriggerManager =
