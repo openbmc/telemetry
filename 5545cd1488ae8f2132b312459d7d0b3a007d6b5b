@@ -48,6 +48,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "6d8e6340_f2c0fa79",
+        "filename": "src/metrics/collection_data.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1001604
+      },
+      "writtenOn": "2026-05-18T13:58:51Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "90f0dc52_fa9df1f4",
+      "range": {
+        "startLine": 34,
+        "startChar": 6,
+        "endLine": 34,
+        "endChar": 27
+      },
+      "revId": "5545cd1488ae8f2132b312459d7d0b3a007d6b5b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "26f40a1c_b4383f38",
@@ -79,6 +103,24 @@
       "side": 1,
       "message": "calculateStreaming has been switched back to use the original name calculate.",
       "parentUuid": "26f40a1c_b4383f38",
+      "revId": "5545cd1488ae8f2132b312459d7d0b3a007d6b5b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "f140ab4b_091da402",
+        "filename": "src/metrics/collection_function.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1001604
+      },
+      "writtenOn": "2026-05-18T13:58:51Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "eb27e30f_f0e010e8",
       "revId": "5545cd1488ae8f2132b312459d7d0b3a007d6b5b",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
@@ -155,6 +197,30 @@
       "side": 1,
       "message": "calculateStreaming has been switched back to use the original name calculate.",
       "parentUuid": "75eda6a8_08b97e8c",
+      "range": {
+        "startLine": 119,
+        "startChar": 19,
+        "endLine": 119,
+        "endChar": 37
+      },
+      "revId": "5545cd1488ae8f2132b312459d7d0b3a007d6b5b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "95cf3cdc_e701a13c",
+        "filename": "src/metrics/collection_function.hpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1001604
+      },
+      "writtenOn": "2026-05-18T13:58:51Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "d4d81c8c_cb2b4fc7",
       "range": {
         "startLine": 119,
         "startChar": 19,
