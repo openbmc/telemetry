@@ -20,6 +20,24 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "6a370711_d4048968",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 16
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1002328
+      },
+      "writtenOn": "2026-05-19T16:25:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d88aa77c_03f7698e",
+      "revId": "46f16bb5a720370e14b73c9097bf90ca94e00e6f",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "9b8e12ca_fe2e141c",
         "filename": "src/metrics/collection_data.cpp",
         "patchSetId": 16
