@@ -28,7 +28,7 @@ using ObjectDelete = sdbusplus::common::xyz::openbmc_project::object::Delete;
 
 using namespace testing;
 using namespace std::literals::string_literals;
-using sdbusplus::message::object_path;
+using sdbusplus::object_path;
 
 static constexpr size_t expectedTriggerVersion = 2;
 

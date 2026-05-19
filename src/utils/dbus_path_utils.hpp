@@ -37,10 +37,10 @@ static_assert(maxPrefixesInId * (maxPrefixLength + 1) + maxIdNameLength <=
                   maxReportFullIdLength,
               "Misconfigured prefix/id/name lengths.");
 
-const sdbusplus::message::object_path triggerDirPath =
-    sdbusplus::message::object_path(std::string(triggerDirStr));
-const sdbusplus::message::object_path reportDirPath =
-    sdbusplus::message::object_path(std::string(reportDirStr));
+const sdbusplus::object_path triggerDirPath =
+    sdbusplus::object_path(std::string(triggerDirStr));
+const sdbusplus::object_path reportDirPath =
+    sdbusplus::object_path(std::string(reportDirStr));
 } // namespace constants
 
 inline bool isValidDbusPath(const std::string& path)
@@ -59,10 +59,10 @@ inline void verifyIdCharacters(std::string_view id)
     }
 }
 
-sdbusplus::message::object_path pathAppend(sdbusplus::message::object_path path,
-                                           const std::string& appended);
+sdbusplus::object_path pathAppend(sdbusplus::object_path path,
+                                  const std::string& appended);
 
-std::string reportPathToId(const sdbusplus::message::object_path& path);
+std::string reportPathToId(const sdbusplus::object_path& path);
 
 void verifyIdPrefixes(std::string_view id);
 
