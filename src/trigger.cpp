@@ -159,7 +159,7 @@ Trigger::Trigger(
 
             dbusIface.register_property_rw(
                 TelemetryTrigger::property_names::reports,
-                std::vector<sdbusplus::message::object_path>(),
+                std::vector<sdbusplus::object_path>(),
                 sdbusplus::vtable::property_::emits_change,
                 [this](auto newVal, auto& oldVal) {
                     auto newReportIds = utils::transform<std::vector>(
