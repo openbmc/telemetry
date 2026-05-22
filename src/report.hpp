@@ -115,7 +115,7 @@ class Report : public interfaces::Report, public interfaces::MetricListener
     static std::vector<ErrorMessage> verify(ReportingType, Milliseconds);
 
     std::string id;
-    const sdbusplus::message::object_path path;
+    const sdbusplus::object_path path;
     std::string name;
     ReportingType reportingType;
     Milliseconds interval;
