@@ -11,7 +11,7 @@
 #include <chrono>
 #include <utility>
 
-using sdbusplus::message::object_path;
+using sdbusplus::object_path;
 
 class TriggerParams
 {
