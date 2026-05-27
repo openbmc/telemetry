@@ -32,15 +32,14 @@
 # data within them will be kept sorted.
 
 
-# This repository is functionally unmaintained.  The maintainers below are
-# Technical oversight forum members;  This repo is actively looking for
-# maintainers.
-
 owners:
-- ed@tanous.net
+- amithash@meta.com
 
 reviewers:
 
 matchers:
 
 openbmc:
+- name: Amithash Prasad
+  email: amithash@meta.com
+  discord: amithash
