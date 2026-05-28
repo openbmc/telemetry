@@ -16,6 +16,24 @@
       "message": "@ed@tanous.net I am glad to co-owning it. If you choose I can add you back in.",
       "revId": "3a853d8eaaaf5196389b4da60652c503d5f3f3d5",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d7c5debd_3c0441df",
+        "filename": "OWNERS",
+        "patchSetId": 1
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1000153
+      },
+      "writtenOn": "2026-05-28T18:06:30Z",
+      "side": 0,
+      "message": "Sure, that seems reasonable to me.  When do you expect you\u0027ll start reviewing patches?",
+      "parentUuid": "9c301ccf_cda54edc",
+      "revId": "3a853d8eaaaf5196389b4da60652c503d5f3f3d5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
