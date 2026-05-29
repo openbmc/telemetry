@@ -34,6 +34,24 @@
       "parentUuid": "cff13779_3224c7fe",
       "revId": "2b9ed05cb67c9c8eb4d2279898f202a1119e8754",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "71897d53_622ba3b5",
+        "filename": "src/report.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1000153
+      },
+      "writtenOn": "2026-05-29T18:33:57Z",
+      "side": 1,
+      "message": "Let me know what, in the context of this commit you think we should do for the above.  I really don\u0027t want to add a bunch of boilerplate catching in this, and this is a pattern we do (right or wrong) in a bunch of asio daemons.",
+      "parentUuid": "a7598b37_c1cfaf0e",
+      "revId": "2b9ed05cb67c9c8eb4d2279898f202a1119e8754",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
