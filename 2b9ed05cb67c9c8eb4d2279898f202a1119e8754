@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "cff13779_3224c7fe",
+        "filename": "src/report.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1000212
+      },
+      "writtenOn": "2026-05-29T16:45:04Z",
+      "side": 1,
+      "message": "If anything else in Report::Report() throws an exception, then Report::~Report() wont be called and we wont call `objServer-\u003eremove_interface(deleteIface);` so there is a potential leak. Same goes with all calls to add_interface(). So probably wrap the constructor in a try/catch/re-throw with a `if (deleteIface) { objServer-\u003eremove_interface(deleteIface); }`\n\nAlso, this looks like a generalized problem/pattern we need to solve with add_interface()?\n\nThat being said, if any of these constructors throw, main() will exit so we dont have to worry about memory leaks. So, probably sets the tone of the comment to a (nit).",
+      "revId": "2b9ed05cb67c9c8eb4d2279898f202a1119e8754",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
