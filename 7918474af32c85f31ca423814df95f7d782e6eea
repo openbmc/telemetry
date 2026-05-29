@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "bb3c993d_147f6c51",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000153
+      },
+      "writtenOn": "2026-05-29T18:32:41Z",
+      "side": 1,
+      "message": "Technically per the docs this commit should\u0027ve included some proof of eligability, but considering the alternative is this going unmaintained, that seems reasonable.\n\nIn the future, please write some amount of commit message.",
+      "revId": "7918474af32c85f31ca423814df95f7d782e6eea",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
