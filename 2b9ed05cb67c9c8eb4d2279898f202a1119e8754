@@ -16,6 +16,24 @@
       "message": "If anything else in Report::Report() throws an exception, then Report::~Report() wont be called and we wont call `objServer-\u003eremove_interface(deleteIface);` so there is a potential leak. Same goes with all calls to add_interface(). So probably wrap the constructor in a try/catch/re-throw with a `if (deleteIface) { objServer-\u003eremove_interface(deleteIface); }`\n\nAlso, this looks like a generalized problem/pattern we need to solve with add_interface()?\n\nThat being said, if any of these constructors throw, main() will exit so we dont have to worry about memory leaks. So, probably sets the tone of the comment to a (nit).",
       "revId": "2b9ed05cb67c9c8eb4d2279898f202a1119e8754",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a7598b37_c1cfaf0e",
+        "filename": "src/report.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1000153
+      },
+      "writtenOn": "2026-05-29T16:55:04Z",
+      "side": 1,
+      "message": "\u003e If anything else in Report::Report() throws an exception, then Report::~Report() wont be called and we wont call `objServer-\u003eremove_interface(deleteIface);` so there is a potential leak.\n\nThere\u0027s no leak.  Object is still owned by the object_server and will be destroyed when it is destroyed, but point taken that we might have an object longer than we\u0027d prefer.\n\n\u003e Same goes with all calls to add_interface(). So probably wrap the constructor in a try/catch/re-throw with a `if (deleteIface) { objServer-\u003eremove_interface(deleteIface); }`\n\nHuh?  This would be the only place we do that.  If this is something we want to hold on, I\u0027d probably rather move all the add_interface calls into an init() method of some kind and out of the constructor.\n\n\u003e \n\u003e Also, this looks like a generalized problem/pattern we need to solve with add_interface()?\n\nYes, that\u0027s exactly what I\u0027m trying to do, but having this callback method is somewhat getting in the way.\n\n\u003e \n\u003e That being said, if any of these constructors throw, main() will exit so we dont have to worry about memory leaks. So, probably sets the tone of the comment to a (nit).\n\nI would tend to agree.  In terms of code cleanliness for this patch, I don\u0027t think catching exceptions thrown here make sense to propagate, especially when they just throw to main and don\u0027t cause a leak.\n\nI agree, the pattern could be improved.",
+      "parentUuid": "cff13779_3224c7fe",
+      "revId": "2b9ed05cb67c9c8eb4d2279898f202a1119e8754",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
