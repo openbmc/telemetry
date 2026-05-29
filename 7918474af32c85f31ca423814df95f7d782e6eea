@@ -1,0 +1,9 @@
+Verified+1: OpenBMC CI <openbmcbump-ci@yahoo.com>
+Code-Review+2: Ed Tanous <ed@tanous.net>
+Submitted-by: Ed Tanous <ed@tanous.net>
+Submitted-at: Fri, 29 May 2026 18:32:43 +0000
+Reviewed-on: https://gerrit.openbmc.org/c/openbmc/telemetry/+/90601
+Comments-Total: 4
+Comments-Unresolved: 1
+Project: openbmc/telemetry
+Branch: refs/heads/master
