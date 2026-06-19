@@ -137,7 +137,7 @@ void Sensor::makeSignalMonitor()
         "type='signal',member='PropertiesChanged',path='"s + sensorId.path +
         "',arg0='" + SensorValue::interface + "'"s;
 
-    signalMonitor = std::make_unique<sdbusplus::bus::match_t>(
+    signalMonitor = std::make_unique<sdbusplus::match>(
         *bus, param,
         [weakSelf = weak_from_this()](sdbusplus::message_t& message) {
             signalProc(weakSelf, message);
