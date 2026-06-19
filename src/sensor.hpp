@@ -61,5 +61,5 @@ class Sensor final :
     std::vector<std::weak_ptr<interfaces::SensorListener>> listeners;
     Milliseconds timestamp = Milliseconds{0u};
     std::optional<double> value;
-    std::unique_ptr<sdbusplus::bus::match_t> signalMonitor;
+    std::unique_ptr<sdbusplus::match> signalMonitor;
 };

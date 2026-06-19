@@ -1200,14 +1200,14 @@ class TestReportInitialization : public TestReport
 
     void makeMonitor()
     {
-        monitor = std::make_unique<sdbusplus::bus::match_t>(
+        monitor = std::make_unique<sdbusplus::match>(
             *DbusEnvironment::getBus(),
             sdbusplus::bus::match::rules::propertiesChanged(
                 sut->getPath(), TelemetryReport::interface),
             [this](auto& msg) { monitorProc(msg); });
     }
 
-    std::unique_ptr<sdbusplus::bus::match_t> monitor;
+    std::unique_ptr<sdbusplus::match> monitor;
     MockFunction<void()> readingsUpdated;
 };
 
