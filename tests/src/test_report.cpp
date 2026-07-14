@@ -1218,9 +1218,9 @@ TEST_F(TestReportInitialization,
     for (auto& metric : metricMocks)
     {
         EXPECT_CALL(*metric, registerForUpdates(_))
-            .WillOnce(Invoke([&args](const interfaces::MetricListener& report) {
+            .WillOnce([&args](const interfaces::MetricListener& report) {
                 args.emplace_back(&report);
-            }));
+            });
         ;
     }
 

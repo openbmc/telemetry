@@ -32,18 +32,16 @@ class ReportFactoryMock : public interfaces::ReportFactory
         using namespace testing;
 
         ON_CALL(*this, convertMetricParams(_))
-            .WillByDefault(
-                WithArgs<0>(Invoke(&ReportFactoryMock::convertToLabeled)));
+            .WillByDefault(WithArgs<0>(&ReportFactoryMock::convertToLabeled));
 
         ON_CALL(*this, convertMetricParams(_, _))
-            .WillByDefault(
-                WithArgs<1>(Invoke(&ReportFactoryMock::convertToLabeled)));
+            .WillByDefault(WithArgs<1>(&ReportFactoryMock::convertToLabeled));
 
         ON_CALL(*this,
                 make(A<const std::string&>(), _, _, _, _, _, _, _, _, _, _, _))
-            .WillByDefault(WithArgs<0>(Invoke([](const std::string& id) {
+            .WillByDefault(WithArgs<0>([](const std::string& id) {
                 return std::make_unique<NiceMock<ReportMock>>(id);
-            })));
+            }));
     }
 
     MOCK_METHOD(std::vector<LabeledMetricParameters>, convertMetricParams,

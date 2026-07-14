@@ -17,9 +17,9 @@ class TriggerFactoryMock : public interfaces::TriggerFactory
         using namespace testing;
 
         ON_CALL(*this, make(A<const std::string&>(), _, _, _, _, _, _, _))
-            .WillByDefault(WithArgs<0>(Invoke([](const std::string& id) {
+            .WillByDefault(WithArgs<0>([](const std::string& id) {
                 return std::make_unique<NiceMock<TriggerMock>>(id);
-            })));
+            }));
     }
 
     MOCK_METHOD(std::unique_ptr<interfaces::Trigger>, make,

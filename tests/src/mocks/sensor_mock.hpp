@@ -56,8 +56,8 @@ class SensorMock : public interfaces::Sensor
   private:
     void initialize()
     {
-        ON_CALL(*this, id()).WillByDefault(testing::Invoke([this] {
+        ON_CALL(*this, id()).WillByDefault([this] {
             return this->mockSensorId;
-        }));
+        });
     }
 };
