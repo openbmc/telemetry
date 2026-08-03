@@ -3,6 +3,8 @@
 
 #include <sdbusplus/exception.hpp>
 
+#include <stdexcept>
+
 #include <gmock/gmock.h>
 
 using namespace testing;
@@ -27,9 +29,7 @@ INSTANTIATE_TEST_SUITE_P(
            std::make_tuple(object_path("/Base/Path/"), "one/two",
                            object_path("/Base/Path/one/two")),
            std::make_tuple(object_path("/Base/Path/"), "one/two/foobar",
-                           object_path("/Base/Path/one/two/foobar")),
-           std::make_tuple(object_path("/Base/Path"), "",
-                           object_path("/Base/Path/"))));
+                           object_path("/Base/Path/one/two/foobar"))));
 
 TEST_P(TestPathAppend, pathAppendsCorrectly)
 {
@@ -56,4 +56,10 @@ TEST_P(TestPathAppendFail, pathAppendsCorrectly)
     auto [basePath, extension] = GetParam();
     EXPECT_THROW(pathAppend(basePath, extension),
                  sdbusplus::exception::SdBusError);
+}
+
+TEST(TestPathAppendEmpty, emptyStringThrows)
+{
+    EXPECT_THROW(pathAppend(object_path("/Base/Path"), ""),
+                 std::invalid_argument);
 }
