@@ -194,8 +194,8 @@ TEST_F(TestTrigger, checkIfPropertiesAreSet)
 TEST_F(TestTrigger, checkBasicGetters)
 {
     EXPECT_THAT(sut->getId(), Eq(triggerParams.id()));
-    EXPECT_THAT(sut->getPath(),
-                Eq(utils::constants::triggerDirPath.str + triggerParams.id()));
+    EXPECT_THAT(sut->getPath(), Eq(utils::constants::triggerDirPath.string() +
+                                   triggerParams.id()));
 }
 
 TEST_F(TestTrigger, setPropertyNameToCorrectValue)
@@ -476,8 +476,8 @@ TEST_F(TestTrigger, sendUpdateWhenTriggerIsDeleted)
 
 TEST_F(TestTrigger, deletingNonExistingTriggerReturnInvalidRequestDescriptor)
 {
-    auto ec =
-        deleteTrigger(utils::constants::triggerDirPath.str + "NonExisting"s);
+    auto ec = deleteTrigger(
+        utils::constants::triggerDirPath.string() + "NonExisting"s);
     EXPECT_THAT(ec.value(), Eq(EBADR));
 }
 

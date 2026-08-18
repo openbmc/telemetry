@@ -596,7 +596,7 @@ TEST_F(TestReport, deleteReport)
 TEST_F(TestReport, deletingNonExistingReportReturnInvalidRequestDescriptor)
 {
     auto ec =
-        deleteReport(utils::constants::reportDirPath.str + "NonExisting"s);
+        deleteReport(utils::constants::reportDirPath.string() + "NonExisting"s);
     EXPECT_THAT(ec.value(), Eq(EBADR));
 }
 

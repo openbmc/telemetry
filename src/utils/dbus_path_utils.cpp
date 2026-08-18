@@ -32,9 +32,9 @@ sdbusplus::object_path pathAppend(sdbusplus::object_path path,
 
 std::string reportPathToId(const sdbusplus::object_path& path)
 {
-    if (path.str.starts_with(constants::reportDirStr))
+    if (path.string().starts_with(constants::reportDirStr))
     {
-        auto id = path.str.substr(constants::reportDirStr.length());
+        auto id = path.string().substr(constants::reportDirStr.length());
         verifyIdPrefixes(id);
         return id;
     }

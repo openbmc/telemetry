@@ -7,6 +7,6 @@ namespace sdbusplus::message::details
 {
 inline void PrintTo(const string_path_wrapper& path, std::ostream* os)
 {
-    *os << path.str;
+    *os << path.string();
 }
 } // namespace sdbusplus::message::details

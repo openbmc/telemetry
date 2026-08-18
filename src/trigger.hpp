@@ -41,7 +41,7 @@ class Trigger : public interfaces::Trigger
 
     std::string getPath() const override
     {
-        return path.str;
+        return path.string();
     }
 
     bool storeConfiguration() const;

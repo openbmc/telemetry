@@ -82,7 +82,7 @@ class Report : public interfaces::Report, public interfaces::MetricListener
 
     std::string getPath() const override
     {
-        return path.str;
+        return path.string();
     }
 
     void metricUpdated() override;
