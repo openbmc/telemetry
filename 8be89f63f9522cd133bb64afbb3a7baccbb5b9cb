@@ -1,0 +1,7 @@
+Code-Review+2: Amithash Prasad <amithash@meta.com>
+Verified+1: OpenBMC CI <openbmcbump-ci@yahoo.com>
+Submitted-by: Alexander <alexander.hansen@9elements.com>
+Submitted-at: Thu, 20 Aug 2026 08:34:55 +0000
+Reviewed-on: https://gerrit.openbmc.org/c/openbmc/telemetry/+/93659
+Project: openbmc/telemetry
+Branch: refs/heads/master
