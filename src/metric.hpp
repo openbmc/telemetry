@@ -30,6 +30,7 @@ class Metric :
     bool isTimerRequired() const override;
 
   private:
+    uint64_t readingTimestamp(size_t index, uint64_t collectionTimestamp) const;
     metrics::CollectionData& findAssociatedData(
         const interfaces::Sensor& notifier);
 

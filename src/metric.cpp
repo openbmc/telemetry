@@ -66,7 +66,7 @@ const std::vector<MetricValue>& Metric::getUpdatedReadings()
         {
             if (i < readings.size())
             {
-                readings[i].timestamp = systemTimestamp;
+                readings[i].timestamp = readingTimestamp(i, systemTimestamp);
                 readings[i].value = *value;
             }
             else
@@ -81,12 +81,24 @@ const std::vector<MetricValue>& Metric::getUpdatedReadings()
                 }
 
                 readings.emplace_back(sensors[i]->metadata(), *value,
-                                      systemTimestamp);
+                                      readingTimestamp(i, systemTimestamp));
             }
         }
     }
 
     return readings;
+}
+
+uint64_t Metric::readingTimestamp(size_t index,
+                                  uint64_t collectionTimestamp) const
+{
+    const uint64_t updated = sensors[index]->updatedTime();
+    if (updated == 0)
+    {
+        return collectionTimestamp;
+    }
+    return std::chrono::duration_cast<Milliseconds>(Microseconds(updated))
+        .count();
 }
 
 void Metric::sensorUpdated(interfaces::Sensor& notifier, Milliseconds timestamp,
