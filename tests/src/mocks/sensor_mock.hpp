@@ -48,6 +48,7 @@ class SensorMock : public interfaces::Sensor
     MOCK_METHOD(void, unregisterFromUpdates,
                 (const std::weak_ptr<interfaces::SensorListener>&), (override));
     MOCK_METHOD(LabeledSensorInfo, getLabeledSensorInfo, (), (const, override));
+    MOCK_METHOD(uint64_t, updatedTime, (), (const, override));
 
     const uint64_t mockId = generateUniqueMockId();
 

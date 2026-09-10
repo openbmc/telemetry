@@ -47,6 +47,21 @@ void Sensor::async_read(std::shared_ptr<utils::UniqueCall::Lock> lock)
 {
     makeSignalMonitor();
 
+    sdbusplus::asio::getProperty<uint64_t>(
+        *bus, sensorId.service, sensorId.path, SensorValue::interface,
+        SensorValue::property_names::updated_time,
+        [weakSelf = weak_from_this()](boost::system::error_code ec,
+                                      uint64_t newUpdatedTime) {
+            if (ec)
+            {
+                return;
+            }
+            if (auto self = weakSelf.lock())
+            {
+                self->updateTime(newUpdatedTime);
+            }
+        });
+
     sdbusplus::asio::getProperty<double>(
         *bus, sensorId.service, sensorId.path, SensorValue::interface,
         SensorValue::property_names::value,
@@ -106,6 +121,16 @@ void Sensor::unregisterFromUpdates(
     }
 }
 
+uint64_t Sensor::updatedTime() const
+{
+    return updatedTimeUsec;
+}
+
+void Sensor::updateTime(uint64_t newUpdatedTime)
+{
+    updatedTimeUsec = newUpdatedTime;
+}
+
 void Sensor::updateValue(double newValue)
 {
     timestamp = Clock().steadyTimestamp();
@@ -158,6 +183,16 @@ void Sensor::signalProc(const std::weak_ptr<Sensor>& weakSelf,
 
         if (iface == SensorValue::interface)
         {
+            const auto timeIt = changed_properties.find(
+                SensorValue::property_names::updated_time);
+            if (timeIt != changed_properties.end())
+            {
+                if (auto time = std::get_if<uint64_t>(&timeIt->second))
+                {
+                    self->updateTime(*time);
+                }
+            }
+
             const auto it =
                 changed_properties.find(SensorValue::property_names::value);
             if (it != changed_properties.end())

@@ -3,6 +3,7 @@
 #include "types/sensor_types.hpp"
 
 #include <chrono>
+#include <cstdint>
 #include <memory>
 #include <ostream>
 #include <string>
@@ -50,6 +51,8 @@ class Sensor
         const std::weak_ptr<SensorListener>&) = 0;
 
     virtual LabeledSensorInfo getLabeledSensorInfo() const = 0;
+
+    virtual uint64_t updatedTime() const = 0;
 };
 
 } // namespace interfaces

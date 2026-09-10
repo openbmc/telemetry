@@ -9,13 +9,14 @@
 #include <sdbusplus/asio/connection.hpp>
 #include <sdbusplus/bus/match.hpp>
 
+#include <cstdint>
 #include <memory>
 
 class Sensor final :
     public interfaces::Sensor,
     public std::enable_shared_from_this<Sensor>
 {
-    using ValueVariant = std::variant<std::monostate, double>;
+    using ValueVariant = std::variant<std::monostate, double, uint64_t>;
 
   public:
     Sensor(interfaces::Sensor::Id sensorId, const std::string& sensorMetadata,
@@ -39,6 +40,7 @@ class Sensor final :
         const std::weak_ptr<interfaces::SensorListener>& weakListener) override;
 
     LabeledSensorInfo getLabeledSensorInfo() const override;
+    uint64_t updatedTime() const override;
 
   private:
     static std::optional<double> readValue(const ValueVariant& v);
@@ -49,6 +51,7 @@ class Sensor final :
     void async_read(std::shared_ptr<utils::UniqueCall::Lock>);
     void makeSignalMonitor();
     void updateValue(double);
+    void updateTime(uint64_t);
 
     interfaces::Sensor::Id sensorId;
     std::string sensorMetadata;
@@ -60,6 +63,7 @@ class Sensor final :
     utils::UniqueCall uniqueCall;
     std::vector<std::weak_ptr<interfaces::SensorListener>> listeners;
     Milliseconds timestamp = Milliseconds{0u};
+    uint64_t updatedTimeUsec = 0u;
     std::optional<double> value;
     std::unique_ptr<sdbusplus::match> signalMonitor;
 };
